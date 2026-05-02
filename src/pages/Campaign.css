@@ -1,0 +1,55 @@
+.progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-bar {
+  width: 60px;
+  height: 6px;
+  background-color: var(--bg-main);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #10b981;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.badge-email {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.badge-sms {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.badge-whatsapp {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.badge-social {
+  background-color: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.badge-completed {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.badge-progress {
+  background-color: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.badge-pending {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}

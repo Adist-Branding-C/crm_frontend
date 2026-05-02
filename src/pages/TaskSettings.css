@@ -1,0 +1,275 @@
+.task-settings-page {
+  padding: 1.5rem;
+}
+
+.task-settings-layout {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.task-settings-layout .settings-menu {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.5rem;
+  height: fit-content;
+}
+
+.task-settings-layout .settings-menu .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.task-settings-layout .settings-menu .menu-item:hover {
+  background: #f3f4f6;
+}
+
+.task-settings-layout .settings-menu .menu-item.active {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #111827;
+}
+
+.task-settings-layout .settings-content {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.task-settings-layout .content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.task-settings-layout .content-header .header-left {
+  display: flex;
+  align-items: center;
+}
+
+.task-settings-layout .content-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.task-settings-layout .entries-select {
+  display: flex;
+  align-items: center;
+}
+
+.task-settings-layout .entries-select label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-right: 0.5rem;
+}
+
+.task-settings-layout .entries-select select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.task-settings-layout .search-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.task-settings-layout .search-input svg {
+  color: #9ca3af;
+}
+
+.task-settings-layout .search-input input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 200px;
+}
+
+.task-settings-layout .search-input input::placeholder {
+  color: #9ca3af;
+}
+
+.task-settings-layout .table-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.task-settings-layout .table-scroll {
+  overflow-x: auto;
+}
+
+.task-settings-layout .data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.task-settings-layout .data-table th {
+  background: #f9fafb;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.task-settings-layout .data-table td {
+  padding: 0.75rem 1rem;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.task-settings-layout .data-table tr:hover {
+  background: #f9fafb;
+}
+
+.task-settings-layout .dataTables_empty {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.task-settings-layout .table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.task-settings-layout .table-info {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.task-settings-layout .pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-settings-layout .paginate-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-settings-layout .paginate-button:hover:not(.disabled) {
+  background-color: #f3f4f6;
+}
+
+.task-settings-layout .paginate-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.task-settings-layout .paginate-button.current {
+  background-color: #f1414f;
+  border-color: #f1414f;
+  color: #fff;
+}
+
+.task-settings-layout .action-link {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.task-settings-layout .dropdown-container {
+  position: relative;
+}
+
+.task-settings-layout .dropdown-toggle {
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.task-settings-layout .dropdown-toggle:hover {
+  background: #f3f4f6;
+}
+
+.task-settings-layout .dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  min-width: 120px;
+}
+
+.task-settings-layout .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-settings-layout .dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+@media (max-width: 1024px) {
+  .task-settings-layout {
+    flex-direction: column;
+  }
+
+  .task-settings-layout .settings-menu {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .task-settings-layout .settings-menu .menu-item {
+    width: auto;
+  }
+}

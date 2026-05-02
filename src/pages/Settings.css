@@ -1,0 +1,73 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  min-width: 0;
+  min-height: 160px;
+}
+
+.settings-card:hover {
+  border-color: #f1414f;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.settings-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f4f6fa;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: #6b7280;
+}
+
+.settings-card:hover .settings-icon {
+  background-color: rgba(241, 65, 79, 0.1);
+  color: #f1414f;
+}
+
+.settings-card h6 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1b1d;
+}
+
+.settings-card > p {
+  margin: 0.5rem 0 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.settings-link {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.settings-link p {
+  margin: 0;
+  font-size: 13px;
+  color: #f1414f;
+  font-weight: 500;
+}

@@ -1,0 +1,322 @@
+.setup-page {
+  /* padding handled by PageContainer */
+}
+
+.pipeline-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  margin-bottom: 1.5rem;
+}
+
+.pipeline-stage-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+}
+
+.stage-box-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.pipeline-stage-box span {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.pipeline-arrow {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.setup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.setup-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  width: 100%;
+  max-width: 900px;
+}
+
+.setup-card .card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-main);
+}
+
+.setup-card .card-header h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.setup-card .card-header p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.stages-flow {
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stage-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+}
+
+.stage-drag {
+  color: var(--text-muted);
+  cursor: grab;
+}
+
+.stage-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stage-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.stage-name:hover {
+  color: var(--primary);
+}
+
+.stage-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stage-edit-form input[type="text"] {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+}
+
+.stage-edit-form input[type="color"] {
+  width: 28px;
+  height: 28px;
+  border: none;
+  cursor: pointer;
+}
+
+.stage-edit-form button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+}
+
+.stage-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.stage-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.stage-actions button:hover:not(:disabled) {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.stage-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stage-actions .delete-btn:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.stage-connector {
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-stage-form {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-main);
+}
+
+.add-stage-form input[type="text"] {
+  flex: 1;
+  max-width: 200px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+}
+
+.add-stage-form input[type="color"] {
+  width: 36px;
+  height: 36px;
+  border: none;
+  cursor: pointer;
+}
+
+.add-stage-form button {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-stage-form button:hover {
+  background: var(--primary-dark);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.form-actions .btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.form-actions .btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+.form-actions .btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.form-actions .btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.form-actions .btn-secondary:hover {
+  background: var(--bg-main);
+}
+
+.pipeline-preview {
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pipeline-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.node-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.pipeline-node span {
+  font-size: 0.8125rem;
+  color: var(--text-main);
+}
+
+@media (max-width: 768px) {
+  .stages-flow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stage-connector {
+    transform: rotate(90deg);
+    margin-left: 1rem;
+  }
+
+  .add-stage-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-stage-form input[type="text"] {
+    max-width: 100%;
+  }
+}
