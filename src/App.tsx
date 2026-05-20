@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from './layouts/DashboardLayout';
+import DashboardLayout from './shared/components/layout/DashboardLayout';
 import Enquiries from './pages/Enquiries';
 import SettingsPage from './pages/Settings';
 import AccountPage from './pages/Account';
-import DashboardContent from './components/DashboardContent';
+import DashboardPage from './features/dashboard/pages/DashboardPage';
 import Setup from './pages/Setup';
 import StaffPerformance from './pages/StaffPerformance';
 import SalesPipeline from './pages/SalesPipeline';
@@ -39,21 +39,23 @@ import FacebookWorkflows from './pages/FacebookWorkflows';
 import FacebookViewLeads from './pages/FacebookViewLeads';
 import GeneralSettings from './pages/GeneralSettings';
 import Spotlight from './pages/Spotlight';
-import Deals from './pages/Deals';
+import DealsPage from './features/deals/pages/DealsPage';
 import TasksPage from './pages/Tasks';
 import CampaignsPage from './pages/Campaigns';
 import FollowupRequired from './pages/FollowupRequired';
 import ReportsPage from './pages/Reports';
 import Calendar from './pages/Calendar';
 import DailyActivity from './pages/DailyActivity';
-import Login from './pages/Login';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+// import Login from './pages/Login';
+import LoginPage from './features/auth/pages/LoginPage';
+import ForgotPasswordPage from './features/auth/pages/ForgotPasswordPage';
+import ResetPasswordPage from './features/auth/pages/ResetPasswordPage';
+import { AUTH_ROUTES } from './features/auth/constants/auth.constants';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('crm_token');
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={AUTH_ROUTES.LOGIN} replace />;
   }
   return children;
 };
@@ -62,9 +64,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path={AUTH_ROUTES.LOGIN} element={<LoginPage />} />
+        {/* <Route path="/login" element={<LoginPage />} /> */}
+        <Route path={AUTH_ROUTES.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+        <Route path={AUTH_ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
         
         <Route path="/" element={
           <ProtectedRoute>
@@ -72,10 +75,10 @@ function App() {
           </ProtectedRoute>
         }>
           <Route path="leads" element={<Enquiries />} />
-          <Route path="dashboard" element={<DashboardContent />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="enquiries" element={<Enquiries />} />
           <Route path="spotlight" element={<Spotlight />} />
-          <Route path="user/deals" element={<Deals />} />
+          <Route path="user/deals" element={<DealsPage />} />
           <Route path="campaigns" element={<CampaignsPage />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="daily-activity" element={<DailyActivity />} />
