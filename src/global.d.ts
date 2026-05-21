@@ -5,3 +5,5 @@ declare module '*.jsx' {
 
   export default Component
 }
+
+declare module '*.css';

@@ -26,7 +26,7 @@ const ResetPasswordPage = () => {
     return <Navigate to="/forgot-password" replace />;
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 

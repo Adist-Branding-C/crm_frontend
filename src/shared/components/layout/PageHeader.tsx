@@ -3,7 +3,16 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import './PageHeader.css';
 
-const Breadcrumb = ({ items }) => {
+interface BreadcrumbItem {
+  label: string;
+  link?: string | null;
+}
+
+interface BreadcrumbProps {
+  items: BreadcrumbItem[];
+}
+
+const Breadcrumb = ({ items }: BreadcrumbProps) => {
   if (!items || items.length === 0) return null;
   
   return (
@@ -22,8 +31,15 @@ const Breadcrumb = ({ items }) => {
   );
 };
 
-const PageHeader = ({ title, description, action, breadcrumb }) => {
-  const defaultBreadcrumb = [
+interface PageHeaderProps {
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+  breadcrumb?: BreadcrumbItem[] | false;
+}
+
+const PageHeader = ({ title, description, action, breadcrumb }: PageHeaderProps) => {
+  const defaultBreadcrumb: BreadcrumbItem[] = [
     { label: 'Tasks', link: '/user/tasks' },
     { label: title, link: null }
   ];
