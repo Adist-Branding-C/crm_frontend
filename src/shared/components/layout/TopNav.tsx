@@ -20,17 +20,23 @@ const initialNotifications = [
   { id: 7, type: 'deal', title: 'Deal won', message: 'Website Development deal has been marked as won', time: '3 days ago', isRead: true, link: '/user/deals' },
 ];
 
-const getNotificationIcon = (type) => {
-  const icons = {
-    lead: { icon: User, color: '#3b82f6' },
-    task: { icon: ListChecks, color: '#f59e0b' },
-    reminder: { icon: Calendar, color: '#8b5cf6' },
-    payment: { icon: CreditCard, color: '#10b981' },
-    call: { icon: PhoneCall, color: '#14b8a6' },
-    system: { icon: Info, color: '#64748b' },
-    deal: { icon: DollarSign, color: '#10b981' },
-  };
-  return icons[type] || { icon: Bell, color: '#64748b' };
+interface NotificationIconInfo {
+  icon: React.ComponentType<{ size?: number }>;
+  color: string;
+}
+
+const notificationIcons: Record<string, NotificationIconInfo> = {
+  lead: { icon: User, color: '#3b82f6' },
+  task: { icon: ListChecks, color: '#f59e0b' },
+  reminder: { icon: Calendar, color: '#8b5cf6' },
+  payment: { icon: CreditCard, color: '#10b981' },
+  call: { icon: PhoneCall, color: '#14b8a6' },
+  system: { icon: Info, color: '#64748b' },
+  deal: { icon: DollarSign, color: '#10b981' },
+};
+
+const getNotificationIcon = (type: string): NotificationIconInfo => {
+  return notificationIcons[type] || { icon: Bell, color: '#64748b' };
 };
 
 const searchCategories = [
@@ -53,7 +59,11 @@ const searchResults = [
   { id: 8, category: 'call', name: 'Call Log - Priya', phone: 'Call-001', description: 'Incoming Call' },
 ];
 
-const TopNav = ({ onOpenDrawer }) => {
+interface TopNavProps {
+  onOpenDrawer: (type: string) => void;
+}
+
+const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,8 +74,8 @@ const TopNav = ({ onOpenDrawer }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showNotificationsDrawer, setShowNotificationsDrawer] = useState(false);
-  const profileRef = useRef(null);
-  const notificationsRef = useRef(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLButtonElement>(null);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -77,11 +87,11 @@ const TopNav = ({ onOpenDrawer }) => {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setShowProfileDropdown(false);
       }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setShowNotificationsDrawer(false);
       }
     };
@@ -93,8 +103,18 @@ const TopNav = ({ onOpenDrawer }) => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   };
 
-  const handleNotificationClick = (notification) => {
-    setNotifications(prev => prev.map(n => 
+  interface NotificationItem {
+    id: number;
+    type: string;
+    title: string;
+    message: string;
+    time: string;
+    isRead: boolean;
+    link: string;
+  }
+
+  const handleNotificationClick = (notification: NotificationItem) => {
+    setNotifications((prev: NotificationItem[]) => prev.map(n => 
       n.id === notification.id ? { ...n, isRead: true } : n
     ));
     if (notification.link) {
@@ -124,9 +144,9 @@ const TopNav = ({ onOpenDrawer }) => {
     ).slice(0, 8);
   }, [searchQuery]);
 
-  const currentOption = addOptions[currentOptionIndex];
+  const currentOption = addOptions[currentOptionIndex]!;
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex(prev => Math.min(prev + 1, filteredResults.length - 1));
@@ -135,26 +155,40 @@ const TopNav = ({ onOpenDrawer }) => {
       setSelectedIndex(prev => Math.max(prev - 1, 0));
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault();
-      handleResultClick(filteredResults[selectedIndex]);
+      if (filteredResults[selectedIndex]) handleResultClick(filteredResults[selectedIndex]);
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
     }
   };
 
-  const handleResultClick = (result) => {
+  interface SearchResult {
+    id: number;
+    category: string;
+    name: string;
+    phone: string;
+    description: string;
+  }
+
+  const handleResultClick = (result: SearchResult) => {
     console.log('Navigate to:', result.category, result);
     setSearchQuery('');
     setShowSuggestions(false);
   };
 
-  const handleAddClick = (option) => {
+  interface AddOption {
+    id: string;
+    name: string;
+    icon: React.ComponentType<{ size?: number }>;
+  }
+
+  const handleAddClick = (option: AddOption) => {
     if (onOpenDrawer) {
       onOpenDrawer(option.id);
     }
     setShowAddDropdown(false);
   };
 
-  const getCategoryIcon = (categoryId) => {
+  const getCategoryIcon = (categoryId: string) => {
     const cat = searchCategories.find(c => c.id === categoryId);
     if (cat) {
       const Icon = cat.icon;

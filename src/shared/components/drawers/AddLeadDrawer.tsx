@@ -2,7 +2,12 @@ import React from 'react';
 import { X } from 'lucide-react';
 import './AddLeadDrawer.css';
 
-const AddLeadDrawer = ({ isOpen, onClose }) => {
+interface AddLeadDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const AddLeadDrawer = ({ isOpen, onClose }: AddLeadDrawerProps) => {
   if (!isOpen) return null;
 
   return (

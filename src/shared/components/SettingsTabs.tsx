@@ -49,13 +49,16 @@ const SettingsTabs = ({ items = defaultTabs }: SettingsTabsProps) => {
       })}
 
       {items.length > 8 && (
-        <Link
+        <span
           onClick={() => setLimit(limit > 8 ? 8 : items.length)}
-          className={`settings-tab ${location.pathname === items[8].link ? 'active' : ''}`}
+          className={`settings-tab ${location.pathname === items[8]?.link ? 'active' : ''}`}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setLimit(limit > 8 ? 8 : items.length); }}
         >
           {limit > 8 ? <Minus size={16} /> : <Plus size={16} />}
           <span style={{ paddingLeft: '10px' }}>{limit > 8 ? 'Reset' : 'More'}</span>
-        </Link>
+        </span>
       )}
     </div>
   );

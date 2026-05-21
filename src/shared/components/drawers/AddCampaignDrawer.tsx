@@ -2,7 +2,31 @@ import React, { useState, useMemo } from 'react';
 import { X, Search, User } from 'lucide-react';
 import './AddLeadDrawer.css';
 
-const sampleLeads = [
+interface SampleLead {
+  id: number;
+  name: string;
+  phone: string;
+  status: string;
+}
+
+interface CampaignFormData {
+  name: string;
+  type: string;
+  selectedLeads: SampleLead[];
+  description: string;
+  startDate: string;
+  endDate: string;
+  createdBy: string;
+}
+
+interface AddCampaignDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: Record<string, unknown>) => void;
+  campaign?: CampaignFormData | null;
+}
+
+const sampleLeads: SampleLead[] = [
   { id: 1, name: 'Rahul Sharma', phone: '9876543210', status: 'Active' },
   { id: 2, name: 'Priya Patel', phone: '9876543211', status: 'Active' },
   { id: 3, name: 'Amit Kumar', phone: '9876543212', status: 'Pending' },
@@ -13,10 +37,10 @@ const sampleLeads = [
   { id: 8, name: 'Kavitha Nair', phone: '9876543217', status: 'Active' },
 ];
 
-const sampleTypes = ['Email', 'SMS', 'WhatsApp', 'Social'];
+const sampleTypes: string[] = ['Email', 'SMS', 'WhatsApp', 'Social'];
 
-const AddCampaignDrawer = ({ isOpen, onClose, onSave, campaign = null }) => {
-  const [formData, setFormData] = useState({
+const AddCampaignDrawer = ({ isOpen, onClose, onSave, campaign = null }: AddCampaignDrawerProps) => {
+  const [formData, setFormData] = useState<CampaignFormData>({
     name: campaign?.name || '',
     type: campaign?.type || '',
     selectedLeads: campaign?.selectedLeads || [],
@@ -26,7 +50,7 @@ const AddCampaignDrawer = ({ isOpen, onClose, onSave, campaign = null }) => {
     createdBy: campaign?.createdBy || 'Admin',
   });
   
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showLeadDropdown, setShowLeadDropdown] = useState(false);
   const [leadSearch, setLeadSearch] = useState('');
 
@@ -38,13 +62,13 @@ const AddCampaignDrawer = ({ isOpen, onClose, onSave, campaign = null }) => {
     );
   }, [leadSearch]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  const handleLeadSelect = (lead) => {
+  const handleLeadSelect = (lead: SampleLead) => {
     if (!formData.selectedLeads.find(l => l.id === lead.id)) {
       setFormData(prev => ({ ...prev, selectedLeads: [...prev.selectedLeads, lead] }));
     }
@@ -52,12 +76,12 @@ const AddCampaignDrawer = ({ isOpen, onClose, onSave, campaign = null }) => {
     setLeadSearch('');
   };
 
-  const handleLeadRemove = (leadId) => {
+  const handleLeadRemove = (leadId: number) => {
     setFormData(prev => ({ ...prev, selectedLeads: prev.selectedLeads.filter(l => l.id !== leadId) }));
   };
 
   const validate = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Campaign name is required';
     if (!formData.type) newErrors.type = 'Type is required';
     if (formData.selectedLeads.length === 0) newErrors.selectedLeads = 'Select at least one lead';

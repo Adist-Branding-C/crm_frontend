@@ -87,7 +87,7 @@ const SalesPipelinePage: React.FC = () => {
     }
   };
 
-  const handleSaveDeal = (_formData: Record<string, unknown>) => {
+  const handleSaveDeal = (_formData: { dealName: string; lead: string; mobile: string; amount: string; status: string; type: string; startDate: string; endDate: string; assignAgent: string }) => {
     // Deal saved via drawer; integration with pipeline state can be added later
   };
 

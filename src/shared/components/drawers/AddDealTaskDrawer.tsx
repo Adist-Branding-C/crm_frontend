@@ -2,19 +2,53 @@ import React, { useState, useMemo } from 'react';
 import { X, Search } from 'lucide-react';
 import './AddLeadDrawer.css';
 
-const sampleDeals = [
+interface SampleDeal {
+  id: number;
+  name: string;
+  dealId: string;
+  amount: number;
+}
+
+interface SampleAgent {
+  id: number;
+  name: string;
+}
+
+interface TaskFormData {
+  title: string;
+  category: string;
+  deal: string;
+  dealId: string;
+  amount: string;
+  description: string;
+  scheduledDate: string;
+  scheduledTime: string;
+  assignedBy: string;
+  assignedTo: string;
+  priority: string;
+  status: string;
+}
+
+interface AddDealTaskDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: TaskFormData) => void;
+  task?: TaskFormData | null;
+}
+
+const sampleDeals: SampleDeal[] = [
   { id: 1, name: 'Website Development', dealId: 'DL001', amount: 150000 },
   { id: 2, name: 'CRM Implementation', dealId: 'DL002', amount: 200000 },
   { id: 3, name: 'Annual Maintenance', dealId: 'DL003', amount: 50000 },
 ];
 
-const sampleAgents = [
+const sampleAgents: SampleAgent[] = [
   { id: 1, name: 'John Doe' },
   { id: 2, name: 'Jane Smith' },
   { id: 3, name: 'Mike Johnson' },
 ];
 
-const sampleCategories = [
+const sampleCategories: SampleAgent[] = [
   { id: 1, name: 'Follow Up' },
   { id: 2, name: 'Payment Reminder' },
   { id: 3, name: 'Demo' },
@@ -22,8 +56,8 @@ const sampleCategories = [
   { id: 5, name: 'Closing' },
 ];
 
-const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }) => {
-  const [formData, setFormData] = useState({
+const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }: AddDealTaskDrawerProps) => {
+  const [formData, setFormData] = useState<TaskFormData>({
     title: task?.title || '',
     category: task?.category || '',
     deal: task?.deal || '',
@@ -38,7 +72,7 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }) => {
     status: task?.status || 'pending',
   });
   
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDealDropdown, setShowDealDropdown] = useState(false);
   const [dealSearch, setDealSearch] = useState('');
 
@@ -49,7 +83,7 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }) => {
     );
   }, [dealSearch]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -57,19 +91,19 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }) => {
     }
   };
 
-  const handleDealSelect = (deal) => {
+  const handleDealSelect = (deal: SampleDeal) => {
     setFormData(prev => ({ 
       ...prev, 
       deal: deal.name,
       dealId: deal.dealId,
-      amount: deal.amount
+      amount: String(deal.amount)
     }));
     setShowDealDropdown(false);
     setDealSearch('');
   };
 
   const validate = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.deal) newErrors.deal = 'Deal is required';

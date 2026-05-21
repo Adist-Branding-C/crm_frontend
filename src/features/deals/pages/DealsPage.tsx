@@ -7,7 +7,35 @@ import './EnquiriesPage.css';
 import './DealsPage.css';
 import './DealTasksPage.css';
 
-const sampleData = [
+interface DealItem {
+  id: number;
+  dealId: string;
+  dealName: string;
+  lead: string;
+  mobile: string;
+  amount: number;
+  status: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  agent: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+interface SortConfig {
+  key: string | null;
+  direction: 'asc' | 'desc';
+}
+
+interface FiltersState {
+  status: string;
+  type: string;
+  dateRange: { start: string; end: string };
+  assignedTo: string;
+}
+
+const sampleData: DealItem[] = [
   { id: 1, dealId: 'DL001', dealName: 'Website Development', lead: 'Rahul Sharma', mobile: '9876543210', amount: 150000, status: 'win', type: 'sales', startDate: '2024-01-15', endDate: '2024-02-15', agent: 'John Doe', createdBy: 'Admin', createdAt: '2024-01-10' },
   { id: 2, dealId: 'DL002', dealName: 'CRM Implementation', lead: 'Priya Patel', mobile: '9876543211', amount: 200000, status: 'pending', type: 'sales', startDate: '2024-01-20', endDate: '2024-03-20', agent: 'Jane Smith', createdBy: 'Admin', createdAt: '2024-01-12' },
   { id: 3, dealId: 'DL003', dealName: 'Annual Maintenance', lead: 'Amit Kumar', mobile: '9876543212', amount: 50000, status: 'invoice', type: 'renewal', startDate: '2024-02-01', endDate: '2024-02-28', agent: 'Mike Johnson', createdBy: 'Admin', createdAt: '2024-01-14' },
@@ -16,18 +44,18 @@ const sampleData = [
 const DealsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [actionMenuOpen, setActionMenuOpen] = useState(null);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
+  const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingDeal, setEditingDeal] = useState(null);
+  const [editingDeal, setEditingDeal] = useState<DealItem | null>(null);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
-  const [deals, setDeals] = useState(sampleData);
+  const [deals, setDeals] = useState<DealItem[]>(sampleData);
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FiltersState>({
     status: '',
     type: '',
     dateRange: { start: '', end: '' },
@@ -74,9 +102,10 @@ const DealsPage = () => {
     }
 
     if (sortConfig.key) {
+      const key = sortConfig.key as keyof DealItem;
       data.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
+        if (a[key] < b[key]) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (a[key] > b[key]) return sortConfig.direction === 'asc' ? 1 : -1;
         return 0;
       });
     }
@@ -94,18 +123,18 @@ const DealsPage = () => {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
-  const handleSort = (key) => {
+  const handleSort = (key: string) => {
     setSortConfig(prev => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
   };
 
-  const handleSortDirection = (key, direction) => {
+  const handleSortDirection = (key: string, direction: 'asc' | 'desc') => {
     setSortConfig({ key, direction });
   };
 
-  const handleSelectAll = (e) => {
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedRows(paginatedData.map(item => item.id));
     } else {
@@ -113,13 +142,13 @@ const DealsPage = () => {
     }
   };
 
-  const handleSelectRow = (id) => {
+  const handleSelectRow = (id: number) => {
     setSelectedRows(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
 
-  const handleRowsPerPageChange = (e) => {
+  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));
     setCurrentPage(1);
   };
@@ -139,33 +168,41 @@ const DealsPage = () => {
     setIsDrawerOpen(true);
   };
 
-  const handleEditDeal = (deal) => {
+  const handleEditDeal = (deal: DealItem) => {
     setEditingDeal(deal);
     setIsDrawerOpen(true);
     setActionMenuOpen(null);
   };
 
-  const handleSaveDeal = (formData) => {
+  const handleSaveDeal = (data: { dealName: string; lead: string; mobile: string; amount: string; status: string; type: string; startDate: string; endDate: string; assignAgent: string }) => {
     if (editingDeal) {
-      setDeals(prev => prev.map(deal => 
-        deal.id === editingDeal.id 
-          ? { ...deal, ...formData, dealId: deal.dealId }
+      setDeals(prev => prev.map(deal =>
+        deal.id === editingDeal.id
+          ? { ...deal, dealName: data.dealName, lead: data.lead, mobile: data.mobile, amount: Number(data.amount), status: data.status, type: data.type, startDate: data.startDate, endDate: data.endDate, agent: data.assignAgent }
           : deal
       ));
     } else {
-      const newDeal = {
-        ...formData,
+      const newDeal: DealItem = {
         id: Date.now(),
         dealId: `DL00${deals.length + 1}`,
+        dealName: data.dealName,
+        lead: data.lead,
+        mobile: data.mobile,
+        amount: Number(data.amount),
+        status: data.status,
+        type: data.type,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        agent: data.assignAgent,
         createdBy: 'Admin',
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0] ?? ''
       };
       setDeals(prev => [...prev, newDeal]);
     }
     setCurrentPage(1);
   };
 
-  const handleDeleteDeal = (id) => {
+  const handleDeleteDeal = (id: number) => {
     setDeals(prev => prev.filter(deal => deal.id !== id));
     setActionMenuOpen(null);
   };
@@ -197,36 +234,36 @@ const DealsPage = () => {
     link.click();
   };
 
-  const getStatusBadge = (status) => {
-    const statusMap = {
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<string, string> = {
       'win': 'deal-win',
       'lost': 'deal-lost',
       'invoice': 'deal-invoice',
       'pending': 'deal-pending'
     };
-    const labelMap = {
+    const labelMap: Record<string, string> = {
       'win': 'Deal Win',
       'lost': 'Deal Lost',
       'invoice': 'Invoice',
       'pending': 'Pending'
     };
-    return <span className={`badge badge-${statusMap[status]}`}>{labelMap[status]}</span>;
+    return <span className={`badge badge-${statusMap[status] ?? ''}`}>{labelMap[status] ?? status}</span>;
   };
 
-  const getTypeBadge = (type) => {
-    const typeMap = {
+  const getTypeBadge = (type: string) => {
+    const typeMap: Record<string, string> = {
       'sales': 'type-sales',
       'registration': 'type-registration',
       'renewal': 'type-renewal',
       'upsell': 'type-upsell'
     };
-    const labelMap = {
+    const labelMap: Record<string, string> = {
       'sales': 'Sales',
       'registration': 'Registration',
       'renewal': 'Renewal',
       'upsell': 'Upsell'
     };
-    return <span className={`badge badge-${typeMap[type]}`}>{labelMap[type]}</span>;
+    return <span className={`badge badge-${typeMap[type] ?? ''}`}>{labelMap[type] ?? type}</span>;
   };
 
   const renderStatsRow = () => (
@@ -489,7 +526,17 @@ const DealsPage = () => {
           setIsDrawerOpen(false);
           setEditingDeal(null);
         }} 
-        deal={editingDeal}
+        deal={editingDeal ? {
+          dealName: editingDeal.dealName,
+          lead: editingDeal.lead,
+          mobile: editingDeal.mobile,
+          amount: String(editingDeal.amount),
+          status: editingDeal.status,
+          type: editingDeal.type,
+          startDate: editingDeal.startDate,
+          endDate: editingDeal.endDate,
+          assignAgent: editingDeal.agent,
+        } : null}
         onSave={handleSaveDeal}
       />
     </PageContainer>

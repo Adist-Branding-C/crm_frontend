@@ -2,7 +2,37 @@ import React, { useState, useMemo } from 'react';
 import { X, Search } from 'lucide-react';
 import './AddLeadDrawer.css';
 
-const sampleLeads = [
+interface SampleLead {
+  id: number;
+  name: string;
+  phone: string;
+}
+
+interface SampleAgent {
+  id: number;
+  name: string;
+}
+
+interface DealFormData {
+  dealName: string;
+  lead: string;
+  mobile: string;
+  amount: string;
+  status: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  assignAgent: string;
+}
+
+interface AddDealDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: DealFormData) => void;
+  deal?: DealFormData | null;
+}
+
+const sampleLeads: SampleLead[] = [
   { id: 1, name: 'Rahul Sharma', phone: '9876543210' },
   { id: 2, name: 'Priya Patel', phone: '9876543211' },
   { id: 3, name: 'Amit Kumar', phone: '9876543212' },
@@ -10,14 +40,14 @@ const sampleLeads = [
   { id: 5, name: 'Vikram Singh', phone: '9876543214' },
 ];
 
-const sampleAgents = [
+const sampleAgents: SampleAgent[] = [
   { id: 1, name: 'John Doe' },
   { id: 2, name: 'Jane Smith' },
   { id: 3, name: 'Mike Johnson' },
 ];
 
-const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }) => {
-  const [formData, setFormData] = useState({
+const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerProps) => {
+  const [formData, setFormData] = useState<DealFormData>({
     dealName: deal?.dealName || '',
     lead: deal?.lead || '',
     mobile: deal?.mobile || '',
@@ -29,7 +59,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }) => {
     assignAgent: deal?.assignAgent || '',
   });
   
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showLeadDropdown, setShowLeadDropdown] = useState(false);
   const [leadSearch, setLeadSearch] = useState('');
 
@@ -40,7 +70,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }) => {
     );
   }, [leadSearch]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -48,7 +78,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }) => {
     }
   };
 
-  const handleLeadSelect = (lead) => {
+  const handleLeadSelect = (lead: SampleLead) => {
     setFormData(prev => ({ 
       ...prev, 
       lead: lead.name,
@@ -59,7 +89,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }) => {
   };
 
   const validate = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
     if (!formData.dealName.trim()) newErrors.dealName = 'Deal name is required';
     if (!formData.lead) newErrors.lead = 'Lead is required';
     if (!formData.mobile.trim()) newErrors.mobile = 'Mobile is required';

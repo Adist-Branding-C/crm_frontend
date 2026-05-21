@@ -2,22 +2,38 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
 import './WidgetStyles.css';
 
+interface PipelineDataItem {
+  name: string;
+  value: number;
+  displayValue: string;
+  color: string;
+}
+
+interface CustomLabelProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  value?: number;
+  index?: number;
+}
+
 const DealPipelineWidget = () => {
-  const data = [
+  const data: PipelineDataItem[] = [
     { name: 'Open', value: 90000, displayValue: '₹90,000', color: '#fbbf24' },
     { name: 'Won', value: 40000, displayValue: '₹40,000', color: '#3b82f6' },
     { name: 'Lost', value: 112000, displayValue: '₹112,000', color: '#ec4899' },
   ];
 
-  const formatYAxis = (tickItem) => {
+  const formatYAxis = (tickItem: number) => {
     return `₹${tickItem}`;
   };
 
-  const CustomLabel = (props) => {
-    const { x, y, width, value, index } = props;
+  const CustomLabel = (props: CustomLabelProps) => {
+    const { x = 0, y = 0, width = 0, index = 0 } = props;
+    const item = data[index];
     return (
       <text x={x + width / 2} y={y - 10} fill="#1a1b1d" textAnchor="middle" fontSize="12" fontWeight="600">
-        {data[index].displayValue}
+        {item?.displayValue ?? ''}
       </text>
     );
   };

@@ -2,7 +2,19 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import './Cards.css';
 
-export const StatCard = ({ title, value }) => {
+interface StatCardProps {
+  title: string;
+  value: string;
+}
+
+interface KpiCardProps {
+  title: string;
+  value: string;
+  isPrimary?: boolean;
+  isHighlight?: boolean;
+}
+
+export const StatCard = ({ title, value }: StatCardProps) => {
   return (
     <div className="card stat-card">
       <div className="stat-value">{value}</div>
@@ -14,7 +26,7 @@ export const StatCard = ({ title, value }) => {
   );
 };
 
-export const KpiCard = ({ title, value, isPrimary, isHighlight }) => {
+export const KpiCard = ({ title, value, isPrimary = false, isHighlight = false }: KpiCardProps) => {
   return (
     <div className={`card kpi-card ${isPrimary ? 'primary-outline' : 'secondary-outline'} ${isHighlight ? 'highlighted' : ''}`}>
       <div className="kpi-value">{value}</div>

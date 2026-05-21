@@ -198,7 +198,7 @@ const DepartmentPage = () => {
                               if (dropdownOpen === dept.id) {
                                 setDropdownOpen(null);
                               } else {
-                                const pos = calculateDropdownPosition(actionMenuRefs.current[dept.id]);
+                                const pos = calculateDropdownPosition(actionMenuRefs.current[dept.id] ?? null);
                                 setDropdownPosition(pos);
                                 setDropdownOpen(dept.id);
                               }

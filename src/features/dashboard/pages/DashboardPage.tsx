@@ -79,7 +79,7 @@ const DashboardPage = () => {
             title={card.title}
             value={card.value}
             isPrimary={card.isPrimary}
-            isHighlight={card.isHighlight}
+            isHighlight={card.isHighlight ?? false}
           />
         ))}
       </div>

@@ -8,7 +8,10 @@ import AddDealTaskDrawer from '../drawers/AddDealTaskDrawer';
 import AddCampaignDrawer from '../drawers/AddCampaignDrawer';
 import './DashboardLayout.css';
 
-const LoadingContext = createContext({
+const LoadingContext = createContext<{
+  isLoading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}>({
   isLoading: false,
   setLoading: () => {}
 });
@@ -16,7 +19,7 @@ const LoadingContext = createContext({
 export const useLoading = () => useContext(LoadingContext);
 
 const DashboardLayout = () => {
-  const [drawerState, setDrawerState] = useState({ type: null, isOpen: false });
+  const [drawerState, setDrawerState] = useState<{ type: string | null; isOpen: boolean }>({ type: null, isOpen: false });
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
 
@@ -26,13 +29,15 @@ const DashboardLayout = () => {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
-  const handleOpenDrawer = (type) => {
+  const handleOpenDrawer = (type: string) => {
     setDrawerState({ type, isOpen: true });
   };
 
   const handleCloseDrawer = () => {
     setDrawerState({ type: null, isOpen: false });
   };
+
+  const noop = () => {};
 
   return (
     <LoadingContext.Provider value={{ isLoading, setLoading: setIsLoading }}>
@@ -55,13 +60,13 @@ const DashboardLayout = () => {
           <AddLeadDrawer isOpen={drawerState.isOpen} onClose={handleCloseDrawer} />
         )}
         {drawerState.isOpen && drawerState.type === 'deal' && (
-          <AddDealDrawer isOpen={drawerState.isOpen} onClose={handleCloseDrawer} />
+          <AddDealDrawer isOpen={drawerState.isOpen} onClose={handleCloseDrawer} onSave={noop} />
         )}
         {drawerState.isOpen && drawerState.type === 'task' && (
-          <AddDealTaskDrawer isOpen={drawerState.isOpen} onClose={handleCloseDrawer} />
+          <AddDealTaskDrawer isOpen={drawerState.isOpen} onClose={handleCloseDrawer} onSave={noop} />
         )}
         {drawerState.isOpen && drawerState.type === 'campaign' && (
-          <AddCampaignDrawer isOpen={drawerState.isOpen} onClose={handleCloseDrawer} />
+          <AddCampaignDrawer isOpen={drawerState.isOpen} onClose={handleCloseDrawer} onSave={noop} />
         )}
       </div>
     </LoadingContext.Provider>
