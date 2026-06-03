@@ -3,125 +3,18 @@ import {
   Download, Filter, Search, ChevronDown, ChevronLeft, ChevronRight,
   MoreHorizontal
 } from 'lucide-react';
-import '../../../pages/Enquiries.css';
+import './ReportsSubPages.css';
+import {
+  sourceWiseData, sourceWiseSortOptions as sortOptions,
+  sourceWiseAgentOptions as agentOptions, sourceWiseSourceOptions as sourceOptions,
+  sourceWiseColumns as lswColumns
+} from '../constants/matrixReports.data';
+import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ACTION_SUBMIT, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
+import type { Column } from '../../../shared/types/table';
+import type { LeadSourceWiseFilters } from '../types';
 
-interface SourceRow {
-  id: number;
-  source: string;
-  fromDate: string;
-  toDate: string;
-  none: number;
-  new: number;
-  connected: number;
-  interested: number;
-  registered: number;
-  notInterested: number;
-  justEnquiry: number;
-  plusOne: number;
-  detailsShared: number;
-  plusTwoCall: number;
-  neetAfter: number;
-  seminarInt: number;
-  nursingPg: number;
-  fridayWeb: number;
-  plusTwo2027: number;
-  mbbs: number;
-  webinarGform: number;
-  webinarAtt: number;
-  junkForm: number;
-  junkHindi: number;
-  webinarFollow: number;
-  webinarLost: number;
-  dnd: number;
-  later: number;
-  empty: number;
-  total: number;
-  [key: string]: string | number;
-}
-
-const sourceWiseData: SourceRow[] = [
-  { id: 1, source: 'Website', fromDate: '2024-01-01', toDate: '2024-01-31', none: 5, new: 25, connected: 45, interested: 32, registered: 18, notInterested: 12, justEnquiry: 8, plusOne: 6, detailsShared: 22, plusTwoCall: 4, neetAfter: 3, seminarInt: 5, nursingPg: 2, fridayWeb: 3, plusTwo2027: 4, mbbs: 5, webinarGform: 6, webinarAtt: 8, junkForm: 4, junkHindi: 2, webinarFollow: 3, webinarLost: 2, dnd: 3, later: 4, empty: 5, total: 208 },
-];
-
-interface Option {
-  value: string;
-  label: string;
-}
-
-const sortOptions: Option[] = [
-  { value: '', label: 'All' },
-  { value: 'assignedDate', label: 'Assigned Date' },
-  { value: 'createdDate', label: 'Created Date' },
-];
-
-const agentOptions: Option[] = [
-  { value: '', label: 'Select Agent' },
-  { value: 'all', label: 'All Agents' },
-  { value: 'john', label: 'John Doe' },
-  { value: 'jane', label: 'Jane Smith' },
-  { value: 'mike', label: 'Mike Johnson' },
-];
-
-const sourceOptions: Option[] = [
-  { value: '', label: 'Select Source' },
-  { value: 'all', label: 'All Sources' },
-  { value: 'website', label: 'Website' },
-  { value: 'meta', label: 'Meta Campaign' },
-  { value: 'referral', label: 'Referral' },
-  { value: 'whatsapp', label: 'Incoming Call / WhatsApp' },
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'google', label: 'Google Ads' },
-  { value: 'email', label: 'Email Campaign' },
-  { value: 'seminar', label: 'Seminar' },
-];
-
-interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-}
-
-const columns: Column[] = [
-  { key: 'select', label: 'Select' },
-  { key: 'action', label: 'Action' },
-  { key: 'slNo', label: 'SL No' },
-  { key: 'source', label: 'Source', sortable: true },
-  { key: 'fromDate', label: 'From Date', sortable: true },
-  { key: 'toDate', label: 'To Date', sortable: true },
-  { key: 'none', label: 'None', sortable: true },
-  { key: 'new', label: 'New', sortable: true },
-  { key: 'connected', label: 'Connected', sortable: true },
-  { key: 'interested', label: 'Interested', sortable: true },
-  { key: 'registered', label: 'Registered', sortable: true },
-  { key: 'notInterested', label: 'Not Interested', sortable: true },
-  { key: 'justEnquiry', label: 'Just Enquiry', sortable: true },
-  { key: 'plusOne', label: 'Plus One', sortable: true },
-  { key: 'detailsShared', label: 'Details Shared', sortable: true },
-  { key: 'plusTwoCall', label: 'Plus Two Call', sortable: true },
-  { key: 'neetAfter', label: 'NEET After', sortable: true },
-  { key: 'seminarInt', label: 'Seminar Int', sortable: true },
-  { key: 'nursingPg', label: 'Nursing PG', sortable: true },
-  { key: 'fridayWeb', label: 'Friday Web', sortable: true },
-  { key: 'plusTwo2027', label: 'Plus Two 2027', sortable: true },
-  { key: 'mbbs', label: 'MBBS Doing', sortable: true },
-  { key: 'webinarGform', label: 'Web GForm', sortable: true },
-  { key: 'webinarAtt', label: 'Web Attended', sortable: true },
-  { key: 'junkForm', label: 'Junk Form', sortable: true },
-  { key: 'junkHindi', label: 'Junk Hindi', sortable: true },
-  { key: 'webinarFollow', label: 'Web Follow', sortable: true },
-  { key: 'webinarLost', label: 'Web Lost', sortable: true },
-  { key: 'dnd', label: 'DND', sortable: true },
-  { key: 'later', label: 'Later', sortable: true },
-  { key: 'empty', label: 'Empty Status', sortable: true },
-  { key: 'total', label: 'Total Leads', sortable: true },
-];
-
-interface Filters {
-  dateRange: { start: string; end: string };
-  sortBy: string;
-  agentId: string;
-  selectSource: string;
-}
+const columns: Column[] = lswColumns;
 
 const LeadSourceWise: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,7 +27,7 @@ const LeadSourceWise: React.FC = () => {
   const [actionMenuPosition, setActionMenuPosition] = useState({ vertical: 'bottom', horizontal: 'right' });
   const actionMenuRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-  const [filters, setFiltersState] = useState<Filters>({
+  const [filters, setFiltersState] = useState<LeadSourceWiseFilters>({
     dateRange: { start: '', end: '' },
     sortBy: '',
     agentId: '',
@@ -282,8 +175,8 @@ const LeadSourceWise: React.FC = () => {
             </div>
             <div className="filter-row">
               <div className="filter-actions">
-                <button type="submit" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary" onClick={clearFilters}>Clear</button>
+                <button type="submit" className="btn btn-primary">{ACTION_SUBMIT}</button>
+                <button type="button" className="btn btn-secondary" onClick={clearFilters}>{ACTION_CLEAR}</button>
               </div>
             </div>
           </form>
@@ -373,9 +266,7 @@ const LeadSourceWise: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
+            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

@@ -3,44 +3,11 @@ import {
   Download, RefreshCw, Filter, Search, ChevronDown, ChevronLeft, ChevronRight,
   MoreHorizontal
 } from 'lucide-react';
-import '../../../pages/Enquiries.css';
-
-interface ExportRow {
-  id: number;
-  dateTime: string;
-  fileName: string;
-  status: string;
-  [key: string]: string | number;
-}
-
-const exportHistoryData: ExportRow[] = [
-  { id: 1, dateTime: '2024-01-25 10:30 AM', fileName: 'leads_export_25Jan2024', status: 'completed' },
-  { id: 2, dateTime: '2024-01-25 09:15 AM', fileName: 'leads_export_24Jan2024', status: 'completed' },
-  { id: 3, dateTime: '2024-01-24 04:45 PM', fileName: 'export_jan24', status: 'completed' },
-  { id: 4, dateTime: '2024-01-24 02:20 PM', fileName: 'leads_backup', status: 'failed' },
-  { id: 5, dateTime: '2024-01-23 11:00 AM', fileName: 'jan23_export', status: 'completed' },
-  { id: 6, dateTime: '2024-01-23 10:00 AM', fileName: 'leads_23jan', status: 'generating' },
-  { id: 7, dateTime: '2024-01-22 05:30 PM', fileName: 'weekly_export', status: 'completed' },
-  { id: 8, dateTime: '2024-01-22 03:15 PM', fileName: 'leads_jan22', status: 'completed' },
-  { id: 9, dateTime: '2024-01-21 09:45 AM', fileName: 'export_file', status: 'failed' },
-  { id: 10, dateTime: '2024-01-20 04:00 PM', fileName: 'backup_jan20', status: 'completed' },
-];
-
-interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-}
-
-const columns: Column[] = [
-  { key: 'checkbox', label: '' },
-  { key: 'action', label: 'Action' },
-  { key: ' SL No', label: '#', sortable: false },
-  { key: 'dateTime', label: 'Date and Time', sortable: true },
-  { key: 'fileName', label: 'File Name', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'download', label: 'Download', sortable: false },
-];
+import './ReportsSubPages.css';
+import { exportHistoryData, exportHistoryColumns as columns } from '../constants/historyReports.data';
+import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ACTION_VIEW, ACTION_DELETE } from '../../../shared/constants/actionLabels';
+import { ImportExportStatus } from '../../../shared/constants/enums';
 
 const LeadExportHistory: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -175,8 +142,8 @@ const LeadExportHistory: React.FC = () => {
                     </button>
                     {actionMenuOpen === row.id && (
                       <div className={`action-dropdown ${actionMenuPosition.vertical === 'top' ? 'dropup' : ''} ${actionMenuPosition.horizontal === 'left' ? 'dropleft' : ''}`}>
-                        <button onClick={() => alert(`Viewing details for: ${row.fileName}`)}>View Details</button>
-                        <button onClick={() => alert(`Deleting: ${row.fileName}`)} className="delete">Delete</button>
+                        <button onClick={() => alert(`Viewing details for: ${row.fileName}`)}>{ACTION_VIEW} Details</button>
+                        <button onClick={() => alert(`Deleting: ${row.fileName}`)} className="delete">{ACTION_DELETE}</button>
                       </div>
                     )}
                   </div>
@@ -189,7 +156,7 @@ const LeadExportHistory: React.FC = () => {
                   <button
                     className="btn btn-primary"
                     onClick={() => handleDownload(row.fileName)}
-                    disabled={row.status === 'generating'}
+                    disabled={row.status === ImportExportStatus.GENERATING}
                     style={{ padding: '0.375rem 0.75rem', height: 'auto', fontSize: '0.75rem' }}
                   >
                     <Download size={14} />
@@ -206,9 +173,7 @@ const LeadExportHistory: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
+            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

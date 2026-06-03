@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { checkinData } from '../constants';
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
 
 const CheckinReport = () => {
   const [search, setSearch] = useState('');
@@ -41,7 +42,7 @@ const CheckinReport = () => {
             <div className="filter-group">
               <label>Show</label>
               <select className="filter-select" value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}>
-                <option value={10}>10</option><option value={25}>25</option><option value={50}>50</option><option value={100}>100</option>
+                {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
               </select>
               <label>entries</label>
             </div>

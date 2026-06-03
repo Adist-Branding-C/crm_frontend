@@ -1,30 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, Search, User } from 'lucide-react';
+import type { SampleLead, CampaignFormData, AddCampaignDrawerProps } from '../../types/drawers';
 import './AddLeadDrawer.css';
-
-interface SampleLead {
-  id: number;
-  name: string;
-  phone: string;
-  status: string;
-}
-
-interface CampaignFormData {
-  name: string;
-  type: string;
-  selectedLeads: SampleLead[];
-  description: string;
-  startDate: string;
-  endDate: string;
-  createdBy: string;
-}
-
-interface AddCampaignDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: Record<string, unknown>) => void;
-  campaign?: CampaignFormData | null;
-}
 
 const sampleLeads: SampleLead[] = [
   { id: 1, name: 'Rahul Sharma', phone: '9876543210', status: 'Active' },

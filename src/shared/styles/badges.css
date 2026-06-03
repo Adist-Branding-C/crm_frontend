@@ -1,0 +1,186 @@
+/* Shared Badge Styles */
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.badge-active,
+.badge-success,
+.badge-completed {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.badge-inactive,
+.badge-expired {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.badge-pending {
+  background-color: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.badge-danger,
+.badge-overdue,
+.badge-lost {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.badge-hot-lead {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.badge-cold-lead {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.badge-warm-lead {
+  background-color: rgba(251, 146, 60, 0.1);
+  color: #fb923c;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Communication channel badges */
+.badge-email {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.badge-sms {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.badge-whatsapp {
+  background-color: rgba(37, 211, 102, 0.1);
+  color: #25d366;
+}
+
+.badge-social {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.badge-progress {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.badge-incoming {
+  display: inline-flex;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #059669;
+  background: #d1fae5;
+  border-radius: var(--border-radius-xs);
+}
+
+.badge-outgoing {
+  display: inline-flex;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #d97706;
+  background: #fef3c7;
+  border-radius: var(--border-radius-xs);
+}
+
+.badge-missed {
+  display: inline-flex;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: var(--border-radius-xs);
+}
+
+.badge-secondary {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.badge-lead {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.badge-deal {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.badge-task {
+  background-color: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.badge-campaign {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.badge-staff {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.badge-check-in {
+  display: inline-flex;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #059669;
+  background: #d1fae5;
+  border-radius: var(--border-radius-xs);
+}
+
+.badge-check-out {
+  display: inline-flex;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: var(--border-radius-xs);
+}
+
+/* Status badge variants (Account admin tables) */
+.status-active {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-admin {
+  background-color: rgba(241, 65, 79, 0.1);
+  color: #f1414f;
+}
+
+.status-badge.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-badge.expired {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}

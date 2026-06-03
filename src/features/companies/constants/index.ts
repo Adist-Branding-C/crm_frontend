@@ -1,5 +1,18 @@
 import type { Company } from '../types';
 
+export const COMPANY_PLAN_OPTIONS = [
+  { value: 'Enterprise', label: 'Enterprise' },
+  { value: 'Professional', label: 'Professional' },
+  { value: 'Basic', label: 'Basic' },
+];
+
+import { CompanyStatus } from '../../../shared/constants/enums/companyStatus';
+
+export const COMPANY_STATUS_OPTIONS = [
+  { value: CompanyStatus.ACTIVE, label: 'Active' },
+  { value: CompanyStatus.EXPIRED, label: 'Expired' },
+];
+
 export const SAMPLE_COMPANIES: Company[] = [
   { id: 1, name: 'TechCorp Solutions', email: 'admin@techcorp.com', phone: '+1 234 567 8900', plan: 'Enterprise', staffCount: 25, leads: 1250, deals: 45, revenue: 125000, status: 'active', createdAt: '2024-01-15', expiryDate: '2025-01-15', plansHistory: [
     { plan: 'Basic', startDate: '2023-01-15', endDate: '2023-07-15', price: 500 },

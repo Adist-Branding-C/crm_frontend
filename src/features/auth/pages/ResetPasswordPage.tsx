@@ -1,20 +1,11 @@
-import React, { useState } from 'react';
-import { useNavigate, useSearchParams, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { useResetPasswordData } from '../hooks/useResetPasswordData';
 import './ResetPassword.css';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
-
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const d = useResetPasswordData();
 
   const isAuthenticated = localStorage.getItem('crm_token');
 
@@ -22,36 +13,11 @@ const ResetPasswordPage = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (!token) {
+  if (!d.token) {
     return <Navigate to="/forgot-password" replace />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!password) {
-      setError('Please enter a new password');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setIsSuccess(true);
-  };
-
-  if (isSuccess) {
+  if (d.isSuccess) {
     return (
       <div className="auth-page">
         <div className="auth-visual-panel">
@@ -104,26 +70,26 @@ const ResetPasswordPage = () => {
             <p>Your new password must be different from previous passwords</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            {error && <div className="auth-error">{error}</div>}
+          <form onSubmit={d.handleSubmit} className="auth-form">
+            {d.error && <div className="auth-error">{d.error}</div>}
             
             <div className="form-group">
               <label>New Password</label>
               <div className="input-wrapper">
                 <Lock size={18} className="input-icon" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={d.showPassword ? 'text' : 'password'}
                   placeholder="Enter new password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={d.password}
+                  onChange={(e) => d.setPassword(e.target.value)}
                   className="form-input"
                 />
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => d.setShowPassword(!d.showPassword)}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {d.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -133,24 +99,24 @@ const ResetPasswordPage = () => {
               <div className="input-wrapper">
                 <Lock size={18} className="input-icon" />
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={d.showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={d.confirmPassword}
+                  onChange={(e) => d.setConfirmPassword(e.target.value)}
                   className="form-input"
                 />
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={() => d.setShowConfirmPassword(!d.showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {d.showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            <button type="submit" className="auth-btn" disabled={isLoading}>
-              {isLoading ? (
+            <button type="submit" className="auth-btn" disabled={d.isLoading}>
+              {d.isLoading ? (
                 <Loader2 size={18} className="spin" />
               ) : (
                 <>

@@ -15,6 +15,30 @@ export const SAMPLE_TASKS: TaskItem[] = [
   { id: 4, slNo: 4, title: 'Closing Meeting', category: 'Closing', deal: 'Website Development', dealId: 'DL001', amount: 150000, description: 'Final closing discussion', scheduledDate: '2024-01-25', scheduledTime: '15:00', assignedBy: 'Admin', assignedTo: 'John Doe', priority: 'high', status: 'pending' },
 ];
 
+export const TASK_DEAL_OPTIONS = [
+  { value: 'Website Development', label: 'Website Development' },
+  { value: 'CRM Implementation', label: 'CRM Implementation' },
+];
+
+import { TaskStatus } from '../../../shared/constants/enums/taskStatus';
+
+export const TASK_STATUS_OPTIONS = [
+  { value: TaskStatus.COMPLETED, label: 'Completed' },
+  { value: TaskStatus.PENDING, label: 'Pending' },
+  { value: TaskStatus.OVERDUE, label: 'OverDue' },
+];
+
+export const TASK_ASSIGNED_TO_OPTIONS = [
+  { value: 'John Doe', label: 'John Doe' },
+  { value: 'Jane Smith', label: 'Jane Smith' },
+];
+
+export const TASK_CATEGORY_OPTIONS = [
+  { value: 'Follow Up', label: 'Follow Up' },
+  { value: 'Demo', label: 'Demo' },
+  { value: 'Payment Reminder', label: 'Payment Reminder' },
+];
+
 export const COLUMNS = [
   { key: 'checkbox', label: '' },
   { key: 'slNo', label: 'Sl No' },

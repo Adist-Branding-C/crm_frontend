@@ -22,6 +22,8 @@ export const AUTH_STORAGE_KEYS = {
   USER: 'crm_user',
 }
 
+export const MIN_SWIPE_DISTANCE = 50;
+
 export const AUTH_CONTENT_SLIDES = [
     {
       icon: Target,

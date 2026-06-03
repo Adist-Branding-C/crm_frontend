@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { glAPISampleData } from '../constants';
+import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 
 const LeadGLAPIHistoryReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -89,8 +90,8 @@ const LeadGLAPIHistoryReport = () => {
               </select>
             </div>
             <div className="filter-actions">
-              <button className="btn btn-primary" onClick={() => setShowFilters(false)}>Filter</button>
-              <button className="btn btn-secondary" onClick={() => { setFilters({ purpose: '', status: '' }); setShowFilters(false); }}>Clear</button>
+              <button className="btn btn-primary" onClick={() => setShowFilters(false)}>{ACTION_FILTER}</button>
+              <button className="btn btn-secondary" onClick={() => { setFilters({ purpose: '', status: '' }); setShowFilters(false); }}>{ACTION_CLEAR}</button>
             </div>
           </div>
         </div>

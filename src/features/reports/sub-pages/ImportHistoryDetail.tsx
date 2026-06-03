@@ -4,61 +4,13 @@ import {
   CheckCircle, XCircle, AlertCircle
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import '../../../pages/Enquiries.css';
-
-interface DetailRow {
-  id: number;
-  name: string;
-  phone: string;
-  email?: string;
-  reason?: string;
-  createdAt: string;
-  meta: string;
-  [key: string]: string | number | undefined;
-}
-
-const importedData: DetailRow[] = [
-  { id: 1, name: 'John Doe', phone: '+1 1234567890', email: 'john@example.com', reason: '', createdAt: '2024-01-25', meta: 'Source: Website' },
-  { id: 2, name: 'Jane Smith', phone: '+91 9876543210', email: 'jane@test.com', reason: '', createdAt: '2024-01-25', meta: 'Source: Referral' },
-  { id: 3, name: 'Mike Johnson', phone: '+1 5551234567', email: 'mike@company.com', reason: '', createdAt: '2024-01-24', meta: 'Source: Website' },
-  { id: 4, name: 'Sarah Williams', phone: '+91 9988776655', email: 'sarah@example.com', reason: '', createdAt: '2024-01-24', meta: 'Source: Facebook' },
-  { id: 5, name: 'Rahul Sharma', phone: '+91 9876543211', email: 'rahul@test.com', reason: '', createdAt: '2024-01-23', meta: 'Source: Website' },
-];
-
-const duplicateData: DetailRow[] = [
-  { id: 1, name: 'Duplicate User', phone: '+1 1234567890', email: 'dup1@example.com', reason: 'Duplicate Phone Number', createdAt: '2024-01-25', meta: 'Source: Website' },
-  { id: 2, name: 'Existing Contact', phone: '+91 9876543210', email: 'existing@test.com', reason: 'Phone already exists', createdAt: '2024-01-25', meta: 'Source: Referral' },
-];
-
-const failedData: DetailRow[] = [
-  { id: 1, name: 'Invalid User', phone: '+1 0000000000', email: 'invalid@test.com', reason: 'Invalid Phone Number', createdAt: '2024-01-24', meta: 'Source: Website' },
-  { id: 2, name: 'No Email', phone: '+91 1234567890', email: '', reason: 'Missing required field', createdAt: '2024-01-24', meta: 'Source: Facebook' },
-  { id: 3, name: 'Bad Email', phone: '+91 5555555555', email: 'not-an-email', reason: 'Invalid email format', createdAt: '2024-01-23', meta: 'Source: Website' },
-];
-
-const statsData = {
-  total: 500,
-  imported: 483,
-  duplicates: 12,
-  failed: 5
-};
-
-interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-}
-
-const columns: Column[] = [
-  { key: 'checkbox', label: '' },
-  { key: ' SL No', label: '#', sortable: false },
-  { key: 'name', label: 'Name', sortable: true },
-  { key: 'phone', label: 'Phone Number', sortable: true },
-  { key: 'email', label: 'Email', sortable: true },
-  { key: 'reason', label: 'Reason', sortable: true },
-  { key: 'createdAt', label: 'Created At', sortable: true },
-  { key: 'meta', label: 'Meta Data', sortable: true },
-];
+import './ReportsSubPages.css';
+import {
+  importedData, duplicateData, failedData, statsData,
+  importDetailColumns as columns
+} from '../constants/historyReports.data';
+import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import type { DetailRow } from '../constants/historyReports.data';
 
 const ImportHistoryDetail: React.FC = () => {
   const navigate = useNavigate();
@@ -225,9 +177,7 @@ const ImportHistoryDetail: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
+            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

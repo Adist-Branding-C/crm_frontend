@@ -1,0 +1,13 @@
+export const STATUS_ACTIVE = 'Active';
+export const STATUS_INACTIVE = 'Inactive';
+export const STATUS_PENDING = 'Pending';
+export const STATUS_COMPLETED = 'Completed';
+export const STATUS_NEW = 'New';
+export const STATUS_EXISTING = 'Existing';
+export const STATUS_DUPLICATE = 'Duplicate';
+export const STATUS_SUCCESS = 'success';
+export const STATUS_FAILED = 'failed';
+export const STATUS_EXPIRED = 'Expired';
+export const STATUS_OVERDUE = 'OverDue';
+export const STATUS_ALL = 'All';
+export const STATUS_SELECT = 'Select';

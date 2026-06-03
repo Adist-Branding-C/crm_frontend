@@ -1,16 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import type { BreadcrumbItem, BreadcrumbProps, PageHeaderProps } from '../../types/layout';
 import './PageHeader.css';
-
-interface BreadcrumbItem {
-  label: string;
-  link?: string | null;
-}
-
-interface BreadcrumbProps {
-  items: BreadcrumbItem[];
-}
 
 const Breadcrumb = ({ items }: BreadcrumbProps) => {
   if (!items || items.length === 0) return null;
@@ -30,13 +22,6 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
     </div>
   );
 };
-
-interface PageHeaderProps {
-  title: string;
-  description?: string;
-  action?: React.ReactNode;
-  breadcrumb?: BreadcrumbItem[] | false;
-}
 
 const PageHeader = ({ title, description, action, breadcrumb }: PageHeaderProps) => {
   const defaultBreadcrumb: BreadcrumbItem[] = [

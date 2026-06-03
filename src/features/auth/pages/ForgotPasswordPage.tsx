@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Mail, ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { useForgotPasswordData } from '../hooks/useForgotPasswordData';
 import './ForgotPassword.css';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSent, setIsSent] = useState(false);
-  const [error, setError] = useState('');
+  const d = useForgotPasswordData();
 
   const isAuthenticated = localStorage.getItem('crm_token');
 
@@ -16,27 +13,7 @@ const ForgotPasswordPage = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!email) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setIsSent(true);
-  };
-
-  if (isSent) {
+  if (d.isSent) {
     return (
       <div className="auth-page">
         <div className="auth-visual-panel">
@@ -56,13 +33,13 @@ const ForgotPasswordPage = () => {
             </div>
             <h1>Check Your Email</h1>
             <p>We&apos;ve sent a password reset link to</p>
-            <p className="email-highlight">{email}</p>
+            <p className="email-highlight">{d.email}</p>
             <p className="resend-text">
               Didn&apos;t receive?{' '}
               <button 
                 type="button" 
                 className="resend-link"
-                onClick={() => setIsSent(false)}
+                onClick={() => d.setIsSent(false)}
               >
                 Resend
               </button>
@@ -105,8 +82,8 @@ const ForgotPasswordPage = () => {
             <p>Enter your email and we&apos;ll send you a reset link</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="auth-form">
-            {error && <div className="auth-error">{error}</div>}
+          <form onSubmit={d.handleSubmit} className="auth-form">
+            {d.error && <div className="auth-error">{d.error}</div>}
             
             <div className="form-group">
               <label>Email Address</label>
@@ -115,15 +92,15 @@ const ForgotPasswordPage = () => {
                 <input
                   type="email"
                   placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={d.email}
+                  onChange={(e) => d.setEmail(e.target.value)}
                   className="form-input"
                 />
               </div>
             </div>
 
-            <button type="submit" className="auth-btn" disabled={isLoading}>
-              {isLoading ? (
+            <button type="submit" className="auth-btn" disabled={d.isLoading}>
+              {d.isLoading ? (
                 <Loader2 size={18} className="spin" />
               ) : (
                 <>

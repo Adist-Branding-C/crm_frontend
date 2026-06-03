@@ -1,15 +1,8 @@
 import React from 'react';
 import './WidgetStyles.css';
+import { LEAD_SOURCE_DATA as data } from '../../constants/dashboard.constants';
 
 const LeadSourceWidget = () => {
-  const data = [
-    { label: 'Facebook', value: '08', color: '#e2e8f0' },
-    { label: 'Instagram', value: '50', color: '#cbd5e1' },
-    { label: 'Advertisement', value: '100', color: '#e2e8f0' },
-    { label: 'Sale', value: '08', color: '#cbd5e1' },
-    { label: 'Marketing', value: '50', color: '#e2e8f0' },
-    { label: 'Other', value: '100', color: '#cbd5e1' },
-  ];
 
   return (
     <div className="card widget-base">

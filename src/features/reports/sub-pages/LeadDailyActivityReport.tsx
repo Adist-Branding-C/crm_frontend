@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { dailyActivitySampleData } from '../constants';
+import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 
 const logTypes = [
   { id: '', name: 'All' },
@@ -80,8 +81,8 @@ const LeadDailyActivityReport = () => {
                 </select>
               </div>
               <div className="filter-actions">
-                <button className="btn btn-primary" onClick={() => { setSubmitted(true); setShowFilters(false); }}>Filter</button>
-                <button className="btn btn-secondary" onClick={() => { setFilters({ dateFrom: '', dateTo: '', agent: 1, logType: '' }); setSubmitted(false); }}>Clear</button>
+                <button className="btn btn-primary" onClick={() => { setSubmitted(true); setShowFilters(false); }}>{ACTION_FILTER}</button>
+                <button className="btn btn-secondary" onClick={() => { setFilters({ dateFrom: '', dateTo: '', agent: 1, logType: '' }); setSubmitted(false); }}>{ACTION_CLEAR}</button>
               </div>
             </div>
           </div>

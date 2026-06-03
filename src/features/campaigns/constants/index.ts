@@ -1,4 +1,30 @@
-import type { Campaign } from '../types';
+import type { Campaign, CampaignColumn } from '../types';
+
+export const CAMPAIGN_TYPE_OPTIONS = [
+  { value: 'Email', label: 'Email' },
+  { value: 'SMS', label: 'SMS' },
+  { value: 'WhatsApp', label: 'WhatsApp' },
+  { value: 'Social', label: 'Social' },
+];
+
+export const CAMPAIGN_CREATED_BY_OPTIONS = [
+  { value: 'Admin', label: 'Admin' },
+  { value: 'John Doe', label: 'John Doe' },
+  { value: 'Jane Smith', label: 'Jane Smith' },
+];
+
+export const COLUMNS: CampaignColumn[] = [
+  { key: 'checkbox', label: '' },
+  { key: 'slNo', label: 'Sl No' },
+  { key: 'name', label: 'Name', sortable: true },
+  { key: 'type', label: 'Type', sortable: true },
+  { key: 'totalTasks', label: 'Total Tasks', sortable: true },
+  { key: 'completedTasks', label: 'Completed Tasks', sortable: true },
+  { key: 'completedPercent', label: 'Completed %', sortable: true },
+  { key: 'createdBy', label: 'Created By', sortable: true },
+  { key: 'createdAt', label: 'Created At', sortable: true },
+  { key: 'action', label: 'Action', sortable: true },
+];
 
 export const SAMPLE_CAMPAIGNS: Campaign[] = [
   { id: 1, slNo: 1, name: 'Q1 Promo Campaign', type: 'Email', totalTasks: 150, completedTasks: 120, completedPercent: 80, createdBy: 'Admin', createdAt: '2024-01-10' },

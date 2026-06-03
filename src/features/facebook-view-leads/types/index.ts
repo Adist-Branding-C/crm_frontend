@@ -1,3 +1,5 @@
+import type { FacebookLeadStatus } from '../../../shared/constants/enums';
+
 export interface FacebookLead {
   id: number;
   workflowName: string;
@@ -9,16 +11,15 @@ export interface FacebookLead {
     email: string;
     campaign: string;
   };
-  status: string;
+  status: FacebookLeadStatus;
   leadStatus: string;
   createdAt: string;
   failureReason: string;
 }
 
-export interface Workflow {
-  id: number;
-  name: string;
-}
+import type { SelectOption } from '../../../shared/types/common';
+
+export type Workflow = SelectOption;
 
 export interface Filters {
   dateFrom: string;
@@ -34,4 +35,42 @@ export interface LeadStats {
   new: number;
   duplicate: number;
   pending: number;
+}
+
+export interface LeadsPaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  rowsPerPage: number;
+  onPageChange: (page: number) => void;
+}
+
+export interface ClearConfirmModalProps {
+  isOpen: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}
+
+export interface LeadsTableProps {
+  data: FacebookLead[];
+  onViewDetails: (lead: FacebookLead) => void;
+  rowsPerPage: number;
+  onRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onSearchChange: (value: string) => void;
+}
+
+export interface LeadDetailsModalProps {
+  isOpen: boolean;
+  lead: FacebookLead | null;
+  onClose: () => void;
+}
+
+export interface SummaryCardsProps {
+  stats: LeadStats;
+}
+
+export interface FilterCardProps {
+  filters: Filters;
+  onFilterChange: (field: keyof Filters, value: string) => void;
+  onClearClick: () => void;
 }

@@ -4,94 +4,17 @@ import {
   MoreHorizontal
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import '../../../pages/Enquiries.css';
-
-interface StatusChangeRow {
-  id: number;
-  agentName: string;
-  total: number;
-  [key: string]: string | number;
-}
-
-const statusChangeData: StatusChangeRow[] = [
-  { id: 1, agentName: 'John Doe', total: 45 },
-  { id: 2, agentName: 'Jane Smith', total: 38 },
-  { id: 3, agentName: 'Mike Johnson', total: 52 },
-  { id: 4, agentName: 'Sarah Williams', total: 28 },
-  { id: 5, agentName: 'Rahul Sharma', total: 35 },
-  { id: 6, agentName: 'Priya Patel', total: 22 },
-  { id: 7, agentName: 'Amit Kumar', total: 41 },
-  { id: 8, agentName: 'Sneha Reddy', total: 18 },
-  { id: 9, agentName: 'Vikram Singh', total: 29 },
-];
-
-interface Option {
-  value: string;
-  label: string;
-}
-
-const statusOptions: Option[] = [
-  { value: '', label: 'Select' },
-  { value: 'new', label: 'New' },
-  { value: 'connected', label: 'Connected' },
-  { value: 'interested', label: 'Interested' },
-  { value: 'registered', label: 'Registered' },
-  { value: 'notInterested', label: 'Not Interested' },
-  { value: 'justEnquiry', label: 'Just Enquiry - try after few days' },
-  { value: 'detailsShared', label: 'Details Shared' },
-  { value: 'webinar', label: 'Webinar Attended' },
-  { value: 'junkLead', label: 'Junk Lead' },
-  { value: 'dnd', label: 'DND - NA/ Off/ Invalid' },
-  { value: 'later', label: 'Later Admission' },
-];
-
-const staffOptions: Option[] = [
-  { value: '', label: 'Select Staff' },
-  { value: 'all', label: 'All' },
-  { value: '7774', label: 'Dr Expert Edulinks' },
-  { value: '7775', label: 'Fida Fathima' },
-  { value: '7776', label: 'Nandana K' },
-  { value: '7777', label: 'Rameesa' },
-  { value: '7778', label: 'Aysha' },
-  { value: '7779', label: 'Nesri' },
-  { value: '7789', label: 'Dilshana' },
-  { value: '8473', label: 'Rahmath' },
-  { value: '8640', label: 'Lana' },
-];
-
-const sourceOptions: Option[] = [
-  { value: '', label: 'Select Enquiry Source' },
-  { value: 'empty', label: 'Empty Source' },
-  { value: '21143', label: 'Incoming Call / whatsapp' },
-  { value: '21144', label: 'Meta Campaign' },
-  { value: '21153', label: 'From Doctor' },
-  { value: '21714', label: 'Website' },
-  { value: '21767', label: 'Meta' },
-  { value: '24424', label: 'Uzbekistan | Common | Kerala' },
-  { value: '24425', label: 'Uzbekistan | Common | GCC' },
-];
+import './ReportsSubPages.css';
+import {
+  statusChangeData, statusChangeStatusOptions as statusOptions,
+  statusChangeStaffOptions as staffOptions, statusChangeSourceOptions as sourceOptions,
+  statusChangeColumns as columns
+} from '../constants/matrixReports.data';
+import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ACTION_SUBMIT, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
+import type { LeadStatusChangeFilters } from '../types';
 
 const totalLeads = statusChangeData.reduce((sum, item) => sum + item.total, 0);
-
-interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-}
-
-const columns: Column[] = [
-  { key: 'checkbox', label: '' },
-  { key: 'action', label: 'Action' },
-  { key: 'agentName', label: 'Agent Name', sortable: true },
-  { key: 'total', label: 'Total', sortable: true },
-];
-
-interface Filters {
-  dateRange: { start: string; end: string };
-  status: string | string[];
-  agentId: string;
-  leadSource: string;
-}
 
 const LeadStatusChange: React.FC = () => {
   const navigate = useNavigate();
@@ -105,7 +28,7 @@ const LeadStatusChange: React.FC = () => {
   const [actionMenuPosition, setActionMenuPosition] = useState({ vertical: 'bottom', horizontal: 'right' });
   const actionMenuRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-  const [filters, setFiltersState] = useState<Filters>({
+  const [filters, setFiltersState] = useState<LeadStatusChangeFilters>({
     dateRange: { start: '', end: '' },
     status: [],
     agentId: '',
@@ -248,8 +171,8 @@ const LeadStatusChange: React.FC = () => {
             </div>
             <div className="filter-row">
               <div className="filter-actions">
-                <button type="submit" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary" onClick={clearFilters}>Clear</button>
+                <button type="submit" className="btn btn-primary">{ACTION_SUBMIT}</button>
+                <button type="button" className="btn btn-secondary" onClick={clearFilters}>{ACTION_CLEAR}</button>
               </div>
             </div>
           </form>
@@ -309,9 +232,7 @@ const LeadStatusChange: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
+            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

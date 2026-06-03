@@ -1,12 +1,9 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import './WidgetStyles.css';
+import { CAMPAIGNS_DATA as data } from '../../constants/dashboard.constants';
 
 const CampaignsWidget = () => {
-  const data = [
-    { name: 'Group A', value: 45, color: '#fbbf24' },
-    { name: 'Group B', value: 55, color: '#e0323e' },
-  ];
 
   return (
     <div className="card widget-base campaigns-widget">

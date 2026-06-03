@@ -1,272 +1,43 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MoreHorizontal, Edit2, Trash2, Plus, Search, X, Tag, Layers, FileText } from 'lucide-react';
+import { Tag, Layers, FileText } from 'lucide-react';
+import { useDealStagesData } from '../hooks/useDealStagesData';
+import AdminToolbar from '../../../shared/components/crud/AdminToolbar';
+import AdminTable from '../../../shared/components/crud/AdminTable';
+import AdminPagination from '../../../shared/components/crud/AdminPagination';
+import AdminFormDrawer from '../../../shared/components/crud/AdminFormDrawer';
+import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../shared/components/layout/PageHeader';
-import '../../../pages/DealSettings.css';
-
-const menuItems = [
-  { id: 'types', label: 'Type', link: '/user/deal-types', icon: Tag },
-  { id: 'stages', label: 'Status', link: '/user/deal-stages', icon: Layers },
-  { id: 'additional', label: 'Additional Fields', link: '/user/additional-fields-deal', icon: FileText },
-];
-
-interface DealStageItem {
-  id: number;
-  status: string;
-  stage: string;
-  priority: number;
-}
-
-const initialData: DealStageItem[] = [
-  { id: 1, status: 'Deal Lost', stage: 'Lose', priority: 1 },
-  { id: 2, status: 'Deal Win', stage: 'Win', priority: 2 },
-  { id: 3, status: 'Final Stage', stage: 'In Progress', priority: 3 },
-  { id: 4, status: 'In progress', stage: 'In Progress', priority: 4 },
-  { id: 5, status: 'Invoice', stage: 'In Progress', priority: 5 },
-  { id: 6, status: 'Create papers', stage: 'In Progress', priority: 6 },
-  { id: 7, status: 'New', stage: 'In Progress', priority: 7 },
-];
+import './DealStagesPage.css';
+import { formFields, columns } from '../constants';
 
 const DealStagesPage = () => {
-  const [data, setData] = useState(initialData);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<DealStageItem | null>(null);
-  const [deletingItem, setDeletingItem] = useState<DealStageItem | null>(null);
-  const [formData, setFormData] = useState({ status: '', stage: 'In Progress', priority: '' });
-
-  const filteredData = data.filter(item =>
-    item.status.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleAddClick = () => {
-    setShowForm(true);
-    setEditingItem(null);
-    setFormData({ status: '', stage: 'In Progress', priority: '' });
-  };
-
-  const handleEditClick = (item: DealStageItem) => {
-    setShowForm(true);
-    setEditingItem(item);
-    setFormData({ status: item.status, stage: item.stage, priority: String(item.priority) });
-    setDropdownOpen(null);
-  };
-
-  const handleDeleteClick = (item: DealStageItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  };
-
-  const handleConfirmDelete = () => {
-    setData(prev => prev.filter(item => item.id !== deletingItem!.id));
-    setDeletingItem(null);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingItem(null);
-    setFormData({ status: '', stage: 'In Progress', priority: '' });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingItem) {
-      setData(prev => prev.map(item =>
-        item.id === editingItem.id ? { ...item, ...formData, priority: Number(formData.priority) } : item
-      ));
-    } else {
-      setData(prev => [...prev, { id: Date.now(), status: formData.status, stage: formData.stage, priority: Number(formData.priority) }]);
-    }
-    handleCloseForm();
-  };
+  const d = useDealStagesData();
 
   return (
     <div className="deal-settings-page">
-      <PageHeader title="Deal Settings" description="Configure deal types, stages and custom fields" />
-
-      <div className="deal-settings-layout">
-        <div className="settings-menu">
-          {menuItems.map(item => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.id}
-                to={item.link}
-                className={`menu-item ${item.id === 'stages' ? 'active' : ''}`}
-              >
-                <Icon size={18} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="settings-content">
-          <div className="content-header">
-            <div className="header-left">
-              <div className="entries-select">
-                <label>Show
-                  <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                  </select>
-                  entries
-                </label>
-              </div>
-            </div>
-            <div className="header-right">
-              <div className="search-input">
-                <Search size={16} />
-                <input
-                  type="search"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <button className="btn btn-primary" onClick={handleAddClick}>
-                <Plus size={16} /> Deal Status
-              </button>
-            </div>
-          </div>
-
-          <div className="table-container">
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Sl No</th>
-                    <th>Deal Status</th>
-                    <th>Deal Stage</th>
-                    <th>Priority</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.slice(0, rowsPerPage).map((item, index) => (
-                    <tr key={item.id}>
-                      <td>{index + 1}</td>
-                      <td>{item.status}</td>
-                      <td>{item.stage}</td>
-                      <td>{item.priority}</td>
-                      <td>
-                        <div className="dropdown-container">
-                          <button
-                            className="dropdown-toggle"
-                            onClick={() => setDropdownOpen(dropdownOpen === item.id ? null : item.id)}
-                          >
-                            <MoreHorizontal size={16} />
-                          </button>
-                          {dropdownOpen === item.id && (
-                            <div className="dropdown-menu">
-                              <a className="dropdown-item" onClick={() => handleEditClick(item)}>
-                                <Edit2 size={14} /> Edit
-                              </a>
-                              <a className="dropdown-item" onClick={() => handleDeleteClick(item)}>
-                                <Trash2 size={14} /> Delete
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="table-footer">
-              <div className="table-info">
-                Showing 1 to {Math.min(rowsPerPage, filteredData.length)} of {filteredData.length} entries
-              </div>
-              <div className="pagination">
-                <button className="paginate-button disabled">Previous</button>
-                <button className="paginate-button current">1</button>
-                <button className="paginate-button disabled">Next</button>
-              </div>
-            </div>
-          </div>
+      <div className="settings-menu">
+        <Link to="/user/deal-types"><Tag size={16} /> Type</Link>
+        <Link to="/user/deal-stages"><Layers size={16} /> Status</Link>
+        <Link to="/user/additional-fields-deal"><FileText size={16} /> Additional Fields</Link>
+      </div>
+      <div className="settings-content">
+        <PageHeader title="Deal Stages" description="Manage deal pipeline stages" />
+        <div className="table-container">
+          <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Stage" />
+          <AdminTable data={d.paginatedData} columns={columns} startIndex={d.startIndex}
+            dropdownOpen={d.dropdownOpen} onToggleDropdown={d.setDropdownOpen}
+            onEdit={d.handleEdit} onDelete={d.handleDeleteClick} />
+          <AdminPagination currentPage={d.currentPage} totalPages={d.totalPages}
+            startIndex={d.startIndex} rowsPerPage={d.rowsPerPage} totalItems={d.filteredData.length}
+            onPageChange={d.setCurrentPage} onRowsPerPageChange={d.handleRowsPerPageChange}
+            prevNextOnly />
         </div>
       </div>
-
-      {showForm && (
-        <div className="drawer-overlay" onClick={handleCloseForm}>
-          <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
-            <div className="drawer-header">
-              <h5>{editingItem ? 'Edit Deal Status' : 'Add Deal Status'}</h5>
-              <button className="drawer-close" onClick={handleCloseForm}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="drawer-body">
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label>Deal Status <span className="text-danger">*</span></label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter deal status"
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Deal Stage</label>
-                  <select
-                    className="form-control"
-                    value={formData.stage}
-                    onChange={(e) => setFormData({ ...formData, stage: e.target.value })}
-                  >
-                    <option value="In Progress">In Progress</option>
-                    <option value="Win">Win</option>
-                    <option value="Lose">Lose</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Priority</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    placeholder="Enter priority"
-                    value={formData.priority}
-                    onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                  />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="btn btn-primary">
-                    {editingItem ? 'Update' : 'Save'}
-                  </button>
-                  <button type="button" className="btn btn-secondary" onClick={handleCloseForm}>Cancel</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {deletingItem && (
-        <div className="modal-overlay" onClick={() => setDeletingItem(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h5>Confirm Delete</h5>
-              <button className="modal-close" onClick={() => setDeletingItem(null)}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <p>Are you sure you want to delete <strong>{deletingItem.status}</strong>?</p>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-danger" onClick={handleConfirmDelete}>Confirm</button>
-              <button className="btn btn-secondary" onClick={() => setDeletingItem(null)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AdminFormDrawer isOpen={d.showForm} title="Stage" fields={formFields}
+        formData={d.formData} onChange={d.setFormData} onSave={d.handleSave} onClose={d.handleCloseForm}
+        isEditing={!!d.editingItem} />
+      <AdminDeleteModal isOpen={!!d.deletingItem} itemName={d.deletingItem?.status} itemType="stage"
+        onConfirm={d.handleConfirmDelete} onClose={() => d.setDeletingItem(null)} />
     </div>
   );
 };

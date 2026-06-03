@@ -1,3 +1,14 @@
+@import '../../../shared/styles/badges.css';
+@import '../../../shared/styles/filters.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/modals.css';
+@import '../../../shared/styles/status-badges.css';
+
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+}
+
 .task-stats-cards {
   display: flex;
   gap: 1rem;
@@ -154,21 +165,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.badge-status-completed {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-}
-
-.badge-status-pending {
-  background-color: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
-}
-
-.badge-status-overdue {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
 }
 
 @media (max-width: 768px) {

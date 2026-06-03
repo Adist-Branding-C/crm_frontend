@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Routes, Route, Navigate } from 'react-router-dom';
-import { Users, DollarSign, ListChecks, Phone, ClipboardList, Clock, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import LeadReportsLanding from '../sub-pages/LeadReportsLanding';
 import LeadDailyActivityReport from '../sub-pages/LeadDailyActivityReport';
@@ -29,22 +29,8 @@ import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
 import CheckinReport from '../sub-pages/CheckinReport';
 import AttendanceReport from '../sub-pages/AttendanceReport';
 import AttendanceProfile from '../sub-pages/AttendanceProfile';
-import '../../../pages/Reports.css';
-
-const callReportOptions = [
-  { id: 'ivr', title: 'IVR Call Report', description: 'Detailed analysis of IVR call patterns and metrics', path: '/reports/call/ivr' },
-  { id: 'dialer', title: 'GLDialer Call Report', description: 'Track dialer performance and call statistics', path: '/reports/call/dialer' },
-  { id: 'feedback', title: 'Call Feedback Report', description: 'Customer feedback and satisfaction metrics', path: '/reports/call/feedback' },
-];
-
-const reportCategories = [
-  { id: 'lead', title: 'Lead Reports', path: '/reports/lead', icon: Users },
-  { id: 'deal', title: 'Deal Reports', path: '/reports/deal', icon: DollarSign },
-  { id: 'task', title: 'Task Reports', path: '/reports/task', icon: ListChecks },
-  { id: 'call', title: 'Call Reports', path: '/reports/call', icon: Phone },
-  { id: 'checkin', title: 'Check-in & Check-out', path: '/reports/checkin', icon: ClipboardList },
-  { id: 'attendance', title: 'Attendance Report', path: '/reports/attendance', icon: Clock },
-];
+import { reportCategories, callReportOptions } from '../constants';
+import './ReportsPage.css';
 
 const ReportsPage = () => {
   return (

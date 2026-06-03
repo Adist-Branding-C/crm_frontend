@@ -31,3 +31,18 @@ export const SETTINGS_LABELS: Record<string, string> = {
 
 export const TIMEZONE_LABEL = 'Time Zone';
 export const CURRENCY_LABEL = 'Currency';
+
+export const DEFAULT_SETTINGS = {
+  globalSearch: true,
+  searchNumberMasking: false,
+  enableWebSound: true,
+  enableAttendanceStatus: true,
+  enableIvrAppNotification: false,
+  staffChangeEnquirySource: false,
+  timezone: 'Asia/Kolkata',
+  enableBranchFilter: true,
+  enableWebNotification: true,
+  enableWebIvrCalling: false,
+  currency: 'INR',
+  enableDeletedAgentFilter: false,
+};

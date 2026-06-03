@@ -1,3 +1,6 @@
+import type { SortConfig } from '../../../shared/types/sort';
+import type { DateRange } from '../../../shared/types/common';
+
 export interface FollowupLead {
   id: number;
   name: string;
@@ -17,10 +20,7 @@ export interface Filters {
   status: string;
   source: string;
   assignedTo: string;
-  dateRange: { start: string; end: string };
+  dateRange: DateRange;
 }
 
-export interface SortConfig {
-  key: string | null;
-  direction: 'asc' | 'desc';
-}
+export type { SortConfig };

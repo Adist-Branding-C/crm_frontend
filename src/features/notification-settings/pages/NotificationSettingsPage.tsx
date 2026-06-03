@@ -1,54 +1,22 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MoreHorizontal, Edit2, Search, X, Bell } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
-import type { NotificationItem } from '../types';
-import { menuItems, initialData } from '../constants';
-import '../../../pages/NotificationSettings.css';
-
-const isStatusActive = (status: string) => status.toLowerCase() === 'active';
+import { menuItems } from '../constants';
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
+import { useNotificationSettingsData } from '../hooks/useNotificationSettingsData';
+import './NotificationSettingsPage.css';
 
 const NotificationSettingsPage = () => {
-  const [data, setData] = useState<NotificationItem[]>(initialData);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-  const [showConfigModal, setShowConfigModal] = useState(false);
-  const [configuringItem, setConfiguringItem] = useState<NotificationItem | null>(null);
-  const [formData, setFormData] = useState<Record<string, string>>({});
-
-  const filteredData = data.filter(item =>
-    item.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.status.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleConfigClick = (item: NotificationItem) => {
-    setConfiguringItem(item);
-    setFormData({ ...item.config });
-    setShowConfigModal(true);
-    setDropdownOpen(null);
-  };
-
-  const handleToggleStatus = (item: NotificationItem) => {
-    setData(prev => prev.map(d =>
-      d.id === item.id ? { ...d, status: d.status === 'Active' ? 'Inactive' : 'Active' } : d
-    ));
-    setDropdownOpen(null);
-  };
-
-  const handleCloseModal = () => {
-    setShowConfigModal(false);
-    setConfiguringItem(null);
-    setFormData({});
-  };
-
-  const handleSaveConfig = (e: React.FormEvent) => {
-    e.preventDefault();
-    setData(prev => prev.map(item =>
-      item.id === configuringItem!.id ? { ...item, config: { ...formData } } : item
-    ));
-    handleCloseModal();
-  };
+  const {
+    searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
+    dropdownOpen, setDropdownOpen,
+    showConfigModal, configuringItem, formData, setFormData,
+    filteredData, isStatusActive,
+    handleConfigClick, handleToggleStatus,
+    handleCloseModal, handleSaveConfig,
+  } = useNotificationSettingsData();
 
   const getConfigFields = (type: string) => {
     switch (type) {
@@ -57,53 +25,28 @@ const NotificationSettingsPage = () => {
           <>
             <div className="form-group">
               <label>SMTP Host</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="smtp.example.com"
-                value={formData.smtpHost || ''}
-                onChange={(e) => setFormData({ ...formData, smtpHost: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="smtp.example.com"
+                value={formData.smtpHost || ''} onChange={(e) => setFormData({ ...formData, smtpHost: e.target.value })} />
             </div>
             <div className="form-group">
               <label>Port</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="587"
-                value={formData.port || ''}
-                onChange={(e) => setFormData({ ...formData, port: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="587"
+                value={formData.port || ''} onChange={(e) => setFormData({ ...formData, port: e.target.value })} />
             </div>
             <div className="form-group">
               <label>Username</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="username"
-                value={formData.username || ''}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="username"
+                value={formData.username || ''} onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
             </div>
             <div className="form-group">
               <label>Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="password"
-                value={formData.password || ''}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
+              <input type="password" className="form-control" placeholder="password"
+                value={formData.password || ''} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
             </div>
             <div className="form-group">
               <label>From Name</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Company Name"
-                value={formData.fromName || ''}
-                onChange={(e) => setFormData({ ...formData, fromName: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="Company Name"
+                value={formData.fromName || ''} onChange={(e) => setFormData({ ...formData, fromName: e.target.value })} />
             </div>
           </>
         );
@@ -112,33 +55,18 @@ const NotificationSettingsPage = () => {
           <>
             <div className="form-group">
               <label>Provider</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Twilio / MSG91 / etc"
-                value={formData.provider || ''}
-                onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="Twilio / MSG91 / etc"
+                value={formData.provider || ''} onChange={(e) => setFormData({ ...formData, provider: e.target.value })} />
             </div>
             <div className="form-group">
               <label>API Key</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="API Key"
-                value={formData.apiKey || ''}
-                onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="API Key"
+                value={formData.apiKey || ''} onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })} />
             </div>
             <div className="form-group">
               <label>Sender ID</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="SENDER"
-                value={formData.senderId || ''}
-                onChange={(e) => setFormData({ ...formData, senderId: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="SENDER"
+                value={formData.senderId || ''} onChange={(e) => setFormData({ ...formData, senderId: e.target.value })} />
             </div>
           </>
         );
@@ -147,33 +75,18 @@ const NotificationSettingsPage = () => {
           <>
             <div className="form-group">
               <label>Bot Token</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v"
-                value={formData.botToken || ''}
-                onChange={(e) => setFormData({ ...formData, botToken: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v"
+                value={formData.botToken || ''} onChange={(e) => setFormData({ ...formData, botToken: e.target.value })} />
             </div>
             <div className="form-group">
               <label>Chat ID</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="123456789"
-                value={formData.chatId || ''}
-                onChange={(e) => setFormData({ ...formData, chatId: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="123456789"
+                value={formData.chatId || ''} onChange={(e) => setFormData({ ...formData, chatId: e.target.value })} />
             </div>
             <div className="form-group">
               <label>Webhook URL</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="https://your-webhook.com"
-                value={formData.webhookUrl || ''}
-                onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })}
-              />
+              <input type="text" className="form-control" placeholder="https://your-webhook.com"
+                value={formData.webhookUrl || ''} onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })} />
             </div>
           </>
         );
@@ -189,11 +102,7 @@ const NotificationSettingsPage = () => {
       <div className="notification-settings-layout">
         <div className="settings-menu">
           {menuItems.map(item => (
-            <Link
-              key={item.id}
-              to={item.link}
-              className="menu-item active"
-            >
+            <Link key={item.id} to={item.link} className="menu-item active">
               <Bell size={18} />
               {item.label}
             </Link>
@@ -206,10 +115,7 @@ const NotificationSettingsPage = () => {
               <div className="entries-select">
                 <label>Show
                   <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                    {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                   entries
                 </label>
@@ -218,12 +124,8 @@ const NotificationSettingsPage = () => {
             <div className="header-right">
               <div className="search-input">
                 <Search size={16} />
-                <input
-                  type="search"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <input type="search" placeholder={ACTION_SEARCH} value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)} />
               </div>
             </div>
           </div>
@@ -251,10 +153,8 @@ const NotificationSettingsPage = () => {
                       </td>
                       <td>
                         <div className="dropdown-container">
-                          <button
-                            className="dropdown-toggle"
-                            onClick={() => setDropdownOpen(dropdownOpen === item.id ? null : item.id)}
-                          >
+                          <button className="dropdown-toggle"
+                            onClick={() => setDropdownOpen(dropdownOpen === item.id ? null : item.id)}>
                             <MoreHorizontal size={16} />
                           </button>
                           {dropdownOpen === item.id && (
@@ -294,17 +194,13 @@ const NotificationSettingsPage = () => {
           <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
               <h5>Configure {configuringItem.type}</h5>
-              <button className="drawer-close" onClick={handleCloseModal}>
-                <X size={20} />
-              </button>
+              <button className="drawer-close" onClick={handleCloseModal}><X size={20} /></button>
             </div>
             <div className="drawer-body">
               <form onSubmit={handleSaveConfig}>
                 {getConfigFields(configuringItem.type)}
                 <div className="form-actions">
-                  <button type="submit" className="btn btn-primary">
-                    Save Configuration
-                  </button>
+                  <button type="submit" className="btn btn-primary">Save Configuration</button>
                   <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancel</button>
                 </div>
               </form>

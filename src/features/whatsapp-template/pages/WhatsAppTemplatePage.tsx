@@ -1,64 +1,32 @@
-import { useState } from 'react';
 import { MoreHorizontal, Edit2, Trash2, Plus, Search, X } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
-import '../../../pages/Account.css';
-
-interface WhatsAppTemplateItem {
-  id: number;
-  name: string;
-  content: string;
-  status: string;
-}
-
-const templateData: WhatsAppTemplateItem[] = [
-  { id: 1, name: 'Welcome Message', content: 'Hello {{name}}, welcome to our service!', status: 'Active' },
-];
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
+import { useWhatsAppTemplateData } from '../hooks/useWhatsAppTemplateData';
+import './WhatsAppTemplatePage.css';
 
 const WhatsAppTemplatePage = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<WhatsAppTemplateItem | null>(null);
-  const [deletingItem, setDeletingItem] = useState<WhatsAppTemplateItem | null>(null);
-  const [formData, setFormData] = useState({ name: '', content: '' });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-
-  const filteredData = templateData.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddClick = () => {
-    setShowForm(true);
-    setEditingItem(null);
-    setFormData({ name: '', content: '' });
-  };
-
-  const handleEditClick = (item: WhatsAppTemplateItem) => {
-    setShowForm(true);
-    setEditingItem(item);
-    setFormData({ name: item.name, content: item.content });
-    setDropdownOpen(null);
-  };
-
-  const handleDeleteClick = (item: WhatsAppTemplateItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  };
-
-  const handleConfirmDelete = () => {
-    setDeletingItem(null);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingItem(null);
-  };
+  const {
+    showForm,
+    editingItem,
+    deletingItem,
+    setDeletingItem,
+    formData,
+    searchQuery,
+    setSearchQuery,
+    rowsPerPage,
+    setRowsPerPage,
+    dropdownOpen,
+    setDropdownOpen,
+    filteredData,
+    handleInputChange,
+    handleAddClick,
+    handleEditClick,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleCloseForm,
+  } = useWhatsAppTemplateData();
 
   return (
     <div className="account-page">
@@ -81,10 +49,7 @@ const WhatsAppTemplatePage = () => {
               <div className="entries-select">
                 <label>Show
                   <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                    {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                   entries
                 </label>
@@ -93,7 +58,7 @@ const WhatsAppTemplatePage = () => {
                 <Search size={16} />
                 <input
                   type="search"
-                  placeholder="Search"
+                  placeholder={ACTION_SEARCH}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />

@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Users, Shield, Building2, Clock, FileText, MapPinned, Mail, MessageSquare, User, Lock, Briefcase, Plus, Minus } from 'lucide-react';
-
-interface TabItem {
-  id: string;
-  title: string;
-  link: string;
-  icon: React.ComponentType<{ size?: number }>;
-}
+import type { TabItem, SettingsTabsProps } from '../types/layout';
 
 const defaultTabs: TabItem[] = [
   { id: 'agent', title: 'Agent', link: '/account', icon: Users },
@@ -23,10 +17,6 @@ const defaultTabs: TabItem[] = [
   { id: 'profile', title: 'Profile', link: '/account/profile', icon: User },
   { id: 'password', title: 'Change Password', link: '/account/password', icon: Lock },
 ];
-
-interface SettingsTabsProps {
-  items?: TabItem[];
-}
 
 const SettingsTabs = ({ items = defaultTabs }: SettingsTabsProps) => {
   const location = useLocation();

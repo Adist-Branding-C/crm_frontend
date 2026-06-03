@@ -1,3 +1,6 @@
+import type { DateRange } from '../../../shared/types/common';
+import type { TabItem } from '../../../shared/types/layout';
+
 export interface TaskItem {
   id: number;
   slNo: number;
@@ -21,12 +24,7 @@ export interface TaskFilters {
   assignedBy: string;
   assignedTo: string;
   category: string;
-  dateRange: { start: string; end: string };
+  dateRange: DateRange;
 }
 
-export interface TaskSubMenuItem {
-  id: string;
-  title: string;
-  link: string;
-  icon: React.ComponentType<{ size?: number }>;
-}
+export type TaskSubMenuItem = TabItem;

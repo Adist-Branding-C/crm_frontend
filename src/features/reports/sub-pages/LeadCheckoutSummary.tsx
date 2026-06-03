@@ -3,64 +3,13 @@ import {
   Download, Filter, Search, ChevronDown, ChevronLeft, ChevronRight,
   MoreHorizontal
 } from 'lucide-react';
-import '../../../pages/Enquiries.css';
-
-interface CheckoutRow {
-  id: number;
-  shop: string;
-  agent: string;
-  note: string;
-  date: string;
-  [key: string]: string | number;
-}
-
-const checkoutData: CheckoutRow[] = [
-  { id: 1, shop: 'Shop A', agent: 'John Doe', note: 'Checkout completed', date: '2024-01-25' },
-  { id: 2, shop: 'Shop B', agent: 'Jane Smith', note: 'All tasks finished', date: '2024-01-25' },
-  { id: 3, shop: 'Shop A', agent: 'Mike Johnson', note: 'Pending work tomorrow', date: '2024-01-24' },
-  { id: 4, shop: 'Shop C', agent: 'Sarah Williams', note: 'Early checkout', date: '2024-01-24' },
-  { id: 5, shop: 'Shop B', agent: 'John Doe', note: 'Completed', date: '2024-01-23' },
-  { id: 6, shop: 'Shop A', agent: 'Priya Patel', note: 'Done', date: '2024-01-23' },
-  { id: 7, shop: 'Shop C', agent: 'Amit Kumar', note: 'Work in progress', date: '2024-01-22' },
-  { id: 8, shop: 'Shop B', agent: 'Sneha Reddy', note: 'Finished', date: '2024-01-22' },
-  { id: 9, shop: 'Shop A', agent: 'Vikram Singh', note: 'All done', date: '2024-01-21' },
-  { id: 10, shop: 'Shop C', agent: 'Ananya Gupta', note: 'Checkout', date: '2024-01-21' },
-];
-
-interface Option {
-  value: string;
-  label: string;
-}
-
-const staffOptions: Option[] = [
-  { value: '', label: 'Select Staff' },
-  { value: 'all', label: 'All Staff' },
-  { value: 'john', label: 'John Doe' },
-  { value: 'jane', label: 'Jane Smith' },
-  { value: 'mike', label: 'Mike Johnson' },
-  { value: 'sarah', label: 'Sarah Williams' },
-];
-
-interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-}
-
-const columns: Column[] = [
-  { key: 'checkbox', label: '' },
-  { key: 'action', label: 'Action' },
-  { key: 'shop', label: 'Shop', sortable: true },
-  { key: 'agent', label: 'Agent', sortable: true },
-  { key: 'note', label: 'Note', sortable: true },
-  { key: 'date', label: 'Date', sortable: true },
-];
-
-interface Filters {
-  fromDate: string;
-  toDate: string;
-  staffId: string;
-}
+import './ReportsSubPages.css';
+import {
+  checkoutData, checkoutStaffOptions as staffOptions, checkoutColumns as columns
+} from '../constants/matrixReports.data';
+import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ACTION_SUBMIT, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
+import type { LeadCheckoutSummaryFilters } from '../types';
 
 const LeadCheckoutSummary: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +22,7 @@ const LeadCheckoutSummary: React.FC = () => {
   const [actionMenuPosition, setActionMenuPosition] = useState({ vertical: 'bottom', horizontal: 'right' });
   const actionMenuRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-  const [filters, setFiltersState] = useState<Filters>({
+  const [filters, setFiltersState] = useState<LeadCheckoutSummaryFilters>({
     fromDate: '',
     toDate: '',
     staffId: ''
@@ -205,8 +154,8 @@ const LeadCheckoutSummary: React.FC = () => {
             </div>
             <div className="filter-row">
               <div className="filter-actions">
-                <button type="submit" className="btn btn-primary">Submit</button>
-                <button type="button" className="btn btn-secondary" onClick={clearFilters}>Clear</button>
+                <button type="submit" className="btn btn-primary">{ACTION_SUBMIT}</button>
+                <button type="button" className="btn btn-secondary" onClick={clearFilters}>{ACTION_CLEAR}</button>
               </div>
             </div>
           </form>
@@ -261,9 +210,7 @@ const LeadCheckoutSummary: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
+            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

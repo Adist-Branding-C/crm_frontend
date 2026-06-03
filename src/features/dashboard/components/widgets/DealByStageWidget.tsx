@@ -1,14 +1,8 @@
 import React from 'react';
 import './WidgetStyles.css';
+import { DEAL_BY_STAGE_DATA as data } from '../../constants/dashboard.constants';
 
 const DealByStageWidget = () => {
-  const data = [
-    { label: 'New', value: '08', color: '#f472b6' },
-    { label: 'Follow up', value: '50', color: '#3b82f6' },
-    { label: 'Partially interested', value: '100', color: '#fbbf24' },
-    { label: 'Interested', value: '08', color: '#10b981' },
-    // Add a few more to match image if needed
-  ];
 
   return (
     <div className="card widget-base">

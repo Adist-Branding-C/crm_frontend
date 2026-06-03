@@ -1,0 +1,75 @@
+/* Settings Layout: sidebar menu + content area pattern */
+.settings-menu {
+  width: 220px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.5rem;
+  height: fit-content;
+}
+
+.settings-menu .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.settings-menu .menu-item:hover {
+  background: #f3f4f6;
+}
+
+.settings-menu .menu-item.active {
+  background: #f3f4f6;
+  font-weight: 600;
+  color: #111827;
+}
+
+.settings-content {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.content-header .header-left {
+  display: flex;
+  align-items: center;
+}
+
+.content-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .settings-menu {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .settings-menu .menu-item {
+    width: auto;
+  }
+}

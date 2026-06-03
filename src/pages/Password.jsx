@@ -4,6 +4,7 @@ import { Eye, EyeOff, Lock, KeyRound, CheckCircle, XCircle } from 'lucide-react'
 import PageHeader from '../components/PageHeader';
 import './Account.css';
 import SettingsTabs from '../components/SettingsTabs';
+import { PASSWORD_UPPERCASE_REGEX, PASSWORD_DIGIT_REGEX } from '../shared/constants/regex';
 
 const subMenuItems = [
   { id: 'agent', title: 'Agent', link: '/account' },
@@ -44,7 +45,7 @@ const PasswordPage = () => {
     if (!password) return { strength: 0, text: '', color: '' };
     if (password.length < 6) return { strength: 1, text: 'Weak', color: '#ef4444' };
     if (password.length < 8) return { strength: 2, text: 'Fair', color: '#f59e0b' };
-    if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
+    if (password.length >= 8 && PASSWORD_UPPERCASE_REGEX.test(password) && PASSWORD_DIGIT_REGEX.test(password)) {
       return { strength: 4, text: 'Strong', color: '#22c55e' };
     }
     return { strength: 3, text: 'Good', color: '#3b82f6' };

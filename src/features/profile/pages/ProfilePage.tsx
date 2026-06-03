@@ -1,35 +1,11 @@
-import { useState } from 'react';
 import { Edit2, X, Save, CheckCircle, Zap, Calendar, RefreshCw } from 'lucide-react';
+import { useProfileData } from '../hooks/useProfileData';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
-import '../../../pages/Account.css';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: 'DR EXPERT EDULINKS',
-    email: 'info@drexpertedu.com',
-    mobile: '919656349000',
-    address: '',
-    gstNumber: '',
-  });
-
-  const profileData = {
-    customerId: 'C5C8CD46',
-    dateOfRegistration: '2025-11-05 14:16:52',
-    accountStatus: 'Active',
-    firstLetter: 'D'
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowForm(false);
-  };
+  const d = useProfileData();
 
   return (
     <div className="account-page">
@@ -113,31 +89,31 @@ const ProfilePage = () => {
               <div className="profile-sidebar-card">
                 <div className="user-avatar-section">
                   <div className="profile-avatar" style={{ background: '#6167e6' }}>
-                    {profileData.firstLetter}
+                    {d.profileData.firstLetter}
                   </div>
                 </div>
                 <div className="profile-name-section">
-                  <h5>{formData.name}</h5>
+                  <h5>{d.formData.name}</h5>
                 </div>
                 <div className="contact-info-section">
                   <div className="section-header">
                     <h5>Contact info</h5>
-                    <button className="edit-icon" onClick={() => setShowForm(true)}>
+                    <button className="edit-icon" onClick={() => d.setShowForm(true)}>
                       <Edit2 size={14} />
                     </button>
                   </div>
                   <ul className="contact-list">
                     <li>
                       <i className="fa fa-map-marker"></i>
-                      {formData.address || 'Not Available'}
+                      {d.formData.address || 'Not Available'}
                     </li>
                     <li>
                       <i className="fa fa-mobile"></i>
-                      {formData.mobile}
+                      {d.formData.mobile}
                     </li>
                     <li>
                       <i className="fa fa-envelope-o"></i>
-                      {formData.email}
+                      {d.formData.email}
                     </li>
                   </ul>
                 </div>
@@ -147,7 +123,7 @@ const ProfilePage = () => {
               <div className="profile-details-card">
                 <div className="details-header">
                   <h4>My Profile Details</h4>
-                  <button className="btn btn-sm btn-primary" onClick={() => setShowForm(true)}>
+                  <button className="btn btn-sm btn-primary" onClick={() => d.setShowForm(true)}>
                     <Edit2 size={14} /> Edit
                   </button>
                 </div>
@@ -157,7 +133,7 @@ const ProfilePage = () => {
                       <p className="detail-label">Customer Id</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{profileData.customerId}</p>
+                      <p className="detail-value">{d.profileData.customerId}</p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -165,7 +141,7 @@ const ProfilePage = () => {
                       <p className="detail-label">Name</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{formData.name}</p>
+                      <p className="detail-value">{d.formData.name}</p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -173,7 +149,7 @@ const ProfilePage = () => {
                       <p className="detail-label">Email</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{formData.email}</p>
+                      <p className="detail-value">{d.formData.email}</p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -181,7 +157,7 @@ const ProfilePage = () => {
                       <p className="detail-label">Mobile Number</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{formData.mobile}</p>
+                      <p className="detail-value">{d.formData.mobile}</p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -189,7 +165,7 @@ const ProfilePage = () => {
                       <p className="detail-label">Address</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{formData.address || '-'}</p>
+                      <p className="detail-value">{d.formData.address || '-'}</p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -197,7 +173,7 @@ const ProfilePage = () => {
                       <p className="detail-label">GST Number</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{formData.gstNumber || '-'}</p>
+                      <p className="detail-value">{d.formData.gstNumber || '-'}</p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -205,7 +181,7 @@ const ProfilePage = () => {
                       <p className="detail-label">Date of Registration</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{profileData.dateOfRegistration}</p>
+                      <p className="detail-value">{d.profileData.dateOfRegistration}</p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -213,7 +189,7 @@ const ProfilePage = () => {
                       <p className="detail-label">Account Status</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{profileData.accountStatus}</p>
+                      <p className="detail-value">{d.profileData.accountStatus}</p>
                     </div>
                   </div>
                 </div>
@@ -223,42 +199,42 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {showForm && (
-        <div className="drawer-overlay" onClick={() => setShowForm(false)}>
+      {d.showForm && (
+        <div className="drawer-overlay" onClick={() => d.setShowForm(false)}>
           <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
               <h5>Edit Profile</h5>
-              <button className="drawer-close" onClick={() => setShowForm(false)}>
+              <button className="drawer-close" onClick={() => d.setShowForm(false)}>
                 <X size={20} />
               </button>
             </div>
             <div className="drawer-body">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={d.handleSubmit}>
                 <div className="form-group">
                   <label>Name <span className="text-danger">*</span></label>
-                  <input type="text" name="name" className="form-control" value={formData.name} onChange={handleInputChange} />
+                  <input type="text" name="name" className="form-control" value={d.formData.name} onChange={d.handleInputChange} />
                 </div>
                 <div className="form-group">
                   <label>Email <span className="text-danger">*</span></label>
-                  <input type="email" name="email" className="form-control" value={formData.email} onChange={handleInputChange} />
+                  <input type="email" name="email" className="form-control" value={d.formData.email} onChange={d.handleInputChange} />
                 </div>
                 <div className="form-group">
                   <label>Mobile Number</label>
-                  <input type="tel" name="mobile" className="form-control" value={formData.mobile} onChange={handleInputChange} />
+                  <input type="tel" name="mobile" className="form-control" value={d.formData.mobile} onChange={d.handleInputChange} />
                 </div>
                 <div className="form-group">
                   <label>Address</label>
-                  <textarea name="address" className="form-control" rows={3} value={formData.address} onChange={handleInputChange} />
+                  <textarea name="address" className="form-control" rows={3} value={d.formData.address} onChange={d.handleInputChange} />
                 </div>
                 <div className="form-group">
                   <label>GST Number</label>
-                  <input type="text" name="gstNumber" className="form-control" value={formData.gstNumber} onChange={handleInputChange} />
+                  <input type="text" name="gstNumber" className="form-control" value={d.formData.gstNumber} onChange={d.handleInputChange} />
                 </div>
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary">
                     <Save size={16} /> Save Changes
                   </button>
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+                  <button type="button" className="btn btn-secondary" onClick={() => d.setShowForm(false)}>Cancel</button>
                 </div>
               </form>
             </div>

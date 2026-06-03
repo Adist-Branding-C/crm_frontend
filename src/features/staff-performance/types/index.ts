@@ -29,3 +29,16 @@ export interface Activity {
   time: string;
   status: string;
 }
+
+export interface StaffDetailViewProps {
+  staff: StaffMember;
+}
+
+export interface ActivityIconProps {
+  type: string;
+}
+
+export interface KpiCardProps {
+  title: string;
+  value: string | number;
+}

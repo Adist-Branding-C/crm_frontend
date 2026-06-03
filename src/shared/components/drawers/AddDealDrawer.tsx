@@ -1,36 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, Search } from 'lucide-react';
+import type { SampleLead, SampleAgent, DealFormData, AddDealDrawerProps } from '../../types/drawers';
 import './AddLeadDrawer.css';
-
-interface SampleLead {
-  id: number;
-  name: string;
-  phone: string;
-}
-
-interface SampleAgent {
-  id: number;
-  name: string;
-}
-
-interface DealFormData {
-  dealName: string;
-  lead: string;
-  mobile: string;
-  amount: string;
-  status: string;
-  type: string;
-  startDate: string;
-  endDate: string;
-  assignAgent: string;
-}
-
-interface AddDealDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: DealFormData) => void;
-  deal?: DealFormData | null;
-}
 
 const sampleLeads: SampleLead[] = [
   { id: 1, name: 'Rahul Sharma', phone: '9876543210' },

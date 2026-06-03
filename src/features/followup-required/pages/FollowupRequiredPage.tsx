@@ -1,89 +1,51 @@
-import React, { useState, useMemo } from 'react';
 import { Search, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import LeadDetailDrawer from '../../../components/LeadDetailDrawer';
-import { SAMPLE_LEADS, INITIAL_FILTERS, COLUMNS } from '../constants';
-import type { FollowupLead, Filters, SortConfig } from '../types';
-import '../../../pages/Enquiries.css';
+import { COLUMNS } from '../constants';
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING } from '../../../shared/constants/statuses';
+import { ACTION_VIEW, ACTION_EDIT, ACTION_DELETE, ACTION_FILTER, ACTION_CLEAR, ACTION_SEARCH } from '../../../shared/constants/actionLabels';
+import { LABEL_ROWS_PER_PAGE } from '../../../shared/constants/labels';
+import { LEAD_TYPE_OPTIONS } from '../../../shared/constants/leadTypes';
+import { SOURCE_OPTIONS } from '../../../shared/constants/sources';
+import { MOCK_STAFF_OPTIONS } from '../../../shared/constants/mockStaff';
+import { useFollowupData } from '../hooks/useFollowupData';
+import './FollowupRequiredPage.css';
 
 const FollowupRequiredPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
-  const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [showActionsDropdown, setShowActionsDropdown] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<FollowupLead | null>(null);
-  const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
-
-  const filteredData = useMemo(() => {
-    let data = [...SAMPLE_LEADS];
-
-    if (searchQuery) {
-      data = data.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.phone.includes(searchQuery) ||
-        item.assignedTo.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (filters.type) data = data.filter(item => item.type === filters.type);
-    if (filters.status) data = data.filter(item => item.status === filters.status);
-    if (filters.source) data = data.filter(item => item.source === filters.source);
-    if (filters.assignedTo) data = data.filter(item => item.assignedTo === filters.assignedTo);
-
-    if (sortConfig.key) {
-      data.sort((a, b) => {
-        const aVal = a[sortConfig.key as keyof FollowupLead];
-        const bVal = b[sortConfig.key as keyof FollowupLead];
-        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return data;
-  }, [searchQuery, filters, sortConfig]);
-
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-  const handleSort = (key: string) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
-    }));
-  };
-
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedRows(paginatedData.map(item => item.id));
-    } else {
-      setSelectedRows([]);
-    }
-  };
-
-  const handleSelectRow = (id: number) => {
-    setSelectedRows(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
-
-  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-  };
-
-  const clearFilters = () => {
-    setFilters(INITIAL_FILTERS);
-    setShowFilters(false);
-  };
+  const {
+    searchQuery,
+    setSearchQuery,
+    showFilters,
+    setShowFilters,
+    selectedRows,
+    currentPage,
+    setCurrentPage,
+    rowsPerPage,
+    sortConfig,
+    actionMenuOpen,
+    setActionMenuOpen,
+    isDrawerOpen,
+    showSortDropdown,
+    setShowSortDropdown,
+    showActionsDropdown,
+    setShowActionsDropdown,
+    selectedLead,
+    filters,
+    setFilters,
+    totalPages,
+    startIndex,
+    paginatedData,
+    filteredData,
+    handleSort,
+    handleSelectAll,
+    handleSelectRow,
+    handleRowsPerPageChange,
+    clearFilters,
+    handleViewLead,
+    handleCloseDrawer,
+  } = useFollowupData();
 
   return (
     <PageContainer>
@@ -95,7 +57,7 @@ const FollowupRequiredPage = () => {
             <Search size={16} className="search-icon" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder={ACTION_SEARCH}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
@@ -103,7 +65,7 @@ const FollowupRequiredPage = () => {
           </div>
           <button className="btn btn-secondary" onClick={() => setShowFilters(!showFilters)}>
             <Filter size={16} />
-            Filter
+            {ACTION_FILTER}
             <ChevronDown size={14} className={showFilters ? 'rotate' : ''} />
           </button>
           <div className="dropdown-container">
@@ -135,7 +97,7 @@ const FollowupRequiredPage = () => {
                 <button onClick={() => setShowActionsDropdown(false)}>Bulk Update</button>
                 <button onClick={() => setShowActionsDropdown(false)}>Update Status</button>
                 <button onClick={() => setShowActionsDropdown(false)}>Assign Agent</button>
-                <button onClick={() => setShowActionsDropdown(false)}>Delete</button>
+                <button onClick={() => setShowActionsDropdown(false)}>{ACTION_DELETE}</button>
               </div>
             )}
           </div>
@@ -149,37 +111,30 @@ const FollowupRequiredPage = () => {
               <label>Type</label>
               <select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}>
                 <option value="">All</option>
-                <option value="Hot Lead">Hot Lead</option>
-                <option value="Cold Lead">Cold Lead</option>
-                <option value="Warm Lead">Warm Lead</option>
+                {LEAD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
             <div className="filter-group">
               <label>Status</label>
               <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
                 <option value="">All</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-                <option value="Pending">Pending</option>
+                <option value={STATUS_ACTIVE}>{STATUS_ACTIVE}</option>
+                <option value={STATUS_INACTIVE}>{STATUS_INACTIVE}</option>
+                <option value={STATUS_PENDING}>{STATUS_PENDING}</option>
               </select>
             </div>
             <div className="filter-group">
               <label>Source</label>
               <select value={filters.source} onChange={(e) => setFilters({ ...filters, source: e.target.value })}>
                 <option value="">All</option>
-                <option value="Website">Website</option>
-                <option value="Referral">Referral</option>
-                <option value="Social Media">Social Media</option>
-                <option value="Email Campaign">Email Campaign</option>
+                {SOURCE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
             <div className="filter-group">
               <label>Assigned To</label>
               <select value={filters.assignedTo} onChange={(e) => setFilters({ ...filters, assignedTo: e.target.value })}>
                 <option value="">All</option>
-                <option value="John Doe">John Doe</option>
-                <option value="Jane Smith">Jane Smith</option>
-                <option value="Mike Johnson">Mike Johnson</option>
+                {MOCK_STAFF_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
           </div>
@@ -193,8 +148,8 @@ const FollowupRequiredPage = () => {
               </div>
             </div>
             <div className="filter-actions">
-              <button className="btn btn-primary" onClick={() => setShowFilters(false)}>Filter</button>
-              <button className="btn btn-secondary" onClick={clearFilters}>Clear</button>
+              <button className="btn btn-primary" onClick={() => setShowFilters(false)}>{ACTION_FILTER}</button>
+              <button className="btn btn-secondary" onClick={clearFilters}>{ACTION_CLEAR}</button>
             </div>
           </div>
         </div>
@@ -231,16 +186,16 @@ const FollowupRequiredPage = () => {
                     </button>
                     {actionMenuOpen === row.id && (
                       <div className="action-dropdown">
-                        <button onClick={() => { setSelectedLead(row); setIsDrawerOpen(true); setActionMenuOpen(null); }}>
-                          <Eye size={14} />View
+                        <button onClick={() => handleViewLead(row)}>
+                          <Eye size={14} />{ACTION_VIEW}
                         </button>
-                        <button><Edit2 size={14} />Edit</button>
-                        <button className="delete"><Trash2 size={14} />Delete</button>
+                        <button><Edit2 size={14} />{ACTION_EDIT}</button>
+                        <button className="delete"><Trash2 size={14} />{ACTION_DELETE}</button>
                       </div>
                     )}
                   </div>
                 </td>
-                <td className="lead-name-cell" onClick={() => { setSelectedLead(row); setIsDrawerOpen(true); }}>{row.name}</td>
+                <td className="lead-name-cell" onClick={() => handleViewLead(row)}>{row.name}</td>
                 <td>{row.phone}</td>
                 <td>{row.assignedTo}</td>
                 <td>{row.purpose}</td>
@@ -258,12 +213,9 @@ const FollowupRequiredPage = () => {
 
       <div className="pagination-container">
         <div className="pagination-left">
-          <span className="rows-label">Rows per page:</span>
+          <span className="rows-label">{LABEL_ROWS_PER_PAGE}</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
+            {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">
             Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}
@@ -281,7 +233,7 @@ const FollowupRequiredPage = () => {
           <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)}>Last</button>
         </div>
       </div>
-      <LeadDetailDrawer lead={selectedLead} isOpen={!!selectedLead && isDrawerOpen} onClose={() => { setIsDrawerOpen(false); setSelectedLead(null); }} />
+      <LeadDetailDrawer lead={selectedLead} isOpen={!!selectedLead && isDrawerOpen} onClose={handleCloseDrawer} />
     </PageContainer>
   );
 };

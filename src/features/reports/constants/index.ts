@@ -185,6 +185,43 @@ export const attendanceData: AttendanceRow[] = [
   { id: 5, agent: 'David Brown', phone: '917025769004', workingDays: 19, leave: 4, duration: '152h 30m' },
 ];
 
+export const REPT_LEAD_TYPE_OPTIONS = [
+  { value: 'hot', label: 'Hot Lead' },
+  { value: 'warm', label: 'Warm Lead' },
+  { value: 'cold', label: 'Cold Lead' },
+];
+
+export const REPT_PURPOSE_OPTIONS = [
+  { value: 'sales', label: 'Sales' },
+  { value: 'support', label: 'Support' },
+  { value: 'demo', label: 'Demo' },
+];
+
+export const REPT_SOURCE_OPTIONS = [
+  { value: 'website', label: 'Website' },
+  { value: 'referral', label: 'Referral' },
+  { value: 'social', label: 'Social Media' },
+];
+
+export const REPT_DEAL_STAGE_OPTIONS = [
+  { value: 'win', label: 'Win' },
+  { value: 'lose', label: 'Lose' },
+  { value: 'inProgress', label: 'In Progress' },
+];
+
+export const REPT_DEAL_TYPE_OPTIONS = [
+  { value: 'hot', label: 'Hot Deal' },
+  { value: 'warm', label: 'Warm Deal' },
+  { value: 'cold', label: 'Cold Deal' },
+];
+
+export const REPT_SORT_OPTIONS = [
+  { value: 'createdDate', label: 'Created Date' },
+  { value: 'updatedDate', label: 'Updated Date' },
+  { value: 'dealAmountHigh', label: 'Deal Amount (High-Low)' },
+  { value: 'dealAmountLow', label: 'Deal Amount (Low-High)' },
+];
+
 export const deletedDealData = [
   { id: 1, dealName: 'TechCorp Deal', deletedBy: 'John Doe', leadName: 'Rahul Sharma', mobile: '9876543210', amount: 50000, status: 'Lost', type: 'Hot Deal', startDate: '2024-01-15', endDate: '2024-02-15', agent: 'John Doe', createdBy: 'Admin', createdAt: '2024-01-10', deletedAt: '2024-01-20', lostReason: 'Not Interested' },
   { id: 2, dealName: 'Startup Deal', deletedBy: 'Jane Smith', leadName: 'Priya Patel', mobile: '9876543211', amount: 25000, status: 'Lost', type: 'Cold Deal', startDate: '2024-01-14', endDate: '2024-02-14', agent: 'Jane Smith', createdBy: 'Admin', createdAt: '2024-01-09', deletedAt: '2024-01-19', lostReason: 'Price High' },

@@ -1,91 +1,19 @@
 import React, { useState, useRef } from 'react';
 import {
   Download, Filter, Search, ChevronDown, ChevronLeft, ChevronRight,
-  Users, UserCheck, UserPlus, UserMinus, MoreHorizontal
+  MoreHorizontal
 } from 'lucide-react';
-import '../../../pages/Enquiries.css';
-
-interface StatusRow {
-  id: number;
-  agentName: string;
-  initials: string;
-  total: number;
-  new: number;
-  connected: number;
-  interested: number;
-  registered: number;
-  notInterested: number;
-  justEnquiry: number;
-  detailsShared: number;
-  webinarAttended: number;
-  lost: number;
-  dnd: number;
-  later: number;
-  [key: string]: string | number;
-}
-
-const statusData: StatusRow[] = [
-  { id: 1, agentName: 'John Doe', initials: 'JD', total: 156, new: 25, connected: 45, interested: 32, registered: 18, notInterested: 12, justEnquiry: 8, detailsShared: 22, webinarAttended: 5, lost: 8, dnd: 3, later: 4 },
-  { id: 2, agentName: 'Jane Smith', initials: 'JS', total: 142, new: 18, connected: 38, interested: 28, registered: 15, notInterested: 10, justEnquiry: 6, detailsShared: 18, webinarAttended: 4, lost: 6, dnd: 2, later: 3 },
-  { id: 3, agentName: 'Mike Johnson', initials: 'MJ', total: 198, new: 35, connected: 52, interested: 42, registered: 25, notInterested: 15, justEnquiry: 12, detailsShared: 28, webinarAttended: 8, lost: 12, dnd: 4, later: 5 },
-  { id: 4, agentName: 'Sarah Williams', initials: 'SW', total: 124, new: 20, connected: 35, interested: 25, registered: 14, notInterested: 8, justEnquiry: 5, detailsShared: 15, webinarAttended: 3, lost: 5, dnd: 2, later: 2 },
-  { id: 5, agentName: 'Rahul Sharma', initials: 'RS', total: 167, new: 28, connected: 48, interested: 35, registered: 20, notInterested: 14, justEnquiry: 9, detailsShared: 20, webinarAttended: 6, lost: 9, dnd: 3, later: 4 },
-  { id: 6, agentName: 'Priya Patel', initials: 'PP', total: 145, new: 22, connected: 40, interested: 30, registered: 17, notInterested: 11, justEnquiry: 7, detailsShared: 19, webinarAttended: 4, lost: 7, dnd: 2, later: 3 },
-  { id: 7, agentName: 'Amit Kumar', initials: 'AK', total: 189, new: 32, connected: 50, interested: 38, registered: 22, notInterested: 13, justEnquiry: 11, detailsShared: 25, webinarAttended: 7, lost: 11, dnd: 4, later: 4 },
-  { id: 8, agentName: 'Sneha Reddy', initials: 'SR', total: 132, new: 19, connected: 36, interested: 26, registered: 15, notInterested: 9, justEnquiry: 6, detailsShared: 16, webinarAttended: 4, lost: 6, dnd: 2, later: 3 },
-  { id: 9, agentName: 'Vikram Singh', initials: 'VS', total: 156, new: 24, connected: 42, interested: 31, registered: 18, notInterested: 12, justEnquiry: 8, detailsShared: 18, webinarAttended: 5, lost: 8, dnd: 3, later: 3 },
-  { id: 10, agentName: 'Ananya Gupta', initials: 'AG', total: 178, new: 30, connected: 48, interested: 36, registered: 21, notInterested: 13, justEnquiry: 10, detailsShared: 23, webinarAttended: 6, lost: 10, dnd: 3, later: 4 },
-];
-
-interface StatsCard {
-  key: string;
-  label: string;
-  value: number;
-  icon: React.ComponentType<{ size?: number }>;
-  color: string;
-  change: string;
-}
-
-const statsCards: StatsCard[] = [
-  { key: 'total', label: 'Total Leads', value: 1587, icon: Users, color: '#3b82f6', change: '+12%' },
-  { key: 'interested', label: 'Interested Leads', value: 323, icon: UserCheck, color: '#10b981', change: '+8%' },
-  { key: 'registered', label: 'Registered Leads', value: 185, icon: UserPlus, color: '#8b5cf6', change: '+15%' },
-  { key: 'notInterested', label: 'Not Interested', value: 117, icon: UserMinus, color: '#ef4444', change: '-5%' },
-];
-
-interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-}
-
-const columns: Column[] = [
-  { key: 'checkbox', label: '' },
-  { key: 'action', label: 'Action' },
-  { key: 'agentName', label: 'Agent Name', sortable: true },
-  { key: 'total', label: 'Total', sortable: true },
-  { key: 'new', label: 'New', sortable: true },
-  { key: 'connected', label: 'Connected', sortable: true },
-  { key: 'interested', label: 'Interested', sortable: true },
-  { key: 'registered', label: 'Registered', sortable: true },
-  { key: 'notInterested', label: 'Not Interested', sortable: true },
-  { key: 'justEnquiry', label: 'Just Enquiry', sortable: true },
-  { key: 'detailsShared', label: 'Details Shared', sortable: true },
-  { key: 'webinarAttended', label: 'Webinar', sortable: true },
-  { key: 'lost', label: 'Lost', sortable: true },
-  { key: 'dnd', label: 'DND', sortable: true },
-  { key: 'later', label: 'Later', sortable: true },
-];
-
-interface Filters {
-  dateRange: { start: string; end: string };
-  sortBy: string;
-  staff: string;
-  leadType: string;
-  purpose: string;
-  source: string;
-  status?: string;
-}
+import './ReportsSubPages.css';
+import {
+  statusWiseData as statusData, statusWiseStatsCards as statsCards,
+  statusWiseColumns as columns
+} from '../constants/matrixReports.data';
+import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
+import { LEAD_STATUS_OPTIONS } from '../../../shared/constants/leadStatuses';
+import { REPT_LEAD_TYPE_OPTIONS, REPT_PURPOSE_OPTIONS, REPT_SOURCE_OPTIONS } from '../constants';
+import { MOCK_STAFF_SHORT } from '../../../shared/constants/mockStaff';
+import type { LeadStatusWiseFilters } from '../types';
 
 const LeadStatusWise: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,7 +26,7 @@ const LeadStatusWise: React.FC = () => {
   const [actionMenuPosition, setActionMenuPosition] = useState({ vertical: 'bottom', horizontal: 'right' });
   const actionMenuRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-  const [filters, setFilters] = useState<Filters>({
+  const [filters, setFilters] = useState<LeadStatusWiseFilters>({
     dateRange: { start: '', end: '' },
     sortBy: '',
     staff: '',
@@ -236,56 +164,44 @@ const LeadStatusWise: React.FC = () => {
             </div>
             <div className="filter-group">
               <label>Status</label>
-              <select value={filters.status} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, status: e.target.value })}>
-                <option value="">Select</option>
-                <option value="new">New</option>
-                <option value="connected">Connected</option>
-                <option value="interested">Interested</option>
-                <option value="registered">Registered</option>
-                <option value="notInterested">Not Interested</option>
-              </select>
+                <select value={filters.status} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, status: e.target.value })}>
+                  <option value="">Select</option>
+                  {LEAD_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
             </div>
             <div className="filter-group">
               <label>Select Staff</label>
-              <select value={filters.staff} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, staff: e.target.value })}>
-                <option value="">All Staff</option>
-                <option value="john">John Doe</option>
-                <option value="jane">Jane Smith</option>
-                <option value="mike">Mike Johnson</option>
-              </select>
+                <select value={filters.staff} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, staff: e.target.value })}>
+                  <option value="">All Staff</option>
+                  {MOCK_STAFF_SHORT.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
             </div>
           </div>
           <div className="filter-row">
             <div className="filter-group">
               <label>Lead Type</label>
-              <select value={filters.leadType} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, leadType: e.target.value })}>
-                <option value="">Select</option>
-                <option value="hot">Hot Lead</option>
-                <option value="warm">Warm Lead</option>
-                <option value="cold">Cold Lead</option>
-              </select>
+                <select value={filters.leadType} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, leadType: e.target.value })}>
+                  <option value="">Select</option>
+                  {REPT_LEAD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
             </div>
             <div className="filter-group">
               <label>Purpose</label>
-              <select value={filters.purpose} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, purpose: e.target.value })}>
-                <option value="">Select</option>
-                <option value="sales">Sales</option>
-                <option value="support">Support</option>
-                <option value="demo">Demo</option>
-              </select>
+                <select value={filters.purpose} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, purpose: e.target.value })}>
+                  <option value="">Select</option>
+                  {REPT_PURPOSE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
             </div>
             <div className="filter-group">
               <label>Source</label>
-              <select value={filters.source} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, source: e.target.value })}>
-                <option value="">Select</option>
-                <option value="website">Website</option>
-                <option value="referral">Referral</option>
-                <option value="social">Social Media</option>
-              </select>
+                <select value={filters.source} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, source: e.target.value })}>
+                  <option value="">Select</option>
+                  {REPT_SOURCE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
             </div>
             <div className="filter-actions">
-              <button className="btn btn-primary">Filter</button>
-              <button className="btn btn-secondary" onClick={clearFilters}>Clear</button>
+              <button className="btn btn-primary">{ACTION_FILTER}</button>
+              <button className="btn btn-secondary" onClick={clearFilters}>{ACTION_CLEAR}</button>
             </div>
           </div>
         </div>
@@ -353,9 +269,7 @@ const LeadStatusWise: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
+            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

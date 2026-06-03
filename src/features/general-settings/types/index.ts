@@ -13,7 +13,6 @@ export interface GeneralSettings {
   enableDeletedAgentFilter: boolean;
 }
 
-export interface Option {
-  value: string;
-  label: string;
-}
+import type { LabelValuePair } from '../../../shared/types/common';
+
+export type Option = LabelValuePair;

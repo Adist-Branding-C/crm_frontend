@@ -1,22 +1,8 @@
 import React from 'react';
 import './ActivitiesWidget.css';
+import { ACTIVITIES_DATA as activities } from '../../constants/dashboard.constants';
 
 const ActivitiesWidget = () => {
-  const activities = [
-    {
-      id: 1,
-      title: 'Farah left a Note',
-      time: 'Jan 14 at 2:40 PM',
-      highlight: false
-    },
-    {
-      id: 2,
-      title: 'Getlead demo created a Call task',
-      time: 'Jan 14 at 2:40 PM',
-      highlight: true
-    }
-    // Can add more if scrollable
-  ];
 
   return (
     <div className="card widget-base activities-widget">

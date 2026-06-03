@@ -1,3 +1,4 @@
+import { CouponDiscountType } from '../../../shared/constants/enums';
 import type { MockPlan, MockPricing, CouponsMap, Addon } from '../types';
 
 export const mockPlan: MockPlan = {
@@ -19,9 +20,9 @@ export const mockPricing: MockPricing = {
 };
 
 export const validCoupons: CouponsMap = {
-  'SAVE10': { discount: 10, type: 'percent' },
-  'WELCOME': { discount: 500, type: 'fixed' },
-  'ANNUAL20': { discount: 20, type: 'percent' },
+  'SAVE10': { discount: 10, type: CouponDiscountType.PERCENT },
+  'WELCOME': { discount: 500, type: CouponDiscountType.FIXED },
+  'ANNUAL20': { discount: 20, type: CouponDiscountType.PERCENT },
 };
 
 export const addonsList: Addon[] = [

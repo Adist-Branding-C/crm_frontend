@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, FileText, Phone, UserCircle, Settings, Users, CreditCard, Shield, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout } from 'lucide-react';
+import type { NotificationIconInfo, TopNavProps } from '../../types/layout';
 import './TopNav.css';
 
 const addOptions = [
@@ -19,11 +20,6 @@ const initialNotifications = [
   { id: 6, type: 'system', title: 'System update', message: 'CRM dashboard will be under maintenance tonight', time: '2 days ago', isRead: true, link: '/settings' },
   { id: 7, type: 'deal', title: 'Deal won', message: 'Website Development deal has been marked as won', time: '3 days ago', isRead: true, link: '/user/deals' },
 ];
-
-interface NotificationIconInfo {
-  icon: React.ComponentType<{ size?: number }>;
-  color: string;
-}
 
 const notificationIcons: Record<string, NotificationIconInfo> = {
   lead: { icon: User, color: '#3b82f6' },
@@ -58,10 +54,6 @@ const searchResults = [
   { id: 7, category: 'enquiry', name: 'John Doe', phone: '9876543212', description: 'Enquiry - Demo' },
   { id: 8, category: 'call', name: 'Call Log - Priya', phone: 'Call-001', description: 'Incoming Call' },
 ];
-
-interface TopNavProps {
-  onOpenDrawer: (type: string) => void;
-}
 
 const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();

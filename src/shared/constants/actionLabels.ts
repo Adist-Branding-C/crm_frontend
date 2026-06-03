@@ -1,0 +1,12 @@
+export const ACTION_EDIT = 'Edit';
+export const ACTION_DELETE = 'Delete';
+export const ACTION_SAVE = 'Save';
+export const ACTION_UPDATE = 'Update';
+export const ACTION_CANCEL = 'Cancel';
+export const ACTION_ADD = 'Add';
+export const ACTION_SEARCH = 'Search';
+export const ACTION_CONFIRM = 'Confirm';
+export const ACTION_VIEW = 'View';
+export const ACTION_FILTER = 'Filter';
+export const ACTION_CLEAR = 'Clear';
+export const ACTION_SUBMIT = 'Submit';

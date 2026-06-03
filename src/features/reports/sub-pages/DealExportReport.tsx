@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import '../../../pages/Reports.css';
+import './ReportsSubPages.css';
+import { DEAL_DATE_FILTER_OPTIONS } from '../../../shared/constants/dateFilterOptions';
+import { REPT_DEAL_STAGE_OPTIONS, REPT_DEAL_TYPE_OPTIONS, REPT_SORT_OPTIONS } from '../constants';
+import { MOCK_STAFF_SHORT } from '../../../shared/constants/mockStaff';
 
 const DealExportReport = () => {
   const [filters, setFilters] = useState({
@@ -61,13 +64,13 @@ const DealExportReport = () => {
               <div className="filter-group">
                 <label>Date By</label>
                 <select value={filters.dateBy} onChange={(e) => setFilters({ ...filters, dateBy: e.target.value })}>
-                  <option value="">Select</option><option value="created">Created Date</option><option value="updated">Updated Date</option><option value="start">Start Date</option><option value="end">End Date</option>
+                  <option value="">Select</option>{DEAL_DATE_FILTER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
               <div className="filter-group">
                 <label>Filter By Date</label>
                 <select value={filters.filterByDate} onChange={(e) => setFilters({ ...filters, filterByDate: e.target.value })}>
-                  <option value="">Select</option><option value="created">Created Date</option><option value="updated">Updated Date</option>
+                  <option value="">Select</option>{DEAL_DATE_FILTER_OPTIONS.slice(0, 2).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
             </div>
@@ -87,13 +90,13 @@ const DealExportReport = () => {
               <div className="filter-group">
                 <label>Deal Stage</label>
                 <select value={filters.dealStage} onChange={(e) => setFilters({ ...filters, dealStage: e.target.value })}>
-                  <option value="">Select</option><option value="win">Win</option><option value="lose">Lose</option><option value="inProgress">In Progress</option>
+                  <option value="">Select</option>{REPT_DEAL_STAGE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
               <div className="filter-group">
                 <label>Deal Type</label>
                 <select value={filters.dealType} onChange={(e) => setFilters({ ...filters, dealType: e.target.value })}>
-                  <option value="">Select</option><option value="hot">Hot Deal</option><option value="warm">Warm Deal</option><option value="cold">Cold Deal</option>
+                  <option value="">Select</option>{REPT_DEAL_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
             </div>
@@ -105,19 +108,19 @@ const DealExportReport = () => {
               <div className="filter-group">
                 <label>Agent</label>
                 <select value={filters.agent} onChange={(e) => setFilters({ ...filters, agent: e.target.value })}>
-                  <option value="">Select</option><option value="john">John Doe</option><option value="jane">Jane Smith</option><option value="mike">Mike Johnson</option>
+                  <option value="">Select</option>{MOCK_STAFF_SHORT.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
               <div className="filter-group">
                 <label>Created By</label>
                 <select value={filters.createdBy} onChange={(e) => setFilters({ ...filters, createdBy: e.target.value })}>
-                  <option value="">Select</option><option value="john">John Doe</option><option value="jane">Jane Smith</option><option value="mike">Mike Johnson</option>
+                  <option value="">Select</option>{MOCK_STAFF_SHORT.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
               <div className="filter-group">
                 <label>Completed By</label>
                 <select value={filters.completedBy} onChange={(e) => setFilters({ ...filters, completedBy: e.target.value })}>
-                  <option value="">Select</option><option value="john">John Doe</option><option value="jane">Jane Smith</option><option value="mike">Mike Johnson</option>
+                  <option value="">Select</option>{MOCK_STAFF_SHORT.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
             </div>
@@ -128,8 +131,7 @@ const DealExportReport = () => {
             <div className="filter-row">
               <div className="filter-group">
                 <select value={filters.sortBy} onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}>
-                  <option value="createdDate">Created Date</option><option value="updatedDate">Updated Date</option>
-                  <option value="dealAmountHigh">Deal Amount (High-Low)</option><option value="dealAmountLow">Deal Amount (Low-High)</option>
+                  {REPT_SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
             </div>

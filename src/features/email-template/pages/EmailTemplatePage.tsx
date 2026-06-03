@@ -1,68 +1,19 @@
-import { useState } from 'react';
 import { MoreHorizontal, Edit2, Trash2, Plus, Search, X } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
-import '../../../pages/Account.css';
-
-interface EmailTemplateItem {
-  id: number;
-  title: string;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-  isDefault: boolean;
-  status: string;
-  htmlCode?: string;
-}
-
-const emailTemplateData: EmailTemplateItem[] = [
-  { id: 1, title: 'Welcome Email', createdBy: 'Admin', createdAt: '2024-01-01', updatedAt: '2024-01-01', isDefault: true, status: 'Active' },
-];
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
+import { useEmailTemplateData } from '../hooks/useEmailTemplateData';
+import './EmailTemplatePage.css';
 
 const EmailTemplatePage = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<EmailTemplateItem | null>(null);
-  const [deletingItem, setDeletingItem] = useState<EmailTemplateItem | null>(null);
-  const [formData, setFormData] = useState({ title: '', htmlCode: '' });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-
-  const filteredData = emailTemplateData.filter(item =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddClick = () => {
-    setShowForm(true);
-    setEditingItem(null);
-    setFormData({ title: '', htmlCode: '' });
-  };
-
-  const handleEditClick = (item: EmailTemplateItem) => {
-    setShowForm(true);
-    setEditingItem(item);
-    setFormData({ title: item.title, htmlCode: item.htmlCode || '' });
-    setDropdownOpen(null);
-  };
-
-  const handleDeleteClick = (item: EmailTemplateItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  };
-
-  const handleConfirmDelete = () => {
-    setDeletingItem(null);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingItem(null);
-  };
+  const {
+    showForm, editingItem, deletingItem, formData, searchQuery, rowsPerPage, dropdownOpen,
+    setFormData, setSearchQuery, setRowsPerPage, setDropdownOpen, setDeletingItem,
+    filteredData,
+    handleInputChange, handleAddClick, handleEditClick, handleDeleteClick,
+    handleConfirmDelete, handleCloseForm,
+  } = useEmailTemplateData();
 
   return (
     <div className="account-page">
@@ -85,10 +36,7 @@ const EmailTemplatePage = () => {
               <div className="entries-select">
                 <label>Show
                   <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                    {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                   entries
                 </label>
@@ -97,7 +45,7 @@ const EmailTemplatePage = () => {
                 <Search size={16} />
                 <input
                   type="search"
-                  placeholder="Search"
+                  placeholder={ACTION_SEARCH}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />

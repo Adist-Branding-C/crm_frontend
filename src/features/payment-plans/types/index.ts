@@ -1,6 +1,8 @@
+import type { BillingCycle, CouponDiscountType } from '../../../shared/constants/enums';
+
 export interface Coupon {
   discount: number;
-  type: 'percent' | 'fixed';
+  type: CouponDiscountType;
 }
 
 export interface Addon {
@@ -11,7 +13,7 @@ export interface Addon {
 
 export interface PlanConfig {
   users: number;
-  billingCycle: 'monthly' | 'yearly';
+  billingCycle: BillingCycle;
   addons: string[];
 }
 

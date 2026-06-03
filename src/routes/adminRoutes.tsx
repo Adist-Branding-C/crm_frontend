@@ -1,0 +1,31 @@
+import React from 'react';
+import { Route } from 'react-router-dom';
+import AccountPage from '../pages/Account';
+import RolesPage from '../features/roles/pages/RolesPage';
+import DepartmentPage from '../features/department/pages/DepartmentPage';
+import WorkModePage from '../features/work-mode/pages/WorkModePage';
+import CheckoutNotePage from '../features/checkout-note/pages/CheckoutNotePage';
+import DesignationPage from '../features/designation/pages/DesignationPage';
+import BranchPage from '../features/branch/pages/BranchPage';
+import MailConfigPage from '../features/mail-config/pages/MailConfigPage';
+import EmailTemplatePage from '../features/email-template/pages/EmailTemplatePage';
+import ProfilePage from '../features/profile/pages/ProfilePage';
+import PasswordPage from '../features/password/pages/PasswordPage';
+import WhatsAppTemplatePage from '../features/whatsapp-template/pages/WhatsAppTemplatePage';
+
+export default (
+  <>
+    <Route path="account" element={<AccountPage />} />
+    <Route path="account/roles" element={<RolesPage />} />
+    <Route path="account/department" element={<DepartmentPage />} />
+    <Route path="account/workmode" element={<WorkModePage />} />
+    <Route path="account/checkout" element={<CheckoutNotePage />} />
+    <Route path="account/designation" element={<DesignationPage />} />
+    <Route path="account/branch" element={<BranchPage />} />
+    <Route path="account/mailconfig" element={<MailConfigPage />} />
+    <Route path="account/emailtemplate" element={<EmailTemplatePage />} />
+    <Route path="account/profile" element={<ProfilePage />} />
+    <Route path="account/password" element={<PasswordPage />} />
+    <Route path="account/whatsapptemplate" element={<WhatsAppTemplatePage />} />
+  </>
+);

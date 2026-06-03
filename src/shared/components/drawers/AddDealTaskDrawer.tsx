@@ -1,40 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, Search } from 'lucide-react';
+import type { SampleDeal, SampleAgent, TaskFormData, AddDealTaskDrawerProps } from '../../types/drawers';
 import './AddLeadDrawer.css';
-
-interface SampleDeal {
-  id: number;
-  name: string;
-  dealId: string;
-  amount: number;
-}
-
-interface SampleAgent {
-  id: number;
-  name: string;
-}
-
-interface TaskFormData {
-  title: string;
-  category: string;
-  deal: string;
-  dealId: string;
-  amount: string;
-  description: string;
-  scheduledDate: string;
-  scheduledTime: string;
-  assignedBy: string;
-  assignedTo: string;
-  priority: string;
-  status: string;
-}
-
-interface AddDealTaskDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: TaskFormData) => void;
-  task?: TaskFormData | null;
-}
 
 const sampleDeals: SampleDeal[] = [
   { id: 1, name: 'Website Development', dealId: 'DL001', amount: 150000 },

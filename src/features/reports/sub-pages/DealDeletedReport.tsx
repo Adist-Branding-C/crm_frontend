@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, Download, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { deletedDealData } from '../constants';
+import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
 
 const DealDeletedReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,7 +114,7 @@ const DealDeletedReport = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="rows-select">
-            <option value={5}>5</option><option value={10}>10</option><option value={25}>25</option>
+            {ROWS_OPTIONS_5_10_25.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

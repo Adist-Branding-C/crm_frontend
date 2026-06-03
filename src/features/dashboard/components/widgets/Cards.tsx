@@ -1,18 +1,7 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import type { StatCardProps, KpiCardProps } from '../../types';
 import './Cards.css';
-
-interface StatCardProps {
-  title: string;
-  value: string;
-}
-
-interface KpiCardProps {
-  title: string;
-  value: string;
-  isPrimary?: boolean;
-  isHighlight?: boolean;
-}
 
 export const StatCard = ({ title, value }: StatCardProps) => {
   return (

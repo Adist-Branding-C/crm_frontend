@@ -4,58 +4,12 @@ import {
   Eye, Plus, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import '../../../pages/Enquiries.css';
+import './ReportsSubPages.css';
+import { importHistoryData, importHistoryColumns as columns } from '../constants/historyReports.data';
+import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import type { LeadImportHistoryModalProps } from '../types';
 
-interface ImportRow {
-  id: number;
-  dateTime: string;
-  fileName: string;
-  total: number;
-  duplicate: number;
-  invalid: number;
-  imported: number;
-  status: string;
-  [key: string]: string | number;
-}
-
-const importHistoryData: ImportRow[] = [
-  { id: 1, dateTime: '2024-01-25 10:30 AM', fileName: 'contacts_import_25Jan', total: 500, duplicate: 12, invalid: 5, imported: 483, status: 'completed' },
-  { id: 2, dateTime: '2024-01-25 09:15 AM', fileName: 'leads_import_24Jan', total: 250, duplicate: 8, invalid: 2, imported: 240, status: 'completed' },
-  { id: 3, dateTime: '2024-01-24 04:45 PM', fileName: 'bulk_contacts', total: 1000, duplicate: 45, invalid: 20, imported: 935, status: 'completed' },
-  { id: 4, dateTime: '2024-01-24 02:20 PM', fileName: 'jan24_import', total: 150, duplicate: 3, invalid: 1, imported: 146, status: 'failed' },
-  { id: 5, dateTime: '2024-01-23 11:00 AM', fileName: 'contacts_jan23', total: 300, duplicate: 15, invalid: 8, imported: 277, status: 'completed' },
-  { id: 6, dateTime: '2024-01-23 10:00 AM', fileName: 'new_leads_import', total: 75, duplicate: 2, invalid: 0, imported: 73, status: 'generating' },
-  { id: 7, dateTime: '2024-01-22 05:30 PM', fileName: 'weekly_import', total: 450, duplicate: 20, invalid: 10, imported: 420, status: 'completed' },
-  { id: 8, dateTime: '2024-01-22 03:15 PM', fileName: 'contacts_backup', total: 600, duplicate: 30, invalid: 15, imported: 555, status: 'completed' },
-  { id: 9, dateTime: '2024-01-21 09:45 AM', fileName: 'jan21_import', total: 200, duplicate: 5, invalid: 3, imported: 192, status: 'failed' },
-  { id: 10, dateTime: '2024-01-20 04:00 PM', fileName: 'contact_list', total: 350, duplicate: 18, invalid: 7, imported: 325, status: 'completed' },
-];
-
-interface Column {
-  key: string;
-  label: string;
-  sortable?: boolean;
-}
-
-const columns: Column[] = [
-  { key: 'checkbox', label: '' },
-  { key: 'action', label: 'Action' },
-  { key: ' SL No', label: '#', sortable: false },
-  { key: 'dateTime', label: 'Date and Time', sortable: true },
-  { key: 'fileName', label: 'File Name', sortable: true },
-  { key: 'total', label: 'Total Records', sortable: true },
-  { key: 'duplicate', label: 'Duplicate Records', sortable: true },
-  { key: 'invalid', label: 'Invalid Records', sortable: true },
-  { key: 'imported', label: 'Imported Records', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-];
-
-interface ImportModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose }) => {
+const ImportModal: React.FC<LeadImportHistoryModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
@@ -244,9 +198,7 @@ const LeadImportHistory: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
+            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

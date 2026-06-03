@@ -1,112 +1,35 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MoreHorizontal, Edit2, Trash2, Plus, Search, X, Tag, Layers, FileText } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, Plus, Search, X } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
-import '../../../pages/DealSettings.css';
-
-const menuItems = [
-  { id: 'types', label: 'Type', link: '/user/deal-types', icon: Tag },
-  { id: 'stages', label: 'Status', link: '/user/deal-stages', icon: Layers },
-  { id: 'additional', label: 'Additional Fields', link: '/user/additional-fields-deal', icon: FileText },
-];
-
-interface DealAdditionalField {
-  id: number;
-  field: string;
-  type: string;
-  inFilter: boolean;
-  inList: boolean;
-  required: boolean;
-}
-
-const initialData: DealAdditionalField[] = [];
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
+import { menuItems } from '../constants';
+import { FIELD_TYPE_OPTIONS } from '../../../shared/constants/fieldTypes';
+import { useDealAdditionalFieldsData } from '../hooks/useDealAdditionalFieldsData';
+import './DealAdditionalFieldsPage.css';
 
 const DealAdditionalFieldsPage = () => {
-  const [data, setData] = useState(initialData);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<DealAdditionalField | null>(null);
-  const [deletingItem, setDeletingItem] = useState<DealAdditionalField | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    fieldName: '',
-    fieldType: '',
-    inFilter: false,
-    inList: false,
-    required: false,
-  });
-
-  const filteredData = data.filter(item =>
-    item.field?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleAddClick = () => {
-    setShowForm(true);
-    setEditingItem(null);
-    setFormData({ fieldName: '', fieldType: '', inFilter: false, inList: false, required: false });
-  };
-
-  const handleEditClick = (item: DealAdditionalField) => {
-    setShowForm(true);
-    setEditingItem(item);
-    setFormData({
-      fieldName: item.field,
-      fieldType: item.type,
-      inFilter: item.inFilter,
-      inList: item.inList,
-      required: item.required,
-    });
-    setDropdownOpen(null);
-  };
-
-  const handleDeleteClick = (item: DealAdditionalField) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  };
-
-  const handleConfirmDelete = () => {
-    setData(prev => prev.filter(item => item.id !== deletingItem!.id));
-    setDeletingItem(null);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingItem(null);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const target = e.target;
-    const name = target.name;
-    const value = target instanceof HTMLInputElement && target.type === 'checkbox' ? target.checked : target.value;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingItem) {
-      setData(prev => prev.map(item =>
-        item.id === editingItem.id ? {
-          ...item,
-          field: formData.fieldName,
-          type: formData.fieldType,
-          inFilter: formData.inFilter,
-          inList: formData.inList,
-          required: formData.required,
-        } : item
-      ));
-    } else {
-      setData(prev => [...prev, {
-        id: Date.now(),
-        field: formData.fieldName,
-        type: formData.fieldType,
-        inFilter: formData.inFilter,
-        inList: formData.inList,
-        required: formData.required,
-      }]);
-    }
-    handleCloseForm();
-  };
+  const {
+    searchQuery,
+    setSearchQuery,
+    rowsPerPage,
+    setRowsPerPage,
+    showForm,
+    editingItem,
+    deletingItem,
+    setDeletingItem,
+    dropdownOpen,
+    setDropdownOpen,
+    formData,
+    filteredData,
+    handleAddClick,
+    handleEditClick,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleCloseForm,
+    handleInputChange,
+    handleSubmit,
+  } = useDealAdditionalFieldsData();
 
   return (
     <div className="deal-settings-page">
@@ -187,12 +110,7 @@ const DealAdditionalFieldsPage = () => {
                         onChange={handleInputChange}
                       >
                         <option value="">Select Type</option>
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="date">Date</option>
-                        <option value="datetime">DateTime</option>
-                        <option value="dropdown">Dropdown</option>
-                        <option value="checkbox">Checkbox</option>
+                        {FIELD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </div>
                     <button type="submit" className="btn btn-primary">
@@ -208,10 +126,7 @@ const DealAdditionalFieldsPage = () => {
                 <div className="entries-select">
                   <label>Show
                     <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                      <option value="10">10</option>
-                      <option value="25">25</option>
-                      <option value="50">50</option>
-                      <option value="100">100</option>
+                      {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
                     entries
                   </label>
@@ -220,7 +135,7 @@ const DealAdditionalFieldsPage = () => {
                   <Search size={16} />
                   <input
                     type="search"
-                    placeholder="Search"
+                    placeholder={ACTION_SEARCH}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />

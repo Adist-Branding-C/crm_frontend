@@ -181,7 +181,98 @@ export interface ReportOption {
   path: string;
 }
 
-export interface SortConfig {
-  key: string | null;
-  direction: 'asc' | 'desc';
+import type { SortConfig } from '../../../shared/types/sort';
+import type { DateRange } from '../../../shared/types/common';
+
+export interface DeletedLeadsFilters {
+  type: string;
+  dateRange: DateRange;
+  filterByDate: string;
+  enquirySource: string;
+  enquiryPurpose: string;
+  leadStatus: string;
+  followupAdded: string;
+  createdBy: string;
+  assignedTo: string;
+  leadType: string;
+  location: string;
+  deleteReason: string;
+}
+
+export interface DeletedLeadsFiltersProps {
+  filters: DeletedLeadsFilters;
+  onFilterChange: (filters: DeletedLeadsFilters) => void;
+  onClearFilters: () => void;
+  onClose: () => void;
+}
+
+export interface DeletedLeadsToolbarProps {
+  searchQuery: string;
+  onSearchChange: (v: string) => void;
+  showFilters: boolean;
+  onToggleFilters: () => void;
+  sortConfig: SortConfig;
+  showSortDropdown: boolean;
+  sortDropdownClosing: boolean;
+  sortDropdownRef: React.RefObject<HTMLDivElement | null>;
+  onSetShowSortDropdown: (v: boolean) => void;
+  onCloseSortDropdown: () => void;
+  onSortDesc: (key: string) => void;
+  onSortAsc: (key: string) => void;
+  selectedCount: number;
+  onRecoverAll: () => void;
+}
+
+export interface LeadStatusWiseFilters {
+  dateRange: DateRange;
+  sortBy: string;
+  staff: string;
+  leadType: string;
+  purpose: string;
+  source: string;
+  status?: string;
+}
+
+export interface LeadSourceWiseFilters {
+  dateRange: DateRange;
+  sortBy: string;
+  agentId: string;
+  selectSource: string;
+}
+
+export interface LeadCheckoutSummaryFilters {
+  fromDate: string;
+  toDate: string;
+  staffId: string;
+}
+
+export interface LeadStatusChangeFilters {
+  dateRange: DateRange;
+  status: string | string[];
+  agentId: string;
+  leadSource: string;
+}
+
+export interface LeadImportHistoryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export interface LeadExportFilters {
+  createdAt: { from: string; to: string };
+  updatedAt: { from: string; to: string };
+  assignedAt: { from: string; to: string };
+  enquirySource: string;
+  enquiryPurpose: string;
+  enquiryStatus: string;
+  createdBy: string;
+  assignedTo: string;
+  leadType: string;
+  campaign: string;
+  did: string;
+  location: string;
+  remarks: string;
+  dateRange: string;
+  sortBy: string;
+  fileName: string;
 }

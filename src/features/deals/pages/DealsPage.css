@@ -1,3 +1,12 @@
+@import '../../../shared/styles/badges.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/modals.css';
+
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+}
+
 .deals-stats-row {
   display: flex;
   justify-content: flex-end;

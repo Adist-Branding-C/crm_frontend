@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Download, Phone, PhoneIncoming, PhoneOutgoing, PhoneMissed, PhoneCall, Users } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { callHistoryData, agentStatsData } from '../constants';
+import { MOCK_STAFF_OPTIONS_WITH_IDS } from '../../../shared/constants/mockStaff';
 
 const GLDialerCallReport = () => {
   const [filters, setFilters] = useState({ dateFrom: '2024-01-01', dateTo: '2024-01-31', agent: '' });
@@ -56,8 +57,7 @@ const GLDialerCallReport = () => {
         <div className="filter-group">
           <label>Agent</label>
           <select className="filter-select" value={filters.agent} onChange={(e) => setFilters({ ...filters, agent: e.target.value })}>
-            <option value="">All Agents</option><option value="1">John Doe</option><option value="2">Jane Smith</option>
-            <option value="3">Mike Johnson</option><option value="4">Sarah Williams</option>
+            <option value="">All Agents</option>{MOCK_STAFF_OPTIONS_WITH_IDS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
         <div className="filter-group"><label>Date From</label><input type="date" className="filter-input" value={filters.dateFrom} onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })} /></div>

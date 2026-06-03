@@ -10,8 +10,13 @@ export interface Campaign {
   createdAt: string;
 }
 
+import type { Column } from '../../../shared/types/table';
+import type { DateRange } from '../../../shared/types/common';
+
+export type CampaignColumn = Column;
+
 export interface CampaignFilters {
   type: string;
   createdBy: string;
-  dateRange: { start: string; end: string };
+  dateRange: DateRange;
 }

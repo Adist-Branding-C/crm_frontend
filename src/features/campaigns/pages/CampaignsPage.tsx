@@ -1,82 +1,48 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, MoreHorizontal, Edit2, Trash2, Eye, Download, User, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Search, Filter, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, MoreHorizontal, Edit2, Trash2, Eye, Download, User, CheckCircle, Clock } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import AddCampaignDrawer from '../../../shared/components/drawers/AddCampaignDrawer';
-import { SAMPLE_CAMPAIGNS } from '../constants';
-import type { Campaign, CampaignFilters } from '../types';
-import '../../../pages/Campaign.css';
-import '../../../pages/Enquiries.css';
-
-const COLUMNS = [
-  { key: 'checkbox', label: '' },
-  { key: 'slNo', label: 'Sl No' },
-  { key: 'name', label: 'Name', sortable: true },
-  { key: 'type', label: 'Type', sortable: true },
-  { key: 'totalTasks', label: 'Total Tasks', sortable: true },
-  { key: 'completedTasks', label: 'Completed Tasks', sortable: true },
-  { key: 'completedPercent', label: 'Completed %', sortable: true },
-  { key: 'createdBy', label: 'Created By', sortable: true },
-  { key: 'createdAt', label: 'Created At', sortable: true },
-  { key: 'action', label: 'Action', sortable: true },
-];
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ACTION_VIEW, ACTION_EDIT, ACTION_DELETE, ACTION_FILTER, ACTION_CLEAR, ACTION_SEARCH } from '../../../shared/constants/actionLabels';
+import { LABEL_ROWS_PER_PAGE, LABEL_SHOWING, LABEL_OF, LABEL_FIRST, LABEL_PAGE, LABEL_LAST } from '../../../shared/constants/labels';
+import { COLUMNS, CAMPAIGN_TYPE_OPTIONS, CAMPAIGN_CREATED_BY_OPTIONS } from '../constants';
+import { useCampaignsData } from '../hooks/useCampaignsData';
+import './CampaignsPage.css';
 
 const CampaignsPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
-  const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [campaigns, setCampaigns] = useState<Campaign[]>(SAMPLE_CAMPAIGNS);
-
-  const [filters, setFilters] = useState<CampaignFilters>({
-    type: '',
-    createdBy: '',
-    dateRange: { start: '', end: '' },
-  });
-
-  const filteredData = useMemo(() => {
-    let data = [...campaigns];
-    if (searchQuery) data = data.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.type.toLowerCase().includes(searchQuery.toLowerCase()));
-    if (filters.type) data = data.filter(item => item.type === filters.type);
-    if (filters.createdBy) data = data.filter(item => item.createdBy === filters.createdBy);
-    if (sortConfig.key) data.sort((a, b) => { const aVal = a[sortConfig.key as keyof Campaign]; const bVal = b[sortConfig.key as keyof Campaign]; if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1; if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1; return 0; });
-    return data;
-  }, [searchQuery, filters, sortConfig, campaigns]);
-
-  const stats = useMemo(() => ({
-    total: filteredData.length,
-    active: filteredData.filter(c => c.completedPercent < 100).length,
-    completed: filteredData.filter(c => c.completedPercent === 100).length,
-  }), [filteredData]);
-
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-  const handleSort = (key: string) => setSortConfig(prev => ({ key, direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc' }));
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => { if (e.target.checked) setSelectedRows(paginatedData.map(item => item.id)); else setSelectedRows([]); };
-  const handleSelectRow = (id: number) => setSelectedRows(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); };
-  const clearFilters = () => { setFilters({ type: '', createdBy: '', dateRange: { start: '', end: '' } }); setShowFilters(false); };
-  const handleDeleteCampaign = (id: number) => { setCampaigns(prev => prev.filter(c => c.id !== id)); setActionMenuOpen(null); };
-
-  const handleExportCSV = () => {
-    const headers = ['Sl No', 'Name', 'Type', 'Total Tasks', 'Completed Tasks', 'Completed %', 'Created By', 'Created At'];
-    const csvContent = [headers.join(','), ...filteredData.map(c => [c.slNo, `"${c.name}"`, c.type, c.totalTasks, c.completedTasks, c.completedPercent + '%', c.createdBy, c.createdAt].join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'campaigns.csv'; link.click();
-  };
-
-  const getProgressBadge = (percent: number) => {
-    if (percent === 100) return <span className="badge badge-completed">Completed</span>;
-    if (percent >= 50) return <span className="badge badge-progress">In Progress</span>;
-    return <span className="badge badge-pending">Not Started</span>;
-  };
+  const {
+    searchQuery,
+    setSearchQuery,
+    showFilters,
+    setShowFilters,
+    selectedRows,
+    currentPage,
+    setCurrentPage,
+    rowsPerPage,
+    sortConfig,
+    actionMenuOpen,
+    setActionMenuOpen,
+    isDrawerOpen,
+    showSortDropdown,
+    setShowSortDropdown,
+    handleSort,
+    handleSelectAll,
+    handleSelectRow,
+    handleRowsPerPageChange,
+    clearFilters,
+    handleDeleteCampaign,
+    handleExportCSV,
+    handleDrawerSave,
+    handleDrawerClose,
+    handleDrawerOpen,
+    filters,
+    setFilters,
+    stats,
+    totalPages,
+    startIndex,
+    paginatedData,
+    filteredData,
+  } = useCampaignsData();
 
   return (
     <PageContainer>
@@ -88,8 +54,8 @@ const CampaignsPage = () => {
       </div>
       <div className="enquiries-toolbar">
         <div className="toolbar-left">
-          <div className="search-box"><Search size={16} className="search-icon" /><input type="text" placeholder="Search campaigns..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="search-input" /></div>
-          <button className="btn btn-secondary" onClick={() => setShowFilters(!showFilters)}><Filter size={16} />Filter<ChevronDown size={14} className={showFilters ? 'rotate' : ''} /></button>
+          <div className="search-box"><Search size={16} className="search-icon" /><input type="text" placeholder={ACTION_SEARCH} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="search-input" /></div>
+          <button className="btn btn-secondary" onClick={() => setShowFilters(!showFilters)}><Filter size={16} />{ACTION_FILTER}<ChevronDown size={14} className={showFilters ? 'rotate' : ''} /></button>
           <div className="dropdown-container">
             <button className="btn btn-secondary" onClick={() => setShowSortDropdown(!showSortDropdown)}>Sort By<ChevronDown size={14} /></button>
             {showSortDropdown && (
@@ -103,18 +69,18 @@ const CampaignsPage = () => {
         </div>
         <div className="toolbar-right">
           <button className="btn btn-secondary" onClick={handleExportCSV}><Download size={16} />Export</button>
-          <button className="btn btn-primary" onClick={() => setIsDrawerOpen(true)}><Plus size={16} />Campaign</button>
+          <button className="btn btn-primary" onClick={handleDrawerOpen}><Plus size={16} />Campaign</button>
         </div>
       </div>
       {showFilters && (
         <div className="filters-panel">
           <div className="filter-row">
-            <div className="filter-group"><label>Type</label><select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}><option value="">All</option><option value="Email">Email</option><option value="SMS">SMS</option><option value="WhatsApp">WhatsApp</option><option value="Social">Social</option></select></div>
-            <div className="filter-group"><label>Created By</label><select value={filters.createdBy} onChange={(e) => setFilters({ ...filters, createdBy: e.target.value })}><option value="">All</option><option value="Admin">Admin</option><option value="John Doe">John Doe</option><option value="Jane Smith">Jane Smith</option></select></div>
+            <div className="filter-group"><label>Type</label><select value={filters.type} onChange={(e) => setFilters({ ...filters, type: e.target.value })}><option value="">All</option>{CAMPAIGN_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
+            <div className="filter-group"><label>Created By</label><select value={filters.createdBy} onChange={(e) => setFilters({ ...filters, createdBy: e.target.value })}><option value="">All</option>{CAMPAIGN_CREATED_BY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
             <div className="filter-group"><label>Date Range</label><div className="date-range-input"><input type="date" value={filters.dateRange.start} onChange={(e) => setFilters({ ...filters, dateRange: { ...filters.dateRange, start: e.target.value } })} /><span>to</span><input type="date" value={filters.dateRange.end} onChange={(e) => setFilters({ ...filters, dateRange: { ...filters.dateRange, end: e.target.value } })} /></div></div>
           </div>
           <div className="filter-row">
-            <div className="filter-actions"><button className="btn btn-primary" onClick={() => setShowFilters(false)}>Filter</button><button className="btn btn-secondary" onClick={clearFilters}>Clear</button></div>
+            <div className="filter-actions"><button className="btn btn-primary" onClick={() => setShowFilters(false)}>{ACTION_FILTER}</button><button className="btn btn-secondary" onClick={clearFilters}>{ACTION_CLEAR}</button></div>
           </div>
         </div>
       )}
@@ -151,10 +117,10 @@ const CampaignsPage = () => {
                     <button className="action-btn" onClick={() => setActionMenuOpen(actionMenuOpen === row.id ? null : row.id)}><MoreHorizontal size={16} /></button>
                     {actionMenuOpen === row.id && (
                       <div className="action-dropdown">
-                        <button><Eye size={14} />View</button>
-                        <button><Edit2 size={14} />Edit</button>
+                        <button><Eye size={14} />{ACTION_VIEW}</button>
+                        <button><Edit2 size={14} />{ACTION_EDIT}</button>
                         <button><User size={14} />Assign</button>
-                        <button onClick={() => handleDeleteCampaign(row.id)} className="delete"><Trash2 size={14} />Delete</button>
+                        <button onClick={() => handleDeleteCampaign(row.id)} className="delete"><Trash2 size={14} />{ACTION_DELETE}</button>
                       </div>
                     )}
                   </div>
@@ -166,24 +132,21 @@ const CampaignsPage = () => {
       </div>
       <div className="pagination-container">
         <div className="pagination-left">
-          <span className="rows-label">Rows per page:</span>
+          <span className="rows-label">{LABEL_ROWS_PER_PAGE}</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
+            {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
-          <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
+          <span className="pagination-info">{LABEL_SHOWING} {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} {LABEL_OF} {filteredData.length}</span>
         </div>
         <div className="pagination-right">
-          <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(1)}>First</button>
+          <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(1)}>{LABEL_FIRST}</button>
           <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}><ChevronLeft size={16} /></button>
-          <span className="page-indicator">Page {currentPage} of {totalPages}</span>
+          <span className="page-indicator">{LABEL_PAGE} {currentPage} {LABEL_OF} {totalPages}</span>
           <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}><ChevronRight size={16} /></button>
-          <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)}>Last</button>
+          <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)}>{LABEL_LAST}</button>
         </div>
       </div>
-      <AddCampaignDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} onSave={(data: any) => setCampaigns(prev => [...prev, { ...data, id: Date.now(), slNo: prev.length + 1 }])} />
+      <AddCampaignDrawer isOpen={isDrawerOpen} onClose={handleDrawerClose} onSave={handleDrawerSave} />
     </PageContainer>
   );
 };

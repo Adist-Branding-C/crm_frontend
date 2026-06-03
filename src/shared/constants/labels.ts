@@ -1,0 +1,16 @@
+export const LABEL_SHOW = 'Show';
+export const LABEL_ENTRIES = 'entries';
+export const LABEL_SL_NO = 'Sl No';
+export const LABEL_ACTIONS = 'Actions';
+export const LABEL_NO_DATA = 'No data available in table';
+export const LABEL_CONFIRM_DELETE = 'Confirm Delete';
+export const LABEL_FIRST = 'First';
+export const LABEL_LAST = 'Last';
+export const LABEL_PREVIOUS = 'Previous';
+export const LABEL_NEXT = 'Next';
+export const LABEL_OF = 'of';
+export const LABEL_PAGE = 'Page';
+export const LABEL_ROWS_PER_PAGE = 'Rows per page:';
+export const LABEL_SHOW_ENTRIES = 'Show entries:';
+export const LABEL_SHOWING = 'Showing';
+export const LABEL_TO = 'to';

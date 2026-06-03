@@ -1,21 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
+import type { PipelineDataItem, CustomLabelProps } from '../../types';
 import './WidgetStyles.css';
-
-interface PipelineDataItem {
-  name: string;
-  value: number;
-  displayValue: string;
-  color: string;
-}
-
-interface CustomLabelProps {
-  x?: number;
-  y?: number;
-  width?: number;
-  value?: number;
-  index?: number;
-}
 
 const DealPipelineWidget = () => {
   const data: PipelineDataItem[] = [

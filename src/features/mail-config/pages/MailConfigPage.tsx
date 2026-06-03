@@ -1,83 +1,33 @@
-import { useState } from 'react';
 import { MoreHorizontal, Edit2, Trash2, Plus, Search, X } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
-import '../../../pages/Account.css';
-
-interface MailConfigItem {
-  id: number;
-  driver: string;
-  host?: string;
-  port: number;
-  encryption: string;
-  username?: string;
-  password?: string;
-  fromEmail?: string;
-  fromName?: string;
-  auth: string;
-  active: boolean;
-}
-
-const mailConfigData: MailConfigItem[] = [
-  { id: 1, driver: 'SMTP', port: 587, encryption: 'TLS', auth: 'Yes', active: true },
-];
+import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
+import { MAIL_DRIVER_OPTIONS, ENCRYPTION_OPTIONS } from '../constants';
+import { useMailConfigData } from '../hooks/useMailConfigData';
+import './MailConfigPage.css';
 
 const MailConfigPage = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<MailConfigItem | null>(null);
-  const [deletingItem, setDeletingItem] = useState<MailConfigItem | null>(null);
-  const [formData, setFormData] = useState({
-    driver: '', host: '', port: '', encryption: '',
-    username: '', password: '', fromEmail: '', fromName: '',
-  });
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-
-  const filteredData = mailConfigData.filter(item =>
-    item.driver.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddClick = () => {
-    setShowForm(true);
-    setEditingItem(null);
-    setFormData({ driver: '', host: '', port: '', encryption: '', username: '', password: '', fromEmail: '', fromName: '' });
-  };
-
-  const handleEditClick = (item: MailConfigItem) => {
-    setShowForm(true);
-    setEditingItem(item);
-    setFormData({
-      driver: item.driver,
-      host: item.host || '',
-      port: String(item.port),
-      encryption: item.encryption,
-      username: item.username || '',
-      password: item.password || '',
-      fromEmail: item.fromEmail || '',
-      fromName: item.fromName || '',
-    });
-    setDropdownOpen(null);
-  };
-
-  const handleDeleteClick = (item: MailConfigItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  };
-
-  const handleConfirmDelete = () => {
-    setDeletingItem(null);
-  };
-
-  const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingItem(null);
-  };
+  const {
+    showForm,
+    editingItem,
+    deletingItem,
+    setDeletingItem,
+    formData,
+    searchQuery,
+    setSearchQuery,
+    rowsPerPage,
+    setRowsPerPage,
+    dropdownOpen,
+    setDropdownOpen,
+    filteredData,
+    handleInputChange,
+    handleAddClick,
+    handleEditClick,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleCloseForm,
+  } = useMailConfigData();
 
   return (
     <div className="account-page">
@@ -100,10 +50,7 @@ const MailConfigPage = () => {
               <div className="entries-select">
                 <label>Show
                   <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                    {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                   entries
                 </label>
@@ -112,7 +59,7 @@ const MailConfigPage = () => {
                 <Search size={16} />
                 <input
                   type="search"
-                  placeholder="Search"
+                  placeholder={ACTION_SEARCH}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -200,9 +147,7 @@ const MailConfigPage = () => {
                   <label>Mail Driver <span className="text-danger">*</span></label>
                   <select name="driver" className="form-control" value={formData.driver} onChange={handleInputChange}>
                     <option value="">Select Driver</option>
-                    <option value="smtp">SMTP</option>
-                    <option value="sendmail">Sendmail</option>
-                    <option value="mailgun">Mailgun</option>
+                    {MAIL_DRIVER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
@@ -217,8 +162,7 @@ const MailConfigPage = () => {
                   <label>Encryption</label>
                   <select name="encryption" className="form-control" value={formData.encryption} onChange={handleInputChange}>
                     <option value="">Select</option>
-                    <option value="tls">TLS</option>
-                    <option value="ssl">SSL</option>
+                    {ENCRYPTION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
                 <div className="form-group">

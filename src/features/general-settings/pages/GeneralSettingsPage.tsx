@@ -1,43 +1,16 @@
-import { useState, useCallback } from 'react';
 import { Check } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
-import type { GeneralSettings as GeneralSettingsType } from '../types';
 import { timezones, currencies } from '../constants';
-import '../../../pages/GeneralSettings.css';
-
-const defaultSettings: GeneralSettingsType = {
-  globalSearch: true,
-  searchNumberMasking: false,
-  enableWebSound: true,
-  enableAttendanceStatus: true,
-  enableIvrAppNotification: false,
-  staffChangeEnquirySource: false,
-  timezone: 'Asia/Kolkata',
-  enableBranchFilter: true,
-  enableWebNotification: true,
-  enableWebIvrCalling: false,
-  currency: 'INR',
-  enableDeletedAgentFilter: false,
-};
+import { useGeneralSettingsData } from '../hooks/useGeneralSettingsData';
+import './GeneralSettingsPage.css';
 
 const GeneralSettingsPage = () => {
-  const [settings, setSettings] = useState<GeneralSettingsType>(defaultSettings);
-  const [showToast, setShowToast] = useState(false);
-
-  const showSaveToast = useCallback(() => {
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
-  }, []);
-
-  const handleToggle = (key: keyof GeneralSettingsType) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
-    showSaveToast();
-  };
-
-  const handleSelectChange = (key: keyof GeneralSettingsType, value: string) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-    showSaveToast();
-  };
+  const {
+    settings,
+    showToast,
+    handleToggle,
+    handleSelectChange,
+  } = useGeneralSettingsData();
 
   return (
     <div className="general-settings-page">

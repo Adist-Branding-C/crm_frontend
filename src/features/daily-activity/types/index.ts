@@ -9,15 +9,10 @@ export interface Activity {
   badge: string;
 }
 
-export interface StaffOption {
-  id: number;
-  name: string;
-}
+import type { SelectOption } from '../../../shared/types/common';
 
-export interface ActivityTypeOption {
-  id: number;
-  name: string;
-}
+export type StaffOption = SelectOption;
+export type ActivityTypeOption = SelectOption;
 
 export interface Filters {
   date: string;
