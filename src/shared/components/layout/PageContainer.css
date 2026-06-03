@@ -1,0 +1,11 @@
+.page-container {
+  padding: 1.5rem;
+  background: var(--bg-main);
+  min-height: calc(100vh - 60px);
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1rem;
+  }
+}

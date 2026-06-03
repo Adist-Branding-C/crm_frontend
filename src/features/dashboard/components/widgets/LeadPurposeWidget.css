@@ -1,0 +1,41 @@
+.lead-purpose-widget .purpose-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.purpose-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.purpose-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+
+.purpose-label {
+  color: var(--text-muted);
+}
+
+.purpose-value {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.purpose-bar-bg {
+  width: 100%;
+  height: 4px;
+  background-color: #f1f5f9;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.purpose-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}

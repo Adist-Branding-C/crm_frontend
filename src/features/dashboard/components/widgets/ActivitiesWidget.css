@@ -1,0 +1,55 @@
+.activities-widget .activities-list {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.activity-item {
+  display: flex;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  z-index: 2;
+  border: 2px solid white;
+}
+
+.timeline-dot-highlight {
+  background-color: var(--text-main);
+}
+
+.timeline-line {
+  position: absolute;
+  left: -19px;
+  top: 16px;
+  width: 2px;
+  height: calc(100% - 10px);
+  background-color: #e2e8f0;
+  z-index: 1;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.activity-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+
+    "lib": ["DOM", "ESNext"],
+
+    "strict": true,
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react-jsx",
+
+    "sourceMap": true,
+    "skipLibCheck": true,
+
+    "isolatedModules": true,
+    "moduleDetection": "force",
+
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  }
+}

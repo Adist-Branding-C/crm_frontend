@@ -1,0 +1,48 @@
+/* Shared Button Styles */
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  height: 44px;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+}
+
+.btn:hover {
+  background-color: var(--bg-main);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  color: var(--text-muted);
+}
+
+.btn-text {
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.btn-text:hover {
+  background: transparent;
+  color: var(--primary-hover);
+}

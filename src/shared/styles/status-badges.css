@@ -1,0 +1,50 @@
+/* Status badge color variants */
+.badge-status-completed {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.badge-status-pending {
+  background-color: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+}
+
+.badge-status-overdue {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.badge-status-success {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.badge-status-failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.badge-status-active {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.badge-status-inactive {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.badge-status-new {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-status-existing {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.badge-status-duplicate {
+  background: #fef3c7;
+  color: #b45309;
+}

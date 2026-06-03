@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Copy, RefreshCw, ExternalLink, Link as LinkIcon, Settings, X, Check, Zap, MessageSquare, Phone, Send, Users } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import { CAMEL_CASE_REGEX, CAPITALIZE_FIRST_REGEX } from '../shared/constants/regex';
 import './Integrations.css';
 
 const integrationsData = [
@@ -248,7 +249,7 @@ const IntegrationsPage = () => {
               {configuringIntegration.configFields.map(field => (
                 <div key={field} className="form-group">
                   <label>
-                    {field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    {field.replace(CAMEL_CASE_REGEX, ' $1').replace(CAPITALIZE_FIRST_REGEX, str => str.toUpperCase())}
                   </label>
                   <input 
                     type="text" 
