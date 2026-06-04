@@ -1,17 +1,17 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
-import AccountPage from '../pages/Account';
+import AccountPage from '../features/account-settings/pages/AccountSettings';
 import RolesPage from '../features/roles/pages/RolesPage';
 import DepartmentPage from '../features/department/pages/DepartmentPage';
-import WorkModePage from '../features/work-mode/pages/WorkModePage';
+import WorkModePage from '../features/account-settings/staff-work-modes/pages/WorkModePage';
 import CheckoutNotePage from '../features/checkout-note/pages/CheckoutNotePage';
-import DesignationPage from '../features/designation/pages/DesignationPage';
-import BranchPage from '../features/branch/pages/BranchPage';
+import DesignationPage from '../features/account-settings/designations/pages/DesignationPage';
+import BranchPage from '../features/account-settings/branch/pages/BranchPage';
 import MailConfigPage from '../features/mail-config/pages/MailConfigPage';
-import EmailTemplatePage from '../features/email-template/pages/EmailTemplatePage';
+import EmailTemplatePage from '../features/account-settings/email-template/pages/EmailTemplatePage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
 import PasswordPage from '../features/password/pages/PasswordPage';
-import WhatsAppTemplatePage from '../features/whatsapp-template/pages/WhatsAppTemplatePage';
+import WhatsAppTemplatePage from '../features/account-settings/whatsapp-template/pages/WhatsappTemplatePage';
 
 export default (
   <>
