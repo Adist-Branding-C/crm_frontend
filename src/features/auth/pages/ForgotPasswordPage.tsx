@@ -3,6 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import { Phone, ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { useForgotPasswordData } from '../hooks/useForgotPasswordData';
 import { useAuth } from '../hooks/useAuth';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
 import './ForgotPassword.css';
 
 const ForgotPasswordPage = () => {
@@ -92,13 +93,14 @@ const ForgotPasswordPage = () => {
               const formError = forgotPasswordData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
               return (
                 <Form className="auth-form">
-                  {formError && <div className="auth-error">{formError}</div>}
+                  {formError && <ErrorMessage message={formError} />}
                   
                   <div className="form-group">
-                    <label>Phone Number</label>
+                    <label htmlFor="phone">Phone Number</label>
                     <div className="input-wrapper-with-icon">
                       <span className="input-icon-left"><Phone size={18} /></span>
                       <Field
+                        id="phone"
                         name="phone"
                         type="tel"
                         placeholder="Enter your phone number"

@@ -1,20 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import * as yup from 'yup';
 import type { FormikHelpers } from 'formik';
 import { authService } from '../services/AuthService';
 import type { ResetPasswordFormData } from '../types/auth.types';
-
-const resetPasswordValidationSchema = yup.object({
-  password: yup
-    .string()
-    .required('Please enter a new password')
-    .min(8, 'Password must be at least 8 characters'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Passwords do not match')
-    .required('Please confirm your new password'),
-});
+import { resetPasswordValidationSchema } from '../validations/resetPassword.schema';
 
 const resetPasswordInitialValues: ResetPasswordFormData = { password: '', confirmPassword: '' };
 
@@ -68,7 +57,7 @@ export function useResetPasswordData() {
     showConfirmPassword, setShowConfirmPassword,
     isLoading, isSuccess, error,
     handleSubmit,
-    validationSchema: resetPasswordValidationSchema,
+    validationSchema: resetPasswordValidationSchema as any,
     initialValues: resetPasswordInitialValues,
   };
 }

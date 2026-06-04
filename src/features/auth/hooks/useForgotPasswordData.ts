@@ -1,12 +1,8 @@
 import { useState, useCallback } from 'react';
-import * as yup from 'yup';
 import type { FormikHelpers } from 'formik';
 import { authService } from '../services/AuthService';
 import type { ForgotPasswordFormData } from '../types/auth.types';
-
-const forgotPasswordValidationSchema = yup.object({
-  phone: yup.string().required('Phone number is required'),
-});
+import { forgotPasswordValidationSchema } from '../validations/forgotPassword.schema';
 
 const forgotPasswordInitialValues: ForgotPasswordFormData = { phone: '' };
 
@@ -51,7 +47,7 @@ export function useForgotPasswordData() {
     submittedPhone,
     isLoading, isSent, setIsSent, error,
     handleSubmit,
-    validationSchema: forgotPasswordValidationSchema,
+    validationSchema: forgotPasswordValidationSchema as any,
     initialValues: forgotPasswordInitialValues,
   };
 }

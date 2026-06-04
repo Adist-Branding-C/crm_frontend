@@ -4,6 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import { Phone, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import { useLoginData } from '../hooks/useLoginData';
 import { useAuth } from '../hooks/useAuth';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
 import './Login.css';
 import { AUTH_CONTENT_SLIDES, AUTH_ROUTES } from '../constants/auth.constants';
 
@@ -66,13 +67,14 @@ const LoginPage = () => {
                 const formError = loginData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
                 return (
                   <Form className="auth-form">
-                    {formError && <div className="auth-error">{formError}</div>}
+                    {formError && <ErrorMessage message={formError} />}
 
                     <div className="form-group">
-                      <label>Phone Number</label>
+                      <label htmlFor="phone">Phone Number</label>
                       <div className="input-wrapper-with-icon">
                         <span className="input-icon-left"><Phone size={18} /></span>
                         <Field
+                          id="phone"
                           name="phone"
                           type="tel"
                           placeholder="Enter your phone number"
@@ -82,10 +84,11 @@ const LoginPage = () => {
                     </div>
 
                     <div className="form-group">
-                      <label>Password</label>
+                      <label htmlFor="password">Password</label>
                       <div className="input-wrapper-with-icon">
                         <span className="input-icon-left"><Lock size={18} /></span>
                         <Field
+                          id="password"
                           name="password"
                           type={loginData.showPassword ? 'text' : 'password'}
                           placeholder="Enter your password"
@@ -95,6 +98,7 @@ const LoginPage = () => {
                           type="button"
                           className="input-icon-right"
                           onClick={() => loginData.setShowPassword(!loginData.showPassword)}
+                          aria-label={loginData.showPassword ? 'Hide password' : 'Show password'}
                         >
                           {loginData.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>

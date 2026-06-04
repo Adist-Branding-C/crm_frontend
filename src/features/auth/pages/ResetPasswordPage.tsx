@@ -3,6 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import { Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { useResetPasswordData } from '../hooks/useResetPasswordData';
 import { useAuth } from '../hooks/useAuth';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
 import './ResetPassword.css';
 
 const ResetPasswordPage = () => {
@@ -80,13 +81,14 @@ const ResetPasswordPage = () => {
               const formError = resetPasswordData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
               return (
                 <Form className="auth-form">
-                  {formError && <div className="auth-error">{formError}</div>}
+                  {formError && <ErrorMessage message={formError} />}
                   
                   <div className="form-group">
-                    <label>New Password</label>
+                    <label htmlFor="password">New Password</label>
                     <div className="input-wrapper">
                       <Lock size={18} className="input-icon" />
                       <Field
+                        id="password"
                         name="password"
                         type={resetPasswordData.showPassword ? 'text' : 'password'}
                         placeholder="Enter new password"
@@ -96,6 +98,7 @@ const ResetPasswordPage = () => {
                         type="button"
                         className="password-toggle"
                         onClick={() => resetPasswordData.setShowPassword(!resetPasswordData.showPassword)}
+                        aria-label={resetPasswordData.showPassword ? 'Hide password' : 'Show password'}
                       >
                         {resetPasswordData.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -103,10 +106,11 @@ const ResetPasswordPage = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Confirm Password</label>
+                    <label htmlFor="confirmPassword">Confirm Password</label>
                     <div className="input-wrapper">
                       <Lock size={18} className="input-icon" />
                       <Field
+                        id="confirmPassword"
                         name="confirmPassword"
                         type={resetPasswordData.showConfirmPassword ? 'text' : 'password'}
                         placeholder="Confirm new password"
@@ -116,6 +120,7 @@ const ResetPasswordPage = () => {
                         type="button"
                         className="password-toggle"
                         onClick={() => resetPasswordData.setShowConfirmPassword(!resetPasswordData.showConfirmPassword)}
+                        aria-label={resetPasswordData.showConfirmPassword ? 'Hide password' : 'Show password'}
                       >
                         {resetPasswordData.showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>

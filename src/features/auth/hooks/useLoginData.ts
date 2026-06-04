@@ -1,16 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import * as yup from 'yup';
 import type { FormikHelpers } from 'formik';
 import { AUTH_CONTENT_SLIDES, AUTH_ROUTES, AUTH_STORAGE_KEYS, MIN_SWIPE_DISTANCE } from '../constants/auth.constants';
 import { authService } from '../services/AuthService';
 import type { LoginFormData } from '../types/auth.types';
-
-const loginValidationSchema = yup.object({
-  phone: yup.string().required('Phone number is required'),
-  password: yup.string().required('Password is required'),
-});
+import { loginValidationSchema } from '../validations/login.schema';
 
 const loginInitialValues: LoginFormData = { phone: '', password: '' };
 
@@ -110,7 +105,7 @@ export function useLoginData() {
     touchStart, touchEnd, sliderRef,
     handleSubmit, onTouchStart, onTouchMove, onTouchEnd, goToSlide,
     currentContent,
-    validationSchema: loginValidationSchema,
+    validationSchema: loginValidationSchema as any,
     initialValues: loginInitialValues,
   };
 }
