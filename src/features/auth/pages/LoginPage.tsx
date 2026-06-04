@@ -11,8 +11,9 @@ import { AUTH_CONTENT_SLIDES, AUTH_ROUTES } from '../constants/auth.constants';
 const LoginPage = () => {
   const navigate = useNavigate();
   const loginData = useLoginData();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
+  if (isLoading) return null;
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
