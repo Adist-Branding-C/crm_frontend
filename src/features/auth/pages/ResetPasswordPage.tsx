@@ -1,23 +1,24 @@
 import { useNavigate, Navigate } from 'react-router-dom';
+import { Formik, Form, Field } from 'formik';
 import { Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { useResetPasswordData } from '../hooks/useResetPasswordData';
+import { useAuth } from '../hooks/useAuth';
 import './ResetPassword.css';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
-  const d = useResetPasswordData();
-
-  const isAuthenticated = localStorage.getItem('crm_token');
+  const resetPasswordData = useResetPasswordData();
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (!d.token) {
+  if (!resetPasswordData.token) {
     return <Navigate to="/forgot-password" replace />;
   }
 
-  if (d.isSuccess) {
+  if (resetPasswordData.isSuccess) {
     return (
       <div className="auth-page">
         <div className="auth-visual-panel">
@@ -70,62 +71,71 @@ const ResetPasswordPage = () => {
             <p>Your new password must be different from previous passwords</p>
           </div>
 
-          <form onSubmit={d.handleSubmit} className="auth-form">
-            {d.error && <div className="auth-error">{d.error}</div>}
-            
-            <div className="form-group">
-              <label>New Password</label>
-              <div className="input-wrapper">
-                <Lock size={18} className="input-icon" />
-                <input
-                  type={d.showPassword ? 'text' : 'password'}
-                  placeholder="Enter new password"
-                  value={d.password}
-                  onChange={(e) => d.setPassword(e.target.value)}
-                  className="form-input"
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => d.setShowPassword(!d.showPassword)}
-                >
-                  {d.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
+          <Formik
+            initialValues={resetPasswordData.initialValues}
+            validationSchema={resetPasswordData.validationSchema}
+            onSubmit={resetPasswordData.handleSubmit}
+          >
+            {({ errors, touched, submitCount }) => {
+              const formError = resetPasswordData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
+              return (
+                <Form className="auth-form">
+                  {formError && <div className="auth-error">{formError}</div>}
+                  
+                  <div className="form-group">
+                    <label>New Password</label>
+                    <div className="input-wrapper">
+                      <Lock size={18} className="input-icon" />
+                      <Field
+                        name="password"
+                        type={resetPasswordData.showPassword ? 'text' : 'password'}
+                        placeholder="Enter new password"
+                        className="form-input"
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => resetPasswordData.setShowPassword(!resetPasswordData.showPassword)}
+                      >
+                        {resetPasswordData.showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
 
-            <div className="form-group">
-              <label>Confirm Password</label>
-              <div className="input-wrapper">
-                <Lock size={18} className="input-icon" />
-                <input
-                  type={d.showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm new password"
-                  value={d.confirmPassword}
-                  onChange={(e) => d.setConfirmPassword(e.target.value)}
-                  className="form-input"
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => d.setShowConfirmPassword(!d.showConfirmPassword)}
-                >
-                  {d.showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
+                  <div className="form-group">
+                    <label>Confirm Password</label>
+                    <div className="input-wrapper">
+                      <Lock size={18} className="input-icon" />
+                      <Field
+                        name="confirmPassword"
+                        type={resetPasswordData.showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Confirm new password"
+                        className="form-input"
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => resetPasswordData.setShowConfirmPassword(!resetPasswordData.showConfirmPassword)}
+                      >
+                        {resetPasswordData.showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
 
-            <button type="submit" className="auth-btn" disabled={d.isLoading}>
-              {d.isLoading ? (
-                <Loader2 size={18} className="spin" />
-              ) : (
-                <>
-                  <span>Reset Password</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </form>
+                  <button type="submit" className="auth-btn" disabled={resetPasswordData.isLoading}>
+                    {resetPasswordData.isLoading ? (
+                      <Loader2 size={18} className="spin" />
+                    ) : (
+                      <>
+                        <span>Reset Password</span>
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </button>
+                </Form>
+              );
+            }}
+          </Formik>
         </div>
       </div>
     </div>

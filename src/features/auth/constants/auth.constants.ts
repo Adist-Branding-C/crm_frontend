@@ -18,7 +18,8 @@ export const AUTH_ROUTES = {
 }
 
 export const AUTH_STORAGE_KEYS = {
-  TOKEN: 'crm_token',
+  ACCESS_TOKEN: 'accessToken',
+  REFRESH_TOKEN: 'refreshToken',
   USER: 'crm_user',
 }
 
