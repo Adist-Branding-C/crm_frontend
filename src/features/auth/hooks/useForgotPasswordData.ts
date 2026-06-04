@@ -1,31 +1,53 @@
 import { useState, useCallback } from 'react';
-import { EMAIL_REGEX } from '../../../shared/constants/regex';
+import type { FormikHelpers } from 'formik';
+import { authService } from '../services/AuthService';
+import type { ForgotPasswordFormData } from '../types/auth.types';
+import { forgotPasswordValidationSchema } from '../validations/forgotPassword.schema';
+
+const forgotPasswordInitialValues: ForgotPasswordFormData = { phone: '' };
 
 export function useForgotPasswordData() {
-  const [email, setEmail] = useState('');
+  const [submittedPhone, setSubmittedPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async (
+    values: ForgotPasswordFormData,
+    { setSubmitting }: FormikHelpers<ForgotPasswordFormData>,
+  ) => {
     setError('');
-
-    if (!email) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    setIsSent(true);
-  }, [email]);
 
-  return { email, setEmail, isLoading, isSent, setIsSent, error, handleSubmit };
+    try {
+      const response = await authService.forgotPassword({ phone: values.phone });
+
+      if (response.status) {
+        setSubmittedPhone(values.phone);
+        setIsSent(true);
+      } else {
+        setError(response.message || 'Failed to send reset link');
+      }
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Failed to send reset link');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Network error. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+      setSubmitting(false);
+    }
+  }, []);
+
+  return {
+    submittedPhone,
+    isLoading, isSent, setIsSent, error,
+    handleSubmit,
+    validationSchema: forgotPasswordValidationSchema as any,
+    initialValues: forgotPasswordInitialValues,
+  };
 }

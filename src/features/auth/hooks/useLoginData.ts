@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import type { FormikHelpers } from 'formik';
 import { AUTH_CONTENT_SLIDES, AUTH_ROUTES, AUTH_STORAGE_KEYS, MIN_SWIPE_DISTANCE } from '../constants/auth.constants';
+import { authService } from '../services/AuthService';
+import type { LoginFormData } from '../types/auth.types';
+import { loginValidationSchema } from '../validations/login.schema';
+
+const loginInitialValues: LoginFormData = { phone: '', password: '' };
 
 export function useLoginData() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,21 +22,42 @@ export function useLoginData() {
 
   const currentContent = AUTH_CONTENT_SLIDES[contentSlide] ?? AUTH_CONTENT_SLIDES[0];
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async (
+    values: LoginFormData,
+    { setSubmitting }: FormikHelpers<LoginFormData>,
+  ) => {
     setError('');
-
-    if (!email || !password) {
-      setError('Please enter email and password');
-      return;
-    }
-
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, 'demo_token');
-    localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify({ name: 'Sharun das', email, role: 'Admin' }));
-    navigate(AUTH_ROUTES.DASHBOARD);
-  }, [email, password, navigate]);
+
+    try {
+      const response = await authService.login(values);
+
+      if (response.status && response.data) {
+        Cookies.set(AUTH_STORAGE_KEYS.ACCESS_TOKEN, response.data.accessToken, { sameSite: 'strict' });
+        Cookies.set(AUTH_STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken, { sameSite: 'strict' });
+        localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify({
+          id: response.data.id,
+          name: response.data.name,
+          phone: response.data.phone,
+        }));
+        navigate(AUTH_ROUTES.DASHBOARD);
+      } else {
+        setError(response.message || 'Login failed');
+      }
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Invalid credentials');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Network error. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+      setSubmitting(false);
+    }
+  }, [navigate]);
 
   const onTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     setTouchEnd(null);
@@ -73,10 +99,13 @@ export function useLoginData() {
   }, []);
 
   return {
-    email, setEmail, password, setPassword, showPassword, setShowPassword,
-    isLoading, error, currentSlide, contentSlide, setContentSlide,
+    showPassword, setShowPassword,
+    isLoading, error,
+    currentSlide, contentSlide, setContentSlide,
     touchStart, touchEnd, sliderRef,
     handleSubmit, onTouchStart, onTouchMove, onTouchEnd, goToSlide,
     currentContent,
+    validationSchema: loginValidationSchema as any,
+    initialValues: loginInitialValues,
   };
 }

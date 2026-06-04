@@ -1,19 +1,21 @@
 import { useNavigate, Navigate } from 'react-router-dom';
-import { Mail, ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { Formik, Form, Field } from 'formik';
+import { Phone, ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { useForgotPasswordData } from '../hooks/useForgotPasswordData';
+import { useAuth } from '../hooks/useAuth';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
 import './ForgotPassword.css';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
-  const d = useForgotPasswordData();
-
-  const isAuthenticated = localStorage.getItem('crm_token');
+  const forgotPasswordData = useForgotPasswordData();
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (d.isSent) {
+  if (forgotPasswordData.isSent) {
     return (
       <div className="auth-page">
         <div className="auth-visual-panel">
@@ -31,15 +33,15 @@ const ForgotPasswordPage = () => {
             <div className="success-animation">
               <CheckCircle size={48} />
             </div>
-            <h1>Check Your Email</h1>
-            <p>We&apos;ve sent a password reset link to</p>
-            <p className="email-highlight">{d.email}</p>
+            <h1>Check Your Phone</h1>
+            <p>Reset link sent to</p>
+            <p className="phone-highlight">{forgotPasswordData.submittedPhone}</p>
             <p className="resend-text">
               Didn&apos;t receive?{' '}
               <button 
                 type="button" 
                 className="resend-link"
-                onClick={() => d.setIsSent(false)}
+                onClick={() => forgotPasswordData.setIsSent(false)}
               >
                 Resend
               </button>
@@ -64,7 +66,7 @@ const ForgotPasswordPage = () => {
           </div>
           <div className="visual-message">
             <h2>Reset Your Password</h2>
-            <p>No worries, we&apos;ll send you instructions to reset your password.</p>
+            <p>No worries, we&apos;ll send you a link to reset your password.</p>
           </div>
         </div>
         <div className="visual-pattern"></div>
@@ -79,37 +81,48 @@ const ForgotPasswordPage = () => {
 
           <div className="auth-header">
             <h1>Forgot Password?</h1>
-            <p>Enter your email and we&apos;ll send you a reset link</p>
+            <p>Enter your phone number to receive a reset link</p>
           </div>
 
-          <form onSubmit={d.handleSubmit} className="auth-form">
-            {d.error && <div className="auth-error">{d.error}</div>}
-            
-            <div className="form-group">
-              <label>Email Address</label>
-              <div className="input-wrapper-with-icon">
-                <span className="input-icon-left"><Mail size={18} /></span>
-                <input
-                  type="email"
-                  placeholder="name@company.com"
-                  value={d.email}
-                  onChange={(e) => d.setEmail(e.target.value)}
-                  className="form-input"
-                />
-              </div>
-            </div>
+          <Formik
+            initialValues={forgotPasswordData.initialValues}
+            validationSchema={forgotPasswordData.validationSchema}
+            onSubmit={forgotPasswordData.handleSubmit}
+          >
+            {({ errors, touched, submitCount }) => {
+              const formError = forgotPasswordData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
+              return (
+                <Form className="auth-form">
+                  {formError && <ErrorMessage message={formError} />}
+                  
+                  <div className="form-group">
+                    <label htmlFor="phone">Phone Number</label>
+                    <div className="input-wrapper-with-icon">
+                      <span className="input-icon-left"><Phone size={18} /></span>
+                      <Field
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        className="form-input"
+                      />
+                    </div>
+                  </div>
 
-            <button type="submit" className="auth-btn" disabled={d.isLoading}>
-              {d.isLoading ? (
-                <Loader2 size={18} className="spin" />
-              ) : (
-                <>
-                  <span>Send Reset Link</span>
-                  <ArrowRight size={18} />
-                </>
-              )}
-            </button>
-          </form>
+                  <button type="submit" className="auth-btn" disabled={forgotPasswordData.isLoading}>
+                    {forgotPasswordData.isLoading ? (
+                      <Loader2 size={18} className="spin" />
+                    ) : (
+                      <>
+                        <span>Send Reset Link</span>
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </button>
+                </Form>
+              );
+            }}
+          </Formik>
         </div>
       </div>
     </div>
