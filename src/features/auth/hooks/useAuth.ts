@@ -7,9 +7,11 @@ import type { AuthUser } from '../types/auth.types';
 export const useAuth = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsAuthenticated(!!Cookies.get(AUTH_STORAGE_KEYS.ACCESS_TOKEN));
+    setIsLoading(false);
   }, []);
 
   const logout = useCallback(() => {
@@ -28,5 +30,5 @@ export const useAuth = () => {
     user = null;
   }
 
-  return { isAuthenticated, user, logout };
+  return { isAuthenticated, isLoading, user, logout };
 };

@@ -4,7 +4,8 @@ import { useAuth } from '../features/auth/hooks/useAuth';
 import { AUTH_ROUTES } from '../features/auth/constants/auth.constants';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return null;
   if (!isAuthenticated) {
     return <Navigate to={AUTH_ROUTES.LOGIN} replace />;
   }
