@@ -130,12 +130,12 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
   useEffect(() => {
     if (lead && isOpen) {
       setLeadInfo({
-        source: lead.source || 'Website',
-        purpose: lead.purpose || 'Sales',
-        status: lead.status || 'Active',
-        assignedTo: lead.assignedTo || 'John Doe',
-        type: lead.type || 'Hot Lead',
-        nextFollowUp: lead.nextFollowUp || '2024-04-30',
+        source: lead.source?.source || 'Website',
+        purpose: lead.purpose?.purpose || 'Sales',
+        status: lead.status?.status || 'Active',
+        assignedTo: lead.agentId || 'Unassigned',
+        type: lead.type?.type || 'Hot Lead',
+        nextFollowUp: lead.nextFollowUpDate || '2024-04-30',
         address: '123 Main Street, City',
         location: 'New York, USA',
         remarks: '',
@@ -200,8 +200,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                 </div>
                 <h2 className="leaddrawer-name">{lead.name}</h2>
                 <div className="leaddrawer-badges">
-                  <span className={`leaddrawer-badge ${getTypeBadgeClass(lead.type)}`}>{lead.type}</span>
-                  <span className={`leaddrawer-badge ${lead.status?.toLowerCase()}`}>{lead.status}</span>
+                  <span className={`leaddrawer-badge ${getTypeBadgeClass(lead.type?.type)}`}>{lead.type?.type}</span>
+                  <span className={`leaddrawer-badge ${lead.status?.status?.toLowerCase()}`}>{lead.status?.status}</span>
                 </div>
               </div>
 
@@ -219,7 +219,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                     <div className="leaddrawer-info-icon"><User size={14} /></div>
                     <div className="leaddrawer-info-content">
                       <span className="leaddrawer-info-label">Created By</span>
-                      <span className="leaddrawer-info-value">{lead.assignedTo}</span>
+                      <span className="leaddrawer-info-value">{lead.agentId}</span>
                     </div>
                   </div>
                   <div className="leaddrawer-info-item">

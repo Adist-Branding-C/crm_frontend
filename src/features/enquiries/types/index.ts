@@ -1,18 +1,8 @@
-export interface Lead {
-  id: number;
-  name: string;
-  phone: string;
-  email: string;
-  location: string;
-  assignedTo: string;
-  purpose: string;
-  type: string;
-  status: string;
-  source: string;
-  createdAt: string;
-  updatedAt: string;
-  nextFollowUp: string;
-}
+import type { SortConfig } from '../../../shared/types/sort';
+import type { DateRange } from '../../../shared/types/common';
+import type { Lead } from './lead.types';
+
+export type { Lead, LeadType, LeadStatus, LeadSource, LeadPurpose } from './lead.types';
 
 export interface Filters {
   type: string;
@@ -30,31 +20,11 @@ export interface Filters {
   date: string;
 }
 
-import type { SortConfig } from '../../../shared/types/sort';
-import type { Column } from '../../../shared/types/table';
-import type { DateRange } from '../../../shared/types/common';
-
 export interface EnquiriesFiltersProps {
   filters: Filters;
   onFilterChange: (filters: Filters) => void;
   onClearFilters: () => void;
   onClose: () => void;
-}
-
-export interface EnquiriesTableProps {
-  data: Lead[];
-  columns: Column[];
-  sortConfig: SortConfig;
-  onSort: (key: string) => void;
-  paginatedIds: number[];
-  selectedIds: number[];
-  onSelectAll: (ids: number[], checked: boolean) => void;
-  onSelectRow: (id: number) => void;
-  actionMenuOpen: number | null;
-  actionMenuButtonRect: DOMRect | null;
-  onSetActionMenuOpen: (id: number | null) => void;
-  onSetActionMenuButtonRect: (rect: DOMRect | null) => void;
-  onViewLead: (lead: Lead) => void;
 }
 
 export interface EnquiriesToolbarProps {
@@ -77,7 +47,3 @@ export interface EnquiriesToolbarProps {
   onCloseActionsDropdown: () => void;
   onAddLead: () => void;
 }
-
-import type { PaginationProps } from '../../../shared/types/pagination';
-
-export interface EnquiriesPaginationProps extends PaginationProps {}

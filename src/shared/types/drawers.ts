@@ -79,4 +79,5 @@ export interface AddDealDrawerProps {
 export interface AddLeadDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }

@@ -1,20 +1,20 @@
 import { useState, useCallback } from 'react';
 
-export function useTableSelection() {
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+export function useTableSelection<TId extends string | number = number>() {
+  const [selectedIds, setSelectedIds] = useState<TId[]>([]);
 
-  const handleSelectAll = useCallback((ids: number[], checked: boolean) => {
+  const handleSelectAll = useCallback((ids: TId[], checked: boolean) => {
     if (checked) setSelectedIds(ids);
     else setSelectedIds([]);
   }, []);
 
-  const handleSelectRow = useCallback((id: number) => {
+  const handleSelectRow = useCallback((id: TId) => {
     setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   }, []);
 
-  const isSelected = useCallback((id: number) => selectedIds.includes(id), [selectedIds]);
+  const isSelected = useCallback((id: TId) => selectedIds.includes(id), [selectedIds]);
 
   return { selectedIds, handleSelectAll, handleSelectRow, isSelected, setSelectedIds };
 }

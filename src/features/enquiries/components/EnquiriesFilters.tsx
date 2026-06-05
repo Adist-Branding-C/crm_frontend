@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Filters, EnquiriesFiltersProps } from '../types';
+import type {  EnquiriesFiltersProps } from '../types';
 import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING } from '../../../shared/constants/statuses';
 import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 import { LEAD_TYPE_OPTIONS } from '../../../shared/constants/leadTypes';
