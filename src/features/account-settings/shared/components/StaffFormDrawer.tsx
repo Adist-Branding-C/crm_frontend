@@ -23,9 +23,10 @@ interface StaffFormDrawerProps {
   staffData: StaffDataItem[];
   onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onClose: () => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-const StaffFormDrawer = ({ isOpen, editingStaff, formData, staffData, onInputChange, onClose }: StaffFormDrawerProps) => {
+const StaffFormDrawer = ({ isOpen, editingStaff, formData, staffData, onInputChange, onClose, handleSubmit }: StaffFormDrawerProps) => {
   if (!isOpen) return null;
 
   return (
@@ -38,7 +39,7 @@ const StaffFormDrawer = ({ isOpen, editingStaff, formData, staffData, onInputCha
           </button>
         </div>
         <div className="drawer-body">
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Name <span className="text-danger">*</span></label>
               <input type="text" name="name" className="form-control" placeholder="Enter name" value={formData.name} onChange={onInputChange} />

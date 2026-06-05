@@ -56,8 +56,11 @@ export function useDepartment() {
       const response = await departmentService.createDepartment(values);
 
       if (response.status) {
-        const { departmentName, description, status } = values;
-        setDepartmentList(prev => [...prev, { id: Date.now(), departmentName, description: description ?? '', status }]);
+        if (response.data && 'id' in response.data) {
+          setDepartmentList(prev => [...prev, response.data as DepartmentItem]);
+        } else {
+          fetchDepartments();
+        }
         resetForm();
         return true;
       } else {
@@ -78,7 +81,7 @@ export function useDepartment() {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, []);
+  }, [fetchDepartments]);
 
   const handleUpdateDepartment = useCallback(async (
     id: number,

@@ -62,7 +62,12 @@ export function useEmailTemplate() {
       const response = await emailTemplateService.createEmailTemplate(requestData);
 
       if (response.status) {
-        setEmailTemplateList(prev => [...prev, { id: Date.now(), templateName, subject, content, isDefault: Boolean(isDefault), status } as EmailTemplateItem]);
+        const createdItem = response.data;
+        if (createdItem && 'id' in createdItem) {
+          setEmailTemplateList(prev => [...prev, createdItem as EmailTemplateItem]);
+        } else {
+          fetchEmailTemplates();
+        }
         resetForm();
         return true;
       } else {
@@ -83,7 +88,7 @@ export function useEmailTemplate() {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, []);
+  }, [fetchEmailTemplates]);
 
   const handleUpdateEmailTemplate = useCallback(async (
     id: number,

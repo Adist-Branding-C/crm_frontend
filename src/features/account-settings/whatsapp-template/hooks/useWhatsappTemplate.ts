@@ -63,7 +63,12 @@ export function useWhatsappTemplate() {
       const response = await whatsappTemplateService.createWhatsappTemplate(requestData);
 
       if (response.status) {
-        setWhatsappTemplateList(prev => [...prev, { id: Date.now(), templateName, message, status }]);
+        const createdItem = response.data;
+        if (createdItem && 'id' in createdItem) {
+          setWhatsappTemplateList(prev => [...prev, createdItem as WhatsappTemplateItem]);
+        } else {
+          fetchWhatsappTemplates();
+        }
         resetForm();
         return true;
       } else {
@@ -77,7 +82,7 @@ export function useWhatsappTemplate() {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, [setErrorFromUnknown]);
+  }, [setErrorFromUnknown, fetchWhatsappTemplates]);
 
   const handleUpdateWhatsappTemplate = useCallback(async (
     id: number,

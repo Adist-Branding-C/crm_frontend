@@ -59,7 +59,12 @@ export function useDesignation() {
       const response = await designationService.createDesignation(requestData);
 
       if (response.status) {
-        setDesignationList(prev => [...prev, { id: Date.now(), designationName, description, status }]);
+        const createdItem = response.data;
+        if (createdItem && 'id' in createdItem) {
+          setDesignationList(prev => [...prev, createdItem as DesignationItem]);
+        } else {
+          fetchDesignations();
+        }
         resetForm();
         return true;
       } else {
@@ -80,7 +85,7 @@ export function useDesignation() {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, []);
+  }, [fetchDesignations]);
 
   const handleUpdateDesignation = useCallback(async (
     id: number,

@@ -3,17 +3,8 @@ import type { FormikHelpers } from 'formik';
 import { agentService } from '../services/agent.service';
 import { addAgentValidationSchema, editAgentValidationSchema } from '../validations/agent.validation';
 import { designationService } from '../../designations/services/designation.service';
+import { ADD_AGENT_INITIAL_VALUES } from '../constants/agent.constants';
 import type { AgentItem, AgentFormData, DesignationOption } from '../types/agent.types';
-
-const addAgentInitialValues: AgentFormData = {
-  fullName: '',
-  email: '',
-  phone: '',
-  password: '',
-  confirmPassword: '',
-  designationId: '',
-  status: '',
-};
 
 export function useAgent() {
   const [agentList, setAgentList] = useState<AgentItem[]>([]);
@@ -194,7 +185,7 @@ export function useAgent() {
     handleDeleteAgent,
     validationSchema: addAgentValidationSchema,
     editValidationSchema: editAgentValidationSchema,
-    initialValues: addAgentInitialValues,
+    initialValues: ADD_AGENT_INITIAL_VALUES,
     designationOptions,
     fetchDesignations,
   };
