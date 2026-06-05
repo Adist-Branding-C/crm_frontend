@@ -10,16 +10,16 @@
 @import '../../../../shared/styles/sidebar-layout.css';
 @import '../../../../shared/styles/toolbars.css';
 
-.work-mode-table-wrapper .table-container,
-.work-mode-table-wrapper .table-scroll {
+.department-table-wrapper .table-container,
+.department-table-wrapper .table-scroll {
   overflow: visible;
 }
 
-.work-mode-table-wrapper .dropdown-container {
+.department-table-wrapper .dropdown-container {
   position: relative;
 }
 
-.work-mode-table-wrapper .dropdown-menu {
+.department-table-wrapper .dropdown-menu {
   position: absolute;
   top: 100%;
   right: 0;

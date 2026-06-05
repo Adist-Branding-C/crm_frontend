@@ -10,18 +10,11 @@
 @import '../../../../shared/styles/sidebar-layout.css';
 @import '../../../../shared/styles/toolbars.css';
 
-.work-mode-table-wrapper .table-container,
-.work-mode-table-wrapper .table-scroll {
+.checkout-note-table-wrapper .table-container,
+.checkout-note-table-wrapper .table-scroll {
   overflow: visible;
 }
 
-.work-mode-table-wrapper .dropdown-container {
-  position: relative;
-}
-
-.work-mode-table-wrapper .dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
+.checkout-note-table-wrapper .dropdown-menu {
   z-index: 9999;
 }

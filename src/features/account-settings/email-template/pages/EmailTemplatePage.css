@@ -15,6 +15,13 @@
   overflow: visible;
 }
 
+.email-template-table-wrapper .dropdown-container {
+  position: relative;
+}
+
 .email-template-table-wrapper .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
   z-index: 9999;
 }
