@@ -1,18 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import type { AgentItem, AgentFormData } from '../types/agent.types';
-
-interface UseAgentActionsParams {
-  agent: {
-    handleAddAgent: (values: AgentFormData, helpers: FormikHelpers<AgentFormData>) => Promise<boolean>;
-    handleUpdateAgent: (staffId: string, values: AgentFormData, helpers: FormikHelpers<AgentFormData>) => Promise<boolean>;
-    handleDeleteAgent: (staffId: string) => Promise<boolean>;
-  };
-  drawer: {
-    editingItem: AgentItem | null;
-    closeDrawer: () => void;
-  };
-}
+import type { UseAgentActionsParams } from '../types/use-agent-actions.types';
 
 export function useAgentActions({ agent, drawer }: UseAgentActionsParams) {
   const [deletingItem, setDeletingItem] = useState<AgentItem | null>(null);
