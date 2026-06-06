@@ -1,13 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { AgentItem } from '../types/agent.types';
-
-interface AgentActionMenuProps {
-  item: AgentItem;
-  dropdownOpen: string | null;
-  onToggleDropdown: (id: string | null) => void;
-  onEdit: (item: AgentItem) => void;
-  onDelete: (item: AgentItem) => void;
-}
+import type { AgentActionMenuProps } from '../types/agent-action-menu.types';
 
 const AgentActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: AgentActionMenuProps) => {
   return (

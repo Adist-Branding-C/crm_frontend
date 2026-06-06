@@ -1,20 +1,7 @@
 import { Search } from 'lucide-react';
 import AgentActionMenu from './AgentActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { AgentItem } from '../types/agent.types';
-
-interface AgentTableProps {
-  data: AgentItem[];
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  rowsPerPage: number;
-  onRowsPerPageChange: (value: number) => void;
-  totalRecords: number;
-  dropdownOpen: string | null;
-  onToggleDropdown: (id: string | null) => void;
-  onEdit: (item: AgentItem) => void;
-  onDelete: (item: AgentItem) => void;
-}
+import type { AgentTableProps } from '../types/agent-table.types';
 
 const AgentTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, totalRecords, dropdownOpen, onToggleDropdown, onEdit, onDelete }: AgentTableProps) => {
   return (

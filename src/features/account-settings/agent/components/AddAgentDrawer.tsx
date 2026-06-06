@@ -1,23 +1,8 @@
 import { useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
-import type { FormikHelpers } from 'formik';
-import type { Schema } from 'yup';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { AgentFormData, DesignationOption } from '../types/agent.types';
-
-interface AddAgentDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  validationSchema: Schema<Record<string, unknown>>;
-  initialValues: AgentFormData;
-  onSubmit: (values: AgentFormData, helpers: FormikHelpers<AgentFormData>) => void | Promise<void>;
-  isLoading: boolean;
-  error: string;
-  isEditing: boolean;
-  designationOptions: DesignationOption[];
-  onFetchDesignations: () => void;
-}
+import type { AddAgentDrawerProps } from '../types/add-agent-drawer.types';
 
 const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing, designationOptions, onFetchDesignations }: AddAgentDrawerProps) => {
   useEffect(() => {

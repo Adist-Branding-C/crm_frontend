@@ -1,11 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteAgentModalProps {
-  isOpen: boolean;
-  itemName: string;
-  onConfirm: () => void;
-  onClose: () => void;
-}
+import type { DeleteAgentModalProps } from '../types/delete-agent-modal.types';
 
 const DeleteAgentModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteAgentModalProps) => {
   if (!isOpen) return null;
