@@ -1,9 +1,9 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { EMAIL_TEMPLATE_API_ENDPOINTS } from '../constants/emailTemplate.constants';
-import type { EmailTemplateFormData, EmailTemplateListResponse, EmailTemplateResponse, EmailTemplateQueryParams, DeleteResponse } from '../types/emailTemplate.types';
+import { EMAIL_TEMPLATE_API_ENDPOINTS } from '../constants/emailTemplateApiEndpoints';
+import type { EmailTemplateFormData, EmailTemplateResponse, DeleteEmailTemplateResponse } from '../types/emailTemplate.types';
 
 class EmailTemplateService {
-  async getAllEmailTemplates(params: EmailTemplateQueryParams = {}): Promise<EmailTemplateListResponse> {
+  async getAllEmailTemplates(params: Record<string, string | number | undefined> = {}): Promise<EmailTemplateResponse> {
     const queryParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
@@ -16,7 +16,7 @@ class EmailTemplateService {
       ? `${EMAIL_TEMPLATE_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
       : EMAIL_TEMPLATE_API_ENDPOINTS.GET_ALL;
 
-    const response = await axiosInstance.get<EmailTemplateListResponse>(url);
+    const response = await axiosInstance.get<EmailTemplateResponse>(url);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -42,8 +42,8 @@ class EmailTemplateService {
     };
   }
 
-  async deleteEmailTemplate(id: number): Promise<DeleteResponse> {
-    const response = await axiosInstance.delete<DeleteResponse>(EMAIL_TEMPLATE_API_ENDPOINTS.DELETE(id));
+  async deleteEmailTemplate(id: number): Promise<DeleteEmailTemplateResponse> {
+    const response = await axiosInstance.delete<DeleteEmailTemplateResponse>(EMAIL_TEMPLATE_API_ENDPOINTS.DELETE(id));
     return {
       status: response.data.status,
       message: response.data.message,

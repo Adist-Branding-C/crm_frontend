@@ -1,9 +1,9 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { WHATSAPP_TEMPLATE_API_ENDPOINTS } from '../constants/whatsappTemplate.constants';
-import type { WhatsappTemplateListResponse, WhatsappTemplateResponse, CreateWhatsappTemplateRequest, UpdateWhatsappTemplateRequest } from '../types/whatsappTemplate.types';
+import { WHATSAPP_TEMPLATE_API_ENDPOINTS } from '../constants/whatsappTemplateApiEndpoints';
+import type { WhatsappTemplateFormData, WhatsappTemplateResponse } from '../types/whatsapp-template.types';
 
 class WhatsappTemplateService {
-  async getAllWhatsappTemplates(params: Record<string, string | number | boolean> = {}): Promise<WhatsappTemplateListResponse> {
+  async getAllWhatsappTemplates(params: Record<string, string | number | undefined> = {}): Promise<WhatsappTemplateResponse> {
     const queryParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
@@ -16,7 +16,7 @@ class WhatsappTemplateService {
       ? `${WHATSAPP_TEMPLATE_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
       : WHATSAPP_TEMPLATE_API_ENDPOINTS.GET_ALL;
 
-    const response = await axiosInstance.get<WhatsappTemplateListResponse>(url);
+    const response = await axiosInstance.get<WhatsappTemplateResponse>(url);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -24,7 +24,7 @@ class WhatsappTemplateService {
     };
   }
 
-  async createWhatsappTemplate(data: CreateWhatsappTemplateRequest): Promise<WhatsappTemplateResponse> {
+  async createWhatsappTemplate(data: WhatsappTemplateFormData): Promise<WhatsappTemplateResponse> {
     const response = await axiosInstance.post<WhatsappTemplateResponse>(WHATSAPP_TEMPLATE_API_ENDPOINTS.CREATE, data);
     return {
       status: response.data.status,
@@ -33,7 +33,7 @@ class WhatsappTemplateService {
     };
   }
 
-  async updateWhatsappTemplate(id: number, data: UpdateWhatsappTemplateRequest): Promise<WhatsappTemplateResponse> {
+  async updateWhatsappTemplate(id: number, data: WhatsappTemplateFormData): Promise<WhatsappTemplateResponse> {
     const response = await axiosInstance.patch<WhatsappTemplateResponse>(WHATSAPP_TEMPLATE_API_ENDPOINTS.UPDATE(id), data);
     return {
       status: response.data.status,
@@ -42,8 +42,8 @@ class WhatsappTemplateService {
     };
   }
 
-  async deleteWhatsappTemplate(id: number): Promise<{ status: boolean; message: string }> {
-    const response = await axiosInstance.delete<{ status: boolean; message: string }>(WHATSAPP_TEMPLATE_API_ENDPOINTS.DELETE(id));
+  async deleteWhatsappTemplate(id: number): Promise<Pick<WhatsappTemplateResponse, 'status' | 'message'>> {
+    const response = await axiosInstance.delete<WhatsappTemplateResponse>(WHATSAPP_TEMPLATE_API_ENDPOINTS.DELETE(id));
     return {
       status: response.data.status,
       message: response.data.message,

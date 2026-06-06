@@ -1,10 +1,7 @@
-export const WORK_MODE_API_ENDPOINTS = {
-  GET_ALL: '/work-mode',
-  CREATE: '/work-mode',
-  UPDATE: (id: number) => `/work-mode/${id}`,
-  DELETE: (id: number) => `/work-mode/${id}`,
-};
+import type { WorkModeFormData } from '../types/workMode.types';
 
-export const WORK_MODE_DEFAULTS = {
-  ROWS_PER_PAGE: 10,
+export const ADD_WORK_MODE_INITIAL_VALUES: WorkModeFormData = {
+  workModeName: '',
+  description: '',
+  status: '',
 };

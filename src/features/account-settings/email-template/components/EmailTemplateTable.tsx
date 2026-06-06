@@ -1,20 +1,7 @@
 import { Search } from 'lucide-react';
 import EmailTemplateActionMenu from './EmailTemplateActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { EmailTemplateItem } from '../types/emailTemplate.types';
-
-interface EmailTemplateTableProps {
-  data: EmailTemplateItem[]
-  searchQuery: string
-  onSearchChange: (value: string) => void
-  rowsPerPage: number
-  onRowsPerPageChange: (value: number) => void
-  totalRecords: number
-  dropdownOpen: number | null
-  onToggleDropdown: (value: number | null) => void
-  onEdit: (item: EmailTemplateItem) => void
-  onDelete: (item: EmailTemplateItem) => void
-}
+import type { EmailTemplateTableProps } from '../types/email-template-table.types';
 
 const EmailTemplateTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, totalRecords, dropdownOpen, onToggleDropdown, onEdit, onDelete }: EmailTemplateTableProps) => {
   return (

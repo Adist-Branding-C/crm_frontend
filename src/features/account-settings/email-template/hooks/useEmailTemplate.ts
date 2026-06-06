@@ -1,23 +1,16 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FormikHelpers } from 'formik';
 import { emailTemplateService } from '../services/emailTemplate.service';
-import { addEmailTemplateValidationSchema } from '../validations/emailTemplate.validation';
+import { addEmailTemplateValidationSchema, editEmailTemplateValidationSchema } from '../validations/emailTemplate.validation';
+import { ADD_EMAIL_TEMPLATE_INITIAL_VALUES } from '../constants/emailTemplate.constants';
 import type { EmailTemplateItem, EmailTemplateFormData } from '../types/emailTemplate.types';
-
-const addEmailTemplateInitialValues: EmailTemplateFormData = {
-  templateName: '',
-  subject: '',
-  content: '',
-  isDefault: false,
-  status: '',
-};
 
 export function useEmailTemplate() {
   const [emailTemplateList, setEmailTemplateList] = useState<EmailTemplateItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchEmailTemplates = useCallback(async (params: Record<string, string | number | boolean | undefined> = {}) => {
+  const fetchEmailTemplates = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
     setIsLoading(true);
     setError('');
 
@@ -25,7 +18,12 @@ export function useEmailTemplate() {
       const response = await emailTemplateService.getAllEmailTemplates(params);
 
       if (response.status) {
-        setEmailTemplateList(Array.isArray(response.data?.items) ? response.data.items : []);
+        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
+          ? (response.data as { items: EmailTemplateItem[] }).items
+          : Array.isArray(response.data)
+            ? response.data
+            : [];
+        setEmailTemplateList(Array.isArray(rawData) ? rawData : []);
       } else {
         setError(response.message || 'Failed to fetch email templates');
       }
@@ -50,20 +48,19 @@ export function useEmailTemplate() {
   const handleAddEmailTemplate = useCallback(async (
     values: EmailTemplateFormData,
     { setSubmitting, resetForm }: FormikHelpers<EmailTemplateFormData>,
-  ): Promise<boolean> => {
+  ) => {
     setError('');
     setIsLoading(true);
 
     try {
-      const { createdBy: _createdBy, ...rest } = values as EmailTemplateFormData & { createdBy?: string };
-      const { templateName, subject, content, isDefault, status } = rest;
+      const { templateName, subject, content, isDefault, status } = values;
       const requestData = { templateName, subject, content, isDefault: Boolean(isDefault), status };
 
       const response = await emailTemplateService.createEmailTemplate(requestData);
 
       if (response.status) {
         const createdItem = response.data;
-        if (createdItem && 'id' in createdItem) {
+        if (createdItem && typeof createdItem === 'object' && 'id' in createdItem) {
           setEmailTemplateList(prev => [...prev, createdItem as EmailTemplateItem]);
         } else {
           fetchEmailTemplates();
@@ -94,13 +91,12 @@ export function useEmailTemplate() {
     id: number,
     values: EmailTemplateFormData,
     { setSubmitting }: FormikHelpers<EmailTemplateFormData>,
-  ): Promise<boolean> => {
+  ) => {
     setError('');
     setIsLoading(true);
 
     try {
-      const { createdBy: _createdBy, ...rest } = values as EmailTemplateFormData & { createdBy?: string };
-      const { templateName, subject, content, isDefault, status } = rest;
+      const { templateName, subject, content, isDefault, status } = values;
       const requestData = { templateName, subject, content, isDefault: Boolean(isDefault), status };
 
       const response = await emailTemplateService.updateEmailTemplate(id, requestData);
@@ -130,7 +126,7 @@ export function useEmailTemplate() {
     }
   }, []);
 
-  const handleDeleteEmailTemplate = useCallback(async (id: number): Promise<boolean> => {
+  const handleDeleteEmailTemplate = useCallback(async (id: number) => {
     setError('');
 
     try {
@@ -165,6 +161,7 @@ export function useEmailTemplate() {
     handleUpdateEmailTemplate,
     handleDeleteEmailTemplate,
     validationSchema: addEmailTemplateValidationSchema,
-    initialValues: addEmailTemplateInitialValues,
+    editValidationSchema: editEmailTemplateValidationSchema,
+    initialValues: ADD_EMAIL_TEMPLATE_INITIAL_VALUES,
   };
 }

@@ -1,5 +1,5 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { CHECKOUT_NOTE_API_ENDPOINTS } from '../constants/checkoutNote.constants';
+import { CHECKOUT_NOTE_API_ENDPOINTS } from '../constants/checkoutNoteApiEndpoints';
 import type { CheckoutNoteRequest, GetAllCheckoutNotesParams, GetAllCheckoutNotesResponse, CheckoutNoteResponse, DeleteCheckoutNoteResponse } from '../types/checkoutNote.types';
 
 class CheckoutNoteService {

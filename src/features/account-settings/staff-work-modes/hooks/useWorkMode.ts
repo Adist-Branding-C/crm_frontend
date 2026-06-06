@@ -1,21 +1,16 @@
 import { useState, useCallback, useEffect } from 'react';
-import { workModeService } from '../services/workMode.service';
-import { addWorkModeValidationSchema } from '../validations/workMode.validation';
-import type { WorkModeItem, WorkModeFormData } from '../types/workMode.types';
 import type { FormikHelpers } from 'formik';
+import { workModeService } from '../services/workMode.service';
+import { addWorkModeValidationSchema, editWorkModeValidationSchema } from '../validations/workMode.validation';
+import { ADD_WORK_MODE_INITIAL_VALUES } from '../constants/workMode.constants';
+import type { WorkModeItem, WorkModeFormData } from '../types/workMode.types';
 
-const addWorkModeInitialValues: WorkModeFormData = {
-  workModeName: '',
-  description: '',
-  status: '',
-};
-
-export function useWorkModes() {
+export function useWorkMode() {
   const [workModeList, setWorkModeList] = useState<WorkModeItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchWorkModes = useCallback(async (params: Record<string, string> = {}) => {
+  const fetchWorkModes = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
     setIsLoading(true);
     setError('');
 
@@ -24,7 +19,7 @@ export function useWorkModes() {
 
       if (response.status) {
         const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? response.data.items
+          ? (response.data as { items: WorkModeItem[] }).items
           : Array.isArray(response.data)
             ? response.data
             : [];
@@ -50,7 +45,10 @@ export function useWorkModes() {
     fetchWorkModes();
   }, [fetchWorkModes]);
 
-  const handleAddWorkMode = useCallback(async (values: WorkModeFormData, { setSubmitting, resetForm }: FormikHelpers<WorkModeFormData>) => {
+  const handleAddWorkMode = useCallback(async (
+    values: WorkModeFormData,
+    { setSubmitting, resetForm }: FormikHelpers<WorkModeFormData>,
+  ) => {
     setError('');
     setIsLoading(true);
 
@@ -61,9 +59,9 @@ export function useWorkModes() {
       const response = await workModeService.createWorkMode(requestData);
 
       if (response.status) {
-        const newItemId = response.data?.id || response.data?.workMode?.id;
-        if (newItemId) {
-          setWorkModeList(prev => [...prev, { id: newItemId, workModeName, description, status }]);
+        const createdItem = response.data;
+        if (createdItem && typeof createdItem === 'object' && 'id' in createdItem) {
+          setWorkModeList(prev => [...prev, createdItem as WorkModeItem]);
         } else {
           fetchWorkModes();
         }
@@ -89,13 +87,11 @@ export function useWorkModes() {
     }
   }, [fetchWorkModes]);
 
-  const handleUpdateWorkMode = useCallback(async (id: number, values: WorkModeFormData, { setSubmitting }: FormikHelpers<WorkModeFormData>) => {
-    const modeId = Number(id);
-    if (!modeId || isNaN(modeId)) {
-      setError('Invalid work mode id');
-      setSubmitting(false);
-      return false;
-    }
+  const handleUpdateWorkMode = useCallback(async (
+    id: number,
+    values: WorkModeFormData,
+    { setSubmitting }: FormikHelpers<WorkModeFormData>,
+  ) => {
     setError('');
     setIsLoading(true);
 
@@ -103,11 +99,11 @@ export function useWorkModes() {
       const { workModeName, description, status } = values;
       const requestData: WorkModeFormData = { workModeName, description, status };
 
-      const response = await workModeService.updateWorkMode(modeId, requestData);
+      const response = await workModeService.updateWorkMode(id, requestData);
 
       if (response.status) {
         setWorkModeList(prev => prev.map(item =>
-          Number(item.id) === modeId ? { ...item, workModeName, description, status } : item
+          item.id === id ? { ...item, workModeName, description, status } : item
         ));
         return true;
       } else {
@@ -131,18 +127,13 @@ export function useWorkModes() {
   }, []);
 
   const handleDeleteWorkMode = useCallback(async (id: number) => {
-    const modeId = Number(id);
-    if (!modeId || isNaN(modeId)) {
-      setError('Invalid work mode id');
-      return false;
-    }
     setError('');
 
     try {
-      const response = await workModeService.deleteWorkMode(modeId);
+      const response = await workModeService.deleteWorkMode(id);
 
       if (response.status) {
-        setWorkModeList(prev => prev.filter(item => Number(item.id) !== modeId));
+        setWorkModeList(prev => prev.filter(item => item.id !== id));
         return true;
       } else {
         setError(response.message || 'Failed to delete work mode');
@@ -170,6 +161,7 @@ export function useWorkModes() {
     handleUpdateWorkMode,
     handleDeleteWorkMode,
     validationSchema: addWorkModeValidationSchema,
-    initialValues: addWorkModeInitialValues,
+    editValidationSchema: editWorkModeValidationSchema,
+    initialValues: ADD_WORK_MODE_INITIAL_VALUES,
   };
 }

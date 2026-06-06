@@ -1,19 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
-import type { FormikHelpers } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { EmailTemplateFormData } from '../types/emailTemplate.types';
-
-interface AddEmailTemplateDrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  validationSchema: unknown
-  initialValues: EmailTemplateFormData
-  onSubmit: (values: EmailTemplateFormData, helpers: FormikHelpers<EmailTemplateFormData>) => void | Promise<void>
-  isLoading: boolean
-  error: string
-  isEditing: boolean
-}
+import type { AddEmailTemplateDrawerProps } from '../types/add-email-template-drawer.types';
 
 const AddEmailTemplateDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddEmailTemplateDrawerProps) => {
   if (!isOpen) return null;

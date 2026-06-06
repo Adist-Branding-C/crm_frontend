@@ -1,22 +1,24 @@
 import { Plus } from 'lucide-react';
-import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { useWhatsappTemplatePage } from '../hooks/useWhatsappTemplatePage';
+import { useWhatsappTemplatePage } from '../hooks';
 import AddWhatsappTemplateDrawer from '../components/AddWhatsappTemplateDrawer';
 import DeleteWhatsappTemplateModal from '../components/DeleteWhatsappTemplateModal';
 import WhatsappTemplateTable from '../components/WhatsappTemplateTable';
+import PageHeader from '../../../../shared/components/layout/PageHeader';
+import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import './WhatsappTemplatePage.css';
 
 const WhatsappTemplatePage = () => {
   const {
     whatsappTemplate,
     searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
     showDrawer,
-    dropdownOpen, setDropdownOpen,
+    dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
-    rowsPerPage, setRowsPerPage,
     filteredData,
+    totalRecords,
+    drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
     handleEditClick,
@@ -25,7 +27,6 @@ const WhatsappTemplatePage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
-    drawerInitialValues,
   } = useWhatsappTemplatePage();
 
   return (
@@ -36,7 +37,7 @@ const WhatsappTemplatePage = () => {
           <SettingsTabs />
           <div className="task-panel">
             <span className="usage-quote">
-              <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{filteredData.length}</span> Templates
+              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Templates
             </span>
             <div className="task-nav">
               <button className="btn btn-primary" onClick={handleAddClick}>
@@ -51,17 +52,17 @@ const WhatsappTemplatePage = () => {
               onSearchChange={setSearchQuery}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={setRowsPerPage}
-              totalRecords={filteredData.length}
+              totalRecords={totalRecords}
               dropdownOpen={dropdownOpen}
-              onToggleDropdown={setDropdownOpen}
-              onEdit={(item) => { handleEditClick(item); setDropdownOpen(null); }}
-              onDelete={(item) => { handleDeleteClick(item); setDropdownOpen(null); }}
+              onToggleDropdown={onToggleDropdown}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
             />
           </div>
           <AddWhatsappTemplateDrawer
             isOpen={showDrawer}
             onClose={handleCloseDrawer}
-            validationSchema={whatsappTemplate.validationSchema}
+            validationSchema={editingItem ? whatsappTemplate.editValidationSchema : whatsappTemplate.validationSchema}
             initialValues={drawerInitialValues}
             onSubmit={editingItem ? handleEditSubmit : handleSubmit}
             isLoading={whatsappTemplate.isLoading}

@@ -1,14 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FormikHelpers } from 'formik';
 import { departmentService } from '../services/department.service';
-import { addDepartmentValidationSchema } from '../validations/department.validation';
+import { addDepartmentValidationSchema, editDepartmentValidationSchema } from '../validations/department.validation';
+import { ADD_DEPARTMENT_INITIAL_VALUES } from '../constants/department.constants';
 import type { DepartmentItem, DepartmentFormData, DepartmentQueryParams } from '../types/department.types';
-
-const addDepartmentInitialValues: DepartmentFormData = {
-  departmentName: '',
-  description: '',
-  status: '',
-};
 
 export function useDepartment() {
   const [departmentList, setDepartmentList] = useState<DepartmentItem[]>([]);
@@ -155,6 +150,7 @@ export function useDepartment() {
     handleUpdateDepartment,
     handleDeleteDepartment,
     validationSchema: addDepartmentValidationSchema,
-    initialValues: addDepartmentInitialValues,
+    editValidationSchema: editDepartmentValidationSchema,
+    initialValues: ADD_DEPARTMENT_INITIAL_VALUES,
   };
 }

@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { useCheckoutNote, useCheckoutNoteDrawer, useCheckoutNoteDropdown, useCheckoutNoteFilters, useCheckoutNoteActions } from '../hooks';
+import { useCheckoutNotePage } from '../hooks';
 import AddCheckoutNoteDrawer from '../components/AddCheckoutNoteDrawer';
 import DeleteCheckoutNoteModal from '../components/DeleteCheckoutNoteModal';
 import CheckoutNoteTable from '../components/CheckoutNoteTable';
@@ -8,11 +8,26 @@ import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import './CheckoutNotePage.css';
 
 const CheckoutNotePage = () => {
-  const checkout = useCheckoutNote();
-  const drawer = useCheckoutNoteDrawer();
-  const dropdown = useCheckoutNoteDropdown();
-  const filters = useCheckoutNoteFilters(checkout.checkoutNoteList);
-  const actions = useCheckoutNoteActions({ checkout, drawer });
+  const {
+    checkoutNote,
+    searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
+    showDrawer,
+    dropdownOpen, onToggleDropdown,
+    editingItem,
+    deletingItem,
+    filteredData,
+    totalRecords,
+    drawerInitialValues,
+    handleAddClick,
+    handleCloseDrawer,
+    handleEditClick,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleCloseDeleteModal,
+    handleSubmit,
+    handleEditSubmit,
+  } = useCheckoutNotePage();
 
   return (
     <div className="account-page">
@@ -22,43 +37,43 @@ const CheckoutNotePage = () => {
           <SettingsTabs />
           <div className="task-panel">
             <span className="usage-quote">
-              <span className="usage-count">{filters.totalRecords}</span> / <span className="usage-total">{filters.totalRecords}</span> Notes
+              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Notes
             </span>
             <div className="task-nav">
-              <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
+              <button className="btn btn-primary" onClick={handleAddClick}>
                 <Plus size={16} /> Add Note
               </button>
             </div>
           </div>
           <div className="checkout-note-table-wrapper">
             <CheckoutNoteTable
-              data={filters.filteredData.slice(0, filters.rowsPerPage)}
-              searchQuery={filters.searchQuery}
-              onSearchChange={filters.setSearchQuery}
-              rowsPerPage={filters.rowsPerPage}
-              onRowsPerPageChange={filters.setRowsPerPage}
-              totalRecords={filters.totalRecords}
-              dropdownOpen={dropdown.dropdownOpen}
-              onToggleDropdown={dropdown.toggleDropdown}
-              onEdit={(item) => { drawer.openEditDrawer(item); dropdown.closeDropdown(); }}
-              onDelete={(item) => { actions.handleDeleteClick(item); dropdown.closeDropdown(); }}
+              data={filteredData.slice(0, rowsPerPage)}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={setRowsPerPage}
+              totalRecords={totalRecords}
+              dropdownOpen={dropdownOpen}
+              onToggleDropdown={onToggleDropdown}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
             />
           </div>
           <AddCheckoutNoteDrawer
-            isOpen={drawer.showDrawer}
-            onClose={drawer.closeDrawer}
-            validationSchema={checkout.validationSchema}
-            initialValues={drawer.drawerInitialValues}
-            onSubmit={drawer.editingItem ? actions.handleEditSubmit : actions.handleSubmit}
-            isLoading={checkout.isLoading}
-            error={checkout.error}
-            isEditing={!!drawer.editingItem}
+            isOpen={showDrawer}
+            onClose={handleCloseDrawer}
+            validationSchema={editingItem ? checkoutNote.editValidationSchema : checkoutNote.validationSchema}
+            initialValues={drawerInitialValues}
+            onSubmit={editingItem ? handleEditSubmit : handleSubmit}
+            isLoading={checkoutNote.isLoading}
+            error={checkoutNote.error}
+            isEditing={!!editingItem}
           />
           <DeleteCheckoutNoteModal
-            isOpen={!!actions.deletingItem}
-            itemName={actions.deletingItem?.title || actions.deletingItem?.note || ''}
-            onConfirm={actions.handleConfirmDelete}
-            onClose={actions.closeDeleteModal}
+            isOpen={!!deletingItem}
+            itemName={deletingItem?.title || deletingItem?.note || ''}
+            onConfirm={handleConfirmDelete}
+            onClose={handleCloseDeleteModal}
           />
         </div>
       </div>

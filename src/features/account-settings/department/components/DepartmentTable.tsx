@@ -1,20 +1,7 @@
 import { Search } from 'lucide-react';
 import DepartmentActionMenu from './DepartmentActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { DepartmentItem } from '../types/department.types';
-
-interface DepartmentTableProps {
-  data: DepartmentItem[];
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  rowsPerPage: number;
-  onRowsPerPageChange: (value: number) => void;
-  totalRecords: number;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
-  onEdit: (item: DepartmentItem) => void;
-  onDelete: (item: DepartmentItem) => void;
-}
+import type { DepartmentTableProps } from '../types/department-table.types';
 
 const DepartmentTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, totalRecords, dropdownOpen, onToggleDropdown, onEdit, onDelete }: DepartmentTableProps) => {
   return (

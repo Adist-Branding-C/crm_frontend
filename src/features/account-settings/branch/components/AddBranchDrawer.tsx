@@ -1,20 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
-import type { FormikHelpers } from 'formik';
-import type { AnyObjectSchema } from 'yup';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { BranchFormData } from '../types/branch.types';
-
-interface AddBranchDrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  validationSchema: AnyObjectSchema
-  initialValues: BranchFormData
-  onSubmit: (values: BranchFormData, helpers: FormikHelpers<BranchFormData>) => void | Promise<void>
-  isLoading: boolean
-  error: string
-  isEditing: boolean
-}
+import type { AddBranchDrawerProps } from '../types/add-branch-drawer.types';
 
 const AddBranchDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddBranchDrawerProps) => {
   if (!isOpen) return null;

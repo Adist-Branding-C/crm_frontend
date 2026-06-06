@@ -1,13 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { WhatsappTemplateItem } from '../types/whatsappTemplate.types';
-
-interface WhatsappTemplateActionMenuProps {
-  item: WhatsappTemplateItem;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
-  onEdit: (item: WhatsappTemplateItem) => void;
-  onDelete: (item: WhatsappTemplateItem) => void;
-}
+import type { WhatsappTemplateActionMenuProps } from '../types/whatsapp-template-action-menu.types';
 
 const WhatsappTemplateActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: WhatsappTemplateActionMenuProps) => {
   return (

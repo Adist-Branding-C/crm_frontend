@@ -1,11 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteDesignationModalProps {
-  isOpen: boolean
-  itemName: string
-  onConfirm: () => void
-  onClose: () => void
-}
+import type { DeleteDesignationModalProps } from '../types/delete-designation-modal.types';
 
 const DeleteDesignationModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteDesignationModalProps) => {
   if (!isOpen) return null;

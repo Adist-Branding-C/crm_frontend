@@ -1,20 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { WorkModeFormData } from '../types/workMode.types';
-import type { FormikHelpers } from 'formik';
-import type { AnyObjectSchema } from 'yup';
-
-interface AddWorkModeDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  validationSchema: AnyObjectSchema;
-  initialValues: WorkModeFormData;
-  onSubmit: (values: WorkModeFormData, helpers: FormikHelpers<WorkModeFormData>) => Promise<void | boolean>;
-  isLoading: boolean;
-  error: string;
-  isEditing: boolean;
-}
+import type { AddWorkModeDrawerProps } from '../types/add-work-mode-drawer.types';
 
 const AddWorkModeDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddWorkModeDrawerProps) => {
   if (!isOpen) return null;
@@ -62,7 +49,7 @@ const AddWorkModeDrawer = ({ isOpen, onClose, validationSchema, initialValues, o
 
                   <div className="form-actions">
                     <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                      {isLoading ? <Loader2 size={16} className="spin" /> : 'Save'}
+                      {isLoading ? <Loader2 size={16} className="spin" /> : (isEditing ? 'Update' : 'Save')}
                     </button>
                     <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
                   </div>

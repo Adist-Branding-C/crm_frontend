@@ -1,29 +1,29 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FormikHelpers } from 'formik';
 import { designationService } from '../services/designation.service';
-import { addDesignationValidationSchema } from '../validations/designation.validation';
+import { addDesignationValidationSchema, editDesignationValidationSchema } from '../validations/designation.validation';
+import { ADD_DESIGNATION_INITIAL_VALUES } from '../constants/designation.constants';
 import type { DesignationItem, DesignationFormData } from '../types/designation.types';
-
-const addDesignationInitialValues: DesignationFormData = {
-  designationName: '',
-  description: '',
-  status: '',
-};
 
 export function useDesignation() {
   const [designationList, setDesignationList] = useState<DesignationItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchDesignations = useCallback(async (params: Record<string, string> = {}) => {
+  const fetchDesignations = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
     setIsLoading(true);
     setError('');
 
     try {
       const response = await designationService.getAllDesignations(params);
 
-      if (response.status && response.data && 'items' in response.data) {
-        setDesignationList(response.data.items);
+      if (response.status) {
+        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
+          ? (response.data as { items: DesignationItem[] }).items
+          : Array.isArray(response.data)
+            ? response.data
+            : [];
+        setDesignationList(Array.isArray(rawData) ? rawData : []);
       } else {
         setError(response.message || 'Failed to fetch designations');
       }
@@ -53,14 +53,11 @@ export function useDesignation() {
     setIsLoading(true);
 
     try {
-      const { designationName, description, status } = values;
-      const requestData: DesignationFormData = { designationName, description, status };
-
-      const response = await designationService.createDesignation(requestData);
+      const response = await designationService.createDesignation(values);
 
       if (response.status) {
         const createdItem = response.data;
-        if (createdItem && 'id' in createdItem) {
+        if (createdItem && typeof createdItem === 'object' && 'id' in createdItem) {
           setDesignationList(prev => [...prev, createdItem as DesignationItem]);
         } else {
           fetchDesignations();
@@ -96,12 +93,10 @@ export function useDesignation() {
     setIsLoading(true);
 
     try {
-      const { designationName, description, status } = values;
-      const requestData: DesignationFormData = { designationName, description, status };
-
-      const response = await designationService.updateDesignation(id, requestData);
+      const response = await designationService.updateDesignation(id, values);
 
       if (response.status) {
+        const { designationName, description, status } = values;
         setDesignationList(prev => prev.map(item =>
           item.id === id ? { ...item, designationName, description, status } : item
         ));
@@ -161,6 +156,7 @@ export function useDesignation() {
     handleUpdateDesignation,
     handleDeleteDesignation,
     validationSchema: addDesignationValidationSchema,
-    initialValues: addDesignationInitialValues,
+    editValidationSchema: editDesignationValidationSchema,
+    initialValues: ADD_DESIGNATION_INITIAL_VALUES,
   };
 }

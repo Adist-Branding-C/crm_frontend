@@ -1,13 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { DepartmentItem } from '../types/department.types';
-
-interface DepartmentActionMenuProps {
-  item: DepartmentItem;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
-  onEdit: (item: DepartmentItem) => void;
-  onDelete: (item: DepartmentItem) => void;
-}
+import type { DepartmentActionMenuProps } from '../types/department-action-menu.types';
 
 const DepartmentActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: DepartmentActionMenuProps) => {
   return (

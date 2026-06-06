@@ -1,110 +1,45 @@
-import { useState, useMemo, useCallback } from 'react';
-import type { FormikHelpers } from 'formik';
-import { useDepartment } from './useDepartment';
-import type { DepartmentItem, DepartmentFormData } from '../types/department.types';
+import { useCallback } from 'react';
+import { useDepartment, useDepartmentDrawer, useDepartmentDropdown, useDepartmentFilters, useDepartmentActions } from './index';
+import type { DepartmentItem } from '../types/department.types';
 
 export function useDepartmentPage() {
   const department = useDepartment();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-  const [editingItem, setEditingItem] = useState<DepartmentItem | null>(null);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [deletingItem, setDeletingItem] = useState<DepartmentItem | null>(null);
-
-  const filteredData = useMemo(
-    () => department.departmentList.filter(item =>
-      (item.departmentName || item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.description || '').toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    [department.departmentList, searchQuery]
-  );
-
-  const handleCloseDrawer = useCallback(() => {
-    setShowDrawer(false);
-    setEditingItem(null);
-  }, []);
-
-  const handleAddClick = useCallback(() => {
-    setEditingItem(null);
-    setShowDrawer(true);
-  }, []);
-
-  const handleSubmit = useCallback(async (
-    values: DepartmentFormData,
-    helpers: FormikHelpers<DepartmentFormData>,
-  ) => {
-    const success = await department.handleAddDepartment(values, helpers);
-    if (success) {
-      handleCloseDrawer();
-    }
-  }, [department.handleAddDepartment, handleCloseDrawer]);
+  const drawer = useDepartmentDrawer();
+  const dropdown = useDepartmentDropdown();
+  const filters = useDepartmentFilters(department.departmentList);
+  const actions = useDepartmentActions({ department, drawer });
 
   const handleEditClick = useCallback((item: DepartmentItem) => {
-    setEditingItem(item);
-    setShowDrawer(true);
-    setDropdownOpen(null);
-  }, []);
+    drawer.openEditDrawer(item);
+    dropdown.closeDropdown();
+  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
 
   const handleDeleteClick = useCallback((item: DepartmentItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  }, []);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingItem) return;
-    const success = await department.handleDeleteDepartment(deletingItem.id);
-    if (success) {
-      setDeletingItem(null);
-    }
-  }, [deletingItem, department.handleDeleteDepartment]);
-
-  const handleCloseDeleteModal = useCallback(() => {
-    setDeletingItem(null);
-  }, []);
-
-  const drawerInitialValues: DepartmentFormData = useMemo(
-    () => editingItem
-      ? {
-          departmentName: editingItem.departmentName || editingItem.name || '',
-          description: editingItem.description || '',
-          status: editingItem.status || '',
-        }
-      : { departmentName: '', description: '', status: '' },
-    [editingItem]
-  );
-
-  const handleEditSubmit = useCallback(async (
-    values: DepartmentFormData,
-    helpers: FormikHelpers<DepartmentFormData>,
-  ) => {
-    if (!editingItem) return;
-    const success = await department.handleUpdateDepartment(editingItem.id, values, helpers);
-    if (success) {
-      handleCloseDrawer();
-    }
-  }, [editingItem, department.handleUpdateDepartment, handleCloseDrawer]);
+    actions.handleDeleteClick(item);
+    dropdown.closeDropdown();
+  }, [actions.handleDeleteClick, dropdown.closeDropdown]);
 
   return {
     department,
-    searchQuery,
-    setSearchQuery,
-    showDrawer,
-    dropdownOpen,
-    setDropdownOpen,
-    editingItem,
-    deletingItem,
-    rowsPerPage,
-    setRowsPerPage,
-    filteredData,
-    handleAddClick,
-    handleCloseDrawer,
+    searchQuery: filters.searchQuery,
+    setSearchQuery: filters.setSearchQuery,
+    rowsPerPage: filters.rowsPerPage,
+    setRowsPerPage: filters.setRowsPerPage,
+    showDrawer: drawer.showDrawer,
+    dropdownOpen: dropdown.dropdownOpen,
+    onToggleDropdown: dropdown.toggleDropdown,
+    editingItem: drawer.editingItem,
+    deletingItem: actions.deletingItem,
+    filteredData: filters.filteredData,
+    totalRecords: filters.totalRecords,
+    drawerInitialValues: drawer.drawerInitialValues,
+    handleAddClick: drawer.openAddDrawer,
+    handleCloseDrawer: drawer.closeDrawer,
     handleEditClick,
     handleDeleteClick,
-    handleConfirmDelete,
-    handleCloseDeleteModal,
-    handleSubmit,
-    handleEditSubmit,
-    drawerInitialValues,
+    handleConfirmDelete: actions.handleConfirmDelete,
+    handleCloseDeleteModal: actions.closeDeleteModal,
+    handleSubmit: actions.handleSubmit,
+    handleEditSubmit: actions.handleEditSubmit,
   };
 }

@@ -1,32 +1,16 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FormikHelpers } from 'formik';
 import { whatsappTemplateService } from '../services/whatsappTemplate.service';
-import { addWhatsappTemplateValidationSchema } from '../validations/whatsappTemplate.validation';
-import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types/whatsappTemplate.types';
-
-const addWhatsappTemplateInitialValues: WhatsappTemplateFormData = {
-  templateName: '',
-  message: '',
-  status: '',
-};
+import { addWhatsappTemplateValidationSchema, editWhatsappTemplateValidationSchema } from '../validations/whatsapp-template.validation';
+import { ADD_WHATSAPP_TEMPLATE_INITIAL_VALUES } from '../constants/whatsappTemplate.constants';
+import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types/whatsapp-template.types';
 
 export function useWhatsappTemplate() {
   const [whatsappTemplateList, setWhatsappTemplateList] = useState<WhatsappTemplateItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const setErrorFromUnknown = useCallback((err: unknown, fallback: string) => {
-    if (err && typeof err === 'object' && 'response' in err) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr.response?.data?.message || fallback);
-    } else if (err && typeof err === 'object' && 'message' in err) {
-      setError((err as { message: string }).message);
-    } else {
-      setError('Network error. Please try again.');
-    }
-  }, []);
-
-  const fetchWhatsappTemplates = useCallback(async (params: Record<string, string | number | boolean> = {}) => {
+  const fetchWhatsappTemplates = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
     setIsLoading(true);
     setError('');
 
@@ -34,16 +18,28 @@ export function useWhatsappTemplate() {
       const response = await whatsappTemplateService.getAllWhatsappTemplates(params);
 
       if (response.status) {
-        setWhatsappTemplateList(Array.isArray(response.data?.items) ? response.data.items : []);
+        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
+          ? (response.data as { items: WhatsappTemplateItem[] }).items
+          : Array.isArray(response.data)
+            ? response.data
+            : [];
+        setWhatsappTemplateList(Array.isArray(rawData) ? rawData : []);
       } else {
         setError(response.message || 'Failed to fetch WhatsApp templates');
       }
     } catch (err: unknown) {
-      setErrorFromUnknown(err, 'Failed to fetch WhatsApp templates');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Failed to fetch WhatsApp templates');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Network error. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [setErrorFromUnknown]);
+  }, []);
 
   useEffect(() => {
     fetchWhatsappTemplates();
@@ -52,20 +48,19 @@ export function useWhatsappTemplate() {
   const handleAddWhatsappTemplate = useCallback(async (
     values: WhatsappTemplateFormData,
     { setSubmitting, resetForm }: FormikHelpers<WhatsappTemplateFormData>,
-  ): Promise<boolean> => {
+  ) => {
     setError('');
     setIsLoading(true);
 
     try {
       const { templateName, message, status } = values;
       const requestData: WhatsappTemplateFormData = { templateName, message, status };
-
       const response = await whatsappTemplateService.createWhatsappTemplate(requestData);
 
       if (response.status) {
-        const createdItem = response.data;
-        if (createdItem && 'id' in createdItem) {
-          setWhatsappTemplateList(prev => [...prev, createdItem as WhatsappTemplateItem]);
+        const data = response.data as { id?: number } | undefined;
+        if (data?.id) {
+          setWhatsappTemplateList(prev => [...prev, { id: data.id, templateName, message, status } as WhatsappTemplateItem]);
         } else {
           fetchWhatsappTemplates();
         }
@@ -76,26 +71,32 @@ export function useWhatsappTemplate() {
         return false;
       }
     } catch (err: unknown) {
-      setErrorFromUnknown(err, 'Failed to add WhatsApp template');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Failed to add WhatsApp template');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Network error. Please try again.');
+      }
       return false;
     } finally {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, [setErrorFromUnknown, fetchWhatsappTemplates]);
+  }, [fetchWhatsappTemplates]);
 
   const handleUpdateWhatsappTemplate = useCallback(async (
     id: number,
     values: WhatsappTemplateFormData,
     { setSubmitting }: FormikHelpers<WhatsappTemplateFormData>,
-  ): Promise<boolean> => {
+  ) => {
     setError('');
     setIsLoading(true);
 
     try {
       const { templateName, message, status } = values;
       const requestData: WhatsappTemplateFormData = { templateName, message, status };
-
       const response = await whatsappTemplateService.updateWhatsappTemplate(id, requestData);
 
       if (response.status) {
@@ -108,15 +109,22 @@ export function useWhatsappTemplate() {
         return false;
       }
     } catch (err: unknown) {
-      setErrorFromUnknown(err, 'Failed to update WhatsApp template');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Failed to update WhatsApp template');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Network error. Please try again.');
+      }
       return false;
     } finally {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, [setErrorFromUnknown]);
+  }, []);
 
-  const handleDeleteWhatsappTemplate = useCallback(async (id: number): Promise<boolean> => {
+  const handleDeleteWhatsappTemplate = useCallback(async (id: number) => {
     setError('');
 
     try {
@@ -130,10 +138,17 @@ export function useWhatsappTemplate() {
         return false;
       }
     } catch (err: unknown) {
-      setErrorFromUnknown(err, 'Failed to delete WhatsApp template');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Failed to delete WhatsApp template');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Network error. Please try again.');
+      }
       return false;
     }
-  }, [setErrorFromUnknown]);
+  }, []);
 
   return {
     whatsappTemplateList,
@@ -143,7 +158,8 @@ export function useWhatsappTemplate() {
     handleAddWhatsappTemplate,
     handleUpdateWhatsappTemplate,
     handleDeleteWhatsappTemplate,
-    validationSchema: addWhatsappTemplateValidationSchema as any,
-    initialValues: addWhatsappTemplateInitialValues,
+    validationSchema: addWhatsappTemplateValidationSchema,
+    editValidationSchema: editWhatsappTemplateValidationSchema,
+    initialValues: ADD_WHATSAPP_TEMPLATE_INITIAL_VALUES,
   };
 }

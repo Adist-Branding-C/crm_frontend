@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { useDesignationPage } from '../hooks/useDesignationPage';
+import { useDesignationPage } from '../hooks';
 import AddDesignationDrawer from '../components/AddDesignationDrawer';
 import DeleteDesignationModal from '../components/DeleteDesignationModal';
 import DesignationTable from '../components/DesignationTable';
@@ -11,12 +11,14 @@ const DesignationPage = () => {
   const {
     designation,
     searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
     showDrawer,
-    dropdownOpen, setDropdownOpen,
+    dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
-    rowsPerPage, setRowsPerPage,
     filteredData,
+    totalRecords,
+    drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
     handleEditClick,
@@ -25,7 +27,6 @@ const DesignationPage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
-    drawerInitialValues,
   } = useDesignationPage();
 
   return (
@@ -36,7 +37,7 @@ const DesignationPage = () => {
           <SettingsTabs />
           <div className="task-panel">
             <span className="usage-quote">
-              <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{filteredData.length}</span> Designations
+              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Designations
             </span>
             <div className="task-nav">
               <button className="btn btn-primary" onClick={handleAddClick}>
@@ -51,17 +52,17 @@ const DesignationPage = () => {
               onSearchChange={setSearchQuery}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={setRowsPerPage}
-              totalRecords={filteredData.length}
+              totalRecords={totalRecords}
               dropdownOpen={dropdownOpen}
-              onToggleDropdown={setDropdownOpen}
-              onEdit={(item) => { handleEditClick(item); setDropdownOpen(null); }}
-              onDelete={(item) => { handleDeleteClick(item); setDropdownOpen(null); }}
+              onToggleDropdown={onToggleDropdown}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
             />
           </div>
           <AddDesignationDrawer
             isOpen={showDrawer}
             onClose={handleCloseDrawer}
-            validationSchema={designation.validationSchema}
+            validationSchema={editingItem ? designation.editValidationSchema : designation.validationSchema}
             initialValues={drawerInitialValues}
             onSubmit={editingItem ? handleEditSubmit : handleSubmit}
             isLoading={designation.isLoading}

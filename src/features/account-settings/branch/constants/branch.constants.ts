@@ -1,10 +1,7 @@
-export const BRANCH_API_ENDPOINTS = {
-  GET_ALL: '/branch',
-  CREATE: '/branch',
-  UPDATE: (id: number) => `/branch/${id}`,
-  DELETE: (id: number) => `/branch/${id}`,
-};
+import type { BranchFormData } from '../types/branch.types';
 
-export const BRANCH_DEFAULTS = {
-  ROWS_PER_PAGE: 10,
+export const ADD_BRANCH_INITIAL_VALUES: BranchFormData = {
+  name: '',
+  description: '',
+  status: '',
 };

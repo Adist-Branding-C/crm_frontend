@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { useDepartmentPage } from '../hooks/useDepartmentPage';
+import { useDepartmentPage } from '../hooks';
 import AddDepartmentDrawer from '../components/AddDepartmentDrawer';
 import DeleteDepartmentModal from '../components/DeleteDepartmentModal';
 import DepartmentTable from '../components/DepartmentTable';
@@ -11,12 +11,14 @@ const DepartmentPage = () => {
   const {
     department,
     searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
     showDrawer,
-    dropdownOpen, setDropdownOpen,
+    dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
-    rowsPerPage, setRowsPerPage,
     filteredData,
+    totalRecords,
+    drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
     handleEditClick,
@@ -25,7 +27,6 @@ const DepartmentPage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
-    drawerInitialValues,
   } = useDepartmentPage();
 
   return (
@@ -36,7 +37,7 @@ const DepartmentPage = () => {
           <SettingsTabs />
           <div className="task-panel">
             <span className="usage-quote">
-              <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{filteredData.length}</span> Departments
+              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Departments
             </span>
             <div className="task-nav">
               <button className="btn btn-primary" onClick={handleAddClick}>
@@ -51,17 +52,17 @@ const DepartmentPage = () => {
               onSearchChange={setSearchQuery}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={setRowsPerPage}
-              totalRecords={filteredData.length}
+              totalRecords={totalRecords}
               dropdownOpen={dropdownOpen}
-              onToggleDropdown={setDropdownOpen}
-              onEdit={(item) => { handleEditClick(item); setDropdownOpen(null); }}
-              onDelete={(item) => { handleDeleteClick(item); setDropdownOpen(null); }}
+              onToggleDropdown={onToggleDropdown}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
             />
           </div>
           <AddDepartmentDrawer
             isOpen={showDrawer}
             onClose={handleCloseDrawer}
-            validationSchema={department.validationSchema}
+            validationSchema={editingItem ? department.editValidationSchema : department.validationSchema}
             initialValues={drawerInitialValues}
             onSubmit={editingItem ? handleEditSubmit : handleSubmit}
             isLoading={department.isLoading}

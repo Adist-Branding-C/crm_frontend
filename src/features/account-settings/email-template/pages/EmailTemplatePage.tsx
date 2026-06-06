@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { useEmailTemplatePage } from '../hooks/useEmailTemplatePage';
+import { useEmailTemplatePage } from '../hooks';
 import AddEmailTemplateDrawer from '../components/AddEmailTemplateDrawer';
 import DeleteEmailTemplateModal from '../components/DeleteEmailTemplateModal';
 import EmailTemplateTable from '../components/EmailTemplateTable';
@@ -11,12 +11,14 @@ const EmailTemplatePage = () => {
   const {
     emailTemplate,
     searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
     showDrawer,
-    dropdownOpen, setDropdownOpen,
+    dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
-    rowsPerPage, setRowsPerPage,
     filteredData,
+    totalRecords,
+    drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
     handleEditClick,
@@ -25,7 +27,6 @@ const EmailTemplatePage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
-    drawerInitialValues,
   } = useEmailTemplatePage();
 
   return (
@@ -36,7 +37,7 @@ const EmailTemplatePage = () => {
           <SettingsTabs />
           <div className="task-panel">
             <span className="usage-quote">
-              <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{filteredData.length}</span> Templates
+              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Templates
             </span>
             <div className="task-nav">
               <button className="btn btn-primary" onClick={handleAddClick}>
@@ -51,17 +52,17 @@ const EmailTemplatePage = () => {
               onSearchChange={setSearchQuery}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={setRowsPerPage}
-              totalRecords={filteredData.length}
+              totalRecords={totalRecords}
               dropdownOpen={dropdownOpen}
-              onToggleDropdown={setDropdownOpen}
-              onEdit={(item) => { handleEditClick(item); setDropdownOpen(null); }}
-              onDelete={(item) => { handleDeleteClick(item); setDropdownOpen(null); }}
+              onToggleDropdown={onToggleDropdown}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
             />
           </div>
           <AddEmailTemplateDrawer
             isOpen={showDrawer}
             onClose={handleCloseDrawer}
-            validationSchema={emailTemplate.validationSchema}
+            validationSchema={editingItem ? emailTemplate.editValidationSchema : emailTemplate.validationSchema}
             initialValues={drawerInitialValues}
             onSubmit={editingItem ? handleEditSubmit : handleSubmit}
             isLoading={emailTemplate.isLoading}

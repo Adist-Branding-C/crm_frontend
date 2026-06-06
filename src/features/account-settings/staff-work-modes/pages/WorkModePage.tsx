@@ -1,22 +1,24 @@
 import { Plus } from 'lucide-react';
-import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { useWorkModePage } from '../hooks/useWorkModePage';
+import { useWorkModePage } from '../hooks';
 import AddWorkModeDrawer from '../components/AddWorkModeDrawer';
 import DeleteWorkModeModal from '../components/DeleteWorkModeModal';
 import WorkModeTable from '../components/WorkModeTable';
+import PageHeader from '../../../../shared/components/layout/PageHeader';
+import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import './WorkModePage.css';
 
 const WorkModePage = () => {
   const {
     workMode,
     searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
     showDrawer,
-    dropdownOpen, setDropdownOpen,
+    dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
-    rowsPerPage, setRowsPerPage,
     filteredData,
+    totalRecords,
+    drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
     handleEditClick,
@@ -25,7 +27,6 @@ const WorkModePage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
-    drawerInitialValues,
   } = useWorkModePage();
 
   return (
@@ -36,7 +37,7 @@ const WorkModePage = () => {
           <SettingsTabs />
           <div className="task-panel">
             <span className="usage-quote">
-              <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{filteredData.length}</span> Work Modes
+              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Work Modes
             </span>
             <div className="task-nav">
               <button className="btn btn-primary" onClick={handleAddClick}>
@@ -51,17 +52,17 @@ const WorkModePage = () => {
               onSearchChange={setSearchQuery}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={setRowsPerPage}
-              totalRecords={filteredData.length}
+              totalRecords={totalRecords}
               dropdownOpen={dropdownOpen}
-              onToggleDropdown={setDropdownOpen}
-              onEdit={(item) => { handleEditClick(item); setDropdownOpen(null); }}
-              onDelete={(item) => { handleDeleteClick(item); setDropdownOpen(null); }}
+              onToggleDropdown={onToggleDropdown}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
             />
           </div>
           <AddWorkModeDrawer
             isOpen={showDrawer}
             onClose={handleCloseDrawer}
-            validationSchema={workMode.validationSchema}
+            validationSchema={editingItem ? workMode.editValidationSchema : workMode.validationSchema}
             initialValues={drawerInitialValues}
             onSubmit={editingItem ? handleEditSubmit : handleSubmit}
             isLoading={workMode.isLoading}

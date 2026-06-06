@@ -1,5 +1,5 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { DEPARTMENT_API_ENDPOINTS } from '../constants/department.constants';
+import { DEPARTMENT_API_ENDPOINTS } from '../constants/departmentApiEndpoints';
 import type { DepartmentFormData, DepartmentListResponse, DepartmentResponse, DeleteDepartmentResponse, DepartmentQueryParams } from '../types/department.types';
 
 class DepartmentService {
@@ -17,22 +17,37 @@ class DepartmentService {
       : DEPARTMENT_API_ENDPOINTS.GET_ALL;
 
     const response = await axiosInstance.get<DepartmentListResponse>(url);
-    return response.data;
+    return {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
   }
 
   async createDepartment(data: DepartmentFormData): Promise<DepartmentResponse> {
     const response = await axiosInstance.post<DepartmentResponse>(DEPARTMENT_API_ENDPOINTS.CREATE, data);
-    return response.data;
+    return {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
   }
 
   async updateDepartment(id: number, data: DepartmentFormData): Promise<DepartmentResponse> {
     const response = await axiosInstance.patch<DepartmentResponse>(DEPARTMENT_API_ENDPOINTS.UPDATE(id), data);
-    return response.data;
+    return {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
   }
 
   async deleteDepartment(id: number): Promise<DeleteDepartmentResponse> {
     const response = await axiosInstance.delete<DeleteDepartmentResponse>(DEPARTMENT_API_ENDPOINTS.DELETE(id));
-    return response.data;
+    return {
+      status: response.data.status,
+      message: response.data.message,
+    };
   }
 }
 

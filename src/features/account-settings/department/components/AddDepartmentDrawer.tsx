@@ -1,20 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
-import type { FormikHelpers } from 'formik';
-import type { ObjectSchema } from 'yup';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { DepartmentFormData } from '../types/department.types';
-
-interface AddDepartmentDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  validationSchema: ObjectSchema<DepartmentFormData>;
-  initialValues: DepartmentFormData;
-  onSubmit: (values: DepartmentFormData, helpers: FormikHelpers<DepartmentFormData>) => Promise<void>;
-  isLoading: boolean;
-  error: string;
-  isEditing: boolean;
-}
+import type { AddDepartmentDrawerProps } from '../types/add-department-drawer.types';
 
 const AddDepartmentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddDepartmentDrawerProps) => {
   if (!isOpen) return null;

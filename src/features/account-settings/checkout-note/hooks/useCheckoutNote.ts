@@ -1,14 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FormikHelpers } from 'formik';
 import { checkoutNoteService } from '../services/checkoutNote.service';
-import { addCheckoutNoteValidationSchema } from '../validations/checkoutNote.validation';
+import { addCheckoutNoteValidationSchema, editCheckoutNoteValidationSchema } from '../validations/checkoutNote.validation';
+import { ADD_CHECKOUT_NOTE_INITIAL_VALUES } from '../constants/checkoutNote.constants';
 import type { CheckoutNoteItem, CheckoutNoteFormData, GetAllCheckoutNotesParams } from '../types/checkoutNote.types';
-
-const addCheckoutNoteInitialValues: CheckoutNoteFormData = {
-  title: '',
-  note: '',
-  status: '',
-};
 
 export function useCheckoutNote() {
   const [checkoutNoteList, setCheckoutNoteList] = useState<CheckoutNoteItem[]>([]);
@@ -172,6 +167,7 @@ export function useCheckoutNote() {
     handleUpdateCheckoutNote,
     handleDeleteCheckoutNote,
     validationSchema: addCheckoutNoteValidationSchema,
-    initialValues: addCheckoutNoteInitialValues,
+    editValidationSchema: editCheckoutNoteValidationSchema,
+    initialValues: ADD_CHECKOUT_NOTE_INITIAL_VALUES,
   };
 }

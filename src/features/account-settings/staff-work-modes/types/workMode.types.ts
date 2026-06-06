@@ -12,8 +12,13 @@ export interface WorkModeFormData {
   status: string;
 }
 
-export interface WorkModeResponse<T = unknown> {
+export interface WorkModeResponse {
   status: boolean;
   message: string;
-  data: T | undefined;
+  data?: unknown;
+}
+
+export interface DeleteWorkModeResponse {
+  status: boolean;
+  message: string;
 }

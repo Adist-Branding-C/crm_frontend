@@ -1,14 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FormikHelpers } from 'formik';
 import { branchService } from '../services/branch.service';
-import { addBranchValidationSchema } from '../validations/branch.validation';
+import { addBranchValidationSchema, editBranchValidationSchema } from '../validations/branch.validation';
+import { ADD_BRANCH_INITIAL_VALUES } from '../constants/branch.constants';
 import type { BranchItem, BranchFormData, GetAllBranchesParams } from '../types/branch.types';
-
-const addBranchInitialValues: BranchFormData = {
-  name: '',
-  description: '',
-  status: '',
-};
 
 export function useBranch() {
   const [branchList, setBranchList] = useState<BranchItem[]>([]);
@@ -172,6 +167,7 @@ export function useBranch() {
     handleUpdateBranch,
     handleDeleteBranch,
     validationSchema: addBranchValidationSchema,
-    initialValues: addBranchInitialValues,
+    editValidationSchema: editBranchValidationSchema,
+    initialValues: ADD_BRANCH_INITIAL_VALUES,
   };
 }

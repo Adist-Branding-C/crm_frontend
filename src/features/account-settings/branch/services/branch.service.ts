@@ -1,5 +1,5 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { BRANCH_API_ENDPOINTS } from '../constants/branch.constants';
+import { BRANCH_API_ENDPOINTS } from '../constants/branchApiEndpoints';
 import type { BranchRequest, GetAllBranchesParams, GetAllBranchesResponse, BranchResponse, DeleteBranchResponse } from '../types/branch.types';
 
 class BranchService {

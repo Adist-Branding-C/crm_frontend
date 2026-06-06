@@ -1,20 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
-import type { FormikHelpers } from 'formik';
-import type { AnyObjectSchema } from 'yup';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { CheckoutNoteFormData } from '../types/checkoutNote.types';
-
-interface AddCheckoutNoteDrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  validationSchema: AnyObjectSchema
-  initialValues: CheckoutNoteFormData
-  onSubmit: (values: CheckoutNoteFormData, helpers: FormikHelpers<CheckoutNoteFormData>) => void | Promise<void>
-  isLoading: boolean
-  error: string
-  isEditing: boolean
-}
+import type { AddCheckoutNoteDrawerProps } from '../types/add-checkout-note-drawer.types';
 
 const AddCheckoutNoteDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddCheckoutNoteDrawerProps) => {
   if (!isOpen) return null;
@@ -39,7 +26,7 @@ const AddCheckoutNoteDrawer = ({ isOpen, onClose, validationSchema, initialValue
               const formError = error || (submitCount > 0 ? Object.values(errors)[0] : '');
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError as string} />}
+                  {formError && <ErrorMessage message={formError} />}
 
                   <div className="form-group">
                     <label>Title <span className="text-danger">*</span></label>

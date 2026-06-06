@@ -1,10 +1,7 @@
-export const CHECKOUT_NOTE_API_ENDPOINTS = {
-  GET_ALL: '/checkout-note',
-  CREATE: '/checkout-note',
-  UPDATE: (id: number) => `/checkout-note/${id}`,
-  DELETE: (id: number) => `/checkout-note/${id}`,
-};
+import type { CheckoutNoteFormData } from '../types/checkoutNote.types';
 
-export const CHECKOUT_NOTE_DEFAULTS = {
-  ROWS_PER_PAGE: 10,
+export const ADD_CHECKOUT_NOTE_INITIAL_VALUES: CheckoutNoteFormData = {
+  title: '',
+  note: '',
+  status: '',
 };

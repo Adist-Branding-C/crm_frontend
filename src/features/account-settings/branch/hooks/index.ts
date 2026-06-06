@@ -3,3 +3,4 @@ export { useBranchDrawer } from './useBranchDrawer';
 export { useBranchDropdown } from './useBranchDropdown';
 export { useBranchFilters } from './useBranchFilters';
 export { useBranchActions } from './useBranchActions';
+export { useBranchPage } from './useBranchPage';

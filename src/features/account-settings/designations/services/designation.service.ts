@@ -1,14 +1,14 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import type { DesignationResponse, DesignationFormData } from '../types/designation.types';
-import { DESIGNATION_API_ENDPOINTS } from '../constants/designation.constants';
+import { DESIGNATION_API_ENDPOINTS } from '../constants/designationApiEndpoints';
+import type { DesignationFormData, DesignationResponse, DeleteDesignationResponse } from '../types/designation.types';
 
 class DesignationService {
-  async getAllDesignations(params: Record<string, string> = {}) {
+  async getAllDesignations(params: Record<string, string | number | undefined> = {}): Promise<DesignationResponse> {
     const queryParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, value);
+        queryParams.append(key, String(value));
       }
     });
 
@@ -24,7 +24,7 @@ class DesignationService {
     };
   }
 
-  async createDesignation(data: DesignationFormData) {
+  async createDesignation(data: DesignationFormData): Promise<DesignationResponse> {
     const response = await axiosInstance.post<DesignationResponse>(DESIGNATION_API_ENDPOINTS.CREATE, data);
     return {
       status: response.data.status,
@@ -33,7 +33,7 @@ class DesignationService {
     };
   }
 
-  async updateDesignation(id: number, data: DesignationFormData) {
+  async updateDesignation(id: number, data: DesignationFormData): Promise<DesignationResponse> {
     const response = await axiosInstance.patch<DesignationResponse>(DESIGNATION_API_ENDPOINTS.UPDATE(id), data);
     return {
       status: response.data.status,
@@ -42,7 +42,7 @@ class DesignationService {
     };
   }
 
-  async deleteDesignation(id: number) {
+  async deleteDesignation(id: number): Promise<DeleteDesignationResponse> {
     const response = await axiosInstance.delete<DesignationResponse>(DESIGNATION_API_ENDPOINTS.DELETE(id));
     return {
       status: response.data.status,

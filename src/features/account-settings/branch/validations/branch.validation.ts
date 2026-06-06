@@ -5,3 +5,9 @@ export const addBranchValidationSchema = yup.object({
   description: yup.string(),
   status: yup.string().required('Status is required'),
 });
+
+export const editBranchValidationSchema = yup.object({
+  name: yup.string().required('Branch name is required'),
+  description: yup.string(),
+  status: yup.string().required('Status is required'),
+});

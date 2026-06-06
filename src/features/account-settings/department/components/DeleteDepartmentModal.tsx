@@ -1,11 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteDepartmentModalProps {
-  isOpen: boolean;
-  itemName: string;
-  onConfirm: () => void;
-  onClose: () => void;
-}
+import type { DeleteDepartmentModalProps } from '../types/delete-department-modal.types';
 
 const DeleteDepartmentModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteDepartmentModalProps) => {
   if (!isOpen) return null;

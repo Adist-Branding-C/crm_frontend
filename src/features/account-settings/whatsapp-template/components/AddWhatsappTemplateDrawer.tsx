@@ -1,20 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
-import type { FormikHelpers } from 'formik';
-import * as yup from 'yup';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { WhatsappTemplateFormData } from '../types/whatsappTemplate.types';
-
-interface AddWhatsappTemplateDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  validationSchema: yup.ObjectSchema<any>;
-  initialValues: WhatsappTemplateFormData;
-  onSubmit: (values: WhatsappTemplateFormData, helpers: FormikHelpers<WhatsappTemplateFormData>) => Promise<void>;
-  isLoading: boolean;
-  error: string;
-  isEditing: boolean;
-}
+import type { AddWhatsappTemplateDrawerProps } from '../types/add-whatsapp-template-drawer.types';
 
 const AddWhatsappTemplateDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddWhatsappTemplateDrawerProps) => {
   if (!isOpen) return null;

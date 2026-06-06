@@ -1,13 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { BranchItem } from '../types/branch.types';
-
-interface BranchActionMenuProps {
-  item: BranchItem
-  dropdownOpen: number | null
-  onToggleDropdown: (value: number | null) => void
-  onEdit: (item: BranchItem) => void
-  onDelete: (item: BranchItem) => void
-}
+import type { BranchActionMenuProps } from '../types/branch-action-menu.types';
 
 const BranchActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: BranchActionMenuProps) => {
   return (

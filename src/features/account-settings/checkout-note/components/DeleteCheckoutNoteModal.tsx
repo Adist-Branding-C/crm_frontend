@@ -1,11 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteCheckoutNoteModalProps {
-  isOpen: boolean
-  itemName: string
-  onConfirm: () => void
-  onClose: () => void
-}
+import type { DeleteCheckoutNoteModalProps } from '../types/delete-checkout-note-modal.types';
 
 const DeleteCheckoutNoteModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteCheckoutNoteModalProps) => {
   if (!isOpen) return null;

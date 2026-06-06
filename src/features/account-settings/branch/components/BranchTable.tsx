@@ -1,20 +1,7 @@
 import { Search } from 'lucide-react';
 import BranchActionMenu from './BranchActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { BranchItem } from '../types/branch.types';
-
-interface BranchTableProps {
-  data: BranchItem[]
-  searchQuery: string
-  onSearchChange: (value: string) => void
-  rowsPerPage: number
-  onRowsPerPageChange: (value: number) => void
-  totalRecords: number
-  dropdownOpen: number | null
-  onToggleDropdown: (value: number | null) => void
-  onEdit: (item: BranchItem) => void
-  onDelete: (item: BranchItem) => void
-}
+import type { BranchTableProps } from '../types/branch-table.types';
 
 const BranchTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, totalRecords, dropdownOpen, onToggleDropdown, onEdit, onDelete }: BranchTableProps) => {
   return (

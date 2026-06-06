@@ -1,109 +1,45 @@
-import { useState, useMemo, useCallback } from 'react';
-import type { FormikHelpers } from 'formik';
-import { useWorkModes } from './useWorkModes';
-import type { WorkModeItem, WorkModeFormData } from '../types/workMode.types';
+import { useCallback } from 'react';
+import { useWorkMode, useWorkModeDrawer, useWorkModeDropdown, useWorkModeFilters, useWorkModeActions } from './index';
+import type { WorkModeItem } from '../types/workMode.types';
 
 export function useWorkModePage() {
-  const workMode = useWorkModes();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-  const [editingItem, setEditingItem] = useState<WorkModeItem | null>(null);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [deletingItem, setDeletingItem] = useState<WorkModeItem | null>(null);
-
-  const filteredData = useMemo(
-    () => workMode.workModeList.filter(item =>
-      (item.workModeName || item.name || '').toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    [workMode.workModeList, searchQuery]
-  );
-
-  const handleCloseDrawer = useCallback(() => {
-    setShowDrawer(false);
-    setEditingItem(null);
-  }, []);
-
-  const handleAddClick = useCallback(() => {
-    setEditingItem(null);
-    setShowDrawer(true);
-  }, []);
-
-  const handleSubmit = useCallback(async (
-    values: WorkModeFormData,
-    helpers: FormikHelpers<WorkModeFormData>,
-  ) => {
-    const success = await workMode.handleAddWorkMode(values, helpers);
-    if (success) {
-      handleCloseDrawer();
-    }
-  }, [workMode.handleAddWorkMode, handleCloseDrawer]);
+  const workMode = useWorkMode();
+  const drawer = useWorkModeDrawer();
+  const dropdown = useWorkModeDropdown();
+  const filters = useWorkModeFilters(workMode.workModeList);
+  const actions = useWorkModeActions({ workMode, drawer });
 
   const handleEditClick = useCallback((item: WorkModeItem) => {
-    setEditingItem(item);
-    setShowDrawer(true);
-    setDropdownOpen(null);
-  }, []);
+    drawer.openEditDrawer(item);
+    dropdown.closeDropdown();
+  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
 
   const handleDeleteClick = useCallback((item: WorkModeItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  }, []);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingItem) return;
-    const success = await workMode.handleDeleteWorkMode(deletingItem.id);
-    if (success) {
-      setDeletingItem(null);
-    }
-  }, [deletingItem, workMode.handleDeleteWorkMode]);
-
-  const handleCloseDeleteModal = useCallback(() => {
-    setDeletingItem(null);
-  }, []);
-
-  const drawerInitialValues: WorkModeFormData = useMemo(
-    () => editingItem
-      ? {
-          workModeName: editingItem.workModeName || editingItem.name || '',
-          description: editingItem.description || '',
-          status: editingItem.status || '',
-        }
-      : workMode.initialValues,
-    [editingItem, workMode.initialValues]
-  );
-
-  const handleEditSubmit = useCallback(async (
-    values: WorkModeFormData,
-    helpers: FormikHelpers<WorkModeFormData>,
-  ) => {
-    if (!editingItem) return;
-    const success = await workMode.handleUpdateWorkMode(editingItem.id, values, helpers);
-    if (success) {
-      handleCloseDrawer();
-    }
-  }, [editingItem, workMode.handleUpdateWorkMode, handleCloseDrawer]);
+    actions.handleDeleteClick(item);
+    dropdown.closeDropdown();
+  }, [actions.handleDeleteClick, dropdown.closeDropdown]);
 
   return {
     workMode,
-    searchQuery,
-    setSearchQuery,
-    showDrawer,
-    dropdownOpen,
-    setDropdownOpen,
-    editingItem,
-    deletingItem,
-    rowsPerPage,
-    setRowsPerPage,
-    filteredData,
-    handleAddClick,
-    handleCloseDrawer,
+    searchQuery: filters.searchQuery,
+    setSearchQuery: filters.setSearchQuery,
+    rowsPerPage: filters.rowsPerPage,
+    setRowsPerPage: filters.setRowsPerPage,
+    showDrawer: drawer.showDrawer,
+    dropdownOpen: dropdown.dropdownOpen,
+    onToggleDropdown: dropdown.toggleDropdown,
+    editingItem: drawer.editingItem,
+    deletingItem: actions.deletingItem,
+    filteredData: filters.filteredData,
+    totalRecords: filters.totalRecords,
+    drawerInitialValues: drawer.drawerInitialValues,
+    handleAddClick: drawer.openAddDrawer,
+    handleCloseDrawer: drawer.closeDrawer,
     handleEditClick,
     handleDeleteClick,
-    handleConfirmDelete,
-    handleCloseDeleteModal,
-    handleSubmit,
-    handleEditSubmit,
-    drawerInitialValues,
+    handleConfirmDelete: actions.handleConfirmDelete,
+    handleCloseDeleteModal: actions.closeDeleteModal,
+    handleSubmit: actions.handleSubmit,
+    handleEditSubmit: actions.handleEditSubmit,
   };
 }

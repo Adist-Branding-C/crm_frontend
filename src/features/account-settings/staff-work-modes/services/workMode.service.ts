@@ -1,14 +1,14 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { WORK_MODE_API_ENDPOINTS } from '../constants/workMode.constants';
-import type { WorkModeFormData, WorkModeItem, WorkModeResponse } from '../types/workMode.types';
+import { WORK_MODE_API_ENDPOINTS } from '../constants/workModeApiEndpoints';
+import type { WorkModeFormData, WorkModeResponse, DeleteWorkModeResponse } from '../types/workMode.types';
 
 class WorkModeService {
-  async getAllWorkModes(params: Record<string, string> = {}): Promise<WorkModeResponse<{ items: WorkModeItem[] } | WorkModeItem[]>> {
+  async getAllWorkModes(params: Record<string, string | number | undefined> = {}): Promise<WorkModeResponse> {
     const queryParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, value);
+        queryParams.append(key, String(value));
       }
     });
 
@@ -16,7 +16,7 @@ class WorkModeService {
       ? `${WORK_MODE_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
       : WORK_MODE_API_ENDPOINTS.GET_ALL;
 
-    const response = await axiosInstance.get<WorkModeResponse<{ items: WorkModeItem[] } | WorkModeItem[]>>(url);
+    const response = await axiosInstance.get<WorkModeResponse>(url);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -24,8 +24,8 @@ class WorkModeService {
     };
   }
 
-  async createWorkMode(data: WorkModeFormData): Promise<WorkModeResponse<{ id?: number; workMode?: WorkModeItem }>> {
-    const response = await axiosInstance.post<WorkModeResponse<{ id?: number; workMode?: WorkModeItem }>>(WORK_MODE_API_ENDPOINTS.CREATE, data);
+  async createWorkMode(data: WorkModeFormData): Promise<WorkModeResponse> {
+    const response = await axiosInstance.post<WorkModeResponse>(WORK_MODE_API_ENDPOINTS.CREATE, data);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -33,8 +33,8 @@ class WorkModeService {
     };
   }
 
-  async updateWorkMode(id: number, data: WorkModeFormData): Promise<WorkModeResponse<unknown>> {
-    const response = await axiosInstance.patch<WorkModeResponse<unknown>>(WORK_MODE_API_ENDPOINTS.UPDATE(id), data);
+  async updateWorkMode(id: number, data: WorkModeFormData): Promise<WorkModeResponse> {
+    const response = await axiosInstance.patch<WorkModeResponse>(WORK_MODE_API_ENDPOINTS.UPDATE(id), data);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -42,8 +42,8 @@ class WorkModeService {
     };
   }
 
-  async deleteWorkMode(id: number): Promise<{ status: boolean; message: string }> {
-    const response = await axiosInstance.delete<{ status: boolean; message: string }>(WORK_MODE_API_ENDPOINTS.DELETE(id));
+  async deleteWorkMode(id: number): Promise<DeleteWorkModeResponse> {
+    const response = await axiosInstance.delete<DeleteWorkModeResponse>(WORK_MODE_API_ENDPOINTS.DELETE(id));
     return {
       status: response.data.status,
       message: response.data.message,

@@ -1,10 +1,7 @@
-export const DEPARTMENT_API_ENDPOINTS = {
-  GET_ALL: '/department',
-  CREATE: '/department',
-  UPDATE: (id: number) => `/department/${id}`,
-  DELETE: (id: number) => `/department/${id}`,
-};
+import type { DepartmentFormData } from '../types/department.types';
 
-export const DEPARTMENT_DEFAULTS = {
-  ROWS_PER_PAGE: 10,
+export const ADD_DEPARTMENT_INITIAL_VALUES: DepartmentFormData = {
+  departmentName: '',
+  description: undefined,
+  status: '',
 };

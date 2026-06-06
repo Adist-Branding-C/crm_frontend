@@ -1,11 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteWorkModeModalProps {
-  isOpen: boolean;
-  itemName: string;
-  onConfirm: () => void;
-  onClose: () => void;
-}
+import type { DeleteWorkModeModalProps } from '../types/delete-work-mode-modal.types';
 
 const DeleteWorkModeModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteWorkModeModalProps) => {
   if (!isOpen) return null;

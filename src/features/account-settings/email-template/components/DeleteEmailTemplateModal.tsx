@@ -1,11 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteEmailTemplateModalProps {
-  isOpen: boolean
-  itemName: string
-  onConfirm: () => void
-  onClose: () => void
-}
+import type { DeleteEmailTemplateModalProps } from '../types/delete-email-template-modal.types';
 
 const DeleteEmailTemplateModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteEmailTemplateModalProps) => {
   if (!isOpen) return null;

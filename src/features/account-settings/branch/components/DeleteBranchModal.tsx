@@ -1,11 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteBranchModalProps {
-  isOpen: boolean
-  itemName: string
-  onConfirm: () => void
-  onClose: () => void
-}
+import type { DeleteBranchModalProps } from '../types/delete-branch-modal.types';
 
 const DeleteBranchModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteBranchModalProps) => {
   if (!isOpen) return null;

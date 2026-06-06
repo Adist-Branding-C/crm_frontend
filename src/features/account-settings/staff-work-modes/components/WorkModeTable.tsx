@@ -1,20 +1,7 @@
 import { Search } from 'lucide-react';
 import WorkModeActionMenu from './WorkModeActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { WorkModeItem } from '../types/workMode.types';
-
-interface WorkModeTableProps {
-  data: WorkModeItem[];
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  rowsPerPage: number;
-  onRowsPerPageChange: (rows: number) => void;
-  totalRecords: number;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
-  onEdit: (item: WorkModeItem) => void;
-  onDelete: (item: WorkModeItem) => void;
-}
+import type { WorkModeTableProps } from '../types/work-mode-table.types';
 
 const WorkModeTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, totalRecords, dropdownOpen, onToggleDropdown, onEdit, onDelete }: WorkModeTableProps) => {
   return (
@@ -45,27 +32,33 @@ const WorkModeTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsP
             </tr>
           </thead>
           <tbody>
-            {data.map((item, index) => (
-              <tr key={item.id}>
-                <td>{index + 1}</td>
-                <td>{item.workModeName || item.name}</td>
-                <td>{item.description || '-'}</td>
-                <td>
-                  <span className={'status-badge status-' + (item.status || 'Active').toLowerCase()}>
-                    {item.status || 'Active'}
-                  </span>
-                </td>
-                <td>
-                  <WorkModeActionMenu
-                    item={item}
-                    dropdownOpen={dropdownOpen}
-                    onToggleDropdown={onToggleDropdown}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                </td>
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="dataTables_empty">No data available in table</td>
               </tr>
-            ))}
+            ) : (
+              data.map((item, index) => (
+                <tr key={item.id}>
+                  <td>{index + 1}</td>
+                  <td>{item.workModeName || item.name || '-'}</td>
+                  <td>{item.description || '-'}</td>
+                  <td>
+                    <span className={'status-badge status-' + (item.status || 'Active').toLowerCase()}>
+                      {item.status || 'Active'}
+                    </span>
+                  </td>
+                  <td>
+                    <WorkModeActionMenu
+                      item={item}
+                      dropdownOpen={dropdownOpen}
+                      onToggleDropdown={onToggleDropdown}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                    />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

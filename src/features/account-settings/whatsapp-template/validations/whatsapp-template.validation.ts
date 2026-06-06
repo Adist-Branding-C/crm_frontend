@@ -5,3 +5,9 @@ export const addWhatsappTemplateValidationSchema = yup.object({
   message: yup.string().trim().required('Message is required'),
   status: yup.string().required('Status is required'),
 });
+
+export const editWhatsappTemplateValidationSchema = yup.object({
+  templateName: yup.string().trim().required('Template name is required'),
+  message: yup.string().trim().required('Message is required'),
+  status: yup.string().required('Status is required'),
+});

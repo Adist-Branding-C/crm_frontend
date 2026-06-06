@@ -1,109 +1,45 @@
-import { useState, useMemo, useCallback } from 'react';
-import type { FormikHelpers } from 'formik';
-import { useDesignation } from './useDesignation';
-import type { DesignationItem, DesignationFormData } from '../types/designation.types';
+import { useCallback } from 'react';
+import { useDesignation, useDesignationDrawer, useDesignationDropdown, useDesignationFilters, useDesignationActions } from './index';
+import type { DesignationItem } from '../types/designation.types';
 
 export function useDesignationPage() {
   const designation = useDesignation();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-  const [editingItem, setEditingItem] = useState<DesignationItem | null>(null);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [deletingItem, setDeletingItem] = useState<DesignationItem | null>(null);
-
-  const filteredData = useMemo(
-    () => designation.designationList.filter(item =>
-      (item.designationName || '').toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    [designation.designationList, searchQuery]
-  );
-
-  const handleCloseDrawer = useCallback(() => {
-    setShowDrawer(false);
-    setEditingItem(null);
-  }, []);
-
-  const handleAddClick = useCallback(() => {
-    setEditingItem(null);
-    setShowDrawer(true);
-  }, []);
-
-  const handleSubmit = useCallback(async (
-    values: DesignationFormData,
-    helpers: FormikHelpers<DesignationFormData>,
-  ) => {
-    const success = await designation.handleAddDesignation(values, helpers);
-    if (success) {
-      handleCloseDrawer();
-    }
-  }, [designation.handleAddDesignation, handleCloseDrawer]);
+  const drawer = useDesignationDrawer();
+  const dropdown = useDesignationDropdown();
+  const filters = useDesignationFilters(designation.designationList);
+  const actions = useDesignationActions({ designation, drawer });
 
   const handleEditClick = useCallback((item: DesignationItem) => {
-    setEditingItem(item);
-    setShowDrawer(true);
-    setDropdownOpen(null);
-  }, []);
+    drawer.openEditDrawer(item);
+    dropdown.closeDropdown();
+  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
 
   const handleDeleteClick = useCallback((item: DesignationItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  }, []);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingItem) return;
-    const success = await designation.handleDeleteDesignation(deletingItem.id);
-    if (success) {
-      setDeletingItem(null);
-    }
-  }, [deletingItem, designation.handleDeleteDesignation]);
-
-  const handleCloseDeleteModal = useCallback(() => {
-    setDeletingItem(null);
-  }, []);
-
-  const drawerInitialValues: DesignationFormData = useMemo(
-    () => editingItem
-      ? {
-          designationName: editingItem.designationName || '',
-          description: editingItem.description || '',
-          status: editingItem.status || '',
-        }
-      : { designationName: '', description: '', status: '' },
-    [editingItem]
-  );
-
-  const handleEditSubmit = useCallback(async (
-    values: DesignationFormData,
-    helpers: FormikHelpers<DesignationFormData>,
-  ) => {
-    if (!editingItem) return;
-    const success = await designation.handleUpdateDesignation(editingItem.id, values, helpers);
-    if (success) {
-      handleCloseDrawer();
-    }
-  }, [editingItem, designation.handleUpdateDesignation, handleCloseDrawer]);
+    actions.handleDeleteClick(item);
+    dropdown.closeDropdown();
+  }, [actions.handleDeleteClick, dropdown.closeDropdown]);
 
   return {
     designation,
-    searchQuery,
-    setSearchQuery,
-    showDrawer,
-    dropdownOpen,
-    setDropdownOpen,
-    editingItem,
-    deletingItem,
-    rowsPerPage,
-    setRowsPerPage,
-    filteredData,
-    handleAddClick,
-    handleCloseDrawer,
+    searchQuery: filters.searchQuery,
+    setSearchQuery: filters.setSearchQuery,
+    rowsPerPage: filters.rowsPerPage,
+    setRowsPerPage: filters.setRowsPerPage,
+    showDrawer: drawer.showDrawer,
+    dropdownOpen: dropdown.dropdownOpen,
+    onToggleDropdown: dropdown.toggleDropdown,
+    editingItem: drawer.editingItem,
+    deletingItem: actions.deletingItem,
+    filteredData: filters.filteredData,
+    totalRecords: filters.totalRecords,
+    drawerInitialValues: drawer.drawerInitialValues,
+    handleAddClick: drawer.openAddDrawer,
+    handleCloseDrawer: drawer.closeDrawer,
     handleEditClick,
     handleDeleteClick,
-    handleConfirmDelete,
-    handleCloseDeleteModal,
-    handleSubmit,
-    handleEditSubmit,
-    drawerInitialValues,
+    handleConfirmDelete: actions.handleConfirmDelete,
+    handleCloseDeleteModal: actions.closeDeleteModal,
+    handleSubmit: actions.handleSubmit,
+    handleEditSubmit: actions.handleEditSubmit,
   };
 }

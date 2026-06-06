@@ -1,20 +1,7 @@
 import { Search } from 'lucide-react';
 import CheckoutNoteActionMenu from './CheckoutNoteActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { CheckoutNoteItem } from '../types/checkoutNote.types';
-
-interface CheckoutNoteTableProps {
-  data: CheckoutNoteItem[]
-  searchQuery: string
-  onSearchChange: (value: string) => void
-  rowsPerPage: number
-  onRowsPerPageChange: (value: number) => void
-  totalRecords: number
-  dropdownOpen: number | null
-  onToggleDropdown: (value: number | null) => void
-  onEdit: (item: CheckoutNoteItem) => void
-  onDelete: (item: CheckoutNoteItem) => void
-}
+import type { CheckoutNoteTableProps } from '../types/checkout-note-table.types';
 
 const NOTE_TRUNCATE_LENGTH = 80;
 
@@ -30,7 +17,7 @@ const CheckoutNoteTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onR
         <div className="entries-select">
           <label>Show
             <select value={rowsPerPage} onChange={(e) => onRowsPerPageChange(Number(e.target.value))}>
-              {ROWS_OPTIONS_10_25_50_100.map((n: number) => <option key={n} value={n}>{n}</option>)}
+              {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
             entries
           </label>

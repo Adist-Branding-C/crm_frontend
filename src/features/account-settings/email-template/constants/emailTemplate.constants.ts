@@ -1,10 +1,9 @@
-export const EMAIL_TEMPLATE_API_ENDPOINTS = {
-  GET_ALL: '/email-template',
-  CREATE: '/email-template',
-  UPDATE: (id: number) => `/email-template/${id}`,
-  DELETE: (id: number) => `/email-template/${id}`,
-};
+import type { EmailTemplateFormData } from '../types/emailTemplate.types';
 
-export const EMAIL_TEMPLATE_DEFAULTS = {
-  ROWS_PER_PAGE: 10,
+export const ADD_EMAIL_TEMPLATE_INITIAL_VALUES: EmailTemplateFormData = {
+  templateName: '',
+  subject: '',
+  content: '',
+  isDefault: false,
+  status: '',
 };

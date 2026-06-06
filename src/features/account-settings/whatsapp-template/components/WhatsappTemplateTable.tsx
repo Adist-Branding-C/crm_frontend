@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react';
 import WhatsappTemplateActionMenu from './WhatsappTemplateActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { WhatsappTemplateItem } from '../types/whatsappTemplate.types';
+import type { WhatsappTemplateTableProps } from '../types/whatsapp-template-table.types';
 
 const MESSAGE_TRUNCATE_LENGTH = 80;
 
@@ -9,19 +9,6 @@ const truncate = (text: string | undefined | null, maxLength: number): string =>
   if (!text) return '-';
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 };
-
-interface WhatsappTemplateTableProps {
-  data: WhatsappTemplateItem[];
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  rowsPerPage: number;
-  onRowsPerPageChange: (value: number) => void;
-  totalRecords: number;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
-  onEdit: (item: WhatsappTemplateItem) => void;
-  onDelete: (item: WhatsappTemplateItem) => void;
-}
 
 const WhatsappTemplateTable = ({
   data,

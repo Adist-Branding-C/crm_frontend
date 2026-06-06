@@ -1,19 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
-import type { FormikHelpers } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { DesignationFormData } from '../types/designation.types';
-
-interface AddDesignationDrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  validationSchema: any
-  initialValues: DesignationFormData
-  onSubmit: (values: DesignationFormData, helpers: FormikHelpers<DesignationFormData>) => Promise<void>
-  isLoading: boolean
-  error: string
-  isEditing: boolean
-}
+import type { AddDesignationDrawerProps } from '../types/add-designation-drawer.types';
 
 const AddDesignationDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddDesignationDrawerProps) => {
   if (!isOpen) return null;
@@ -61,7 +49,7 @@ const AddDesignationDrawer = ({ isOpen, onClose, validationSchema, initialValues
 
                   <div className="form-actions">
                     <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                      {isLoading ? <Loader2 size={16} className="spin" /> : 'Save'}
+                      {isLoading ? <Loader2 size={16} className="spin" /> : (isEditing ? 'Update' : 'Save')}
                     </button>
                     <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
                   </div>
