@@ -12,10 +12,10 @@ import IntegrationsPage from '../features/integrations/pages/IntegrationsPage';
 import LeadGenerationAPIPage from '../features/lead-generation-api/pages/LeadGenerationAPIPage';
 import GeneralSettingsPage from '../features/general-settings/pages/GeneralSettingsPage';
 import UserLayout from '../features/task-settings/components/UserLayout';
-import CallStatusPage from '../features/task-settings/call-status/pages/CallStatusPage';
-import CallReasonPage from '../features/task-settings/call-reasons/pages/CallReasonPage';
-import MeetingOutcomePage from '../features/task-settings/meeting-outcomes/pages/MeetingOutcomePage';
-import TaskCategoryPage from '../features/task-settings/task-categories/pages/TaskCategoryPage';
+import CallStatusPage from '../features/task-settings/call-status/CallStatus';
+import CallReasonPage from '../features/task-settings/call-reason/CallReason';
+import MeetingOutcomePage from '../features/task-settings/meeting-outcome/MeetingOutcome';
+import TaskCategoryPage from '../features/task-settings/task-category/TaskCategory';
 
 export default (
   <>

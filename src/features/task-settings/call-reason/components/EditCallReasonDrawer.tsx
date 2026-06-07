@@ -1,16 +1,16 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { EditCallStatusDrawerProps } from '../types/index';
+import type { EditCallReasonDrawerProps } from '../types/index';
 
-const EditCallStatusDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, editingItem }: EditCallStatusDrawerProps) => {
+const EditCallReasonDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, editingItem }: EditCallReasonDrawerProps) => {
   if (!isOpen || !editingItem) return null;
 
   return (
     <div className="drawer-overlay" onClick={onClose}>
       <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
-          <h5>Edit Call Status</h5>
+          <h5>Edit Call Reason</h5>
           <button className="drawer-close" onClick={onClose}>
             <X size={20} />
           </button>
@@ -29,8 +29,8 @@ const EditCallStatusDrawer = ({ isOpen, onClose, validationSchema, initialValues
                   {formError && <ErrorMessage message={formError} />}
 
                   <div className="form-group">
-                    <label>Name <span className="text-danger">*</span></label>
-                    <Field type="text" name="name" className="form-control" placeholder="Enter call status name" />
+                    <label>Reason <span className="text-danger">*</span></label>
+                    <Field type="text" name="name" className="form-control" placeholder="Enter call reason" />
                   </div>
 
                   <div className="form-group">
@@ -58,4 +58,4 @@ const EditCallStatusDrawer = ({ isOpen, onClose, validationSchema, initialValues
   );
 };
 
-export default EditCallStatusDrawer;
+export default EditCallReasonDrawer;

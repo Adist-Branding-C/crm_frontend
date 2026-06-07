@@ -1,33 +1,33 @@
 import { useState, useCallback, useEffect } from 'react';
-import { callStatusService } from '../services/callStatus.service';
-import type { CallStatusItem, CallStatusFormData } from '../types/index';
+import { taskCategoryService } from '../services/taskCategory.service';
+import type { TaskCategoryItem, TaskCategoryFormData } from '../types/index';
 
-export function useCallStatus() {
-  const [callStatusList, setCallStatusList] = useState<CallStatusItem[]>([]);
+export function useTaskCategory() {
+  const [taskCategoryList, setTaskCategoryList] = useState<TaskCategoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchCallStatuses = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
+  const fetchTaskCategories = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await callStatusService.getAll(params);
+      const response = await taskCategoryService.getAll(params);
 
       if (response.status) {
         const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? (response.data as { items: CallStatusItem[] }).items
+          ? (response.data as { items: TaskCategoryItem[] }).items
           : Array.isArray(response.data)
             ? response.data
             : [];
-        setCallStatusList(Array.isArray(rawData) ? rawData : []);
+        setTaskCategoryList(Array.isArray(rawData) ? rawData : []);
       } else {
-        setError(response.message || 'Failed to fetch call statuses');
+        setError(response.message || 'Failed to fetch task categories');
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch call statuses');
+        setError(axiosErr.response?.data?.message || 'Failed to fetch task categories');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -39,33 +39,33 @@ export function useCallStatus() {
   }, []);
 
   useEffect(() => {
-    fetchCallStatuses();
-  }, [fetchCallStatuses]);
+    fetchTaskCategories();
+  }, [fetchTaskCategories]);
 
-  const handleAdd = useCallback(async (values: CallStatusFormData) => {
+  const handleAdd = useCallback(async (values: TaskCategoryFormData) => {
     setError('');
     setIsLoading(true);
 
     try {
-      const { name, status } = values;
-      const response = await callStatusService.create({ name, status });
+      const { category, action } = values;
+      const response = await taskCategoryService.create({ category, action });
 
       if (response.status) {
         const data = response.data as { id?: number } | undefined;
         if (data?.id) {
-          setCallStatusList(prev => [...prev, { id: data.id, name, status } as unknown as CallStatusItem]);
+          setTaskCategoryList(prev => [...prev, { id: data.id, category, action } as TaskCategoryItem]);
         } else {
-          fetchCallStatuses();
+          fetchTaskCategories();
         }
         return true;
       } else {
-        setError(response.message || 'Failed to add call status');
+        setError(response.message || 'Failed to add task category');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add call status');
+        setError(axiosErr.response?.data?.message || 'Failed to add task category');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -75,29 +75,29 @@ export function useCallStatus() {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchCallStatuses]);
+  }, [fetchTaskCategories]);
 
-  const handleUpdate = useCallback(async (id: number, values: CallStatusFormData) => {
+  const handleUpdate = useCallback(async (id: number, values: TaskCategoryFormData) => {
     setError('');
     setIsLoading(true);
 
     try {
-      const { name, status } = values;
-      const response = await callStatusService.update(id, { name, status });
+      const { category, action } = values;
+      const response = await taskCategoryService.update(id, { category, action });
 
       if (response.status) {
-        setCallStatusList(prev => prev.map(item =>
-          item.id === id ? { ...item, name, status } : item
+        setTaskCategoryList(prev => prev.map(item =>
+          item.id === id ? { ...item, category, action } : item
         ));
         return true;
       } else {
-        setError(response.message || 'Failed to update call status');
+        setError(response.message || 'Failed to update task category');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update call status');
+        setError(axiosErr.response?.data?.message || 'Failed to update task category');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -114,19 +114,19 @@ export function useCallStatus() {
     setIsLoading(true);
 
     try {
-      const response = await callStatusService.delete(id);
+      const response = await taskCategoryService.delete(id);
 
       if (response.status) {
-        setCallStatusList(prev => prev.filter(item => item.id !== id));
+        setTaskCategoryList(prev => prev.filter(item => item.id !== id));
         return true;
       } else {
-        setError(response.message || 'Failed to delete call status');
+        setError(response.message || 'Failed to delete task category');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete call status');
+        setError(axiosErr.response?.data?.message || 'Failed to delete task category');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -139,10 +139,10 @@ export function useCallStatus() {
   }, []);
 
   return {
-    callStatusList,
+    taskCategoryList,
     isLoading,
     error,
-    fetchCallStatuses,
+    fetchTaskCategories,
     handleAdd,
     handleUpdate,
     handleDelete,

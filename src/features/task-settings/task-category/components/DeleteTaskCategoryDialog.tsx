@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
-import type { DeleteCallStatusDialogProps } from '../types/index';
+import type { DeleteTaskCategoryDialogProps } from '../types/index';
 
-const DeleteCallStatusDialog = ({ isOpen, itemName, onConfirm, onClose }: DeleteCallStatusDialogProps) => {
+const DeleteTaskCategoryDialog = ({ isOpen, itemName, onConfirm, onClose }: DeleteTaskCategoryDialogProps) => {
   if (!isOpen) return null;
 
   return (
@@ -27,4 +27,4 @@ const DeleteCallStatusDialog = ({ isOpen, itemName, onConfirm, onClose }: Delete
   );
 };
 
-export default DeleteCallStatusDialog;
+export default DeleteTaskCategoryDialog;

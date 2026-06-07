@@ -1,9 +1,9 @@
 import { Search } from 'lucide-react';
-import CallStatusActions from './CallStatusActions';
+import TaskCategoryActions from './TaskCategoryActions';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { CallStatusTableProps } from '../types/index';
+import type { TaskCategoryTableProps } from '../types/index';
 
-const CallStatusTable = ({
+const TaskCategoryTable = ({
   data,
   searchQuery,
   onSearchChange,
@@ -14,7 +14,7 @@ const CallStatusTable = ({
   onToggleDropdown,
   onEdit,
   onDelete,
-}: CallStatusTableProps) => {
+}: TaskCategoryTableProps) => {
   return (
     <div className="table-container">
       <div className="table-header-controls">
@@ -36,8 +36,8 @@ const CallStatusTable = ({
           <thead>
             <tr>
               <th>Sl No</th>
-              <th>Name</th>
-              <th>Status</th>
+              <th>Category</th>
+              <th>Action</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -50,14 +50,10 @@ const CallStatusTable = ({
               data.map((item, index) => (
                 <tr key={item.id}>
                   <td>{index + 1}</td>
-                  <td>{item.name || '-'}</td>
+                  <td>{item.category || '-'}</td>
+                  <td>{item.action || '-'}</td>
                   <td>
-                    <span className={'status-badge status-' + (item.status || 'Active').toLowerCase()}>
-                      {item.status || 'Active'}
-                    </span>
-                  </td>
-                  <td>
-                    <CallStatusActions
+                    <TaskCategoryActions
                       item={item}
                       dropdownOpen={dropdownOpen}
                       onToggleDropdown={onToggleDropdown}
@@ -80,4 +76,4 @@ const CallStatusTable = ({
   );
 };
 
-export default CallStatusTable;
+export default TaskCategoryTable;

@@ -1,33 +1,33 @@
 import { useState, useCallback, useEffect } from 'react';
-import { callStatusService } from '../services/callStatus.service';
-import type { CallStatusItem, CallStatusFormData } from '../types/index';
+import { meetingOutcomeService } from '../services/meetingOutcome.service';
+import type { MeetingOutcomeItem, MeetingOutcomeFormData } from '../types/index';
 
-export function useCallStatus() {
-  const [callStatusList, setCallStatusList] = useState<CallStatusItem[]>([]);
+export function useMeetingOutcome() {
+  const [meetingOutcomeList, setMeetingOutcomeList] = useState<MeetingOutcomeItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchCallStatuses = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
+  const fetchMeetingOutcomes = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const response = await callStatusService.getAll(params);
+      const response = await meetingOutcomeService.getAll(params);
 
       if (response.status) {
         const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? (response.data as { items: CallStatusItem[] }).items
+          ? (response.data as { items: MeetingOutcomeItem[] }).items
           : Array.isArray(response.data)
             ? response.data
             : [];
-        setCallStatusList(Array.isArray(rawData) ? rawData : []);
+        setMeetingOutcomeList(Array.isArray(rawData) ? rawData : []);
       } else {
-        setError(response.message || 'Failed to fetch call statuses');
+        setError(response.message || 'Failed to fetch meeting outcomes');
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch call statuses');
+        setError(axiosErr.response?.data?.message || 'Failed to fetch meeting outcomes');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -39,33 +39,33 @@ export function useCallStatus() {
   }, []);
 
   useEffect(() => {
-    fetchCallStatuses();
-  }, [fetchCallStatuses]);
+    fetchMeetingOutcomes();
+  }, [fetchMeetingOutcomes]);
 
-  const handleAdd = useCallback(async (values: CallStatusFormData) => {
+  const handleAdd = useCallback(async (values: MeetingOutcomeFormData) => {
     setError('');
     setIsLoading(true);
 
     try {
       const { name, status } = values;
-      const response = await callStatusService.create({ name, status });
+      const response = await meetingOutcomeService.create({ name, status });
 
       if (response.status) {
         const data = response.data as { id?: number } | undefined;
         if (data?.id) {
-          setCallStatusList(prev => [...prev, { id: data.id, name, status } as unknown as CallStatusItem]);
+          setMeetingOutcomeList(prev => [...prev, { id: data.id, name, status } as unknown as MeetingOutcomeItem]);
         } else {
-          fetchCallStatuses();
+          fetchMeetingOutcomes();
         }
         return true;
       } else {
-        setError(response.message || 'Failed to add call status');
+        setError(response.message || 'Failed to add meeting outcome');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add call status');
+        setError(axiosErr.response?.data?.message || 'Failed to add meeting outcome');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -75,29 +75,29 @@ export function useCallStatus() {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchCallStatuses]);
+  }, [fetchMeetingOutcomes]);
 
-  const handleUpdate = useCallback(async (id: number, values: CallStatusFormData) => {
+  const handleUpdate = useCallback(async (id: number, values: MeetingOutcomeFormData) => {
     setError('');
     setIsLoading(true);
 
     try {
       const { name, status } = values;
-      const response = await callStatusService.update(id, { name, status });
+      const response = await meetingOutcomeService.update(id, { name, status });
 
       if (response.status) {
-        setCallStatusList(prev => prev.map(item =>
+        setMeetingOutcomeList(prev => prev.map(item =>
           item.id === id ? { ...item, name, status } : item
         ));
         return true;
       } else {
-        setError(response.message || 'Failed to update call status');
+        setError(response.message || 'Failed to update meeting outcome');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update call status');
+        setError(axiosErr.response?.data?.message || 'Failed to update meeting outcome');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -114,19 +114,19 @@ export function useCallStatus() {
     setIsLoading(true);
 
     try {
-      const response = await callStatusService.delete(id);
+      const response = await meetingOutcomeService.delete(id);
 
       if (response.status) {
-        setCallStatusList(prev => prev.filter(item => item.id !== id));
+        setMeetingOutcomeList(prev => prev.filter(item => item.id !== id));
         return true;
       } else {
-        setError(response.message || 'Failed to delete call status');
+        setError(response.message || 'Failed to delete meeting outcome');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete call status');
+        setError(axiosErr.response?.data?.message || 'Failed to delete meeting outcome');
       } else if (err && typeof err === 'object' && 'message' in err) {
         setError((err as { message: string }).message);
       } else {
@@ -139,10 +139,10 @@ export function useCallStatus() {
   }, []);
 
   return {
-    callStatusList,
+    meetingOutcomeList,
     isLoading,
     error,
-    fetchCallStatuses,
+    fetchMeetingOutcomes,
     handleAdd,
     handleUpdate,
     handleDelete,

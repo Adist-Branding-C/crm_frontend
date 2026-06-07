@@ -1,15 +1,15 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { CallStatusItem, CallStatusFormData } from '../types/index';
-import { ADD_CALL_STATUS_INITIAL_VALUES } from '../constants/index';
+import type { MeetingOutcomeItem, MeetingOutcomeFormData } from '../types/index';
+import { ADD_MEETING_OUTCOME_INITIAL_VALUES } from '../constants/index';
 
-export function useCallStatusForm() {
+export function useMeetingOutcomeForm() {
   const [showAddDrawer, setShowAddDrawer] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
-  const [editingItem, setEditingItem] = useState<CallStatusItem | null>(null);
+  const [editingItem, setEditingItem] = useState<MeetingOutcomeItem | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-  const [deletingItem, setDeletingItem] = useState<CallStatusItem | null>(null);
+  const [deletingItem, setDeletingItem] = useState<MeetingOutcomeItem | null>(null);
 
   const openAddDrawer = useCallback(() => {
     setShowAddDrawer(true);
@@ -19,7 +19,7 @@ export function useCallStatusForm() {
     setShowAddDrawer(false);
   }, []);
 
-  const openEditDrawer = useCallback((item: CallStatusItem) => {
+  const openEditDrawer = useCallback((item: MeetingOutcomeItem) => {
     setEditingItem(item);
     setShowEditDrawer(true);
     setDropdownOpen(null);
@@ -30,7 +30,7 @@ export function useCallStatusForm() {
     setEditingItem(null);
   }, []);
 
-  const handleDeleteClick = useCallback((item: CallStatusItem) => {
+  const handleDeleteClick = useCallback((item: MeetingOutcomeItem) => {
     setDeletingItem(item);
     setDropdownOpen(null);
   }, []);
@@ -43,10 +43,10 @@ export function useCallStatusForm() {
     setDropdownOpen(id);
   }, []);
 
-  const editInitialValues: CallStatusFormData = useMemo(
+  const editInitialValues: MeetingOutcomeFormData = useMemo(
     () => editingItem
       ? { name: editingItem.name || '', status: editingItem.status || 'Active' }
-      : ADD_CALL_STATUS_INITIAL_VALUES,
+      : ADD_MEETING_OUTCOME_INITIAL_VALUES,
     [editingItem]
   );
 

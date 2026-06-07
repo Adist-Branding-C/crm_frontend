@@ -1,7 +1,7 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { AddCallStatusDrawerProps } from '../types/callStatus.types';
+import type { AddCallStatusDrawerProps } from '../types/index';
 
 const AddCallStatusDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error }: AddCallStatusDrawerProps) => {
   if (!isOpen) return null;

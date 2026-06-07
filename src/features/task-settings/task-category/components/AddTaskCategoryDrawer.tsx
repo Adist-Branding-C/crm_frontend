@@ -1,16 +1,16 @@
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { EditCallStatusDrawerProps } from '../types/index';
+import type { AddTaskCategoryDrawerProps } from '../types/index';
 
-const EditCallStatusDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, editingItem }: EditCallStatusDrawerProps) => {
-  if (!isOpen || !editingItem) return null;
+const AddTaskCategoryDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error }: AddTaskCategoryDrawerProps) => {
+  if (!isOpen) return null;
 
   return (
     <div className="drawer-overlay" onClick={onClose}>
       <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
-          <h5>Edit Call Status</h5>
+          <h5>Add Task Category</h5>
           <button className="drawer-close" onClick={onClose}>
             <X size={20} />
           </button>
@@ -29,22 +29,18 @@ const EditCallStatusDrawer = ({ isOpen, onClose, validationSchema, initialValues
                   {formError && <ErrorMessage message={formError} />}
 
                   <div className="form-group">
-                    <label>Name <span className="text-danger">*</span></label>
-                    <Field type="text" name="name" className="form-control" placeholder="Enter call status name" />
+                    <label>Category <span className="text-danger">*</span></label>
+                    <Field type="text" name="category" className="form-control" placeholder="Enter category" />
                   </div>
 
                   <div className="form-group">
-                    <label>Status <span className="text-danger">*</span></label>
-                    <Field as="select" name="status" className="form-control">
-                      <option value="">Select status</option>
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </Field>
+                    <label>Action <span className="text-danger">*</span></label>
+                    <Field type="text" name="action" className="form-control" placeholder="Enter action" />
                   </div>
 
                   <div className="form-actions">
                     <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                      {isLoading ? <Loader2 size={16} className="spin" /> : 'Update'}
+                      {isLoading ? <Loader2 size={16} className="spin" /> : 'Save'}
                     </button>
                     <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
                   </div>
@@ -58,4 +54,4 @@ const EditCallStatusDrawer = ({ isOpen, onClose, validationSchema, initialValues
   );
 };
 
-export default EditCallStatusDrawer;
+export default AddTaskCategoryDrawer;

@@ -1,5 +1,5 @@
-import { fetchCallStatusesApi, createCallStatusApi, updateCallStatusApi, deleteCallStatusApi } from '../api/callStatus.api';
-import type { CallStatusFormData, CallStatusResponse } from '../types/callStatus.types';
+import { fetchCallStatusesApi, createCallStatusApi, updateCallStatusApi, deleteCallStatusApi } from './callStatus.api';
+import type { CallStatusFormData, CallStatusResponse } from '../types/index';
 
 class CallStatusService {
   async getAll(params: Record<string, string | number | undefined> = {}): Promise<CallStatusResponse> {

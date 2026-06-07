@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
-import type { DeleteCallStatusDialogProps } from '../types/index';
+import type { DeleteMeetingOutcomeDialogProps } from '../types/index';
 
-const DeleteCallStatusDialog = ({ isOpen, itemName, onConfirm, onClose }: DeleteCallStatusDialogProps) => {
+const DeleteMeetingOutcomeDialog = ({ isOpen, itemName, onConfirm, onClose }: DeleteMeetingOutcomeDialogProps) => {
   if (!isOpen) return null;
 
   return (
@@ -27,4 +27,4 @@ const DeleteCallStatusDialog = ({ isOpen, itemName, onConfirm, onClose }: Delete
   );
 };
 
-export default DeleteCallStatusDialog;
+export default DeleteMeetingOutcomeDialog;

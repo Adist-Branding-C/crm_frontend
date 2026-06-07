@@ -1,9 +1,9 @@
 import { Search } from 'lucide-react';
-import CallStatusActions from './CallStatusActions';
+import MeetingOutcomeActions from './MeetingOutcomeActions';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { CallStatusTableProps } from '../types/index';
+import type { MeetingOutcomeTableProps } from '../types/index';
 
-const CallStatusTable = ({
+const MeetingOutcomeTable = ({
   data,
   searchQuery,
   onSearchChange,
@@ -14,7 +14,7 @@ const CallStatusTable = ({
   onToggleDropdown,
   onEdit,
   onDelete,
-}: CallStatusTableProps) => {
+}: MeetingOutcomeTableProps) => {
   return (
     <div className="table-container">
       <div className="table-header-controls">
@@ -36,7 +36,7 @@ const CallStatusTable = ({
           <thead>
             <tr>
               <th>Sl No</th>
-              <th>Name</th>
+              <th>Outcome</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -57,7 +57,7 @@ const CallStatusTable = ({
                     </span>
                   </td>
                   <td>
-                    <CallStatusActions
+                    <MeetingOutcomeActions
                       item={item}
                       dropdownOpen={dropdownOpen}
                       onToggleDropdown={onToggleDropdown}
@@ -80,4 +80,4 @@ const CallStatusTable = ({
   );
 };
 
-export default CallStatusTable;
+export default MeetingOutcomeTable;

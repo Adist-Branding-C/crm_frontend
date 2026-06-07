@@ -1,7 +1,7 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { CallStatusActionsProps } from '../types/index';
+import type { CallReasonActionsProps } from '../types/index';
 
-const CallStatusActions = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: CallStatusActionsProps) => {
+const CallReasonActions = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: CallReasonActionsProps) => {
   return (
     <div className="dropdown-container">
       <button className="dropdown-toggle" onClick={() => onToggleDropdown(dropdownOpen === item.id ? null : item.id)}>
@@ -17,4 +17,4 @@ const CallStatusActions = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDel
   );
 };
 
-export default CallStatusActions;
+export default CallReasonActions;
