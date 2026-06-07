@@ -1,0 +1,8 @@
+.agent-table-wrapper .table-container,
+.agent-table-wrapper .table-scroll {
+  overflow: visible;
+}
+
+.agent-table-wrapper .dropdown-menu {
+  z-index: 9999;
+}
