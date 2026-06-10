@@ -14,7 +14,7 @@ import GeneralSettingsPage from '../features/general-settings/pages/GeneralSetti
 import CallStatusPage from '../features/call-status/pages/CallStatusPage';
 import CallReasonPage from '../features/call-reason/pages/CallReasonPage';
 import MeetingOutcomePage from '../features/meeting-outcome/pages/MeetingOutcomePage';
-import TaskCategoriesPage from '../features/task-categories/pages/TaskCategoriesPage';
+import TaskCategoryPage from '../features/task/category/pages/TaskCategoryPage';
 
 export default (
   <>
@@ -32,6 +32,6 @@ export default (
     <Route path="user/call_status" element={<CallStatusPage />} />
     <Route path="user/reason" element={<CallReasonPage />} />
     <Route path="user/meeting-outcome" element={<MeetingOutcomePage />} />
-    <Route path="user/task-categories" element={<TaskCategoriesPage />} />
+    <Route path="user/task-categories" element={<TaskCategoryPage />} />
   </>
 );

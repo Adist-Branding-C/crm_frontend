@@ -1,257 +1,135 @@
-import React, { useState, useMemo } from 'react';
-import { X, Search } from 'lucide-react';
-import './AddLeadDrawer.css';
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
-const sampleDeals = [
-  { id: 1, name: 'Website Development', dealId: 'DL001', amount: 150000 },
-  { id: 2, name: 'CRM Implementation', dealId: 'DL002', amount: 200000 },
-  { id: 3, name: 'Annual Maintenance', dealId: 'DL003', amount: 50000 },
-];
+const drawerOverlayStyle = {
+  position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+  background: 'rgba(0,0,0,0.5)', zIndex: 9998, display: 'flex',
+  justifyContent: 'flex-end',
+};
 
-const sampleAgents = [
-  { id: 1, name: 'John Doe' },
-  { id: 2, name: 'Jane Smith' },
-  { id: 3, name: 'Mike Johnson' },
-];
+const drawerPanelStyle = {
+  width: '480px', maxWidth: '100%', background: 'white',
+  height: '100%', display: 'flex', flexDirection: 'column',
+  boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
+};
 
-const sampleCategories = [
-  { id: 1, name: 'Follow Up' },
-  { id: 2, name: 'Payment Reminder' },
-  { id: 3, name: 'Demo' },
-  { id: 4, name: 'Documentation' },
-  { id: 5, name: 'Closing' },
-];
+const drawerHeaderStyle = {
+  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+  padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb',
+};
 
-const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }) => {
+const drawerBodyStyle = {
+  flex: 1, padding: '1.5rem', overflowY: 'auto',
+};
+
+const drawerFooterStyle = {
+  display: 'flex', justifyContent: 'flex-end', gap: '0.75rem',
+  padding: '1rem 1.5rem', borderTop: '1px solid #e5e7eb',
+};
+
+const fieldStyle = {
+  marginBottom: '1.25rem',
+};
+
+const labelStyle = {
+  display: 'block', fontSize: '0.875rem', fontWeight: 500,
+  color: '#374151', marginBottom: '0.375rem',
+};
+
+const inputStyle = {
+  width: '100%', padding: '0.625rem 0.75rem',
+  border: '1px solid #d1d5db', borderRadius: '6px',
+  fontSize: '0.875rem', boxSizing: 'border-box',
+};
+
+const selectStyle = {
+  ...inputStyle, background: 'white', cursor: 'pointer',
+};
+
+const AddDealTaskDrawer = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    title: task?.title || '',
-    category: task?.category || '',
-    deal: task?.deal || '',
-    dealId: task?.dealId || '',
-    amount: task?.amount || '',
-    description: task?.description || '',
-    scheduledDate: task?.scheduledDate || '',
-    scheduledTime: task?.scheduledTime || '',
-    assignedBy: task?.assignedBy || 'Admin',
-    assignedTo: task?.assignedTo || '',
-    priority: task?.priority || 'medium',
-    status: task?.status || 'pending',
+    title: '', category: 'call', date: '', priority: 'medium',
+    assignedTo: '', status: 'pending',
   });
-  
-  const [errors, setErrors] = useState({});
-  const [showDealDropdown, setShowDealDropdown] = useState(false);
-  const [dealSearch, setDealSearch] = useState('');
 
-  const filteredDeals = useMemo(() => {
-    if (!dealSearch) return sampleDeals;
-    return sampleDeals.filter(deal => 
-      deal.name.toLowerCase().includes(dealSearch.toLowerCase())
-    );
-  }, [dealSearch]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({ title: '', category: 'call', date: '', priority: 'medium', assignedTo: '', status: 'pending' });
     }
+  }, [isOpen]);
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleDealSelect = (deal) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      deal: deal.name,
-      dealId: deal.dealId,
-      amount: deal.amount
-    }));
-    setShowDealDropdown(false);
-    setDealSearch('');
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (!formData.deal) newErrors.deal = 'Deal is required';
-    if (!formData.scheduledDate) newErrors.scheduledDate = 'Scheduled date is required';
-    if (!formData.scheduledTime) newErrors.scheduledTime = 'Scheduled time is required';
-    if (!formData.assignedTo) newErrors.assignedTo = 'Assigned to is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (validate()) {
-      onSave(formData);
-      onClose();
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.title.trim()) return;
+    onSave(formData);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="drawer-overlay" onClick={onClose}>
-      <div className="drawer-panel" onClick={(e) => e.stopPropagation()}>
-        <div className="drawer-header">
-          <h2>{task ? 'Edit Deal Task' : 'Create Deal Task'}</h2>
-          <button className="drawer-close" onClick={onClose}>
+    <div style={drawerOverlayStyle} onClick={onClose}>
+      <div style={drawerPanelStyle} onClick={(e) => e.stopPropagation()}>
+        <div style={drawerHeaderStyle}>
+          <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600 }}>Add Task</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}>
             <X size={20} />
           </button>
         </div>
-        <div className="drawer-body">
-          <div className="form-section-title">Task Details</div>
-          <form className="lead-form">
-            <div className="form-group">
-              <label>Title *</label>
-              <input 
-                type="text" 
-                name="title"
-                placeholder="Enter task title" 
-                value={formData.title}
-                onChange={handleChange}
-              />
-              {errors.title && <span className="error-text">{errors.title}</span>}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+          <div style={drawerBodyStyle}>
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Title *</label>
+              <input style={inputStyle} value={formData.title} onChange={(e) => handleChange('title', e.target.value)} placeholder="Enter task title" required />
             </div>
-            <div className="form-group">
-              <label>Category *</label>
-              <select 
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                {sampleCategories.map(cat => (
-                  <option key={cat.id} value={cat.name}>{cat.name}</option>
-                ))}
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Category</label>
+              <select style={selectStyle} value={formData.category} onChange={(e) => handleChange('category', e.target.value)}>
+                <option value="call">Call</option>
+                <option value="email">Email</option>
+                <option value="meeting">Meeting</option>
+                <option value="demo">Demo</option>
+                <option value="follow-up">Follow-up</option>
               </select>
-              {errors.category && <span className="error-text">{errors.category}</span>}
             </div>
-            <div className="form-group">
-              <label>Deal *</label>
-              <div className="dropdown-search-container">
-                <div className="search-input-wrapper">
-                  <input 
-                    type="text" 
-                    placeholder="Search deal..."
-                    value={formData.deal || dealSearch}
-                    onChange={(e) => {
-                      setDealSearch(e.target.value);
-                      setShowDealDropdown(true);
-                      if (!e.target.value) setFormData(prev => ({ ...prev, deal: '', dealId: '', amount: '' }));
-                    }}
-                    onFocus={() => setShowDealDropdown(true)}
-                  />
-                  <Search size={16} className="search-icon-inner" />
-                </div>
-                {showDealDropdown && filteredDeals.length > 0 && (
-                  <div className="dropdown-list">
-                    {filteredDeals.map(deal => (
-                      <button 
-                        key={deal.id} 
-                        type="button"
-                        onClick={() => handleDealSelect(deal)}
-                      >
-                        {deal.name} - ₹{deal.amount.toLocaleString()}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {errors.deal && <span className="error-text">{errors.deal}</span>}
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Due Date</label>
+              <input style={inputStyle} type="date" value={formData.date} onChange={(e) => handleChange('date', e.target.value)} />
             </div>
-            <div className="form-group">
-              <label>Amount (₹)</label>
-              <input 
-                type="number" 
-                name="amount"
-                placeholder="Enter amount" 
-                value={formData.amount}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Description</label>
-              <textarea 
-                name="description"
-                placeholder="Enter description" 
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-              />
-            </div>
-            <div className="form-group">
-              <label>Scheduled Date *</label>
-              <input 
-                type="date" 
-                name="scheduledDate"
-                value={formData.scheduledDate}
-                onChange={handleChange}
-              />
-              {errors.scheduledDate && <span className="error-text">{errors.scheduledDate}</span>}
-            </div>
-            <div className="form-group">
-              <label>Scheduled Time *</label>
-              <input 
-                type="time" 
-                name="scheduledTime"
-                value={formData.scheduledTime}
-                onChange={handleChange}
-              />
-              {errors.scheduledTime && <span className="error-text">{errors.scheduledTime}</span>}
-            </div>
-            <div className="form-group">
-              <label>Assigned By</label>
-              <input 
-                type="text" 
-                name="assignedBy"
-                value={formData.assignedBy}
-                disabled
-              />
-            </div>
-            <div className="form-group">
-              <label>Assigned To *</label>
-              <select 
-                name="assignedTo"
-                value={formData.assignedTo}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                {sampleAgents.map(agent => (
-                  <option key={agent.id} value={agent.name}>{agent.name}</option>
-                ))}
-              </select>
-              {errors.assignedTo && <span className="error-text">{errors.assignedTo}</span>}
-            </div>
-            <div className="form-group">
-              <label>Priority</label>
-              <select 
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-              >
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Priority</label>
+              <select style={selectStyle} value={formData.priority} onChange={(e) => handleChange('priority', e.target.value)}>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
             </div>
-            <div className="form-group">
-              <label>Status</label>
-              <select 
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="overdue">OverDue</option>
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Assigned To</label>
+              <select style={selectStyle} value={formData.assignedTo} onChange={(e) => handleChange('assignedTo', e.target.value)}>
+                <option value="">Select person</option>
+                <option value="John Doe">John Doe</option>
+                <option value="Jane Smith">Jane Smith</option>
+                <option value="Mike Johnson">Mike Johnson</option>
               </select>
             </div>
-          </form>
-        </div>
-        <div className="drawer-footer">
-          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSubmit}>Save Task</button>
-        </div>
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Status</label>
+              <select style={selectStyle} value={formData.status} onChange={(e) => handleChange('status', e.target.value)}>
+                <option value="pending">Pending</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div style={drawerFooterStyle}>
+            <button type="button" onClick={onClose} style={{ padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', background: '#f3f4f6', color: '#374151', border: 'none' }}>Cancel</button>
+            <button type="submit" style={{ padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none' }}>Save Task</button>
+          </div>
+        </form>
       </div>
     </div>
   );
