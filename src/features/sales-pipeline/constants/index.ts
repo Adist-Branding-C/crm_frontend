@@ -45,5 +45,5 @@ const TASK_STAGE_COLORS: Record<string, string> = {
 };
 
 export function taskStageColor(status: string): string {
-  return TASK_STAGE_COLORS[status] ?? DEAL_STAGE_COLORS[status.charCodeAt(0) % 7 + 1] ?? '#6b7280';
+  return TASK_STAGE_COLORS[status] ?? '#6b7280';
 }

@@ -24,7 +24,6 @@ export function usePipelineDragDrop(
 
       const currentStatusId = sourceGroup.statusId;
       if (currentStatusId === targetStatusId) {
-        setDraggedDeal(null);
         return prevGroups;
       }
 
