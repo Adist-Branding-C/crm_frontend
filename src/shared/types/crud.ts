@@ -65,7 +65,7 @@ export interface AdminFormDrawerProps {
   isOpen: boolean;
   title: string;
   fields: FormField[];
-  formData: Record<string, unknown>;
+  formData: object;
   onChange: (data: any) => void;
   onSave: () => void;
   onClose: () => void;
