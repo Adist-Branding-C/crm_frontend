@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { useCrudData } from '../../../shared/hooks/useCrudData';
 import { LEAD_TYPE_DATA } from '../constants';
 import type { LeadTypeItem } from '../types';
+import { useCrudData } from '../../../shared/hooks/useCrudData';
 
 export function useLeadTypesData() {
   const crud = useCrudData(LEAD_TYPE_DATA);

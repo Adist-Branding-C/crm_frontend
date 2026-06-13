@@ -4,16 +4,9 @@
 @import '../../../shared/styles/pagination.css';
 @import '../../../shared/styles/forms.css';
 @import '../../../shared/styles/tabs.css';
-@import '../../../shared/styles/settings-layout.css';
 
 .lead-settings-page {
   padding: 1.5rem;
-}
-
-.lead-settings-layout {
-  display: flex;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
 }
 
 .color-pill {
@@ -30,12 +23,6 @@
   text-overflow: ellipsis;
 }
 
-.additional-fields-layout {
-  display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 1.5rem;
-}
-
 .color-input {
   height: 50px;
   padding: 4px;
@@ -45,14 +32,4 @@
 .modal-content {
   width: 100%;
   max-width: 450px;
-}
-
-@media (max-width: 1024px) {
-  .lead-settings-layout {
-    flex-direction: column;
-  }
-
-  .additional-fields-layout {
-    grid-template-columns: 1fr;
-  }
 }

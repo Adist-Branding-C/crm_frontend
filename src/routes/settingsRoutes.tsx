@@ -4,7 +4,6 @@ import SettingsPage from '../features/settings/pages/SettingsPage';
 import LeadPurposePage from '../features/lead-purpose/pages/LeadPurposePage';
 import LeadStatusPage from '../features/lead-status/pages/LeadStatusPage';
 import LeadSourcePage from '../features/lead-source/pages/LeadSourcePage';
-import LeadTypesPage from '../features/lead-types/pages/LeadTypesPage';
 import LeadAdditionalPage from '../features/lead-additional/pages/LeadAdditionalPage';
 import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
 import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
@@ -15,6 +14,7 @@ import CallStatusPage from '../features/call-status/pages/CallStatusPage';
 import CallReasonPage from '../features/call-reason/pages/CallReasonPage';
 import MeetingOutcomePage from '../features/meeting-outcome/pages/MeetingOutcomePage';
 import TaskCategoriesPage from '../features/task-categories/pages/TaskCategoriesPage';
+import LeadTypesPage from '../features/lead-types/pages/LeadTypesPage';
 
 export default (
   <>

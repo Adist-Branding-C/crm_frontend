@@ -319,3 +319,23 @@
 .text-danger {
   color: #dc2626 !important;
 }
+
+/* Skeleton loading animation */
+@keyframes skeleton-pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+.skeleton-box {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--border-color);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  max-width: 180px;
+}
+
+.skeleton-box--action {
+  max-width: 32px;
+  margin: 0 auto;
+}
