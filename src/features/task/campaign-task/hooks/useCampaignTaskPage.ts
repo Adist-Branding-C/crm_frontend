@@ -21,17 +21,14 @@ export function useCampaignTaskPage() {
 
   return {
     campaignTask,
-    searchQuery: filters.searchQuery,
-    setSearchQuery: filters.setSearchQuery,
-    rowsPerPage: filters.rowsPerPage,
-    setRowsPerPage: filters.setRowsPerPage,
+    searchQuery: campaignTask.search,
+    setSearchQuery: campaignTask.handleSearchChange,
     showDrawer: drawer.showAddDrawer || drawer.showEditDrawer,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,
     editingItem: drawer.editingItem,
     deletingItem: actions.deletingItem,
     filteredData: filters.filteredData,
-    totalRecords: filters.totalRecords,
     drawerInitialValues: drawer.drawerInitialValues,
     handleAddClick: drawer.openAddDrawer,
     handleCloseDrawer: () => { drawer.closeAddDrawer(); drawer.closeEditDrawer(); },
@@ -41,5 +38,13 @@ export function useCampaignTaskPage() {
     handleCloseDeleteModal: actions.closeDeleteModal,
     handleSubmit: actions.handleSubmit,
     handleEditSubmit: actions.handleEditSubmit,
+    staffOptions: campaignTask.staffOptions,
+    campaignOptions: campaignTask.campaignOptions,
+    page: campaignTask.page,
+    limit: campaignTask.limit,
+    totalPages: campaignTask.totalPages,
+    totalItems: campaignTask.totalItems,
+    handlePageChange: campaignTask.handlePageChange,
+    handleLimitChange: campaignTask.handleLimitChange,
   };
 }

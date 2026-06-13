@@ -10,4 +10,6 @@ export interface AddTaskDrawerProps {
   isLoading: boolean;
   error: string;
   isEditing: boolean;
+  categoryOptions: string[];
+  staffOptions: string[];
 }

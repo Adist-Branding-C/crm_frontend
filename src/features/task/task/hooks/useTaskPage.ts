@@ -21,17 +21,14 @@ export function useTaskPage() {
 
   return {
     task,
-    searchQuery: filters.searchQuery,
-    setSearchQuery: filters.setSearchQuery,
-    rowsPerPage: filters.rowsPerPage,
-    setRowsPerPage: filters.setRowsPerPage,
+    searchQuery: task.search,
+    setSearchQuery: task.handleSearchChange,
     showDrawer: drawer.showAddDrawer || drawer.showEditDrawer,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,
     editingItem: drawer.editingItem,
     deletingItem: actions.deletingItem,
     filteredData: filters.filteredData,
-    totalRecords: filters.totalRecords,
     drawerInitialValues: drawer.drawerInitialValues,
     handleAddClick: drawer.openAddDrawer,
     handleCloseDrawer: () => { drawer.closeAddDrawer(); drawer.closeEditDrawer(); },
@@ -41,5 +38,13 @@ export function useTaskPage() {
     handleCloseDeleteModal: actions.closeDeleteModal,
     handleSubmit: actions.handleSubmit,
     handleEditSubmit: actions.handleEditSubmit,
+    categoryOptions: task.categoryOptions,
+    staffOptions: task.staffOptions,
+    page: task.page,
+    limit: task.limit,
+    totalPages: task.totalPages,
+    totalItems: task.totalItems,
+    handlePageChange: task.handlePageChange,
+    handleLimitChange: task.handleLimitChange,
   };
 }

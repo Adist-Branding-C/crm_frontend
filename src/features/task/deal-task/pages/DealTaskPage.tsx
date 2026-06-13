@@ -11,13 +11,11 @@ const DealTaskPage = () => {
   const {
     dealTask,
     searchQuery, setSearchQuery,
-    rowsPerPage, setRowsPerPage,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
     filteredData,
-    totalRecords,
     drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
@@ -27,6 +25,13 @@ const DealTaskPage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
+    staffOptions,
+    page,
+    limit,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handleLimitChange,
   } = useDealTaskPage();
 
   return (
@@ -35,18 +40,21 @@ const DealTaskPage = () => {
       <SettingsTabs items={taskTabs} />
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
         <DealTaskTable
-          data={filteredData.slice(0, rowsPerPage)}
+          data={filteredData}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={setRowsPerPage}
-          totalRecords={totalRecords}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           onAdd={handleAddClick}
           addLabel="Add Deal Task"
+          page={page}
+          limit={limit}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          handlePageChange={handlePageChange}
+          handleLimitChange={handleLimitChange}
         />
         <AddDealTaskDrawer
           isOpen={showDrawer}
@@ -57,6 +65,9 @@ const DealTaskPage = () => {
           isLoading={dealTask.isLoading}
           error={dealTask.error}
           isEditing={!!editingItem}
+          deals={dealTask.deals}
+          dealListLoading={dealTask.dealListLoading}
+          staffOptions={staffOptions}
         />
         <DeleteDealTaskModal
           isOpen={!!deletingItem}

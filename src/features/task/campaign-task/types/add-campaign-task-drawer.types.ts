@@ -10,4 +10,6 @@ export interface AddCampaignTaskDrawerProps {
   isLoading: boolean;
   error: string;
   isEditing: boolean;
+  staffOptions: string[];
+  campaignOptions: string[];
 }

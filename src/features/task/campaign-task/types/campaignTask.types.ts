@@ -20,9 +20,3 @@ export interface CampaignTaskFormData {
   assignedTo: string;
   status: string;
 }
-
-export interface CampaignTaskResponse {
-  status: boolean;
-  message: string;
-  data?: unknown;
-}

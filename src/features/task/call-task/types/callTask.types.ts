@@ -22,9 +22,3 @@ export interface CallTaskFormData {
   assignedTo: string;
   status: string;
 }
-
-export interface CallTaskResponse {
-  status: boolean;
-  message: string;
-  data?: unknown;
-}

@@ -1,26 +1,64 @@
-import { useState, useCallback, useEffect } from 'react';
-import { dealTaskService } from '../services/dealTask.service';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { taskService } from '../../shared/services/taskService';
+import { dealService } from '../services/deal.service';
 import { addDealTaskValidationSchema, editDealTaskValidationSchema } from '../validations/dealTask.validation';
 import { ADD_DEAL_TASK_INITIAL_VALUES } from '../constants/dealTask.constants';
-import type { DealTaskItem, DealTaskFormData } from '../types/dealTask.types';
+import type { DealTaskItem, DealTaskFormData, DealOption } from '../types/dealTask.types';
 
 export function useDealTask() {
   const [dealTaskList, setDealTaskList] = useState<DealTaskItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [deals, setDeals] = useState<DealOption[]>([]);
+  const [dealListLoading, setDealListLoading] = useState(false);
+  const [staffOptions, setStaffOptions] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const paginationRef = useRef({ page: 1, limit: 10 });
+  useEffect(() => { paginationRef.current = { page, limit }; }, [page, limit]);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search]);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+  }, []);
 
   const fetchDealTasks = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await dealTaskService.getAll(params);
+      const response = await taskService.getTasks({ ...params, category: 'deal_task' });
       if (response.status) {
-        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? (response.data as { items: DealTaskItem[] }).items
+        const data = response.data && typeof response.data === 'object'
+          ? (response.data as Record<string, unknown>)
+          : {};
+        const rawData = 'items' in data
+          ? (data.items as DealTaskItem[])
           : Array.isArray(response.data)
             ? response.data
             : [];
         setDealTaskList(Array.isArray(rawData) ? rawData : []);
+        const staff = data.staff;
+        if (Array.isArray(staff)) setStaffOptions(staff as string[]);
+        const apiTotalPages = data.totalPages ?? data.totalPages ?? 1;
+        const apiTotalItems = data.totalItems ?? data.total ?? data.totalRecords ?? 0;
+        if (typeof apiTotalPages === 'number') setTotalPages(apiTotalPages);
+        if (typeof apiTotalItems === 'number') setTotalItems(apiTotalItems);
       } else {
         setError(response.message || 'Failed to fetch deal tasks');
       }
@@ -38,21 +76,41 @@ export function useDealTask() {
     }
   }, []);
 
+  const fetchDeals = useCallback(async () => {
+    setDealListLoading(true);
+    const dealList = await dealService.getAll();
+    setDeals(dealList);
+    setDealListLoading(false);
+  }, []);
+
   useEffect(() => {
-    fetchDealTasks();
-  }, [fetchDealTasks]);
+    const params: Record<string, string | number | undefined> = { page, limit };
+    if (debouncedSearch) params.search = debouncedSearch;
+    fetchDealTasks(params);
+    fetchDeals();
+  }, [fetchDealTasks, fetchDeals, page, limit, debouncedSearch]);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const handleLimitChange = useCallback((newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  }, []);
 
   const handleAdd = useCallback(async (values: DealTaskFormData) => {
     setError('');
     setIsLoading(true);
     try {
-      const response = await dealTaskService.create(values);
+      const payload = { ...values, category: 'deal_task' };
+      const response = await taskService.createTask(payload);
       if (response.status) {
         const data = response.data as { id?: number } | undefined;
         if (data?.id) {
           setDealTaskList(prev => [...prev, { id: data.id, ...values, amount: Number(values.amount) || 0 } as unknown as DealTaskItem]);
         } else {
-          fetchDealTasks();
+          fetchDealTasks(paginationRef.current);
         }
         return true;
       } else {
@@ -72,13 +130,14 @@ export function useDealTask() {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchDealTasks]);
+  }, [fetchDealTasks, paginationRef]);
 
   const handleUpdate = useCallback(async (id: number, values: DealTaskFormData) => {
     setError('');
     setIsLoading(true);
     try {
-      const response = await dealTaskService.update(id, values);
+      const payload = { ...values, category: 'deal_task' };
+      const response = await taskService.updateTask(id, payload);
       if (response.status) {
         setDealTaskList(prev => prev.map(item =>
           item.id === id ? { ...item, ...values, amount: Number(values.amount) || 0 } as unknown as DealTaskItem : item
@@ -106,7 +165,7 @@ export function useDealTask() {
   const handleDelete = useCallback(async (id: number) => {
     setError('');
     try {
-      const response = await dealTaskService.delete(id);
+      const response = await taskService.deleteTask(id);
       if (response.status) {
         setDealTaskList(prev => prev.filter(item => item.id !== id));
         return true;
@@ -131,10 +190,21 @@ export function useDealTask() {
     dealTaskList,
     isLoading,
     error,
+    deals,
+    dealListLoading,
+    staffOptions,
+    page,
+    limit,
+    totalPages,
+    totalItems,
+    search,
+    handleSearchChange,
     fetchDealTasks,
     handleAdd,
     handleUpdate,
     handleDelete,
+    handlePageChange,
+    handleLimitChange,
     validationSchema: addDealTaskValidationSchema,
     editValidationSchema: editDealTaskValidationSchema,
     initialValues: ADD_DEAL_TASK_INITIAL_VALUES,

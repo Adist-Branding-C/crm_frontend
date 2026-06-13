@@ -11,13 +11,11 @@ const CampaignTaskPage = () => {
   const {
     campaignTask,
     searchQuery, setSearchQuery,
-    rowsPerPage, setRowsPerPage,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
     filteredData,
-    totalRecords,
     drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
@@ -27,6 +25,14 @@ const CampaignTaskPage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
+    staffOptions,
+    campaignOptions,
+    page,
+    limit,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handleLimitChange,
   } = useCampaignTaskPage();
 
   return (
@@ -35,18 +41,21 @@ const CampaignTaskPage = () => {
       <SettingsTabs items={taskTabs} />
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
         <CampaignTaskTable
-          data={filteredData.slice(0, rowsPerPage)}
+          data={filteredData}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={setRowsPerPage}
-          totalRecords={totalRecords}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           onAdd={handleAddClick}
           addLabel="Add Campaign Task"
+          page={page}
+          limit={limit}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          handlePageChange={handlePageChange}
+          handleLimitChange={handleLimitChange}
         />
         <AddCampaignTaskDrawer
           isOpen={showDrawer}
@@ -57,6 +66,8 @@ const CampaignTaskPage = () => {
           isLoading={campaignTask.isLoading}
           error={campaignTask.error}
           isEditing={!!editingItem}
+          staffOptions={staffOptions}
+          campaignOptions={campaignOptions}
         />
         <DeleteCampaignTaskModal
           isOpen={!!deletingItem}

@@ -1,22 +1,6 @@
-import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
-import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import { X } from 'lucide-react';
+import DealTaskForm from './DealTaskForm';
 import type { AddDealTaskDrawerProps } from '../types/add-deal-task-drawer.types';
-
-const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'overdue', label: 'Overdue' },
-];
-
-const DEAL_STAGE_OPTIONS = [
-  { value: 'lead', label: 'Lead' },
-  { value: 'qualified', label: 'Qualified' },
-  { value: 'proposal', label: 'Proposal' },
-  { value: 'negotiation', label: 'Negotiation' },
-  { value: 'closed-won', label: 'Closed Won' },
-  { value: 'closed-lost', label: 'Closed Lost' },
-];
 
 const AddDealTaskDrawer = ({
   isOpen,
@@ -27,6 +11,9 @@ const AddDealTaskDrawer = ({
   isLoading,
   error,
   isEditing,
+  deals,
+  dealListLoading,
+  staffOptions,
 }: AddDealTaskDrawerProps) => {
   if (!isOpen) return null;
 
@@ -40,84 +27,17 @@ const AddDealTaskDrawer = ({
           </button>
         </div>
         <div className="drawer-body">
-          <Formik
-            enableReinitialize
-            initialValues={initialValues}
+          <DealTaskForm
             validationSchema={validationSchema}
+            initialValues={initialValues}
             onSubmit={onSubmit}
-          >
-            {({ errors, submitCount }) => {
-              const formError = error || (submitCount > 0 ? Object.values(errors)[0] : '');
-              return (
-                <Form>
-                  {formError && <ErrorMessage message={formError} />}
-
-                  <div className="form-group">
-                    <label>Title <span className="text-danger">*</span></label>
-                    <Field type="text" name="title" className="form-control" placeholder="Enter deal task title" />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Description</label>
-                    <Field as="textarea" name="description" className="form-control" placeholder="Enter description" rows={3} />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Deal Name</label>
-                    <Field type="text" name="dealName" className="form-control" placeholder="Enter deal name" />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Deal Stage</label>
-                    <Field as="select" name="dealStage" className="form-control">
-                      <option value="">Select stage</option>
-                      {DEAL_STAGE_OPTIONS.map(o => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </Field>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Amount</label>
-                    <Field type="text" name="amount" className="form-control" placeholder="Enter amount" />
-                  </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Scheduled Date</label>
-                      <Field type="date" name="scheduledDate" className="form-control" />
-                    </div>
-                    <div className="form-group">
-                      <label>Scheduled Time</label>
-                      <Field type="time" name="scheduledTime" className="form-control" />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Assigned To</label>
-                    <Field type="text" name="assignedTo" className="form-control" placeholder="Enter assignee name" />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Status <span className="text-danger">*</span></label>
-                    <Field as="select" name="status" className="form-control">
-                      <option value="">Select status</option>
-                      {STATUS_OPTIONS.map(o => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </Field>
-                  </div>
-
-                  <div className="form-actions">
-                    <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                      {isLoading ? <Loader2 size={16} className="spin" /> : isEditing ? 'Update' : 'Save'}
-                    </button>
-                    <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                  </div>
-                </Form>
-              );
-            }}
-          </Formik>
+            isLoading={isLoading}
+            error={error}
+            isEditing={isEditing}
+            deals={deals}
+            dealListLoading={dealListLoading}
+            staffOptions={staffOptions}
+          />
         </div>
       </div>
     </div>

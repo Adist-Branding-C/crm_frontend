@@ -1,34 +1,40 @@
-import { Search, Plus } from 'lucide-react';
-import CampaignTaskActionMenu from './CampaignTaskActionMenu';
+import { Search, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import CampaignTaskTableRow from './CampaignTaskTableRow';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
+import { LABEL_SHOW, LABEL_ENTRIES, LABEL_FIRST, LABEL_LAST, LABEL_PAGE, LABEL_OF, LABEL_SHOWING, LABEL_TO } from '../../../../shared/constants/labels';
 import type { CampaignTaskTableProps } from '../types/campaign-task-table.types';
 
 const CampaignTaskTable = ({
   data,
   searchQuery,
   onSearchChange,
-  rowsPerPage,
-  onRowsPerPageChange,
-  totalRecords,
   dropdownOpen,
   onToggleDropdown,
   onEdit,
   onDelete,
   onAdd,
   addLabel,
+  page,
+  limit,
+  totalPages,
+  totalItems,
+  handlePageChange,
+  handleLimitChange,
 }: CampaignTaskTableProps) => {
+  const startIndex = (page - 1) * limit;
+
   return (
     <div className="table-container">
       <div className="table-header-controls">
         <div className="entries-select">
           <label>
-            Show
-            <select value={rowsPerPage} onChange={(e) => onRowsPerPageChange(Number(e.target.value))}>
+            {LABEL_SHOW}
+            <select value={limit} onChange={(e) => handleLimitChange(Number(e.target.value))}>
               {ROWS_OPTIONS_10_25_50_100.map((n) => (
                 <option key={n} value={n}>{n}</option>
               ))}
             </select>
-            entries
+            {LABEL_ENTRIES}
           </label>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -62,35 +68,33 @@ const CampaignTaskTable = ({
           </thead>
           <tbody>
             {data.map((item, index) => (
-              <tr key={item.id}>
-                <td>{index + 1}</td>
-                <td>{item.title}</td>
-                <td>{item.campaignName || '-'}</td>
-                <td>{item.campaignType || '-'}</td>
-                <td>{item.scheduledDate || '-'}</td>
-                <td>{item.assignedTo || '-'}</td>
-                <td>
-                  <span className={`status-badge status-${(item.status || '').toLowerCase()}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td>
-                  <CampaignTaskActionMenu
-                    item={item}
-                    dropdownOpen={dropdownOpen}
-                    onToggleDropdown={onToggleDropdown}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                </td>
-              </tr>
+              <CampaignTaskTableRow
+                key={item.id}
+                item={item}
+                index={index}
+                dropdownOpen={dropdownOpen}
+                onToggleDropdown={onToggleDropdown}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             ))}
           </tbody>
         </table>
       </div>
       <div className="table-footer">
         <div className="table-info">
-          Showing 1 to {Math.min(rowsPerPage, totalRecords)} of {totalRecords} entries
+          {LABEL_SHOWING} {Math.min(startIndex + 1, totalItems)} {LABEL_TO} {Math.min(startIndex + limit, totalItems)} {LABEL_OF} {totalItems} {LABEL_ENTRIES}
+        </div>
+        <div className="table-controls">
+          {totalPages > 1 && (
+            <div className="pagination-controls" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              <button className="pagination-btn" disabled={page === 1} onClick={() => handlePageChange(1)}>{LABEL_FIRST}</button>
+              <button className="pagination-btn" disabled={page === 1} onClick={() => handlePageChange(page - 1)}><ChevronLeft size={16} /></button>
+              <span className="page-indicator">{LABEL_PAGE} {page} {LABEL_OF} {totalPages}</span>
+              <button className="pagination-btn" disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}><ChevronRight size={16} /></button>
+              <button className="pagination-btn" disabled={page === totalPages} onClick={() => handlePageChange(totalPages)}>{LABEL_LAST}</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

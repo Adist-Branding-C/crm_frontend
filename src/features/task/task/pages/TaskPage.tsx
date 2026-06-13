@@ -11,13 +11,11 @@ const TaskPage = () => {
   const {
     task,
     searchQuery, setSearchQuery,
-    rowsPerPage, setRowsPerPage,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
     filteredData,
-    totalRecords,
     drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
@@ -27,6 +25,14 @@ const TaskPage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
+    categoryOptions,
+    staffOptions,
+    page,
+    limit,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handleLimitChange,
   } = useTaskPage();
 
   return (
@@ -35,18 +41,21 @@ const TaskPage = () => {
       <SettingsTabs items={taskTabs} />
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
         <TaskTable
-          data={filteredData.slice(0, rowsPerPage)}
+          data={filteredData}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={setRowsPerPage}
-          totalRecords={totalRecords}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           onAdd={handleAddClick}
           addLabel="Add Task"
+          page={page}
+          limit={limit}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          handlePageChange={handlePageChange}
+          handleLimitChange={handleLimitChange}
         />
         <AddTaskDrawer
           isOpen={showDrawer}
@@ -57,6 +66,8 @@ const TaskPage = () => {
           isLoading={task.isLoading}
           error={task.error}
           isEditing={!!editingItem}
+          categoryOptions={categoryOptions}
+          staffOptions={staffOptions}
         />
         <DeleteTaskModal
           isOpen={!!deletingItem}
@@ -64,6 +75,7 @@ const TaskPage = () => {
           onConfirm={handleConfirmDelete}
           onClose={handleCloseDeleteModal}
         />
+
       </div>
     </div>
   );

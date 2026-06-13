@@ -11,13 +11,11 @@ const CallTaskPage = () => {
   const {
     callTask,
     searchQuery, setSearchQuery,
-    rowsPerPage, setRowsPerPage,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
     filteredData,
-    totalRecords,
     drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
@@ -27,6 +25,13 @@ const CallTaskPage = () => {
     handleCloseDeleteModal,
     handleSubmit,
     handleEditSubmit,
+    staffOptions,
+    page,
+    limit,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handleLimitChange,
   } = useCallTaskPage();
 
   return (
@@ -35,18 +40,21 @@ const CallTaskPage = () => {
       <SettingsTabs items={taskTabs} />
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
         <CallTaskTable
-          data={filteredData.slice(0, rowsPerPage)}
+          data={filteredData}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={setRowsPerPage}
-          totalRecords={totalRecords}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           onAdd={handleAddClick}
           addLabel="Add Call Task"
+          page={page}
+          limit={limit}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          handlePageChange={handlePageChange}
+          handleLimitChange={handleLimitChange}
         />
         <AddCallTaskDrawer
           isOpen={showDrawer}
@@ -57,6 +65,7 @@ const CallTaskPage = () => {
           isLoading={callTask.isLoading}
           error={callTask.error}
           isEditing={!!editingItem}
+          staffOptions={staffOptions}
         />
         <DeleteCallTaskModal
           isOpen={!!deletingItem}

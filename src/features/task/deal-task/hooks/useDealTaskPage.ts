@@ -21,17 +21,14 @@ export function useDealTaskPage() {
 
   return {
     dealTask,
-    searchQuery: filters.searchQuery,
-    setSearchQuery: filters.setSearchQuery,
-    rowsPerPage: filters.rowsPerPage,
-    setRowsPerPage: filters.setRowsPerPage,
+    searchQuery: dealTask.search,
+    setSearchQuery: dealTask.handleSearchChange,
     showDrawer: drawer.showAddDrawer || drawer.showEditDrawer,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,
     editingItem: drawer.editingItem,
     deletingItem: actions.deletingItem,
     filteredData: filters.filteredData,
-    totalRecords: filters.totalRecords,
     drawerInitialValues: drawer.drawerInitialValues,
     handleAddClick: drawer.openAddDrawer,
     handleCloseDrawer: () => { drawer.closeAddDrawer(); drawer.closeEditDrawer(); },
@@ -41,5 +38,12 @@ export function useDealTaskPage() {
     handleCloseDeleteModal: actions.closeDeleteModal,
     handleSubmit: actions.handleSubmit,
     handleEditSubmit: actions.handleEditSubmit,
+    staffOptions: dealTask.staffOptions,
+    page: dealTask.page,
+    limit: dealTask.limit,
+    totalPages: dealTask.totalPages,
+    totalItems: dealTask.totalItems,
+    handlePageChange: dealTask.handlePageChange,
+    handleLimitChange: dealTask.handleLimitChange,
   };
 }

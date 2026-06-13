@@ -1,5 +1,5 @@
 import type { Schema } from 'yup';
-import type { DealTaskFormData } from './dealTask.types';
+import type { DealTaskFormData, DealOption } from './dealTask.types';
 
 export interface AddDealTaskDrawerProps {
   isOpen: boolean;
@@ -10,4 +10,7 @@ export interface AddDealTaskDrawerProps {
   isLoading: boolean;
   error: string;
   isEditing: boolean;
+  deals: DealOption[];
+  dealListLoading: boolean;
+  staffOptions: string[];
 }

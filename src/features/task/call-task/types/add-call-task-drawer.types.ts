@@ -10,4 +10,5 @@ export interface AddCallTaskDrawerProps {
   isLoading: boolean;
   error: string;
   isEditing: boolean;
+  staffOptions: string[];
 }
