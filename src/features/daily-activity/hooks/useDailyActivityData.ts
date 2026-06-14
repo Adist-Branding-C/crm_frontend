@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { staffList } from '../constants';
 import { DEFAULT_ROWS_PER_PAGE } from '../../../shared/constants/pagination';
 import { activityService } from '../services/ActivityService';
@@ -23,8 +23,10 @@ export const useDailyActivityData = () => {
   const [showStaffDropdown, setShowStaffDropdown] = useState(false);
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const rowsPerPage = DEFAULT_ROWS_PER_PAGE;
+  const requestSeqRef = useRef(0);
 
   const fetchActivities = useCallback(async (page: number, f: Filters, at: string) => {
+    const requestSeq = ++requestSeqRef.current;
     try {
       const params: Record<string, string | number> = { page, limit: rowsPerPage };
       if (f.date) params.date = f.date;
@@ -34,11 +36,18 @@ export const useDailyActivityData = () => {
       if (at) params.activityType = at;
 
       const response = await activityService.getActivities(params);
+      if (requestSeq !== requestSeqRef.current) return;
       if (response.status) {
         setActivities(response.data.items.map(mapApiItemToUI));
         setPagination(response.data.pagination);
+      } else {
+        setActivities([]);
+        setPagination(null);
       }
     } catch {
+      if (requestSeq !== requestSeqRef.current) return;
+      setActivities([]);
+      setPagination(null);
     }
   }, [rowsPerPage]);
 

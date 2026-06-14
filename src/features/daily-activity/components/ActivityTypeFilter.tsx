@@ -4,8 +4,10 @@ import './ActivityTypeFilter.css';
 const ActivityTypeFilter = ({ activityTypeFilter, activityTypes, onChange }: ActivityTypeFilterProps) => (
   <div className="activity-type-filter">
     <div className="activity-type-dropdown-group">
-      <label>Activity Type</label>
+      <label htmlFor="activity-type-filter">
+        Activity Type</label>
       <select
+        id="activity-type-filter"
         className="filter-select"
         value={activityTypeFilter}
         onChange={(e) => onChange(e.target.value)}
