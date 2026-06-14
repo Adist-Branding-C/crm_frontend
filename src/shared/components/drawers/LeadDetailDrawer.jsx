@@ -55,7 +55,6 @@ const modalFooterStyle = {
   borderTop: '1px solid #e5e7eb',
   justifyContent: 'center',
 };
-import './LeadDetailDrawer.css';
 import AddDealTaskDrawer from './AddDealTaskDrawer';
 
 const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
@@ -77,6 +76,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
     { id: 2, title: 'Basic Plan', amount: 50000, stage: 'won', expectedClose: '2024-04-20', progress: 100, owner: 'Jane Smith' },
   ]);
   const [taskFilter, setTaskFilter] = useState('all');
+  const [editingTask, setEditingTask] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [editingField, setEditingField] = useState(null);
@@ -173,6 +173,47 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
   const cancelEdit = () => {
     setEditingField(null);
     setEditValue('');
+  };
+
+  const handleCompleteTask = (id) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'completed' } : t));
+  };
+
+  const handleDeleteTask = (id) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleEditTask = (task) => {
+    setEditingTask({
+      title: task.title,
+      category: task.category || '',
+      deal: '',
+      dealId: '',
+      amount: '',
+      description: '',
+      scheduledDate: task.date || '',
+      scheduledTime: '',
+      assignedBy: 'Admin',
+      assignedTo: task.assignedTo || '',
+      priority: task.priority || 'medium',
+      status: task.status || 'pending',
+      _id: task.id,
+    });
+    setShowTaskDrawer(true);
+  };
+
+  const handleSaveTask = (taskData) => {
+    if (editingTask && editingTask._id) {
+      setTasks(prev => prev.map(t =>
+        t.id === editingTask._id
+          ? { ...t, title: taskData.title, category: taskData.category, date: taskData.scheduledDate, priority: taskData.priority, status: taskData.status, assignedTo: taskData.assignedTo }
+          : t
+      ));
+    } else {
+      setTasks(prev => [...prev, { id: Date.now(), title: taskData.title, category: taskData.category, date: taskData.scheduledDate, priority: taskData.priority, status: taskData.status, assignedTo: taskData.assignedTo }]);
+    }
+    setEditingTask(null);
+    setShowTaskDrawer(false);
   };
 
   const filteredTasks = taskFilter === 'all' ? tasks : tasks.filter(t => t.status === taskFilter);
@@ -523,7 +564,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                 <div>
                   <div className="leaddrawer-tab-header">
                     <h3 className="leaddrawer-tab-heading">Tasks</h3>
-                    <button className="btn btn-primary btn-sm" onClick={() => setShowTaskDrawer(true)}>
+                    <button className="btn btn-primary btn-sm" onClick={() => { setEditingTask(null); setShowTaskDrawer(true); }}>
                       <Plus size={14} /> Add Task
                     </button>
                   </div>
@@ -548,9 +589,9 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                           <span className={`leaddrawer-task-badge ${task.status === 'in-progress' ? 'in-progress' : task.status}`}>{task.status === 'in-progress' ? 'In Progress' : task.status}</span>
                         </div>
                         <div className="leaddrawer-task-actions">
-                          <button className="leaddrawer-note-action"><Edit2 size={14} /></button>
-                          <button className="leaddrawer-note-action"><Check size={14} /></button>
-                          <button className="leaddrawer-note-action"><Trash2 size={14} /></button>
+                          <button className="leaddrawer-note-action" title="Edit task" onClick={() => handleEditTask(task)}><Edit2 size={14} /></button>
+                          <button className="leaddrawer-note-action" title="Mark complete" onClick={() => handleCompleteTask(task.id)} disabled={task.status === 'completed'}><Check size={14} /></button>
+                          <button className="leaddrawer-note-action" title="Delete task" onClick={() => handleDeleteTask(task.id)}><Trash2 size={14} /></button>
                         </div>
                       </div>
                     ))}
@@ -641,16 +682,14 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
           </div>
         </div>
       )}
-      <AddDealTaskDrawer 
-        isOpen={showTaskDrawer} 
-        onClose={() => setShowTaskDrawer(false)}
-        onSave={(taskData) => {
-          setTasks([...tasks, { ...taskData, id: Date.now() }]);
-          setShowTaskDrawer(false);
-        }}
+      <AddDealTaskDrawer
+        isOpen={showTaskDrawer}
+        onClose={() => { setShowTaskDrawer(false); setEditingTask(null); }}
+        task={editingTask}
+        onSave={handleSaveTask}
       />
     </div>
   );
-};
+
 
 export default LeadDetailDrawer;
