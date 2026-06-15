@@ -548,7 +548,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                           <span className={`leaddrawer-task-badge ${task.status === 'in-progress' ? 'in-progress' : task.status}`}>{task.status === 'in-progress' ? 'In Progress' : task.status}</span>
                         </div>
                         <div className="leaddrawer-task-actions">
-                          <button className="leaddrawer-note-action"><Edit2 size={14} /></button>
+                          <button className="leaddrawer-note-action"><Edit2 size={14} /> </button>
                           <button className="leaddrawer-note-action"><Check size={14} /></button>
                           <button className="leaddrawer-note-action"><Trash2 size={14} /></button>
                         </div>

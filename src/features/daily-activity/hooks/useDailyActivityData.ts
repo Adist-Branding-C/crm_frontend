@@ -69,6 +69,7 @@ export const useDailyActivityData = () => {
 
   const handleFilterChange = (field: keyof Filters, value: string | number) => {
     setFilters({ ...filters, [field]: value });
+    setCurrentPage(1);
   };
 
   const handleReset = () => {

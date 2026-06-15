@@ -27,6 +27,7 @@ export function useSpotlightData() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const initialRender = useRef(true);
+  const latestRequestId = useRef(0);
 
   // Debounce search query before sending to API
   useEffect(() => {
@@ -39,10 +40,12 @@ export function useSpotlightData() {
   }, [searchQuery]);
 
   const fetchLeads = useCallback(async (params: SpotlightRequestParams) => {
+    const requestId = ++latestRequestId.current;
     setLoading(true);
     setError(null);
     try {
       const response = await spotlightService.getLeads(params);
+      if (requestId !== latestRequestId.current) return;
       if (response.status && response.data) {
         const items = response.data.items || [];
         setRawItems(items);
@@ -57,6 +60,7 @@ export function useSpotlightData() {
         setError(response.message || 'Failed to fetch leads');
       }
     } catch (err: unknown) {
+      if (requestId !== latestRequestId.current) return;
       setRawItems([]);
       setData([]);
       setTotalRecords(0);
@@ -70,6 +74,7 @@ export function useSpotlightData() {
         setError('Network error. Please try again.');
       }
     } finally {
+      if (requestId !== latestRequestId.current) return;
       setLoading(false);
     }
   }, []);
@@ -137,6 +142,11 @@ export function useSpotlightData() {
     setCurrentPage(1);
   }, []);
 
+  const handleFilterChange = useCallback((newFilters: SpotlightFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  }, []);
+
   const clearFilters = useCallback(() => {
     setFilters({ ...INITIAL_FILTERS });
     setCurrentPage(1);
@@ -148,7 +158,7 @@ export function useSpotlightData() {
   return {
     searchQuery, setSearchQuery,
     showFilters, setShowFilters,
-    filters, setFilters, clearFilters,
+    filters, setFilters: handleFilterChange, clearFilters,
     sortConfig, handleSort, handleSortDirection,
     setSortConfig,
     currentPage, setCurrentPage,

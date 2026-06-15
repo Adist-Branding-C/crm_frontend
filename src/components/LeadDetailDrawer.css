@@ -170,48 +170,12 @@
   gap: 0.5rem;
 }
 
-.leaddrawer-back-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  background: transparent;
-  border: none;
-  color: var(--primary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
+.leaddrawer-header .leaddrawer-back-btn {
   padding: 0.5rem;
-  border-radius: var(--border-radius-sm);
-  transition: all 0.2s;
 }
 
-.leaddrawer-back-btn:hover {
-  background-color: var(--bg-main);
-}
-
-.leaddrawer-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-main);
-  margin: 0;
-}
-
-.leaddrawer-close {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
+.leaddrawer-header .leaddrawer-close {
   padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius-sm);
-  transition: all 0.2s;
-}
-
-.leaddrawer-close:hover {
-  background-color: var(--bg-main);
-  color: var(--text-main);
 }
 
 .leaddrawer-main {
