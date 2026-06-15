@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import EnquiriesPage from '../features/enquiries/pages/EnquiriesPage';
-import CampaignsPage from '../features/campaigns/pages/CampaignsPage';
+import CampaignsPage from '../features/campaigns';
 import FollowupRequiredPage from '../features/followup-required/pages/FollowupRequiredPage';
 import SalesPipelinePage from '../features/sales-pipeline/pages/SalesPipelinePage';
 import CompaniesPage from '../features/companies/pages/CompaniesPage';
