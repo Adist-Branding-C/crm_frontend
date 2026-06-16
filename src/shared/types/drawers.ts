@@ -46,6 +46,7 @@ export interface CampaignFormData {
 export interface DealFormData {
   dealName: string;
   lead: string;
+  leadId?: string | number;
   mobile: string;
   amount: string;
   status: string;
@@ -53,6 +54,7 @@ export interface DealFormData {
   startDate: string;
   endDate: string;
   assignAgent: string;
+  agentId?: string | number;
 }
 
 export interface AddDealTaskDrawerProps {

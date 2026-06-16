@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
-import DealsPage from '../features/deals/pages/DealsPage';
+import DealsPage from '../features/deal/pages/DealPage';
 import DealTypesPage from '../features/deal-types/pages/DealTypesPage';
 import DealStagesPage from '../features/deal-stages/pages/DealStagesPage';
 import DealAdditionalFieldsPage from '../features/deal-additional-fields/pages/DealAdditionalFieldsPage';
