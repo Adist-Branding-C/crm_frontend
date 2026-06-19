@@ -1,21 +1,15 @@
 import React from 'react';
-import type { SpotlightFilters, SpotlightFiltersProps } from '../types';
-import { STATUS_ACTIVE, STATUS_INACTIVE, STATUS_PENDING } from '../../../shared/constants/statuses';
-import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
-import { LEAD_TYPE_OPTIONS } from '../../../shared/constants/leadTypes';
-import { SOURCE_OPTIONS } from '../../../shared/constants/sources';
-import { PURPOSE_OPTIONS } from '../../../shared/constants/purposes';
-import { DATE_FILTER_OPTIONS } from '../../../shared/constants/dateFilterOptions';
-import { MOCK_STAFF_OPTIONS } from '../../../shared/constants/mockStaff';
+import { DATE_FILTER_OPTIONS } from '../constants';
+import type { SpotlightFiltersProps } from '../types';
 
-const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({ filters, onFilterChange, onClearFilters, onClose }) => (
+const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({ filters, filterOptions, onFilterChange, onClearFilters, onClose }) => (
   <div className="filters-panel">
     <div className="filter-row">
       <div className="filter-group">
         <label>Type</label>
         <select value={filters.type} onChange={(e) => onFilterChange({ ...filters, type: e.target.value })}>
           <option value="">All</option>
-          {LEAD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {filterOptions.leadTypes.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
       <div className="filter-group">
@@ -37,7 +31,7 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({ filters, onFilterCh
         <label>Enquiry Source</label>
         <select value={filters.enquirySource} onChange={(e) => onFilterChange({ ...filters, enquirySource: e.target.value })}>
           <option value="">Select</option>
-          {SOURCE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {filterOptions.sources.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
     </div>
@@ -46,16 +40,14 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({ filters, onFilterCh
         <label>Enquiry Purpose</label>
         <select value={filters.enquiryPurpose} onChange={(e) => onFilterChange({ ...filters, enquiryPurpose: e.target.value })}>
           <option value="">Select</option>
-          {PURPOSE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {filterOptions.purposes.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
       <div className="filter-group">
         <label>Lead Status</label>
-        <select value={filters.leadStatus} onChange={(e) => onFilterChange({ ...filters, leadStatus: e.target.value })}>
+        <select value={filters.leadStatusId} onChange={(e) => onFilterChange({ ...filters, leadStatusId: e.target.value })}>
           <option value="">Select</option>
-          <option value={STATUS_ACTIVE}>{STATUS_ACTIVE}</option>
-          <option value={STATUS_INACTIVE}>{STATUS_INACTIVE}</option>
-          <option value={STATUS_PENDING}>{STATUS_PENDING}</option>
+          {filterOptions.statuses.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
       <div className="filter-group">
@@ -70,7 +62,7 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({ filters, onFilterCh
         <label>Created By</label>
         <select value={filters.createdBy} onChange={(e) => onFilterChange({ ...filters, createdBy: e.target.value })}>
           <option value="">Select</option>
-          {MOCK_STAFF_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {filterOptions.agents.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
     </div>
@@ -79,14 +71,14 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({ filters, onFilterCh
         <label>Assigned To</label>
         <select value={filters.assignedTo} onChange={(e) => onFilterChange({ ...filters, assignedTo: e.target.value })}>
           <option value="">Select</option>
-          {MOCK_STAFF_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {filterOptions.agents.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
       <div className="filter-group">
         <label>Lead Type</label>
-        <select value={filters.leadType} onChange={(e) => onFilterChange({ ...filters, leadType: e.target.value })}>
+        <select value={filters.leadTypeId} onChange={(e) => onFilterChange({ ...filters, leadTypeId: e.target.value })}>
           <option value="">Select</option>
-          {LEAD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {filterOptions.leadTypes.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
       <div className="filter-group">
@@ -104,8 +96,8 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({ filters, onFilterCh
         <input type="text" placeholder="Enter remarks" value={filters.remarks} onChange={(e) => onFilterChange({ ...filters, remarks: e.target.value })} />
       </div>
       <div className="filter-actions">
-        <button className="btn btn-primary" onClick={onClose}>{ACTION_FILTER}</button>
-        <button className="btn btn-secondary" onClick={onClearFilters}>{ACTION_CLEAR}</button>
+        <button className="btn btn-primary" onClick={onClose}>Apply</button>
+        <button className="btn btn-secondary" onClick={onClearFilters}>Clear</button>
       </div>
     </div>
   </div>
