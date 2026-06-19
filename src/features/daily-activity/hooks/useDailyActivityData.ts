@@ -3,7 +3,7 @@ import { DEFAULT_ROWS_PER_PAGE } from '../../../shared/constants/pagination';
 import { activityService } from '../services/ActivityService';
 import { mapApiItemToUI } from '../utils/activityMapper';
 import type { Filters, Activity, PaginationInfo } from '../types';
-import {staffList, DEFAULT_FILTERS } from '../constants';
+import { staffList, DEFAULT_FILTERS } from '../constants';
 
 export const useDailyActivityData = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
