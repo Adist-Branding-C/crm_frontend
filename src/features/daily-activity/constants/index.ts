@@ -1,5 +1,5 @@
 import { formatActivityType } from '../utils/activityHelpers';
-import type { StaffOption, ActivityTypeOption } from '../types';
+import type {Filters, StaffOption, ActivityTypeOption } from '../types';
 
 export const staffList: StaffOption[] = [
   { id: 1, name: 'All Staff' },
@@ -45,3 +45,10 @@ export const activityTypes: ActivityTypeOption[] = [
   { value: '', label: 'All' },
   ...ACTIVITY_TYPE_ENUMS.map((value) => ({ value, label: formatActivityType(value) })),
 ];
+
+export const DEFAULT_FILTERS: Filters = {
+  date: '',
+  startTime: '',
+  endTime: '',
+  staff: 1,
+};

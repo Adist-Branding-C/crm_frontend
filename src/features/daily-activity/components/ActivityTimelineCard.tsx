@@ -12,7 +12,7 @@ const ActivityTimelineCard = ({ activity }: ActivityTimelineCardProps) => (
 
       <div className="timeline-body">
         <div className="timeline-avatar">
-          {activity.user.charAt(0)}
+          {activity.user?.trim()?.charAt(0)?.toUpperCase() || '?'}
         </div>
 
         <div className="timeline-details">
