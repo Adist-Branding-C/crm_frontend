@@ -14,7 +14,11 @@ import { useEnquiriesFilter } from '../hooks/useEnquiriesFilter';
 import { useEnquiriesActions } from '../hooks/useEnquiriesActions';
 import { useEnquiriesUI } from '../hooks/useEnquiriesUI';
 import { COLUMNS } from '../constants';
-import EnquiriesToolbar from '../components/EnquiriesToolbar';
+import SearchBox from '../../../shared/components/toolbar/SearchBox';
+import FilterButton from '../../../shared/components/toolbar/FilterButton';
+import SortDropdown from '../../../shared/components/toolbar/SortDropdown';
+import ActionsDropdown from '../../../shared/components/toolbar/ActionsDropdown';
+import AddLeadButton from '../../../shared/components/toolbar/AddLeadButton';
 import EnquiriesFilters from '../components/EnquiriesFilters';
 import './EnquiriesPage.css';
 
@@ -39,26 +43,32 @@ const EnquiriesPage = () => {
     <PageContainer>
       <PageHeader title="Leads" description="Potential customers showing interest in a product or service." />
 
-      <EnquiriesToolbar
-        searchQuery={filter.searchQuery}
-        onSearchChange={filter.setSearchQuery}
-        showFilters={ui.showFilters}
-        onToggleFilters={() => ui.setShowFilters(!ui.showFilters)}
-        sortConfig={sort.sortConfig}
-        onSortDesc={sort.handleSortDesc}
-        onSortAsc={sort.handleSortAsc}
-        showSortDropdown={ui.showSortDropdown}
-        sortDropdownClosing={ui.sortDropdownClosing}
-        sortDropdownRef={ui.sortDropdownRef}
-        onSetShowSortDropdown={ui.setShowSortDropdown}
-        onCloseSortDropdown={ui.closeSortDropdown}
-        showActionsDropdown={ui.showActionsDropdown}
-        actionsDropdownClosing={ui.actionsDropdownClosing}
-        actionsDropdownRef={ui.actionsDropdownRef}
-        onSetShowActionsDropdown={ui.setShowActionsDropdown}
-        onCloseActionsDropdown={ui.closeActionsDropdown}
-        onAddLead={() => ui.setIsDrawerOpen(true)}
-      />
+      <div className="enquiries-toolbar">
+        <div className="toolbar-left">
+          <SearchBox searchQuery={filter.searchQuery} onSearchChange={filter.setSearchQuery} />
+          <FilterButton showFilters={ui.showFilters} onClick={() => ui.setShowFilters(!ui.showFilters)} />
+          <SortDropdown
+            sortConfig={sort.sortConfig}
+            showDropdown={ui.showSortDropdown}
+            dropdownClosing={ui.sortDropdownClosing}
+            dropdownRef={ui.sortDropdownRef}
+            onOpen={ui.openSortDropdown}
+            onClose={ui.closeSortDropdown}
+            onSortAsc={sort.handleSortAsc}
+            onSortDesc={sort.handleSortDesc}
+          />
+          <ActionsDropdown
+            showDropdown={ui.showActionsDropdown}
+            dropdownClosing={ui.actionsDropdownClosing}
+            dropdownRef={ui.actionsDropdownRef}
+            onOpen={ui.openActionsDropdown}
+            onClose={ui.closeActionsDropdown}
+          />
+        </div>
+        <div className="toolbar-right">
+          <AddLeadButton onClick={() => ui.setIsDrawerOpen(true)} />
+        </div>
+      </div>
 
       {ui.showFilters && (
         <EnquiriesFilters
@@ -69,7 +79,7 @@ const EnquiriesPage = () => {
         />
       )}
 
-      <TableWrapper isLoading={isLoading} error={error} columns={COLUMNS.length}>
+      <TableWrapper isLoading={isLoading} error={error} columns={COLUMNS.length} isEmpty={!isLoading && !error && leads.length === 0} emptyMessage="No enquiries found">
         <Table>
           <TableHead>
             <TableRow>

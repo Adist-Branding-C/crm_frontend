@@ -38,11 +38,13 @@ export interface UseEnquiriesUIResult {
   sortDropdownRef: React.RefObject<HTMLDivElement | null>;
   setShowSortDropdown: (v: boolean) => void;
   closeSortDropdown: () => void;
+  openSortDropdown: () => void;
   showActionsDropdown: boolean;
   actionsDropdownClosing: boolean;
   actionsDropdownRef: React.RefObject<HTMLDivElement | null>;
   setShowActionsDropdown: (v: boolean) => void;
   closeActionsDropdown: () => void;
+  openActionsDropdown: () => void;
   isDrawerOpen: boolean;
   setIsDrawerOpen: (v: boolean) => void;
   selectedLead: Lead | null;
@@ -88,6 +90,16 @@ export function useEnquiriesUI(): UseEnquiriesUIResult {
     };
   }, [sortDropdown.show, sortDropdown.close, actionsDropdown.show, actionsDropdown.close]);
 
+  const openSortDropdown = useCallback(() => {
+    sortDropdown.setShow(true);
+    actionsDropdown.setShow(false);
+  }, [sortDropdown.setShow, actionsDropdown.setShow]);
+
+  const openActionsDropdown = useCallback(() => {
+    actionsDropdown.setShow(true);
+    sortDropdown.setShow(false);
+  }, [actionsDropdown.setShow, sortDropdown.setShow]);
+
   return {
     showFilters,
     setShowFilters,
@@ -96,11 +108,13 @@ export function useEnquiriesUI(): UseEnquiriesUIResult {
     sortDropdownRef: sortDropdown.ref,
     setShowSortDropdown: sortDropdown.setShow,
     closeSortDropdown: sortDropdown.close,
+    openSortDropdown,
     showActionsDropdown: actionsDropdown.show,
     actionsDropdownClosing: actionsDropdown.closing,
     actionsDropdownRef: actionsDropdown.ref,
     setShowActionsDropdown: actionsDropdown.setShow,
     closeActionsDropdown: actionsDropdown.close,
+    openActionsDropdown,
     isDrawerOpen,
     setIsDrawerOpen,
     selectedLead,
