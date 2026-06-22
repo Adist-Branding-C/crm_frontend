@@ -370,6 +370,32 @@
   background: rgba(241, 65, 79, 0.05);
 }
 
+.see-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.75rem 0.75rem;
+  padding: 0.625rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  background: var(--bg-main);
+  color: var(--primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.see-more-btn:hover {
+  background: var(--bg-card);
+  border-color: var(--primary);
+}
+
+.see-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 1024px) {
   .month-column {
     flex: 0 0 280px;

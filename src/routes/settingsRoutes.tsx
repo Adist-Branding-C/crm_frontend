@@ -11,10 +11,11 @@ import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
 import IntegrationsPage from '../features/integrations/pages/IntegrationsPage';
 import LeadGenerationAPIPage from '../features/lead-generation-api/pages/LeadGenerationAPIPage';
 import GeneralSettingsPage from '../features/general-settings/pages/GeneralSettingsPage';
-import CallStatusPage from '../features/call-status/pages/CallStatusPage';
-import CallReasonPage from '../features/call-reason/pages/CallReasonPage';
-import MeetingOutcomePage from '../features/meeting-outcome/pages/MeetingOutcomePage';
-import TaskCategoryPage from '../features/task/category/pages/TaskCategoryPage';
+import UserLayout from '../features/task-settings/components/UserLayout';
+import CallStatusPage from '../features/task-settings/call-status/CallStatus';
+import CallReasonPage from '../features/task-settings/call-reason/CallReason';
+import MeetingOutcomePage from '../features/task-settings/meeting-outcome/MeetingOutcome';
+import TaskCategoryPage from '../features/task-settings/task-category/TaskCategory';
 
 export default (
   <>
@@ -29,9 +30,11 @@ export default (
     <Route path="user/gl-connect" element={<IntegrationsPage />} />
     <Route path="user/gl-connect/lead-api" element={<LeadGenerationAPIPage />} />
     <Route path="user/general-settings" element={<GeneralSettingsPage />} />
-    <Route path="user/call_status" element={<CallStatusPage />} />
-    <Route path="user/reason" element={<CallReasonPage />} />
-    <Route path="user/meeting-outcome" element={<MeetingOutcomePage />} />
-    <Route path="user/task-categories" element={<TaskCategoryPage />} />
+    <Route path="user" element={<UserLayout />}>
+      <Route path="call_status" element={<CallStatusPage />} />
+      <Route path="call_reasons" element={<CallReasonPage />} />
+      <Route path="meeting_outcome" element={<MeetingOutcomePage />} />
+      <Route path="task_categories" element={<TaskCategoryPage />} />
+    </Route>
   </>
 );
