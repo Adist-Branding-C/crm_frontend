@@ -1,0 +1,34 @@
+.activity-count-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 180px;
+}
+
+.activity-count-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--primary);
+  border-radius: var(--border-radius);
+  color: #fff;
+}
+
+.activity-count-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-count-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.activity-count-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.1;
+}

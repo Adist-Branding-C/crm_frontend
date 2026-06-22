@@ -1,0 +1,18 @@
+.activity-type-filter {
+  padding: 1rem 1.25rem;
+  border-radius: var(--border-radius);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+}
+
+.activity-type-dropdown-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.activity-type-dropdown-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-main);
+}

@@ -1,121 +1,108 @@
-import { useState, useMemo } from 'react';
-import { staffList, activityTypes, sampleActivities } from '../constants';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { DEFAULT_ROWS_PER_PAGE } from '../../../shared/constants/pagination';
-import type { Filters } from '../types';
+import { activityService } from '../services/ActivityService';
+import { mapApiItemToUI } from '../utils/activityMapper';
+import type { Filters, Activity, PaginationInfo } from '../types';
+import { staffList, DEFAULT_FILTERS } from '../constants';
 
 export const useDailyActivityData = () => {
-  const [filters, setFilters] = useState<Filters>({
-    date: '2026-04-25',
-    startTime: '',
-    endTime: '',
-    staff: 1,
-    type: 1,
-  });
-  const [activityTypeFilter, setActivityTypeFilter] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [activityTypeFilter, setActivityTypeFilter] = useState('');
+  const [appliedFilters, setAppliedFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [appliedActivityType, setAppliedActivityType] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showStaffDropdown, setShowStaffDropdown] = useState(false);
   const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const [completedActivities, setCompletedActivities] = useState<number[]>([]);
   const rowsPerPage = DEFAULT_ROWS_PER_PAGE;
+  const requestSeqRef = useRef(0);
 
-  const filteredActivities = useMemo(() => {
-    let filtered = [...sampleActivities];
+  const fetchActivities = useCallback(async (page: number, f: Filters, at: string) => {
+    const requestSeq = ++requestSeqRef.current;
+    try {
+      const params: Record<string, string | number> = { page, limit: rowsPerPage };
+      if (f.date) params.date = f.date;
+      if (f.startTime) params.startTime = f.startTime;
+      if (f.endTime) params.endTime = f.endTime;
+      if (f.staff !== 1) params.actorId = f.staff;
+      if (at) params.activityType = at;
 
-    if (filters.staff !== 1) {
-      const staff = staffList.find(s => s.id === filters.staff);
-      if (staff) filtered = filtered.filter(a => a.user === staff.name);
+      const response = await activityService.getActivities(params);
+      if (requestSeq !== requestSeqRef.current) return;
+      if (response.status) {
+        setActivities(response.data.items.map(mapApiItemToUI));
+        setPagination(response.data.pagination);
+      } else {
+        setActivities([]);
+        setPagination(null);
+      }
+    } catch {
+      if (requestSeq !== requestSeqRef.current) return;
+      setActivities([]);
+      setPagination(null);
     }
+  }, [rowsPerPage]);
 
-    if (activityTypeFilter !== 1) {
-      const type = activityTypes.find(t => t.id === activityTypeFilter);
-      if (type) filtered = filtered.filter(a => a.type === type.name);
-    }
+  useEffect(() => {
+    fetchActivities(1, DEFAULT_FILTERS, '');
+  }, [fetchActivities]);
 
-    if (filters.date) {
-      filtered = filtered.filter(a => a.timestamp.startsWith(filters.date));
-    }
-
-    if (filters.startTime) {
-      filtered = filtered.filter(a => {
-        const time = a.timestamp.split(' ')[1] ?? '';
-        return time >= filters.startTime;
-      });
-    }
-
-    if (filters.endTime) {
-      filtered = filtered.filter(a => {
-        const time = a.timestamp.split(' ')[1] ?? '';
-        return time <= filters.endTime;
-      });
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(a =>
-        a.relatedLead.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return filtered;
-  }, [filters, activityTypeFilter, searchQuery]);
-
-  const totalActivities = filteredActivities.length;
-  const totalPages = Math.ceil(totalActivities / rowsPerPage);
-  const paginatedActivities = filteredActivities.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
-
-  const handleFilterChange = (field: keyof Filters, value: string | number) => {
-    setFilters({ ...filters, [field]: value });
+  const handleApply = useCallback(() => {
+    const nextFilters = { ...filters };
+    setAppliedFilters(nextFilters);
+    setAppliedActivityType(activityTypeFilter);
     setCurrentPage(1);
-  };
+    fetchActivities(1, nextFilters, activityTypeFilter);
+  }, [filters, activityTypeFilter, fetchActivities]);
 
-  const handleReset = () => {
-    setFilters({ date: '2026-04-25', startTime: '', endTime: '', staff: 1, type: 1 });
-    setActivityTypeFilter(1);
-    setSearchQuery('');
+  const handleReset = useCallback(() => {
+    setFilters(DEFAULT_FILTERS);
+    setAppliedFilters(DEFAULT_FILTERS);
+    setActivityTypeFilter('');
+    setAppliedActivityType('');
     setCurrentPage(1);
-  };
+    fetchActivities(1, DEFAULT_FILTERS, '');
+  }, [fetchActivities]);
 
-  const handleMarkComplete = (activityId: number) => {
-    if (!completedActivities.includes(activityId)) {
-      setCompletedActivities([...completedActivities, activityId]);
-    }
-  };
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    fetchActivities(page, appliedFilters, appliedActivityType);
+  }, [appliedFilters, appliedActivityType, fetchActivities]);
 
-  const selectedStaffName = staffList.find(s => s.id === filters.staff)?.name || 'All Staff';
+  const handleFilterChange = useCallback((field: keyof Filters, value: string | number) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
-  const getPageNumbers = () => {
+  const totalActivities = pagination?.total ?? 0;
+  const totalPages = pagination?.total_pages ?? 1;
+
+  const selectedStaffName =
+    staffList.find((s) => s.id === filters.staff)?.name || 'All Staff';
+
+  const getPageNumbers = useCallback(() => {
     const pages: number[] = [];
     for (let i = 1; i <= totalPages; i++) pages.push(i);
     return pages;
-  };
+  }, [totalPages]);
 
   return {
     filters,
-    setFilters,
     activityTypeFilter,
     setActivityTypeFilter,
-    searchQuery,
-    setSearchQuery,
     currentPage,
-    setCurrentPage,
     showStaffDropdown,
     setShowStaffDropdown,
     localSearchQuery,
     setLocalSearchQuery,
-    completedActivities,
-    rowsPerPage,
-    filteredActivities,
     totalActivities,
     totalPages,
-    paginatedActivities,
+    paginatedActivities: activities,
     selectedStaffName,
     handleFilterChange,
+    handleApply,
     handleReset,
-    handleMarkComplete,
+    handlePageChange,
     getPageNumbers,
   };
 };
