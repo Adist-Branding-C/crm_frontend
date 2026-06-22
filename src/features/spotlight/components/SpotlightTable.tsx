@@ -1,13 +1,17 @@
 import React from 'react';
 import { ChevronUp, ChevronDown, MoreHorizontal, Eye, Edit2, Trash2 } from 'lucide-react';
-import type { SpotlightLead, SpotlightTableProps } from '../types';
+import type { SpotlightTableProps } from '../types';
 
 const SpotlightTable: React.FC<SpotlightTableProps> = ({
   data, columns, sortConfig, onSort,
   paginatedIds, selectedIds, onSelectAll, onSelectRow,
   actionMenuOpen, onSetActionMenuOpen,
   onViewLead,
+
 }) => {
+
+  
+
 
   return (
     <div className="table-container">
