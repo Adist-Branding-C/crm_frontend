@@ -1,0 +1,25 @@
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/pagination.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/settings-layout.css';
+
+.task-category-table-wrapper .table-container,
+.task-category-table-wrapper .table-scroll {
+  overflow: visible;
+}
+
+.task-category-table-wrapper .dropdown-container {
+  position: relative;
+}
+
+.task-category-table-wrapper .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 9999;
+}
