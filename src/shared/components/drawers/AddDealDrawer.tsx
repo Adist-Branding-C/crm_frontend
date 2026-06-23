@@ -1,26 +1,18 @@
-import React, { useState, useMemo } from 'react';
-import { X, Search } from 'lucide-react';
-import type { SampleLead, SampleAgent, DealFormData, AddDealDrawerProps } from '../../types/drawers';
+import React, { useState, useMemo, useEffect } from 'react';
+import { X, Search, Loader2 } from 'lucide-react';
+import { useLeadSearch } from '../../../features/deal/hooks/useLeadSearch';
+import { useStaffList } from '../../../features/deal/hooks/useStaffList';
+import type { DealFormData, AddDealDrawerProps } from '../../types/drawers';
 import './AddLeadDrawer.css';
 
-const sampleLeads: SampleLead[] = [
-  { id: 1, name: 'Rahul Sharma', phone: '9876543210' },
-  { id: 2, name: 'Priya Patel', phone: '9876543211' },
-  { id: 3, name: 'Amit Kumar', phone: '9876543212' },
-  { id: 4, name: 'Sneha Reddy', phone: '9876543213' },
-  { id: 5, name: 'Vikram Singh', phone: '9876543214' },
-];
-
-const sampleAgents: SampleAgent[] = [
-  { id: 1, name: 'John Doe' },
-  { id: 2, name: 'Jane Smith' },
-  { id: 3, name: 'Mike Johnson' },
-];
-
 const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerProps) => {
+  const { leads, isLoading: leadsLoading, search: leadSearch, setSearch: setLeadSearch } = useLeadSearch();
+  const { staff, isLoading: staffLoading } = useStaffList();
+
   const [formData, setFormData] = useState<DealFormData>({
     dealName: deal?.dealName || '',
     lead: deal?.lead || '',
+    leadId: deal?.leadId,
     mobile: deal?.mobile || '',
     amount: deal?.amount || '',
     status: deal?.status || '',
@@ -28,32 +20,55 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
     startDate: deal?.startDate || '',
     endDate: deal?.endDate || '',
     assignAgent: deal?.assignAgent || '',
+    agentId: deal?.agentId,
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showLeadDropdown, setShowLeadDropdown] = useState(false);
-  const [leadSearch, setLeadSearch] = useState('');
 
   const filteredLeads = useMemo(() => {
-    if (!leadSearch) return sampleLeads;
-    return sampleLeads.filter(lead => 
-      lead.name.toLowerCase().includes(leadSearch.toLowerCase())
+    if (!leadSearch) return leads;
+    return leads.filter(l =>
+      l.label.toLowerCase().includes(leadSearch.toLowerCase())
     );
-  }, [leadSearch]);
+  }, [leadSearch, leads]);
+
+  useEffect(() => {
+    if (deal?.leadId && leads.length > 0) {
+      const match = leads.find(l => String(l.value) === String(deal.leadId));
+      if (match) {
+        setFormData(prev => ({ ...prev, lead: match.label, leadId: match.value }));
+      }
+    }
+  }, [deal?.leadId, leads]);
+
+  useEffect(() => {
+    if (deal?.agentId && staff.length > 0) {
+      const match = staff.find(s => String(s.value) === String(deal.agentId));
+      if (match) {
+        setFormData(prev => ({ ...prev, assignAgent: match.label, agentId: match.value }));
+      }
+    }
+  }, [deal?.agentId, staff]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'assignAgent') {
+      const match = staff.find(s => s.label === value);
+      setFormData(prev => ({ ...prev, assignAgent: value, agentId: match?.value }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
-  const handleLeadSelect = (lead: SampleLead) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      lead: lead.name,
-      mobile: lead.phone 
+  const handleLeadSelect = (lead: { label: string; value: string | number }) => {
+    setFormData(prev => ({
+      ...prev,
+      lead: lead.label,
+      leadId: lead.value,
     }));
     setShowLeadDropdown(false);
     setLeadSearch('');
@@ -63,7 +78,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
     const newErrors: Record<string, string> = {};
     if (!formData.dealName.trim()) newErrors.dealName = 'Deal name is required';
     if (!formData.lead) newErrors.lead = 'Lead is required';
-    if (!formData.mobile.trim()) newErrors.mobile = 'Mobile is required';
+    if (formData.mobile && !formData.mobile.trim()) newErrors.mobile = 'Mobile is required';
     if (!formData.amount) newErrors.amount = 'Amount is required';
     if (!formData.status) newErrors.status = 'Status is required';
     if (!formData.type) newErrors.type = 'Type is required';
@@ -95,10 +110,10 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
           <form className="lead-form">
             <div className="form-group">
               <label>Deal Name *</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="dealName"
-                placeholder="Enter deal name" 
+                placeholder="Enter deal name"
                 value={formData.dealName}
                 onChange={handleChange}
               />
@@ -108,41 +123,54 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
               <label>Lead *</label>
               <div className="dropdown-search-container">
                 <div className="search-input-wrapper">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Search lead..."
-                    value={formData.lead || leadSearch}
+                    value={showLeadDropdown ? leadSearch : formData.lead}
                     onChange={(e) => {
-                      setLeadSearch(e.target.value);
+                      const val = e.target.value;
+                      setLeadSearch(val);
                       setShowLeadDropdown(true);
-                      if (!e.target.value) setFormData(prev => ({ ...prev, lead: '' }));
+                      if (!val) setFormData(prev => ({ ...prev, lead: '', leadId: undefined }));
                     }}
-                    onFocus={() => setShowLeadDropdown(true)}
+                    onFocus={() => {
+                      setLeadSearch(formData.lead);
+                      setShowLeadDropdown(true);
+                    }}
                   />
                   <Search size={16} className="search-icon-inner" />
                 </div>
-                {showLeadDropdown && filteredLeads.length > 0 && (
+                {showLeadDropdown && (
                   <div className="dropdown-list">
-                    {filteredLeads.map(lead => (
-                      <button 
-                        key={lead.id} 
-                        type="button"
-                        onClick={() => handleLeadSelect(lead)}
-                      >
-                        {lead.name} - {lead.phone}
-                      </button>
-                    ))}
+                    {leadsLoading ? (
+                      <div className="dropdown-loading">
+                        <Loader2 size={16} className="spinner" />
+                        Loading leads...
+                      </div>
+                    ) : filteredLeads.length > 0 ? (
+                      filteredLeads.map(l => (
+                        <button
+                          key={l.value}
+                          type="button"
+                          onClick={() => handleLeadSelect(l)}
+                        >
+                          {l.label}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="dropdown-no-results">No leads found</div>
+                    )}
                   </div>
                 )}
               </div>
               {errors.lead && <span className="error-text">{errors.lead}</span>}
             </div>
             <div className="form-group">
-              <label>Mobile *</label>
-              <input 
-                type="tel" 
+              <label>Mobile</label>
+              <input
+                type="tel"
                 name="mobile"
-                placeholder="Enter mobile number" 
+                placeholder="Enter mobile number"
                 value={formData.mobile}
                 onChange={handleChange}
               />
@@ -150,10 +178,10 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
             </div>
             <div className="form-group">
               <label>Amount (₹) *</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 name="amount"
-                placeholder="Enter amount" 
+                placeholder="Enter amount"
                 value={formData.amount}
                 onChange={handleChange}
               />
@@ -161,7 +189,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
             </div>
             <div className="form-group">
               <label>Status *</label>
-              <select 
+              <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
@@ -176,7 +204,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
             </div>
             <div className="form-group">
               <label>Type *</label>
-              <select 
+              <select
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
@@ -191,8 +219,8 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
             </div>
             <div className="form-group">
               <label>Start Date</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleChange}
@@ -200,8 +228,8 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
             </div>
             <div className="form-group">
               <label>End Date</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleChange}
@@ -209,15 +237,19 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, onSave }: AddDealDrawerPr
             </div>
             <div className="form-group">
               <label>Assign Agent *</label>
-              <select 
+              <select
                 name="assignAgent"
                 value={formData.assignAgent}
                 onChange={handleChange}
               >
                 <option value="">Select</option>
-                {sampleAgents.map(agent => (
-                  <option key={agent.id} value={agent.name}>{agent.name}</option>
-                ))}
+                {staffLoading ? (
+                  <option value="" disabled>Loading staff...</option>
+                ) : (
+                  staff.map(s => (
+                    <option key={s.value} value={s.label}>{s.label}</option>
+                  ))
+                )}
               </select>
               {errors.assignAgent && <span className="error-text">{errors.assignAgent}</span>}
             </div>
