@@ -661,3 +661,27 @@
 .user-profile-trigger:hover {
   background: var(--bg-main);
 }
+
+/* Mobile hamburger menu button */
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .mobile-menu-btn:hover {
+    color: var(--primary);
+  }
+}

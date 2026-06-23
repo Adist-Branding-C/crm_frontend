@@ -7,8 +7,10 @@ export interface AgentTableProps {
   rowsPerPage: number;
   onRowsPerPageChange: (value: number) => void;
   totalRecords: number;
-  dropdownOpen: string | null;
-  onToggleDropdown: (id: string | null) => void;
+  pageNumber: number;
+  onPageChange: (page: number) => void;
+  dropdownOpen: number | null;
+  onToggleDropdown: (id: number | null) => void;
   onEdit: (item: AgentItem) => void;
   onDelete: (item: AgentItem) => void;
 }

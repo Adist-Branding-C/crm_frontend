@@ -22,11 +22,9 @@ const PasswordPage = () => {
 
   return (
     <div className="account-page">
-      <div className="account-layout">
-        <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
-          <PageHeader title="Change Password" description="Update your account password" />
-
-          <SettingsTabs />
+      <PageHeader title="Change Password" description="Update your account password" />
+      <SettingsTabs />
+      <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
 
           <div className="row">
             <div className="col-lg-8 col-md-8">
@@ -152,7 +150,6 @@ const PasswordPage = () => {
               </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   );

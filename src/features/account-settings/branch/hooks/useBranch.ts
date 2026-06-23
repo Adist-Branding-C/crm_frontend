@@ -1,86 +1,61 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
+import { useTableData } from '../../../../shared/hooks/useTableData';
 import { branchService } from '../services/branch.service';
 import { addBranchValidationSchema, editBranchValidationSchema } from '../validations/branch.validation';
 import { ADD_BRANCH_INITIAL_VALUES } from '../constants/branch.constants';
-import type { BranchItem, BranchFormData, GetAllBranchesParams } from '../types/branch.types';
+import type { BranchItem, BranchFormData } from '../types/branch.types';
 
 export function useBranch() {
-  const [branchList, setBranchList] = useState<BranchItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchBranches = useCallback(async (params: GetAllBranchesParams = {}) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
+  const pagination = useTableData<BranchItem>({
+    fetchFn: async (params) => {
       const response = await branchService.getAllBranches(params);
-
       if (response.status) {
-        setBranchList(Array.isArray(response.data?.items) ? response.data.items : []);
-      } else {
-        setError(response.message || 'Failed to fetch branches');
+        const data = response.data as { items: BranchItem[]; total?: number } | undefined;
+        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
+        return { items: Array.isArray(items) ? items : [], total: data?.total ?? (Array.isArray(items) ? items.length : 0) };
       }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch branches');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchBranches();
-  }, [fetchBranches]);
+      throw new Error(response.message || 'Failed to fetch branches');
+    },
+  });
 
   const handleAddBranch = useCallback(async (
     values: BranchFormData,
     { setSubmitting, resetForm }: FormikHelpers<BranchFormData>,
   ): Promise<boolean> => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { name, description, status } = values;
       const requestData = { name, description, status };
-
       const response = await branchService.createBranch(requestData);
 
       if (response.status) {
-        const newItem: BranchItem = { id: response.data?.id || response.data?.branch?.id || 0, name, description, status };
-        if (newItem.id) {
-          setBranchList(prev => [...prev, newItem]);
-        } else {
-          fetchBranches();
-        }
+        pagination.setPageNumber(1);
+        pagination.setSearchQuery('');
+        pagination.refresh();
         resetForm();
         return true;
       } else {
-        setError(response.message || 'Failed to add branch');
+        pagination.setError(response.message || 'Failed to add branch');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add branch');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to add branch');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [fetchBranches]);
+  }, []);
 
   const handleUpdateBranch = useCallback(async (
     id: number,
@@ -89,40 +64,37 @@ export function useBranch() {
   ): Promise<boolean> => {
     const branchId = Number(id);
     if (!branchId || isNaN(branchId)) {
-      setError('Invalid branch id');
+      pagination.setError('Invalid branch id');
       setSubmitting(false);
       return false;
     }
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { name, description, status } = values;
       const requestData = { name, description, status };
-
       const response = await branchService.updateBranch(branchId, requestData);
 
       if (response.status) {
-        setBranchList(prev => prev.map(item =>
-          Number(item.id) === branchId ? { ...item, name, description, status } : item
-        ));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to update branch');
+        pagination.setError(response.message || 'Failed to update branch');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update branch');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to update branch');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
   }, []);
@@ -130,44 +102,51 @@ export function useBranch() {
   const handleDeleteBranch = useCallback(async (id: number): Promise<boolean> => {
     const branchId = Number(id);
     if (!branchId || isNaN(branchId)) {
-      setError('Invalid branch id');
+      pagination.setError('Invalid branch id');
       return false;
     }
-    setError('');
+    pagination.setError('');
 
     try {
       const response = await branchService.deleteBranch(branchId);
 
       if (response.status) {
-        setBranchList(prev => prev.filter(item => Number(item.id) !== branchId));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to delete branch');
+        pagination.setError(response.message || 'Failed to delete branch');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete branch');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete branch');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     }
   }, []);
 
   return {
-    branchList,
-    isLoading,
-    error,
-    fetchBranches,
+    branchList: pagination.list,
+    isLoading: pagination.isLoading,
+    error: pagination.error,
+    fetchBranches: pagination.refresh,
     handleAddBranch,
     handleUpdateBranch,
     handleDeleteBranch,
     validationSchema: addBranchValidationSchema,
     editValidationSchema: editBranchValidationSchema,
     initialValues: ADD_BRANCH_INITIAL_VALUES,
+    pageNumber: pagination.pageNumber,
+    setPageNumber: pagination.setPageNumber,
+    limit: pagination.limit,
+    totalCount: pagination.totalCount,
+    searchQuery: pagination.searchQuery,
+    handleSearchChange: pagination.handleSearchChange,
+    handleRowsPerPageChange: pagination.handleRowsPerPageChange,
   };
 }

@@ -23,7 +23,7 @@ const SettingsTabs = ({ items = defaultTabs }: SettingsTabsProps) => {
   const [limit, setLimit] = useState(8);
 
   return (
-    <div className="settings-tabs">
+    <div className="settings-tabs overflow-x-auto md:overflow-x-visible flex-nowrap">
       {items.slice(0, limit).map((item) => {
         const Icon = item.icon;
         return (

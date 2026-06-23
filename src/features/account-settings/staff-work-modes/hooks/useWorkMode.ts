@@ -1,56 +1,30 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
+import { useTableData } from '../../../../shared/hooks/useTableData';
 import { workModeService } from '../services/workMode.service';
 import { addWorkModeValidationSchema, editWorkModeValidationSchema } from '../validations/workMode.validation';
 import { ADD_WORK_MODE_INITIAL_VALUES } from '../constants/workMode.constants';
 import type { WorkModeItem, WorkModeFormData } from '../types/workMode.types';
 
 export function useWorkMode() {
-  const [workModeList, setWorkModeList] = useState<WorkModeItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchWorkModes = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await workModeService.getAllWorkModes(params);
-
+  const pagination = useTableData<WorkModeItem>({
+    fetchFn: async (params) => {
+      const response = await workModeService.getAllWorkModes(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
-        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? (response.data as { items: WorkModeItem[] }).items
-          : Array.isArray(response.data)
-            ? response.data
-            : [];
-        setWorkModeList(Array.isArray(rawData) ? rawData : []);
-      } else {
-        setError(response.message || 'Failed to fetch work modes');
+        const data = response.data as { items: WorkModeItem[]; pagination?: { total: number } } | undefined;
+        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
+        return { items: Array.isArray(items) ? items : [], total: data?.pagination?.total ?? (Array.isArray(items) ? items.length : 0) };
       }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch work modes');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchWorkModes();
-  }, [fetchWorkModes]);
+      throw new Error(response.message || 'Failed to fetch work modes');
+    },
+  });
 
   const handleAddWorkMode = useCallback(async (
     values: WorkModeFormData,
     { setSubmitting, resetForm }: FormikHelpers<WorkModeFormData>,
   ) => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { workModeName, description, status } = values;
@@ -59,41 +33,38 @@ export function useWorkMode() {
       const response = await workModeService.createWorkMode(requestData);
 
       if (response.status) {
-        const createdItem = response.data;
-        if (createdItem && typeof createdItem === 'object' && 'id' in createdItem) {
-          setWorkModeList(prev => [...prev, createdItem as WorkModeItem]);
-        } else {
-          fetchWorkModes();
-        }
+        pagination.setPageNumber(1);
+        pagination.setSearchQuery('');
+        pagination.refresh();
         resetForm();
         return true;
       } else {
-        setError(response.message || 'Failed to add work mode');
+        pagination.setError(response.message || 'Failed to add work mode');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add work mode');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to add work mode');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [fetchWorkModes]);
+  }, []);
 
   const handleUpdateWorkMode = useCallback(async (
     id: number,
     values: WorkModeFormData,
     { setSubmitting }: FormikHelpers<WorkModeFormData>,
   ) => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { workModeName, description, status } = values;
@@ -102,66 +73,71 @@ export function useWorkMode() {
       const response = await workModeService.updateWorkMode(id, requestData);
 
       if (response.status) {
-        setWorkModeList(prev => prev.map(item =>
-          item.id === id ? { ...item, workModeName, description, status } : item
-        ));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to update work mode');
+        pagination.setError(response.message || 'Failed to update work mode');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update work mode');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to update work mode');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
   }, []);
 
   const handleDeleteWorkMode = useCallback(async (id: number) => {
-    setError('');
+    pagination.setError('');
 
     try {
       const response = await workModeService.deleteWorkMode(id);
 
       if (response.status) {
-        setWorkModeList(prev => prev.filter(item => item.id !== id));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to delete work mode');
+        pagination.setError(response.message || 'Failed to delete work mode');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete work mode');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete work mode');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     }
   }, []);
 
   return {
-    workModeList,
-    isLoading,
-    error,
-    fetchWorkModes,
+    workModeList: pagination.list,
+    isLoading: pagination.isLoading,
+    error: pagination.error,
+    fetchWorkModes: pagination.refresh,
     handleAddWorkMode,
     handleUpdateWorkMode,
     handleDeleteWorkMode,
     validationSchema: addWorkModeValidationSchema,
     editValidationSchema: editWorkModeValidationSchema,
     initialValues: ADD_WORK_MODE_INITIAL_VALUES,
+    pageNumber: pagination.pageNumber,
+    setPageNumber: pagination.setPageNumber,
+    limit: pagination.limit,
+    totalCount: pagination.totalCount,
+    searchQuery: pagination.searchQuery,
+    handleSearchChange: pagination.handleSearchChange,
+    handleRowsPerPageChange: pagination.handleRowsPerPageChange,
   };
 }

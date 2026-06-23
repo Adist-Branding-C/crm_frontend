@@ -28,6 +28,7 @@ export interface NotificationIconInfo {
 
 export interface TopNavProps {
   onOpenDrawer: (type: string) => void;
+  onToggleMobileSidebar?: () => void;
 }
 
 export interface TabItem {

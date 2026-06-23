@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, FileText, Phone, UserCircle, Settings, Users, CreditCard, Shield, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout } from 'lucide-react';
+import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, FileText, Phone, UserCircle, Settings, Users, CreditCard, Shield, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout, Menu } from 'lucide-react';
 import type { NotificationIconInfo, TopNavProps } from '../../types/layout';
 import './TopNav.css';
 
@@ -55,7 +55,7 @@ const searchResults = [
   { id: 8, category: 'call', name: 'Call Log - Priya', phone: 'Call-001', description: 'Incoming Call' },
 ];
 
-const TopNav = ({ onOpenDrawer }: TopNavProps) => {
+const TopNav = ({ onOpenDrawer, onToggleMobileSidebar }: TopNavProps) => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [searchQuery, setSearchQuery] = useState('');
@@ -191,6 +191,9 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
 
   return (
     <div className="topnav">
+      <button className="mobile-menu-btn" onClick={onToggleMobileSidebar}>
+        <Menu size={20} />
+      </button>
       <div className="search-container">
         <div className="search-bar">
           <Search size={18} className="search-icon" />

@@ -18,7 +18,7 @@ const DeleteAgentModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteAgentM
             Are you sure you want to delete <strong>{itemName}</strong>? This action cannot be undone.
           </p>
         </div>
-        <div className="modal-footer">
+        <div className="modal-footer flex flex-col sm:flex-row sm:justify-end gap-3">
           <button className="btn btn-danger" onClick={onConfirm}>Delete</button>
           <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
         </div>

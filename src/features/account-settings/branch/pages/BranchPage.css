@@ -10,11 +10,7 @@
 @import '../../../../shared/styles/sidebar-layout.css';
 @import '../../../../shared/styles/toolbars.css';
 
-.branch-table-wrapper .table-container,
-.branch-table-wrapper .table-scroll {
-  overflow: visible;
-}
-
 .branch-table-wrapper .dropdown-menu {
   z-index: 9999;
 }
+

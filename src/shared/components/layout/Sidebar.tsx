@@ -22,7 +22,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="sidebar">
+    <div className="sidebar hidden md:flex">
       <div className="sidebar-logo">
         <div className="logo-circle">
           <CheckCircle size={20} color="#fff" />

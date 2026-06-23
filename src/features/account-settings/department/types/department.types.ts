@@ -17,6 +17,9 @@ export interface DepartmentListResponse {
   message: string;
   data: {
     items: DepartmentItem[];
+    pagination?: {
+      total: number;
+    };
   };
 }
 

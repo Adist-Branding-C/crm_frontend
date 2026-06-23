@@ -1,10 +1,24 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import type { AddAgentDrawerProps } from '../types/add-agent-drawer.types';
 
 const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing, designationOptions, onFetchDesignations }: AddAgentDrawerProps) => {
+  const [fieldErrors, setFieldErrors] = useState<{ phone?: string; email?: string }>({});
+
+  useEffect(() => {
+    if (error) {
+      const errLower = error.toLowerCase();
+      const newErrors: { phone?: string; email?: string } = {};
+      if (errLower.includes('phone')) newErrors.phone = 'This phone number is already registered';
+      if (errLower.includes('email')) newErrors.email = 'This email is already registered';
+      setFieldErrors(newErrors);
+    } else {
+      setFieldErrors({});
+    }
+  }, [error]);
+
   useEffect(() => {
     if (isOpen) {
       onFetchDesignations();
@@ -42,12 +56,14 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
 
                   <div className="form-group">
                     <label>Phone Number <span className="text-danger">*</span></label>
-                    <Field type="text" name="phone" className="form-control" placeholder="Enter phone number" />
+                    <Field type="text" name="phone" className={`form-control${fieldErrors.phone ? ' input-error' : ''}`} placeholder="Enter phone number" />
+                    {fieldErrors.phone && <small className="field-error-text">{fieldErrors.phone}</small>}
                   </div>
 
                   <div className="form-group">
                     <label>Email <span className="text-danger">*</span></label>
-                    <Field type="email" name="email" className="form-control" placeholder="Enter email" />
+                    <Field type="email" name="email" className={`form-control${fieldErrors.email ? ' input-error' : ''}`} placeholder="Enter email" />
+                    {fieldErrors.email && <small className="field-error-text">{fieldErrors.email}</small>}
                   </div>
 
                   {!isEditing && (
@@ -82,7 +98,7 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
                     </Field>
                   </div>
 
-                  <div className="form-actions">
+                  <div className="form-actions flex flex-col sm:flex-row gap-3">
                     <button type="submit" className="btn btn-primary" disabled={isLoading}>
                       {isLoading ? <Loader2 size={16} className="spin" /> : 'Save'}
                     </button>

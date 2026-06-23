@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
+import { useTableData } from '../../../../shared/hooks/useTableData';
 import { agentService } from '../services/agent.service';
 import { addAgentValidationSchema, editAgentValidationSchema } from '../validations/agent.validation';
 import { designationService } from '../../designations/services/designation.service';
@@ -7,41 +8,29 @@ import { ADD_AGENT_INITIAL_VALUES } from '../constants/agent.constants';
 import type { AgentItem, AgentFormData, DesignationOption } from '../types/agent.types';
 
 export function useAgent() {
-  const [agentList, setAgentList] = useState<AgentItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [designationOptions, setDesignationOptions] = useState<DesignationOption[]>([]);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [showToast, setShowToast] = useState(false);
 
-  const fetchAgents = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await agentService.getAllAgents(params);
-
-      if (response.status) {
-        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? (response.data as { items: AgentItem[] }).items
-          : Array.isArray(response.data)
-            ? response.data
-            : [];
-        setAgentList(Array.isArray(rawData) ? rawData : []);
-      } else {
-        setError(response.message || 'Failed to fetch agents');
-      }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch agents');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3500);
   }, []);
+
+  const pagination = useTableData<AgentItem>({
+    fetchFn: async (params) => {
+      const response = await agentService.getAllAgents(params as unknown as Record<string, string | number | undefined>);
+      if (response.status) {
+        const data = response.data as { items: AgentItem[]; pagination?: { total: number } } | undefined;
+        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
+        return { items: Array.isArray(items) ? items : [], total: data?.pagination?.total ?? (Array.isArray(items) ? items.length : 0) };
+      }
+      throw new Error(response.message || 'Failed to fetch agents');
+    },
+  });
 
   const fetchDesignations = useCallback(async () => {
     try {
@@ -62,16 +51,12 @@ export function useAgent() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchAgents();
-  }, [fetchAgents]);
-
   const handleAddAgent = useCallback(async (
     values: AgentFormData,
     { setSubmitting, resetForm }: FormikHelpers<AgentFormData>,
   ) => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { fullName, email, phone, password, designationId, status } = values;
@@ -80,43 +65,45 @@ export function useAgent() {
       const response = await agentService.createAgent(requestData);
 
       if (response.status) {
-        const data = response.data as { id?: number; staff_id?: string; staff?: { id?: number; staff_id?: string } } | undefined;
-        const newItemId = data?.id || data?.staff?.id;
-        const newItemStaffId = data?.staff_id || data?.staff?.staff_id;
-        if (newItemId) {
-          setAgentList(prev => [...prev, { id: newItemId, staff_id: newItemStaffId, fullName, email, phone, designationId, status } as unknown as AgentItem]);
-        } else {
-          fetchAgents();
-        }
+        pagination.setPageNumber(1);
+        pagination.setSearchQuery('');
+        pagination.refresh();
         resetForm();
+        showToastMessage('Staff member added successfully', 'success');
         return true;
       } else {
-        setError(response.message || 'Failed to add agent');
+        pagination.setError(response.message || 'Failed to add agent');
+        showToastMessage(response.message || 'Failed to add agent', 'error');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add agent');
+        const message = axiosErr.response?.data?.message || 'Failed to add agent';
+        pagination.setError(message);
+        showToastMessage(message, 'error');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        const message = (err as { message: string }).message;
+        pagination.setError(message);
+        showToastMessage(message, 'error');
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
+        showToastMessage('Network error. Please try again.', 'error');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [fetchAgents]);
+  }, []);
 
   const handleUpdateAgent = useCallback(async (
     staffId: string,
     values: AgentFormData,
     { setSubmitting }: FormikHelpers<AgentFormData>,
   ) => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { fullName, email, phone, designationId, status } = values;
@@ -125,61 +112,59 @@ export function useAgent() {
       const response = await agentService.updateAgent(staffId, requestData);
 
       if (response.status) {
-        setAgentList(prev => prev.map(item =>
-          item.staff_id === staffId ? { ...item, fullName, email, phone, designationId, status } : item
-        ));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to update agent');
+        pagination.setError(response.message || 'Failed to update agent');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update agent');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to update agent');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
   }, []);
 
   const handleDeleteAgent = useCallback(async (staffId: string) => {
-    setError('');
+    pagination.setError('');
 
     try {
       const response = await agentService.deleteAgent(staffId);
 
       if (response.status) {
-        setAgentList(prev => prev.filter(item => item.staff_id !== staffId));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to delete agent');
+        pagination.setError(response.message || 'Failed to delete agent');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete agent');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete agent');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     }
   }, []);
 
   return {
-    agentList,
-    isLoading,
-    error,
-    fetchAgents,
+    agentList: pagination.list,
+    isLoading: pagination.isLoading,
+    error: pagination.error,
+    fetchAgents: pagination.refresh,
     handleAddAgent,
     handleUpdateAgent,
     handleDeleteAgent,
@@ -188,5 +173,16 @@ export function useAgent() {
     initialValues: ADD_AGENT_INITIAL_VALUES,
     designationOptions,
     fetchDesignations,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
+    pageNumber: pagination.pageNumber,
+    setPageNumber: pagination.setPageNumber,
+    limit: pagination.limit,
+    totalCount: pagination.totalCount,
+    searchQuery: pagination.searchQuery,
+    handleSearchChange: pagination.handleSearchChange,
+    handleRowsPerPageChange: pagination.handleRowsPerPageChange,
   };
 }

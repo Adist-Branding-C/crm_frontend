@@ -7,6 +7,8 @@ export interface WhatsappTemplateTableProps {
   rowsPerPage: number;
   onRowsPerPageChange: (value: number) => void;
   totalRecords: number;
+  pageNumber: number;
+  onPageChange: (page: number) => void;
   dropdownOpen: number | null;
   onToggleDropdown: (id: number | null) => void;
   onEdit: (item: WhatsappTemplateItem) => void;

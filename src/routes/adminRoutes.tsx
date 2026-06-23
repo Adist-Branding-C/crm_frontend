@@ -7,11 +7,11 @@ import WorkModePage from '../features/account-settings/staff-work-modes/pages/Wo
 import CheckoutNotePage from '../features/account-settings/checkout-note/pages/CheckoutNotePage';
 import DesignationPage from '../features/account-settings/designations/pages/DesignationPage';
 import BranchPage from '../features/account-settings/branch/pages/BranchPage';
-import MailConfigPage from '../features/mail-config/pages/MailConfigPage';
 import EmailTemplatePage from '../features/account-settings/email-template/pages/EmailTemplatePage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
 import PasswordPage from '../features/password/pages/PasswordPage';
 import WhatsAppTemplatePage from '../features/account-settings/whatsapp-template/pages/WhatsappTemplatePage';
+import MailConfigPage from '../features/account-settings/mail-configuration/pages/MailConfigurationPage';
 
 export default (
   <>

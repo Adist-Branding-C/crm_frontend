@@ -47,7 +47,7 @@ const AddDepartmentDrawer = ({ isOpen, onClose, validationSchema, initialValues,
                     </Field>
                   </div>
 
-                  <div className="form-actions">
+                  <div className="form-actions flex flex-col sm:flex-row gap-3">
                     <button type="submit" className="btn btn-primary" disabled={isLoading}>
                       {isLoading ? <Loader2 size={16} className="spin" /> : (isEditing ? 'Update' : 'Save')}
                     </button>
