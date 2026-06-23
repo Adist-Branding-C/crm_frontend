@@ -1,0 +1,22 @@
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/tabs.css';
+@import '../../../../shared/styles/toolbars.css';
+
+.task-table-wrapper .table-scroll {
+  overflow: visible;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
