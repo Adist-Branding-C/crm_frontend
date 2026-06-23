@@ -1,0 +1,26 @@
+export const ERROR_MESSAGES = {
+  FETCH_LEAD_PURPOSES: 'Failed to fetch lead purposes',
+  CREATE_LEAD_PURPOSE: 'Failed to create lead purpose',
+  UPDATE_LEAD_PURPOSE: 'Failed to update lead purpose',
+  DELETE_LEAD_PURPOSE: 'Failed to delete lead purpose',
+
+  FETCH_LEAD_SOURCES: 'Failed to fetch lead sources',
+  CREATE_LEAD_SOURCE: 'Failed to create lead source',
+  UPDATE_LEAD_SOURCE: 'Failed to update lead source',
+  DELETE_LEAD_SOURCE: 'Failed to delete lead source',
+
+  FETCH_LEAD_STATUSES: 'Failed to fetch lead statuses',
+  CREATE_LEAD_STATUS: 'Failed to create lead status',
+  UPDATE_LEAD_STATUS: 'Failed to update lead status',
+  DELETE_LEAD_STATUS: 'Failed to delete lead status',
+
+  FETCH_LEAD_TYPES: 'Failed to fetch lead types',
+  CREATE_LEAD_TYPE: 'Failed to create lead type',
+  UPDATE_LEAD_TYPE: 'Failed to update lead type',
+  DELETE_LEAD_TYPE: 'Failed to delete lead type',
+
+  FETCH_ADDITIONAL_FIELDS: 'Failed to fetch additional fields',
+  CREATE_ADDITIONAL_FIELD: 'Failed to create additional field',
+  UPDATE_ADDITIONAL_FIELD: 'Failed to update additional field',
+  DELETE_ADDITIONAL_FIELD: 'Failed to delete additional field',
+} as const;
