@@ -70,4 +70,6 @@ export interface AdminFormDrawerProps {
   onSave: () => void;
   onClose: () => void;
   isEditing: boolean;
+  error?: string | null;
+  onClearError?: () => void;
 }

@@ -5,6 +5,13 @@ export const columns: Column<LeadAdditionalItem>[] = [
   { key: 'field', label: 'Field' },
   { key: 'type', label: 'Type' },
   {
+    key: 'dropdownValues',
+    label: 'Values',
+    render: (item) => (
+      <span>{item.dropdownValues.length > 0 ? item.dropdownValues.join(', ') : '-'}</span>
+    ),
+  },
+  {
     key: 'inFilter',
     label: 'in filter',
     render: (item) => (

@@ -30,7 +30,7 @@ const LeadStatusPage = () => {
         </div>
       <AdminFormDrawer isOpen={d.showForm} title="Status" fields={formFields}
         formData={d.formData} onChange={d.setFormData} onSave={d.handleSave} onClose={d.handleCloseForm}
-        isEditing={!!d.editingItem} />
+        isEditing={!!d.editingItem} error={d.error} onClearError={d.clearError} />
       <AdminDeleteModal isOpen={!!d.deletingItem} itemName={d.deletingItem?.status} itemType="status"
         onConfirm={d.handleConfirmDelete} onClose={() => d.setDeletingItem(null)} />
     </div>

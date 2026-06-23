@@ -27,6 +27,7 @@ const LeadAdditionalPage = () => {
             editingItem={d.editingItem}
             isSaving={d.isSaving}
             error={d.error}
+            onClearError={d.clearError}
             onInputChange={d.handleInputChange}
             onSubmit={d.handleSubmit}
             onDropdownValueChange={d.handleDropdownValueChange}

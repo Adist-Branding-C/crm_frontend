@@ -147,6 +147,8 @@ export function useLeadPurposeData() {
     }
   }, [deletingItem, currentPage, rowsPerPage, searchQuery, fetchData]);
 
+  const clearError = useCallback(() => setError(null), []);
+
   return {
     paginatedData: items,
     totalItems: total,
@@ -168,6 +170,6 @@ export function useLeadPurposeData() {
     handleSave,
     handleConfirmDelete,
     formData, setFormData,
-    isLoading, isSaving, isDeleting, error,
+    isLoading, isSaving, isDeleting, error, clearError,
   };
 }

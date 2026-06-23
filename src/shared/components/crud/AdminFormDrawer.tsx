@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { ACTION_EDIT, ACTION_ADD, ACTION_UPDATE, ACTION_SAVE, ACTION_CANCEL } from '../../constants/actionLabels';
+import ValidationAlert from '../ValidationAlert';
 import type { FormField, AdminFormDrawerProps } from '../../types/crud';
 
 function buildValidationSchema(fields: FormField[]) {
@@ -19,7 +20,7 @@ function buildValidationSchema(fields: FormField[]) {
   return Object.keys(shape).length > 0 ? Yup.object().shape(shape) : undefined;
 }
 
-const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields, formData, onChange, onSave, onClose, isEditing }) => {
+const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields, formData, onChange, onSave, onClose, isEditing, error, onClearError }) => {
   if (!isOpen) return null;
 
   const validationSchema = React.useMemo(() => buildValidationSchema(fields), [fields]);
@@ -32,6 +33,7 @@ const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields
           <button className="drawer-close" onClick={onClose}><X size={20} /></button>
         </div>
         <div className="drawer-body">
+          <ValidationAlert message={error ?? null} onClose={onClearError} />
           <Formik
             enableReinitialize
             initialValues={formData as Record<string, string>}

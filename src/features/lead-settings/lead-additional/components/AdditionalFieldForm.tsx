@@ -1,6 +1,7 @@
 import { Plus, Loader2 } from 'lucide-react';
 import { FIELD_TYPE_OPTIONS } from '../../../../shared/constants/fieldTypes';
 import DropdownValuesInput from './DropdownValuesInput';
+import ValidationAlert from '../../../../shared/components/ValidationAlert';
 import type { FormData, LeadPurposeOption, LeadAdditionalItem } from '../types';
 import './AdditionalFieldForm.css';
 
@@ -15,6 +16,7 @@ interface AdditionalFieldFormProps {
   onDropdownValueChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddDropdownValue: () => void;
   onRemoveDropdownValue: (index: number) => void;
+  onClearError?: () => void;
 }
 
 const AdditionalFieldForm = ({
@@ -28,6 +30,7 @@ const AdditionalFieldForm = ({
   onDropdownValueChange,
   onAddDropdownValue,
   onRemoveDropdownValue,
+  onClearError,
 }: AdditionalFieldFormProps) => (
   <div className="additional-form-panel">
     <div className="card">
@@ -35,9 +38,7 @@ const AdditionalFieldForm = ({
         <h5>{editingItem ? 'Edit Field' : 'Add Field'}</h5>
       </div>
       <div className="card-body">
-        {error && (
-          <div className="alert alert-danger">{error}</div>
-        )}
+        <ValidationAlert message={error} onClose={onClearError} />
         <form onSubmit={onSubmit}>
           <div className="checkbox-group">
             <label className="checkbox-item">

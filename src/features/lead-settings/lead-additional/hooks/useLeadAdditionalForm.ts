@@ -43,7 +43,7 @@ export function useLeadAdditionalForm() {
   const populateForm = useCallback((item: LeadAdditionalItem) => {
     setFormData({
       name: item.field,
-      fieldType: item.type,
+      fieldType: item.type.toLowerCase(),
       showInFilter: item.inFilter,
       showInList: item.inList,
       isRequired: item.required,

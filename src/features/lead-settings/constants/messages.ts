@@ -23,4 +23,9 @@ export const ERROR_MESSAGES = {
   CREATE_ADDITIONAL_FIELD: 'Failed to create additional field',
   UPDATE_ADDITIONAL_FIELD: 'Failed to update additional field',
   DELETE_ADDITIONAL_FIELD: 'Failed to delete additional field',
+  VALIDATION_FIELD_NAME_REQUIRED: 'Field Name is required.',
+  VALIDATION_FIELD_TYPE_REQUIRED: 'Please select a field type.',
+  VALIDATION_LEAD_PURPOSE_REQUIRED: 'Please select a lead purpose.',
+  VALIDATION_DROPDOWN_VALUES: 'Please add at least one dropdown value.',
+  VALIDATION_CHECKBOX_VALUES: 'Please add at least one checkbox value.',
 } as const;

@@ -115,25 +115,46 @@ export function useLeadAdditionalData() {
     setEditingItem(null);
   }, []);
 
+  const clearError = useCallback(() => setError(null), []);
+
+  const handleFormInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setError(null);
+    form.handleInputChange(e);
+  }, [form]);
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     const { formData } = form;
+    const errors: string[] = [];
+    if (!formData.name.trim()) errors.push(ERROR_MESSAGES.VALIDATION_FIELD_NAME_REQUIRED);
+    if (!formData.fieldType) errors.push(ERROR_MESSAGES.VALIDATION_FIELD_TYPE_REQUIRED);
+    if (formData.connectWithLeadPurpose && !formData.purposeId) errors.push(ERROR_MESSAGES.VALIDATION_LEAD_PURPOSE_REQUIRED);
+    if (formData.fieldType === FIELD_TYPES.DROPDOWN && formData.dropdownValues.length === 0) errors.push(ERROR_MESSAGES.VALIDATION_DROPDOWN_VALUES);
+    if (formData.fieldType === FIELD_TYPES.CHECKBOX && formData.dropdownValues.length === 0) errors.push(ERROR_MESSAGES.VALIDATION_CHECKBOX_VALUES);
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
+      return;
+    }
+    const isDropdownOrCheckbox = formData.fieldType === FIELD_TYPES.DROPDOWN || formData.fieldType === FIELD_TYPES.CHECKBOX;
     if (editingItem) {
       setIsSaving(true);
       setError(null);
       try {
         const payload: UpdateLeadAdditionalPayload = {};
         if (formData.name !== editingItem.field) payload.name = formData.name;
-        if (formData.fieldType !== editingItem.type) payload.fieldType = formData.fieldType;
         if (formData.showInFilter !== editingItem.inFilter) payload.showInFilter = formData.showInFilter;
         if (formData.showInList !== editingItem.inList) payload.showInList = formData.showInList;
         if (formData.isRequired !== editingItem.required) payload.isRequired = formData.isRequired;
         if (formData.connectWithLeadPurpose !== editingItem.purpose) payload.connectWithLeadPurpose = formData.connectWithLeadPurpose;
         if (formData.purposeId !== (editingItem.purposeId || '')) payload.purposeId = formData.purposeId || null;
-        if (formData.fieldType === FIELD_TYPES.DROPDOWN || formData.fieldType === FIELD_TYPES.CHECKBOX) {
+        if (isDropdownOrCheckbox) {
+          payload.fieldType = formData.fieldType;
           payload.values = formData.dropdownValues;
+        } else {
+          payload.values = [];
         }
         await leadAdditionalService.update(editingItem.id, payload);
+        form.resetForm();
         setShowForm(false);
         setEditingItem(null);
         fetchData(currentPage, rowsPerPage, searchQuery);
@@ -154,10 +175,9 @@ export function useLeadAdditionalData() {
           showInFilter: formData.showInFilter,
           connectWithLeadPurpose: formData.connectWithLeadPurpose,
           purposeId: formData.purposeId || null,
-          ...((formData.fieldType === FIELD_TYPES.DROPDOWN || formData.fieldType === FIELD_TYPES.CHECKBOX)
-            ? { values: formData.dropdownValues }
-            : {}),
+          values: isDropdownOrCheckbox ? formData.dropdownValues : [],
         });
+        form.resetForm();
         setShowForm(false);
         setEditingItem(null);
         setCurrentPage(1);
@@ -209,10 +229,10 @@ export function useLeadAdditionalData() {
     handleConfirmDelete,
     formData: form.formData,
     setFormData: form.setFormData,
-    handleInputChange: form.handleInputChange,
+    handleInputChange: handleFormInputChange,
     handleDropdownValueChange: form.handleDropdownValueChange,
     handleAddDropdownValue: form.handleAddDropdownValue,
     handleRemoveDropdownValue: form.handleRemoveDropdownValue,
-    isLoading, isSaving, isDeleting, error,
+    isLoading, isSaving, isDeleting, error, clearError,
   };
 }

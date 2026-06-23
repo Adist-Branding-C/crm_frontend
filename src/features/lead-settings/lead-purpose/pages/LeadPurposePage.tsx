@@ -30,7 +30,7 @@ const LeadPurposePage = () => {
         </div>
       <AdminFormDrawer isOpen={d.showForm} title="Lead Purpose" fields={formFields}
         formData={d.formData} onChange={d.setFormData} onSave={d.handleSave} onClose={d.handleCloseForm}
-        isEditing={!!d.editingItem} />
+        isEditing={!!d.editingItem} error={d.error} onClearError={d.clearError} />
       <AdminDeleteModal isOpen={!!d.deletingItem} itemName={d.deletingItem?.title} itemType="lead purpose"
         onConfirm={d.handleConfirmDelete} onClose={() => d.setDeletingItem(null)} />
     </div>
