@@ -1,21 +1,23 @@
-import { Plus } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { useAgentPage } from '../hooks';
 import AddAgentDrawer from '../components/AddAgentDrawer';
-import DeleteAgentModal from '../components/DeleteAgentModal';
-import AgentTable from '../components/AgentTable';
-import './AgentPage.css';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
+import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
+import type { Column } from '../../../../shared/types/crud';
+import type { AgentItem } from '../types/agent.types';
 
 const AgentPage = () => {
   const {
     agent,
-    searchQuery, setSearchQuery,
-    rowsPerPage, setRowsPerPage,
+    searchQuery, handleSearchChange,
+    rowsPerPage, handleRowsPerPageChange,
+    pageNumber, setPageNumber,
+    totalCount,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
     filteredData,
-    totalRecords,
     drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
@@ -27,32 +29,37 @@ const AgentPage = () => {
     handleEditSubmit,
   } = useAgentPage();
 
+  const startIndex = (pageNumber - 1) * rowsPerPage;
+  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
+
+  const columns: Column<AgentItem>[] = [
+    { key: 'fullName', label: 'Name', render: (item) => item.fullName || item.name || '-' },
+    { key: 'email', label: 'Email' },
+    { key: 'mobile', label: 'Mobile', render: (item) => item.mobile || item.phone || item.phone_number || item.phoneNumber || '-' },
+    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
+  ];
+
   return (
     <>
-      <div className="task-panel">
-        <span className="usage-quote">
-          <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Staffs Used
-        </span>
-        <div className="task-nav">
-          <button className="btn btn-primary" onClick={handleAddClick}>
-            <Plus size={16} /> Add Staff
-          </button>
-        </div>
-      </div>
-      <div className="agent-table-wrapper">
-        <AgentTable
-          data={filteredData.slice(0, rowsPerPage)}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={setRowsPerPage}
-          totalRecords={totalRecords}
-          dropdownOpen={dropdownOpen}
-          onToggleDropdown={onToggleDropdown}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-        />
-      </div>
+      <SettingsTableLayout
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onAdd={handleAddClick}
+        addLabel="Add Staff"
+        data={filteredData}
+        columns={columns}
+        startIndex={startIndex}
+        dropdownOpen={dropdownOpen}
+        onToggleDropdown={onToggleDropdown}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteClick}
+        currentPage={pageNumber}
+        totalPages={totalPages}
+        rowsPerPage={rowsPerPage}
+        totalItems={totalCount}
+        onPageChange={setPageNumber}
+        onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+      />
       <AddAgentDrawer
         isOpen={showDrawer}
         onClose={handleCloseDrawer}
@@ -65,12 +72,18 @@ const AgentPage = () => {
         designationOptions={agent.designationOptions}
         onFetchDesignations={agent.fetchDesignations}
       />
-      <DeleteAgentModal
+      <AdminDeleteModal
         isOpen={!!deletingItem}
         itemName={deletingItem?.fullName || deletingItem?.name || ''}
         onConfirm={handleConfirmDelete}
         onClose={handleCloseDeleteModal}
       />
+      {agent.showToast && (
+        <div className={`toast-notification toast-${agent.toastType}`} onClick={() => agent.setShowToast(false)}>
+          {agent.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+          <span>{agent.toastMessage}</span>
+        </div>
+      )}
     </>
   );
 };

@@ -10,11 +10,7 @@
 @import '../../../../shared/styles/sidebar-layout.css';
 @import '../../../../shared/styles/toolbars.css';
 
-.checkout-note-table-wrapper .table-container,
-.checkout-note-table-wrapper .table-scroll {
-  overflow: visible;
-}
-
 .checkout-note-table-wrapper .dropdown-menu {
   z-index: 9999;
 }
+

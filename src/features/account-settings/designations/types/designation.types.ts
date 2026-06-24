@@ -14,6 +14,9 @@ export interface DesignationFormData {
 
 export interface DesignationListData {
   items: DesignationItem[];
+  pagination?: {
+    total: number;
+  };
 }
 
 export interface DesignationResponse {

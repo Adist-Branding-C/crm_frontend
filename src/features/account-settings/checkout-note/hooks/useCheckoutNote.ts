@@ -1,51 +1,29 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
+import { useTableData } from '../../../../shared/hooks/useTableData';
 import { checkoutNoteService } from '../services/checkoutNote.service';
 import { addCheckoutNoteValidationSchema, editCheckoutNoteValidationSchema } from '../validations/checkoutNote.validation';
 import { ADD_CHECKOUT_NOTE_INITIAL_VALUES } from '../constants/checkoutNote.constants';
-import type { CheckoutNoteItem, CheckoutNoteFormData, GetAllCheckoutNotesParams } from '../types/checkoutNote.types';
+import type { CheckoutNoteItem, CheckoutNoteFormData } from '../types/checkoutNote.types';
 
 export function useCheckoutNote() {
-  const [checkoutNoteList, setCheckoutNoteList] = useState<CheckoutNoteItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchCheckoutNotes = useCallback(async (params: GetAllCheckoutNotesParams = {}) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
+  const pagination = useTableData<CheckoutNoteItem>({
+    fetchFn: async (params) => {
       const response = await checkoutNoteService.getAllCheckoutNotes(params);
-
       if (response.status) {
-        setCheckoutNoteList(Array.isArray(response.data?.items) ? response.data.items : []);
-      } else {
-        setError(response.message || 'Failed to fetch checkout notes');
+        const items = Array.isArray(response.data?.items) ? response.data.items : [];
+        return { items, total: response.data?.pagination?.total ?? items.length };
       }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch checkout notes');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCheckoutNotes();
-  }, [fetchCheckoutNotes]);
+      throw new Error(response.message || 'Failed to fetch checkout notes');
+    },
+  });
 
   const handleAddCheckoutNote = useCallback(async (
     values: CheckoutNoteFormData,
     { setSubmitting, resetForm }: FormikHelpers<CheckoutNoteFormData>,
   ): Promise<boolean> => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { title, note, status } = values;
@@ -54,33 +32,30 @@ export function useCheckoutNote() {
       const response = await checkoutNoteService.createCheckoutNote(requestData);
 
       if (response.status) {
-        const newItemId = response.data?.id ?? null;
-        if (newItemId) {
-          setCheckoutNoteList(prev => [...prev, { id: newItemId, title, note, status }]);
-        } else {
-          fetchCheckoutNotes();
-        }
+        pagination.setPageNumber(1);
+        pagination.setSearchQuery('');
+        pagination.refresh();
         resetForm();
         return true;
       } else {
-        setError(response.message || 'Failed to add checkout note');
+        pagination.setError(response.message || 'Failed to add checkout note');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add checkout note');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to add checkout note');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [fetchCheckoutNotes]);
+  }, []);
 
   const handleUpdateCheckoutNote = useCallback(async (
     id: number,
@@ -89,12 +64,12 @@ export function useCheckoutNote() {
   ): Promise<boolean> => {
     const noteId = Number(id);
     if (!noteId || isNaN(noteId)) {
-      setError('Invalid checkout note id');
+      pagination.setError('Invalid checkout note id');
       setSubmitting(false);
       return false;
     }
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { title, note, status } = values;
@@ -103,26 +78,24 @@ export function useCheckoutNote() {
       const response = await checkoutNoteService.updateCheckoutNote(noteId, requestData);
 
       if (response.status) {
-        setCheckoutNoteList(prev => prev.map(item =>
-          Number(item.id) === noteId ? { ...item, title, note, status } : item
-        ));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to update checkout note');
+        pagination.setError(response.message || 'Failed to update checkout note');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update checkout note');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to update checkout note');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
   }, []);
@@ -130,44 +103,51 @@ export function useCheckoutNote() {
   const handleDeleteCheckoutNote = useCallback(async (id: number): Promise<boolean> => {
     const noteId = Number(id);
     if (!noteId || isNaN(noteId)) {
-      setError('Invalid checkout note id');
+      pagination.setError('Invalid checkout note id');
       return false;
     }
-    setError('');
+    pagination.setError('');
 
     try {
       const response = await checkoutNoteService.deleteCheckoutNote(noteId);
 
       if (response.status) {
-        setCheckoutNoteList(prev => prev.filter(item => Number(item.id) !== noteId));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to delete checkout note');
+        pagination.setError(response.message || 'Failed to delete checkout note');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete checkout note');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete checkout note');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     }
   }, []);
 
   return {
-    checkoutNoteList,
-    isLoading,
-    error,
-    fetchCheckoutNotes,
+    checkoutNoteList: pagination.list,
+    isLoading: pagination.isLoading,
+    error: pagination.error,
+    fetchCheckoutNotes: pagination.refresh,
     handleAddCheckoutNote,
     handleUpdateCheckoutNote,
     handleDeleteCheckoutNote,
     validationSchema: addCheckoutNoteValidationSchema,
     editValidationSchema: editCheckoutNoteValidationSchema,
     initialValues: ADD_CHECKOUT_NOTE_INITIAL_VALUES,
+    pageNumber: pagination.pageNumber,
+    setPageNumber: pagination.setPageNumber,
+    limit: pagination.limit,
+    totalCount: pagination.totalCount,
+    searchQuery: pagination.searchQuery,
+    handleSearchChange: pagination.handleSearchChange,
+    handleRowsPerPageChange: pagination.handleRowsPerPageChange,
   };
 }

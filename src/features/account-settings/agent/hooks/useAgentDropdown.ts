@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 
 export function useAgentDropdown() {
-  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
 
-  const toggleDropdown = useCallback((id: string | null) => {
+  const toggleDropdown = useCallback((id: number | null) => {
     setDropdownOpen(id);
   }, []);
 

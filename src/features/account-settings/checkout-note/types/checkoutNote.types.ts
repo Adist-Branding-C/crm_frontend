@@ -29,6 +29,9 @@ export interface GetAllCheckoutNotesResponse {
   data: {
     items: CheckoutNoteItem[]
     total?: number
+    pagination?: {
+      total: number
+    }
   }
 }
 
