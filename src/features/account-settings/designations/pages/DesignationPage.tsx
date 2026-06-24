@@ -1,23 +1,24 @@
-import { Plus } from 'lucide-react';
 import { useDesignationPage } from '../hooks';
 import AddDesignationDrawer from '../components/AddDesignationDrawer';
-import DeleteDesignationModal from '../components/DeleteDesignationModal';
-import DesignationTable from '../components/DesignationTable';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import './DesignationPage.css';
+import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
+import type { Column } from '../../../../shared/types/crud';
+import type { DesignationItem } from '../types/designation.types';
 
 const DesignationPage = () => {
   const {
     designation,
-    searchQuery, setSearchQuery,
-    rowsPerPage, setRowsPerPage,
+    searchQuery, handleSearchChange,
+    rowsPerPage, handleRowsPerPageChange,
+    pageNumber, setPageNumber,
+    totalCount,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
     filteredData,
-    totalRecords,
     drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
@@ -29,53 +30,55 @@ const DesignationPage = () => {
     handleEditSubmit,
   } = useDesignationPage();
 
+  const startIndex = (pageNumber - 1) * rowsPerPage;
+  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
+
+  const columns: Column<DesignationItem>[] = [
+    { key: 'designationName', label: 'Designation', render: (item) => item.designationName || item.name || '-' },
+    { key: 'description', label: 'Description' },
+    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
+  ];
+
   return (
     <div className="account-page">
-      <div className="account-layout">
-        <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
-          <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
-          <SettingsTabs />
-          <div className="task-panel">
-            <span className="usage-quote">
-              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Designations
-            </span>
-            <div className="task-nav">
-              <button className="btn btn-primary" onClick={handleAddClick}>
-                <Plus size={16} /> Add Designation
-              </button>
-            </div>
-          </div>
-          <div className="designation-table-wrapper">
-            <DesignationTable
-              data={filteredData.slice(0, rowsPerPage)}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={setRowsPerPage}
-              totalRecords={totalRecords}
-              dropdownOpen={dropdownOpen}
-              onToggleDropdown={onToggleDropdown}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteClick}
-            />
-          </div>
-          <AddDesignationDrawer
-            isOpen={showDrawer}
-            onClose={handleCloseDrawer}
-            validationSchema={editingItem ? designation.editValidationSchema : designation.validationSchema}
-            initialValues={drawerInitialValues}
-            onSubmit={editingItem ? handleEditSubmit : handleSubmit}
-            isLoading={designation.isLoading}
-            error={designation.error}
-            isEditing={!!editingItem}
-          />
-          <DeleteDesignationModal
-            isOpen={!!deletingItem}
-            itemName={deletingItem?.designationName || deletingItem?.name || ''}
-            onConfirm={handleConfirmDelete}
-            onClose={handleCloseDeleteModal}
-          />
-        </div>
+      <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
+      <SettingsTabs />
+      <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
+        <SettingsTableLayout
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onAdd={handleAddClick}
+          addLabel="Add Designation"
+          data={filteredData}
+          columns={columns}
+          startIndex={startIndex}
+          dropdownOpen={dropdownOpen}
+          onToggleDropdown={onToggleDropdown}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+          currentPage={pageNumber}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          totalItems={totalCount}
+          onPageChange={setPageNumber}
+          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+        />
+        <AddDesignationDrawer
+          isOpen={showDrawer}
+          onClose={handleCloseDrawer}
+          validationSchema={editingItem ? designation.editValidationSchema : designation.validationSchema}
+          initialValues={drawerInitialValues}
+          onSubmit={editingItem ? handleEditSubmit : handleSubmit}
+          isLoading={designation.isLoading}
+          error={designation.error}
+          isEditing={!!editingItem}
+        />
+        <AdminDeleteModal
+          isOpen={!!deletingItem}
+          itemName={deletingItem?.designationName || deletingItem?.name || ''}
+          onConfirm={handleConfirmDelete}
+          onClose={handleCloseDeleteModal}
+        />
       </div>
     </div>
   );

@@ -1,23 +1,24 @@
-import { Plus } from 'lucide-react';
 import { useBranchPage } from '../hooks';
 import AddBranchDrawer from '../components/AddBranchDrawer';
-import DeleteBranchModal from '../components/DeleteBranchModal';
-import BranchTable from '../components/BranchTable';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import './BranchPage.css';
+import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
+import type { Column } from '../../../../shared/types/crud';
+import type { BranchItem } from '../types/branch.types';
 
 const BranchPage = () => {
   const {
     branch,
-    searchQuery, setSearchQuery,
-    rowsPerPage, setRowsPerPage,
+    searchQuery, handleSearchChange,
+    rowsPerPage, handleRowsPerPageChange,
+    pageNumber, setPageNumber,
+    totalCount,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
     deletingItem,
     filteredData,
-    totalRecords,
     drawerInitialValues,
     handleAddClick,
     handleCloseDrawer,
@@ -29,53 +30,55 @@ const BranchPage = () => {
     handleEditSubmit,
   } = useBranchPage();
 
+  const startIndex = (pageNumber - 1) * rowsPerPage;
+  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
+
+  const columns: Column<BranchItem>[] = [
+    { key: 'branchName', label: 'Branch Name', render: (item) => item.name || item.branchName || '-' },
+    { key: 'description', label: 'Description' },
+    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
+  ];
+
   return (
     <div className="account-page">
-      <div className="account-layout">
-        <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
-          <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
-          <SettingsTabs />
-          <div className="task-panel">
-            <span className="usage-quote">
-              <span className="usage-count">{totalRecords}</span> / <span className="usage-total">{totalRecords}</span> Branches
-            </span>
-            <div className="task-nav">
-              <button className="btn btn-primary" onClick={handleAddClick}>
-                <Plus size={16} /> Add Branch
-              </button>
-            </div>
-          </div>
-          <div className="branch-table-wrapper">
-            <BranchTable
-              data={filteredData.slice(0, rowsPerPage)}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={setRowsPerPage}
-              totalRecords={totalRecords}
-              dropdownOpen={dropdownOpen}
-              onToggleDropdown={onToggleDropdown}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteClick}
-            />
-          </div>
-          <AddBranchDrawer
-            isOpen={showDrawer}
-            onClose={handleCloseDrawer}
-            validationSchema={editingItem ? branch.editValidationSchema : branch.validationSchema}
-            initialValues={drawerInitialValues}
-            onSubmit={editingItem ? handleEditSubmit : handleSubmit}
-            isLoading={branch.isLoading}
-            error={branch.error}
-            isEditing={!!editingItem}
-          />
-          <DeleteBranchModal
-            isOpen={!!deletingItem}
-            itemName={deletingItem?.name || deletingItem?.branchName || ''}
-            onConfirm={handleConfirmDelete}
-            onClose={handleCloseDeleteModal}
-          />
-        </div>
+      <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
+      <SettingsTabs />
+      <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
+        <SettingsTableLayout
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onAdd={handleAddClick}
+          addLabel="Add Branch"
+          data={filteredData}
+          columns={columns}
+          startIndex={startIndex}
+          dropdownOpen={dropdownOpen}
+          onToggleDropdown={onToggleDropdown}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+          currentPage={pageNumber}
+          totalPages={totalPages}
+          rowsPerPage={rowsPerPage}
+          totalItems={totalCount}
+          onPageChange={setPageNumber}
+          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+        />
+        <AddBranchDrawer
+          isOpen={showDrawer}
+          onClose={handleCloseDrawer}
+          validationSchema={editingItem ? branch.editValidationSchema : branch.validationSchema}
+          initialValues={drawerInitialValues}
+          onSubmit={editingItem ? handleEditSubmit : handleSubmit}
+          isLoading={branch.isLoading}
+          error={branch.error}
+          isEditing={!!editingItem}
+        />
+        <AdminDeleteModal
+          isOpen={!!deletingItem}
+          itemName={deletingItem?.name || deletingItem?.branchName || ''}
+          onConfirm={handleConfirmDelete}
+          onClose={handleCloseDeleteModal}
+        />
       </div>
     </div>
   );

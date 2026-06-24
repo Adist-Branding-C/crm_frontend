@@ -1,162 +1,137 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
+import { useTableData } from '../../../../shared/hooks/useTableData';
 import { designationService } from '../services/designation.service';
 import { addDesignationValidationSchema, editDesignationValidationSchema } from '../validations/designation.validation';
 import { ADD_DESIGNATION_INITIAL_VALUES } from '../constants/designation.constants';
 import type { DesignationItem, DesignationFormData } from '../types/designation.types';
 
 export function useDesignation() {
-  const [designationList, setDesignationList] = useState<DesignationItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const fetchDesignations = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await designationService.getAllDesignations(params);
-
+  const pagination = useTableData<DesignationItem>({
+    fetchFn: async (params) => {
+      const response = await designationService.getAllDesignations(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
-        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? (response.data as { items: DesignationItem[] }).items
-          : Array.isArray(response.data)
-            ? response.data
-            : [];
-        setDesignationList(Array.isArray(rawData) ? rawData : []);
-      } else {
-        setError(response.message || 'Failed to fetch designations');
+        const data = response.data as { items: DesignationItem[]; pagination?: { total: number } } | undefined;
+        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
+        return { items: Array.isArray(items) ? items : [], total: data?.pagination?.total ?? (Array.isArray(items) ? items.length : 0) };
       }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch designations');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDesignations();
-  }, [fetchDesignations]);
+      throw new Error(response.message || 'Failed to fetch designations');
+    },
+  });
 
   const handleAddDesignation = useCallback(async (
     values: DesignationFormData,
     { setSubmitting, resetForm }: FormikHelpers<DesignationFormData>,
   ) => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const response = await designationService.createDesignation(values);
 
       if (response.status) {
-        const createdItem = response.data;
-        if (createdItem && typeof createdItem === 'object' && 'id' in createdItem) {
-          setDesignationList(prev => [...prev, createdItem as DesignationItem]);
-        } else {
-          fetchDesignations();
-        }
+        pagination.setPageNumber(1);
+        pagination.setSearchQuery('');
+        pagination.refresh();
         resetForm();
         return true;
       } else {
-        setError(response.message || 'Failed to add designation');
+        pagination.setError(response.message || 'Failed to add designation');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add designation');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to add designation');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [fetchDesignations]);
+  }, []);
 
   const handleUpdateDesignation = useCallback(async (
     id: number,
     values: DesignationFormData,
     { setSubmitting }: FormikHelpers<DesignationFormData>,
   ) => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const response = await designationService.updateDesignation(id, values);
 
       if (response.status) {
-        const { designationName, description, status } = values;
-        setDesignationList(prev => prev.map(item =>
-          item.id === id ? { ...item, designationName, description, status } : item
-        ));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to update designation');
+        pagination.setError(response.message || 'Failed to update designation');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update designation');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to update designation');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
       setSubmitting(false);
     }
   }, []);
 
   const handleDeleteDesignation = useCallback(async (id: number) => {
-    setError('');
+    pagination.setError('');
 
     try {
       const response = await designationService.deleteDesignation(id);
 
       if (response.status) {
-        setDesignationList(prev => prev.filter(item => item.id !== id));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to delete designation');
+        pagination.setError(response.message || 'Failed to delete designation');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete designation');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete designation');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
     }
   }, []);
 
   return {
-    designationList,
-    isLoading,
-    error,
-    fetchDesignations,
+    designationList: pagination.list,
+    isLoading: pagination.isLoading,
+    error: pagination.error,
+    fetchDesignations: pagination.refresh,
     handleAddDesignation,
     handleUpdateDesignation,
     handleDeleteDesignation,
     validationSchema: addDesignationValidationSchema,
     editValidationSchema: editDesignationValidationSchema,
     initialValues: ADD_DESIGNATION_INITIAL_VALUES,
+    pageNumber: pagination.pageNumber,
+    setPageNumber: pagination.setPageNumber,
+    limit: pagination.limit,
+    totalCount: pagination.totalCount,
+    searchQuery: pagination.searchQuery,
+    handleSearchChange: pagination.handleSearchChange,
+    handleRowsPerPageChange: pagination.handleRowsPerPageChange,
   };
 }

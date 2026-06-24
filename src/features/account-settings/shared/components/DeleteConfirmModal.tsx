@@ -32,7 +32,7 @@ const DeleteConfirmModal = ({ deletingStaff, deleteConfirmText, onDeleteConfirmT
               value={deleteConfirmText} onChange={(e: React.ChangeEvent<HTMLInputElement>) => onDeleteConfirmTextChange(e.target.value)} />
           </div>
         </div>
-        <div className="modal-footer">
+        <div className="modal-footer flex flex-col sm:flex-row sm:justify-end gap-3">
           <button className="btn btn-danger" disabled={deleteConfirmText !== expectedText} onClick={onConfirmDelete}>
             Delete Staff
           </button>
