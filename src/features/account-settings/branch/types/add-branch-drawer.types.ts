@@ -12,3 +12,5 @@ export interface AddBranchDrawerProps {
   error: string;
   isEditing: boolean;
 }
+
+{}
