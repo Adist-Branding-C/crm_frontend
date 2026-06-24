@@ -20,7 +20,7 @@ class LeadPurposeService {
   }
 
   async getLeadPurposes(page = 1, limit = 10, search?: string): Promise<LeadPurposeListResponse> {
-    const params: Record<string, string | number> = { page, limit };
+    const params: Record<string, string | number> = { pageNumber: page, limit };
     if (search) params.search = search;
     const response = await axiosInstance.get<LeadPurposeListResponse>(LEAD_PURPOSE_API_ENDPOINTS.PURPOSES, { params });
     return {
