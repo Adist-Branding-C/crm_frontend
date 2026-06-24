@@ -1,6 +1,7 @@
 import axiosInstance from '../../../../api/axiosInstance';
 import { normalizeFieldType, denormalizeFieldType } from '../utils/fieldType';
-import { LEAD_ADDITIONAL_API_ENDPOINTS } from '../constants/leadAdditionalApiEndpoints';import type {
+import { LEAD_ADDITIONAL_API_ENDPOINTS } from '../constants/leadAdditionalApiEndpoints';
+import type {
   CreateLeadAdditionalPayload,
   CreateLeadAdditionalResponse,
   UpdateLeadAdditionalPayload,

@@ -67,6 +67,12 @@ export function useLeadAdditionalData() {
 
   const isFirstSearch = useRef(true);
 
+  const rowsPerPageRef = useRef(rowsPerPage);
+
+  useEffect(() => {
+    rowsPerPageRef.current = rowsPerPage;
+  }, [rowsPerPage]);
+
   useEffect(() => {
     if (isFirstSearch.current) {
       isFirstSearch.current = false;
@@ -74,10 +80,10 @@ export function useLeadAdditionalData() {
     }
     const timer = setTimeout(() => {
       setCurrentPage(1);
-      fetchData(1, rowsPerPage, searchQuery);
+      fetchData(1, rowsPerPageRef.current, searchQuery);
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+}, [searchQuery, fetchData]);
 
   const handleSetCurrentPage = useCallback((page: number) => {
     setCurrentPage(page);

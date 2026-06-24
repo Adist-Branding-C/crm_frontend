@@ -1,5 +1,6 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { LEAD_STATUS_API_ENDPOINTS } from '../constants/leadStatusApiEndpoints';import type {
+import { LEAD_STATUS_API_ENDPOINTS } from '../constants/leadStatusApiEndpoints';
+import type {
   CreateLeadStatusPayload,
   CreateLeadStatusResponse,
   UpdateLeadStatusPayload,

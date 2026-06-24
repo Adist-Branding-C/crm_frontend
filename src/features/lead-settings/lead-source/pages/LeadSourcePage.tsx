@@ -8,7 +8,7 @@ import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModa
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import './LeadSourcePage.css';
 import { formFields, columns } from '../constants';
-
+import ValidationAlert from '../../../../shared/components/ValidationAlert';
 const LeadSourcePage = () => {
   const d = useLeadSourceData();
 
@@ -17,7 +17,13 @@ const LeadSourcePage = () => {
       <PageHeader title="Lead Source" description="Manage lead source channels" />
       <LeadSettingsSidebar />
       <div className="settings-content">
-          <div className="table-container">
+        {d.error && !d.showForm && (
+          <ValidationAlert
+            message={d.error}
+            onClose={d.clearError}
+          />
+        )}
+        <div className="table-container">
           <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Lead Source" />
           <AdminTable data={d.paginatedData} columns={columns} startIndex={d.startIndex}
             dropdownOpen={d.dropdownOpen} onToggleDropdown={d.setDropdownOpen}
@@ -26,8 +32,8 @@ const LeadSourcePage = () => {
             startIndex={d.startIndex} rowsPerPage={d.rowsPerPage} totalItems={d.totalItems}
             onPageChange={d.setCurrentPage} onRowsPerPageChange={d.handleRowsPerPageChange}
             prevNextOnly />
-          </div>
         </div>
+      </div>
       <AdminFormDrawer isOpen={d.showForm} title="Lead Source" fields={formFields}
         formData={d.formData} onChange={d.setFormData} onSave={d.handleSave} onClose={d.handleCloseForm}
         isEditing={!!d.editingItem} error={d.error} onClearError={d.clearError} />

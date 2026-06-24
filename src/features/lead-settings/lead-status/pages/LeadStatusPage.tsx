@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react';
 import LeadSettingsSidebar from '../../components/LeadSettingsSidebar';
 import { useLeadStatusData } from '../hooks/useLeadStatusData';
 import AdminToolbar from '../../../../shared/components/crud/AdminToolbar';
@@ -19,13 +20,27 @@ const LeadStatusPage = () => {
       <div className="settings-content">
           <div className="table-container">
           <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Status" />
-          <AdminTable data={d.paginatedData} columns={columns} startIndex={d.startIndex}
-            dropdownOpen={d.dropdownOpen} onToggleDropdown={d.setDropdownOpen}
-            onEdit={d.handleEdit} onDelete={d.handleDeleteClick} />
-          <AdminPagination currentPage={d.currentPage} totalPages={d.totalPages}
-            startIndex={d.startIndex} rowsPerPage={d.rowsPerPage} totalItems={d.totalItems}
-            onPageChange={d.setCurrentPage} onRowsPerPageChange={d.handleRowsPerPageChange}
-            prevNextOnly />
+          {d.error && (
+            <div className="alert alert-danger">
+              {d.error}
+            </div>
+          )}
+          {d.isLoading ? (
+            <div className="table-loading">
+              <Loader2 size={32} className="spin" />
+              <p>Loading lead statuses...</p>
+            </div>
+          ) : (
+            <>
+              <AdminTable data={d.paginatedData} columns={columns} startIndex={d.startIndex}
+                dropdownOpen={d.dropdownOpen} onToggleDropdown={d.setDropdownOpen}
+                onEdit={d.handleEdit} onDelete={d.handleDeleteClick} />
+              <AdminPagination currentPage={d.currentPage} totalPages={d.totalPages}
+                startIndex={d.startIndex} rowsPerPage={d.rowsPerPage} totalItems={d.totalItems}
+                onPageChange={d.setCurrentPage} onRowsPerPageChange={d.handleRowsPerPageChange}
+                prevNextOnly />
+            </>
+          )}
           </div>
         </div>
       <AdminFormDrawer isOpen={d.showForm} title="Status" fields={formFields}
