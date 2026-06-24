@@ -20,7 +20,7 @@ class LeadTypeService {
   }
 
   async getLeadTypes(page = 1, limit = 10, search?: string): Promise<LeadTypeListResponse> {
-    const params: Record<string, string | number> = { page, limit };
+    const params: Record<string, string | number> = { pageNumber: page, limit };
     if (search) params.search = search;
     const response = await axiosInstance.get<LeadTypeListResponse>(LEAD_TYPE_API_ENDPOINTS.TYPES, { params });
     return {
