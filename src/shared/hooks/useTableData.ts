@@ -29,6 +29,8 @@ export function useTableData<T>({ fetchFn, initialPage = 1, initialLimit = DEFAU
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [totalCount, setTotalCount] = useState(0);
   const fetchRef = useRef(0);
+  const fetchFnRef = useRef(fetchFn);
+  fetchFnRef.current = fetchFn;
 
   const fetchData = useCallback(async (page: number, limitVal: number, search: string) => {
     const fetchId = ++fetchRef.current;
@@ -38,7 +40,7 @@ export function useTableData<T>({ fetchFn, initialPage = 1, initialLimit = DEFAU
     try {
       const params: FetchParams = { pageNumber: page, limit: limitVal };
       if (search) params.search = search;
-      const result = await fetchFn(params);
+      const result = await fetchFnRef.current(params);
       if (fetchId === fetchRef.current) {
         setList(result.items);
         setTotalCount(result.total);
@@ -55,11 +57,11 @@ export function useTableData<T>({ fetchFn, initialPage = 1, initialLimit = DEFAU
         setIsLoading(false);
       }
     }
-  }, [fetchFn]);
+  }, []);
 
   useEffect(() => {
     fetchData(pageNumber, limit, searchQuery);
-  }, [pageNumber, limit, searchQuery, fetchData]);
+  }, [pageNumber, limit, searchQuery]);
 
   const refresh = useCallback(() => {
     fetchData(pageNumber, limit, searchQuery);
