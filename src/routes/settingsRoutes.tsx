@@ -1,11 +1,11 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import SettingsPage from '../features/settings/pages/SettingsPage';
-import LeadPurposePage from '../features/lead-purpose/pages/LeadPurposePage';
-import LeadStatusPage from '../features/lead-status/pages/LeadStatusPage';
-import LeadSourcePage from '../features/lead-source/pages/LeadSourcePage';
-import LeadTypesPage from '../features/lead-types/pages/LeadTypesPage';
-import LeadAdditionalPage from '../features/lead-additional/pages/LeadAdditionalPage';
+import LeadPurposePage from '../features/lead-settings/lead-purpose/pages/LeadPurposePage';
+import LeadStatusPage from '../features/lead-settings/lead-status/pages/LeadStatusPage';
+import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSourcePage';
+import LeadTypesPage from '../features/lead-settings/lead-types/pages/LeadTypesPage';
+import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/LeadAdditionalPage';
 import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
 import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
 import IntegrationsPage from '../features/integrations/pages/IntegrationsPage';

@@ -4,7 +4,7 @@ import { ACTION_EDIT, ACTION_DELETE } from '../../constants/actionLabels';
 import { LABEL_SL_NO, LABEL_ACTIONS, LABEL_NO_DATA } from '../../constants/labels';
 import type { Column, AdminTableProps } from '../../types/crud';
 
-function AdminTableInner<T extends { id: number }>(props: AdminTableProps<T>) {
+function AdminTableInner<T extends { id: number | string }>(props: AdminTableProps<T>) {
   const { data, columns, startIndex, dropdownOpen, onToggleDropdown, onEdit, onDelete, renderActions, emptyMessage } = props;
 
   return (

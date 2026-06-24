@@ -49,12 +49,12 @@ export interface AdminDeleteModalProps {
   onClose: () => void;
 }
 
-export interface AdminTableProps<T extends { id: number }> {
+export interface AdminTableProps<T extends { id: number | string }> {
   data: T[];
   columns: Column<T>[];
   startIndex: number;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
+  dropdownOpen: T['id'] | null;
+  onToggleDropdown: (id: T['id'] | null) => void;
   onEdit: (item: T) => void;
   onDelete: (item: T) => void;
   renderActions?: (item: T) => ReactNode;
@@ -70,4 +70,6 @@ export interface AdminFormDrawerProps {
   onSave: () => void;
   onClose: () => void;
   isEditing: boolean;
+  error?: string | null;
+  onClearError?: () => void;
 }

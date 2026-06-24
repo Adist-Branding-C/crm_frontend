@@ -322,10 +322,8 @@
 .action-dropdown {
   position: absolute;
   right: 0;
-  top: auto;
-  bottom: 100%;
-  margin-top: 0;
-  margin-bottom: 8px;
+  top: 100%;
+  margin-top: 8px;
 }
 
 .action-dropdown.dropleft {
