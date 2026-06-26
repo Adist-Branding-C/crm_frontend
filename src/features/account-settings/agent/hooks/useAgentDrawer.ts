@@ -28,7 +28,7 @@ export function useAgentDrawer() {
           phone: editingItem.phone || editingItem.phone_number || editingItem.phoneNumber || editingItem.mobile || '',
           password: '',
           confirmPassword: '',
-          designationId: editingItem.designationId || editingItem.designation || '',
+          designationId: editingItem.designationId || String(editingItem.designation_id ?? editingItem.designation ?? ''),
           status: editingItem.status || '',
         }
       : { fullName: '', email: '', phone: '', password: '', confirmPassword: '', designationId: '', status: '' },

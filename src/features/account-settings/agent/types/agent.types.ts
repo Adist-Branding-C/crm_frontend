@@ -9,6 +9,7 @@ export interface AgentItem {
   phoneNumber?: string;
   mobile?: string;
   designationId?: string;
+  designation_id?: number | string;
   designation?: string;
   status: string;
 }
@@ -27,6 +28,8 @@ export interface AgentResponse {
   status: boolean;
   message: string;
   data?: unknown;
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface DesignationOption {

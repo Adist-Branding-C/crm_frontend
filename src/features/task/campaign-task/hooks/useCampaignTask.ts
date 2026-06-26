@@ -18,8 +18,8 @@ export function useCampaignTask() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const paginationRef = useRef({ page: 1, limit: 10 });
-  useEffect(() => { paginationRef.current = { page, limit }; }, [page, limit]);
+  const paginationRef = useRef({ pageNumber: 1, limit: 10 });
+  useEffect(() => { paginationRef.current = { pageNumber: page, limit }; }, [page, limit]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -77,7 +77,7 @@ export function useCampaignTask() {
   }, []);
 
   useEffect(() => {
-    const params: Record<string, string | number | undefined> = { page, limit };
+    const params: Record<string, string | number | undefined> = { pageNumber: page, limit };
     if (debouncedSearch) params.search = debouncedSearch;
     fetchCampaignTasks(params);
   }, [fetchCampaignTasks, page, limit, debouncedSearch]);

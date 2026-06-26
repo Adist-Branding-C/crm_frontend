@@ -11,3 +11,5 @@ export interface MailConfigItem {
   auth: string;
   active: boolean;
 }
+
+export * from './mailConfiguration.types';

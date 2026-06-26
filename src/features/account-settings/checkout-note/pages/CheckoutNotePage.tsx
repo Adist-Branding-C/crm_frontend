@@ -1,3 +1,4 @@
+import { Check, X } from 'lucide-react';
 import { useCheckoutNotePage } from '../hooks';
 import AddCheckoutNoteDrawer from '../components/AddCheckoutNoteDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -34,7 +35,8 @@ const CheckoutNotePage = () => {
   const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
 
   const columns: Column<CheckoutNoteItem>[] = [
-    { key: 'title', label: 'Note', render: (item) => item.title || item.note || '-' },
+    { key: 'title', label: 'Title', render: (item) => item.title || '-' },
+    { key: 'note', label: 'Note', render: (item) => item.note || '-' },
   ];
 
   return (
@@ -77,6 +79,12 @@ const CheckoutNotePage = () => {
           onConfirm={handleConfirmDelete}
           onClose={handleCloseDeleteModal}
         />
+        {checkoutNote.showToast && (
+          <div className={`toast-notification toast-${checkoutNote.toastType}`} onClick={() => checkoutNote.setShowToast(false)}>
+            {checkoutNote.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+            <span>{checkoutNote.toastMessage}</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ export const useDailyActivityData = () => {
   const fetchActivities = useCallback(async (page: number, f: Filters, at: string) => {
     const requestSeq = ++requestSeqRef.current;
     try {
-      const params: Record<string, string | number> = { page, limit: rowsPerPage };
+      const params: Record<string, string | number> = { pageNumber: page, limit: rowsPerPage };
       if (f.date) params.date = f.date;
       if (f.startTime) params.startTime = f.startTime;
       if (f.endTime) params.endTime = f.endTime;

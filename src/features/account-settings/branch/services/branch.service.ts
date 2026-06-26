@@ -30,6 +30,8 @@ class BranchService {
       status: response.data.status,
       message: response.data.message,
       data: response.data.data,
+      errors: response.data.errors,
+      field: response.data.field,
     };
   }
 
@@ -39,6 +41,8 @@ class BranchService {
       status: response.data.status,
       message: response.data.message,
       data: response.data.data,
+      errors: response.data.errors,
+      field: response.data.field,
     };
   }
 

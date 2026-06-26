@@ -23,7 +23,7 @@ class LeadAdditionalService {
   }
 
   async getAll(page = 1, limit = 10, search?: string): Promise<LeadAdditionalListResponse> {
-    const params: Record<string, string | number> = { page, limit };
+    const params: Record<string, string | number> = { pageNumber: page, limit };
     if (search) params.search = search;
     const response = await axiosInstance.get<LeadAdditionalListResponse>(LEAD_ADDITIONAL_API_ENDPOINTS.ADDITIONAL_FIELDS, { params });
     return {

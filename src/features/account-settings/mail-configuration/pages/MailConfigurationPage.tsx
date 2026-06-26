@@ -1,48 +1,43 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 import './MailConfigurationPage.css';
+import AddMailConfigurationDrawer from '../components/AddMailConfigurationDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import { MAIL_DRIVER_OPTIONS, ENCRYPTION_OPTIONS } from '../constants';
-import { useMailConfigData } from '../hooks/useMailConfigData';
+import { useMailConfigurationPage } from '../hooks/useMailConfigurationPage';
 import type { Column } from '../../../../shared/types/crud';
 import type { MailConfigItem } from '../types';
 
-const MailConfigPage = () => {
+const MailConfigurationPage = () => {
   const {
-    showForm,
+    mailConfig,
+    mailConfigData,
+    showDrawer,
     editingItem,
-    deletingItem,
-    setDeletingItem,
-    formData,
-    searchQuery,
-    setSearchQuery,
-    rowsPerPage,
-    setRowsPerPage,
-    dropdownOpen,
-    setDropdownOpen,
-    filteredData,
-    handleInputChange,
+    drawerInitialValues,
     handleAddClick,
     handleEditClick,
     handleDeleteClick,
+    handleCloseDrawer,
+    handleSubmit,
+    handleEditSubmit,
     handleConfirmDelete,
-    handleCloseForm,
-  } = useMailConfigData();
+    handleCloseDeleteModal,
+    searchQuery, setSearchQuery,
+    rowsPerPage, setRowsPerPage,
+    dropdownOpen, setDropdownOpen,
+    filteredData,
+    deletingItem,
+  } = useMailConfigurationPage();
 
   const [pageNumber, setPageNumber] = useState(1);
 
   const startIndex = (pageNumber - 1) * rowsPerPage;
   const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleCloseForm();
-  };
 
   const columns: Column<MailConfigItem>[] = [
     { key: 'driver', label: 'Driver/Host', render: (item) => `${item.driver}${item.host ? ` / ${item.host}` : ''}` },
@@ -82,75 +77,32 @@ const MailConfigPage = () => {
         />
       </div>
 
+      <AddMailConfigurationDrawer
+        isOpen={showDrawer}
+        onClose={handleCloseDrawer}
+        validationSchema={editingItem ? mailConfig.editValidationSchema : mailConfig.validationSchema}
+        initialValues={drawerInitialValues}
+        onSubmit={editingItem ? handleEditSubmit : handleSubmit}
+        isLoading={mailConfig.isLoading}
+        error={mailConfig.error}
+        isEditing={!!editingItem}
+      />
+
       <AdminDeleteModal
         isOpen={!!deletingItem}
         itemName={deletingItem?.driver || ''}
         onConfirm={handleConfirmDelete}
-        onClose={() => setDeletingItem(null)}
+        onClose={handleCloseDeleteModal}
       />
 
-      {showForm && (
-        <div className="drawer-overlay" onClick={handleCloseForm}>
-          <div className="drawer drawer-right" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-            <div className="drawer-header">
-              <h5>{editingItem ? 'Edit Mail Config' : 'Add Mail Config'}</h5>
-              <button className="drawer-close" onClick={handleCloseForm}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="drawer-body">
-              <form onSubmit={handleFormSubmit}>
-                <div className="form-group">
-                  <label>Mail Driver <span className="text-danger">*</span></label>
-                  <select name="driver" className="form-control" value={formData.driver} onChange={handleInputChange}>
-                    <option value="">Select Driver</option>
-                    {MAIL_DRIVER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Host</label>
-                  <input type="text" name="host" className="form-control" placeholder="mail.example.com" value={formData.host} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Port</label>
-                  <input type="text" name="port" className="form-control" placeholder="587" value={formData.port} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Encryption</label>
-                  <select name="encryption" className="form-control" value={formData.encryption} onChange={handleInputChange}>
-                    <option value="">Select</option>
-                    {ENCRYPTION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Username</label>
-                  <input type="text" name="username" className="form-control" placeholder="username" value={formData.username} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Password</label>
-                  <input type="password" name="password" className="form-control" placeholder="password" value={formData.password} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>From Email</label>
-                  <input type="email" name="fromEmail" className="form-control" placeholder="noreply@example.com" value={formData.fromEmail} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>From Name</label>
-                  <input type="text" name="fromName" className="form-control" placeholder="Company Name" value={formData.fromName} onChange={handleInputChange} />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="btn btn-primary">
-                    {editingItem ? 'Update' : 'Save'}
-                  </button>
-                  <button type="button" className="btn btn-secondary" onClick={handleCloseForm}>Cancel</button>
-                </div>
-              </form>
-            </div>
-          </div>
+      {mailConfig.showToast && (
+        <div className={`toast-notification toast-${mailConfig.toastType}`} onClick={() => mailConfig.setShowToast(false)}>
+          {mailConfig.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+          <span>{mailConfig.toastMessage}</span>
         </div>
       )}
     </div>
   );
 };
 
-export default MailConfigPage;
+export default MailConfigurationPage;

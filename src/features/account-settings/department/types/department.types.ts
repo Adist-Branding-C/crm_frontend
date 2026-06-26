@@ -8,7 +8,7 @@ export interface DepartmentItem {
 
 export interface DepartmentFormData {
   departmentName: string;
-  description: string | undefined;
+  description: string;
   status: string;
 }
 
@@ -27,6 +27,8 @@ export interface DepartmentResponse {
   status: boolean;
   message: string;
   data: DepartmentItem | undefined;
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface DeleteDepartmentResponse {

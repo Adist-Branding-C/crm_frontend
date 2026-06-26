@@ -21,7 +21,17 @@ export function useDesignationActions({ designation, drawer }: UseDesignationAct
     helpers: FormikHelpers<DesignationFormData>,
   ) => {
     if (!drawer.editingItem) return;
-    const success = await designation.handleUpdateDesignation(drawer.editingItem.id, values, helpers);
+    const item = drawer.editingItem;
+    const original: DesignationFormData = {
+      designationName: item.designationName || item.name || '',
+      description: item.description || '',
+      status: item.status || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await designation.handleUpdateDesignation(item.id, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }
@@ -36,8 +46,10 @@ export function useDesignationActions({ designation, drawer }: UseDesignationAct
     const success = await designation.handleDeleteDesignation(deletingItem.id);
     if (success) {
       setDeletingItem(null);
+    } else if (designation.dependencyError) {
+      setDeletingItem(null);
     }
-  }, [deletingItem, designation.handleDeleteDesignation]);
+  }, [deletingItem, designation.handleDeleteDesignation, designation.dependencyError]);
 
   const closeDeleteModal = useCallback(() => {
     setDeletingItem(null);

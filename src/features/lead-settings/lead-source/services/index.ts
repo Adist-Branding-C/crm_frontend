@@ -20,7 +20,7 @@ class LeadSourceService {
   }
 
   async getLeadSources(page = 1, limit = 10, search?: string): Promise<LeadSourceListResponse> {
-    const params: Record<string, string | number> = { page, limit };
+    const params: Record<string, string | number> = { pageNumber: page, limit };
     if (search) params.search = search;
     const response = await axiosInstance.get<LeadSourceListResponse>(LEAD_SOURCE_API_ENDPOINTS.SOURCES, { params });
     return {

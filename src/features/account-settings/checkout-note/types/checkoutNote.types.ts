@@ -43,6 +43,8 @@ export interface CheckoutNoteResponse {
   status: boolean
   message: string
   data: CheckoutNoteResponseData | undefined
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface DeleteCheckoutNoteResponse {
