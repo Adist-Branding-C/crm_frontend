@@ -27,7 +27,7 @@ export function useDepartmentDrawer() {
           description: editingItem.description || '',
           status: editingItem.status || '',
         }
-      : { departmentName: '', description: undefined, status: '' },
+      : { departmentName: '', description: '', status: '' },
     [editingItem]
   );
 

@@ -21,7 +21,17 @@ export function useCheckoutNoteActions({ checkoutNote, drawer }: UseCheckoutNote
     helpers: FormikHelpers<CheckoutNoteFormData>,
   ) => {
     if (!drawer.editingItem) return;
-    const success = await checkoutNote.handleUpdateCheckoutNote(drawer.editingItem.id, values, helpers);
+    const item = drawer.editingItem;
+    const original: CheckoutNoteFormData = {
+      title: item.title || '',
+      note: item.note || '',
+      status: item.status || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await checkoutNote.handleUpdateCheckoutNote(item.id, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }

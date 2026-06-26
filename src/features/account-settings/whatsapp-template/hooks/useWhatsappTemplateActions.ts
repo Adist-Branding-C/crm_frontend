@@ -21,7 +21,17 @@ export function useWhatsappTemplateActions({ whatsappTemplate, drawer }: UseWhat
     helpers: FormikHelpers<WhatsappTemplateFormData>,
   ) => {
     if (!drawer.editingItem) return;
-    const success = await whatsappTemplate.handleUpdateWhatsappTemplate(drawer.editingItem.id, values, helpers);
+    const item = drawer.editingItem;
+    const original: WhatsappTemplateFormData = {
+      templateName: item.templateName || item.name || '',
+      message: item.message || item.content || '',
+      status: item.status || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await whatsappTemplate.handleUpdateWhatsappTemplate(item.id, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }

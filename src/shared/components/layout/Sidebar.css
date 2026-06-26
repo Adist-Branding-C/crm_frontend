@@ -86,13 +86,19 @@
   .sidebar {
     width: 60px;
   }
-  
+
   .nav-item {
     padding: 0.5rem 0;
   }
-  
+
   .nav-icon {
     width: 18px;
     height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 50px;
   }
 }

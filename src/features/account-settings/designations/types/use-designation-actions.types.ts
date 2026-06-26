@@ -6,6 +6,8 @@ export interface UseDesignationActionsParams {
     handleAddDesignation: (values: DesignationFormData, helpers: FormikHelpers<DesignationFormData>) => Promise<boolean>;
     handleUpdateDesignation: (id: number, values: DesignationFormData, helpers: FormikHelpers<DesignationFormData>) => Promise<boolean>;
     handleDeleteDesignation: (id: number) => Promise<boolean>;
+    dependencyError: boolean;
+    clearDependencyError: () => void;
   };
   drawer: {
     editingItem: DesignationItem | null;

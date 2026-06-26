@@ -1,3 +1,4 @@
+import { Check, X } from 'lucide-react';
 import { useEmailTemplatePage } from '../hooks';
 import AddEmailTemplateDrawer from '../components/AddEmailTemplateDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -34,7 +35,16 @@ const EmailTemplatePage = () => {
   const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
 
   const columns: Column<EmailTemplateItem>[] = [
-    { key: 'templateName', label: 'Template Name', render: (item) => item.templateName || item.title || '-' },
+    { key: 'title', label: 'Template Name', render: (item) => item.title || item.templateName || '-' },
+    { key: 'subject', label: 'Subject', render: (item) => item.subject || '-' },
+    {
+      key: 'htmlContent',
+      label: 'Content',
+      render: (item) => {
+        const content = item.htmlContent || item.content || '';
+        return content.length > 50 ? content.substring(0, 50) + '...' : content || '-';
+      },
+    },
     { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
   ];
 
@@ -78,6 +88,12 @@ const EmailTemplatePage = () => {
           onConfirm={handleConfirmDelete}
           onClose={handleCloseDeleteModal}
         />
+        {emailTemplate.showToast && (
+          <div className={`toast-notification toast-${emailTemplate.toastType}`} onClick={() => emailTemplate.setShowToast(false)}>
+            {emailTemplate.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+            <span>{emailTemplate.toastMessage}</span>
+          </div>
+        )}
       </div>
     </div>
   );

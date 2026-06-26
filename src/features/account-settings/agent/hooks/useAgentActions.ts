@@ -21,7 +21,21 @@ export function useAgentActions({ agent, drawer }: UseAgentActionsParams) {
     helpers: FormikHelpers<AgentFormData>,
   ) => {
     if (!drawer.editingItem || !drawer.editingItem.staff_id) return;
-    const success = await agent.handleUpdateAgent(drawer.editingItem.staff_id, values, helpers);
+    const item = drawer.editingItem;
+    const original: AgentFormData = {
+      fullName: item.fullName || item.name || '',
+      email: item.email || '',
+      phone: item.phone || item.phone_number || item.phoneNumber || item.mobile || '',
+      password: '',
+      confirmPassword: '',
+      designationId: item.designationId || String(item.designation_id ?? item.designation ?? ''),
+      status: item.status || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await agent.handleUpdateAgent(item.staff_id, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }

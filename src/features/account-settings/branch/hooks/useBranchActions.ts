@@ -21,7 +21,17 @@ export function useBranchActions({ branch, drawer }: UseBranchActionsParams) {
     helpers: FormikHelpers<BranchFormData>,
   ) => {
     if (!drawer.editingItem) return;
-    const success = await branch.handleUpdateBranch(drawer.editingItem.id, values, helpers);
+    const item = drawer.editingItem;
+    const original: BranchFormData = {
+      name: item.name || item.branchName || '',
+      description: item.description || '',
+      status: item.status || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await branch.handleUpdateBranch(item.id, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }

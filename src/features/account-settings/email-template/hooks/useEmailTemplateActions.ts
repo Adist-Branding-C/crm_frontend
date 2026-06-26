@@ -21,7 +21,18 @@ export function useEmailTemplateActions({ emailTemplate, drawer }: UseEmailTempl
     helpers: FormikHelpers<EmailTemplateFormData>,
   ) => {
     if (!drawer.editingItem) return;
-    const success = await emailTemplate.handleUpdateEmailTemplate(drawer.editingItem.id, values, helpers);
+    const item = drawer.editingItem;
+    const original: EmailTemplateFormData = {
+      templateName: item.templateName || item.title || '',
+      subject: item.subject || '',
+      content: item.content || item.htmlContent || item.htmlCode || '',
+      status: item.status || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await emailTemplate.handleUpdateEmailTemplate(item.id, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }

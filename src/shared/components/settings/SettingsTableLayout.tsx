@@ -38,13 +38,16 @@ function SettingsTableLayoutInner<T extends { id: number | string }>(props: Sett
   };
 
   return (
-    <>
+    <div className="table-container">
       <AdminToolbar
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
         onAdd={onAdd}
         addLabel={addLabel}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={onRowsPerPageChange}
       />
+
       <AdminTable
         data={data}
         columns={columns}
@@ -54,6 +57,7 @@ function SettingsTableLayoutInner<T extends { id: number | string }>(props: Sett
         onEdit={onEdit}
         onDelete={onDelete}
       />
+
       <AdminPagination
         currentPage={currentPage}
         totalPages={totalPages}
@@ -65,7 +69,7 @@ function SettingsTableLayoutInner<T extends { id: number | string }>(props: Sett
         showRowsSelector={false}
         prevNextOnly={false}
       />
-    </>
+    </div>
   );
 }
 

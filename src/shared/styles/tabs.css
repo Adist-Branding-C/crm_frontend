@@ -77,3 +77,39 @@
   padding: 0.5rem 0;
   border-bottom: none;
 }
+
+@media (max-width: 768px) {
+  .settings-tabs {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .settings-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-tab {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.75rem;
+    min-height: 44px;
+  }
+
+  .settings-tab span {
+    padding-left: 6px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-tab {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+
+  .settings-tab span {
+    display: none;
+  }
+
+  .settings-tabs-container {
+    padding: 0 1rem;
+  }
+}

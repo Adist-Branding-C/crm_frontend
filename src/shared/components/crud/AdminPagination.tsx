@@ -7,49 +7,54 @@ import type { AdminPaginationProps } from '../../types/crud';
 const AdminPagination: React.FC<AdminPaginationProps> = React.memo(({
   currentPage, totalPages, startIndex, rowsPerPage, totalItems,
   onPageChange, onRowsPerPageChange, showRowsSelector, prevNextOnly,
-}) => (
-  <div className="table-footer">
-    {!prevNextOnly && (
-      <div className="entries-select">
-        <label>
-          {LABEL_SHOW}
-          <select value={rowsPerPage} onChange={onRowsPerPageChange}>
-            {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
-          </select>
-          {LABEL_ENTRIES}
-        </label>
-      </div>
-    )}
-    <div className="table-info">
-      {LABEL_SHOWING} {Math.min(startIndex + 1, totalItems)} {LABEL_TO} {Math.min(startIndex + rowsPerPage, totalItems)} {LABEL_OF} {totalItems} {LABEL_ENTRIES}
-    </div>
-    <div className="table-controls">
-      {totalPages > 1 && (
-        <div className="pagination-controls" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-          {!prevNextOnly && (
-            <>
-              <button className="pagination-btn" disabled={currentPage === 1} onClick={() => onPageChange(1)}>{LABEL_FIRST}</button>
-              <button className="pagination-btn" disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}><ChevronLeft size={16} /></button>
-            </>
-          )}
-          {prevNextOnly && (
-            <button className="pagination-btn" disabled={currentPage === 1} onClick={() => onPageChange(currentPage - 1)}>{LABEL_PREVIOUS}</button>
-          )}
-          <span className="page-indicator">{LABEL_PAGE} {currentPage} {LABEL_OF} {totalPages}</span>
-          {!prevNextOnly && (
-            <>
-              <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => onPageChange(currentPage + 1)}><ChevronRight size={16} /></button>
-              <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => onPageChange(totalPages)}>{LABEL_LAST}</button>
-            </>
-          )}
-          {prevNextOnly && (
-            <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => onPageChange(currentPage + 1)}>{LABEL_NEXT}</button>
-          )}
+}) => {
+  const safeTotalPages = Math.max(1, Number(totalPages) || 1);
+  const safeCurrentPage = Math.max(1, Number(currentPage) || 1);
+
+  return (
+    <div className="table-footer">
+      {!prevNextOnly && showRowsSelector && (
+        <div className="entries-select">
+          <label>
+            {LABEL_SHOW}
+            <select value={rowsPerPage} onChange={onRowsPerPageChange}>
+              {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            {LABEL_ENTRIES}
+          </label>
         </div>
       )}
+      <div className="table-info">
+        {LABEL_SHOWING} {Math.min(startIndex + 1, totalItems)} {LABEL_TO} {Math.min(startIndex + rowsPerPage, totalItems)} {LABEL_OF} {totalItems} {LABEL_ENTRIES}
+      </div>
+      <div className="table-controls">
+        {safeTotalPages > 1 && (
+          <div className="pagination-controls" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+            {!prevNextOnly && (
+              <>
+                <button className="pagination-btn" disabled={safeCurrentPage === 1} onClick={() => onPageChange(1)}>{LABEL_FIRST}</button>
+                <button className="pagination-btn" disabled={safeCurrentPage === 1} onClick={() => onPageChange(safeCurrentPage - 1)}><ChevronLeft size={16} /></button>
+              </>
+            )}
+            {prevNextOnly && (
+              <button className="pagination-btn" disabled={safeCurrentPage === 1} onClick={() => onPageChange(safeCurrentPage - 1)}>{LABEL_PREVIOUS}</button>
+            )}
+            <span className="page-indicator">{LABEL_PAGE} {safeCurrentPage} {LABEL_OF} {safeTotalPages}</span>
+            {!prevNextOnly && (
+              <>
+                <button className="pagination-btn" disabled={safeCurrentPage === safeTotalPages} onClick={() => onPageChange(safeCurrentPage + 1)}><ChevronRight size={16} /></button>
+                <button className="pagination-btn" disabled={safeCurrentPage === safeTotalPages} onClick={() => onPageChange(safeTotalPages)}>{LABEL_LAST}</button>
+              </>
+            )}
+            {prevNextOnly && (
+              <button className="pagination-btn" disabled={safeCurrentPage === safeTotalPages} onClick={() => onPageChange(safeCurrentPage + 1)}>{LABEL_NEXT}</button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-));
+  );
+});
 
 AdminPagination.displayName = 'AdminPagination';
 export default AdminPagination;
