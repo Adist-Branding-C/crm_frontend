@@ -6,6 +6,8 @@ export interface UseDepartmentActionsParams {
     handleAddDepartment: (values: DepartmentFormData, helpers: FormikHelpers<DepartmentFormData>) => Promise<boolean>;
     handleUpdateDepartment: (id: number, values: DepartmentFormData, helpers: FormikHelpers<DepartmentFormData>) => Promise<boolean>;
     handleDeleteDepartment: (id: number) => Promise<boolean>;
+    dependencyError: boolean;
+    clearDependencyError: () => void;
   };
   drawer: {
     editingItem: DepartmentItem | null;

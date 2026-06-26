@@ -73,3 +73,9 @@
     width: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .settings-content {
+    padding: 1rem;
+  }
+}

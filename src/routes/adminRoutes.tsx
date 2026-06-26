@@ -10,7 +10,7 @@ import BranchPage from '../features/account-settings/branch/pages/BranchPage';
 import MailConfigPage from '../features/mail-config/pages/MailConfigPage';
 import EmailTemplatePage from '../features/account-settings/email-template/pages/EmailTemplatePage';
 import ProfilePage from '../features/profile/pages/ProfilePage';
-import PasswordPage from '../features/password/pages/PasswordPage';
+import PasswordPage from '../features/account-settings/password/pages/PasswordPage';
 import WhatsAppTemplatePage from '../features/account-settings/whatsapp-template/pages/WhatsappTemplatePage';
 
 export default (

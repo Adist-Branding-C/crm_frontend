@@ -4,6 +4,5 @@ export const ADD_EMAIL_TEMPLATE_INITIAL_VALUES: EmailTemplateFormData = {
   templateName: '',
   subject: '',
   content: '',
-  isDefault: false,
   status: '',
 };

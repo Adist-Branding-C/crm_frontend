@@ -1,3 +1,4 @@
+import { Check, X } from 'lucide-react';
 import { useDepartmentPage } from '../hooks';
 import AddDepartmentDrawer from '../components/AddDepartmentDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -73,12 +74,40 @@ const DepartmentPage = () => {
           error={department.error}
           isEditing={!!editingItem}
         />
-        <AdminDeleteModal
-          isOpen={!!deletingItem}
-          itemName={deletingItem?.departmentName || deletingItem?.name || ''}
-          onConfirm={handleConfirmDelete}
-          onClose={handleCloseDeleteModal}
-        />
+        {!!deletingItem && !department.dependencyError && (
+          <AdminDeleteModal
+            isOpen={!!deletingItem}
+            itemName={deletingItem?.departmentName || deletingItem?.name || ''}
+            onConfirm={handleConfirmDelete}
+            onClose={handleCloseDeleteModal}
+          />
+        )}
+        {department.dependencyError && (
+          <div className="modal-overlay" onClick={department.clearDependencyError}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+              <div className="modal-header">
+                <h5>Cannot Delete Department</h5>
+                <button className="modal-close" onClick={department.clearDependencyError}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal-body">
+                <p className="delete-warning">
+                  This department is currently assigned to one or more staff members. Please reassign or remove those staff members before deleting this department.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-primary" onClick={department.clearDependencyError}>OK</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {department.showToast && (
+          <div className={`toast-notification toast-${department.toastType}`} onClick={() => department.setShowToast(false)}>
+            {department.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+            <span>{department.toastMessage}</span>
+          </div>
+        )}
       </div>
     </div>
   );
