@@ -6,8 +6,6 @@ export function useCallReasonForm() {
   const [showAddDrawer, setShowAddDrawer] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [editingItem, setEditingItem] = useState<CallReasonItem | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
   const [deletingItem, setDeletingItem] = useState<CallReasonItem | null>(null);
 
@@ -54,10 +52,6 @@ export function useCallReasonForm() {
     showAddDrawer,
     showEditDrawer,
     editingItem,
-    searchQuery,
-    setSearchQuery,
-    rowsPerPage,
-    setRowsPerPage,
     dropdownOpen,
     toggleDropdown,
     deletingItem,

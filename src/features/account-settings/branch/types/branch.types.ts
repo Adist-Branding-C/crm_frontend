@@ -42,6 +42,8 @@ export interface BranchResponse {
   status: boolean
   message: string
   data: BranchResponseData | undefined
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface DeleteBranchResponse {

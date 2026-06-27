@@ -21,7 +21,17 @@ export function useDepartmentActions({ department, drawer }: UseDepartmentAction
     helpers: FormikHelpers<DepartmentFormData>,
   ) => {
     if (!drawer.editingItem) return;
-    const success = await department.handleUpdateDepartment(drawer.editingItem.id, values, helpers);
+    const item = drawer.editingItem;
+    const original: DepartmentFormData = {
+      departmentName: item.departmentName || item.name || '',
+      description: item.description || '',
+      status: item.status || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await department.handleUpdateDepartment(item.id, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }
@@ -36,8 +46,14 @@ export function useDepartmentActions({ department, drawer }: UseDepartmentAction
     const success = await department.handleDeleteDepartment(deletingItem.id);
     if (success) {
       setDeletingItem(null);
+    } else if (department.dependencyError) {
+      setDeletingItem(null);
     }
-  }, [deletingItem, department.handleDeleteDepartment]);
+  }, [deletingItem, department.handleDeleteDepartment, department.dependencyError]);
+
+  const handleCloseDependencyError = useCallback(() => {
+    department.clearDependencyError();
+  }, [department.clearDependencyError]);
 
   const closeDeleteModal = useCallback(() => {
     setDeletingItem(null);
@@ -50,5 +66,6 @@ export function useDepartmentActions({ department, drawer }: UseDepartmentAction
     handleDeleteClick,
     handleConfirmDelete,
     closeDeleteModal,
+    handleCloseDependencyError,
   };
 }

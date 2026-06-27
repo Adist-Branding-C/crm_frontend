@@ -7,5 +7,5 @@ export const CALL_REASON_API_ENDPOINTS = {
 
 export const ADD_CALL_REASON_INITIAL_VALUES = {
   name: '',
-  status: 'Active',
+  status: '',
 };

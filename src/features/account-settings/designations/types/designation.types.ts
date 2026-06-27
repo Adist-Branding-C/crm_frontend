@@ -23,6 +23,8 @@ export interface DesignationResponse {
   status: boolean;
   message: string;
   data?: unknown;
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface DeleteDesignationResponse {

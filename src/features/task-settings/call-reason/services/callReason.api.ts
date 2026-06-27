@@ -16,20 +16,39 @@ export async function fetchCallReasonsApi(params: Record<string, string | number
     : CALL_REASON_API_ENDPOINTS.GET_ALL;
 
   const response = await axiosInstance.get<CallReasonResponse>(url);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+  };
 }
 
 export async function createCallReasonApi(data: { name: string; status: string }): Promise<CallReasonResponse> {
   const response = await axiosInstance.post<CallReasonResponse>(CALL_REASON_API_ENDPOINTS.CREATE, data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
 export async function updateCallReasonApi(id: number, data: { name: string; status: string }): Promise<CallReasonResponse> {
   const response = await axiosInstance.patch<CallReasonResponse>(CALL_REASON_API_ENDPOINTS.UPDATE(id), data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
-export async function deleteCallReasonApi(id: number): Promise<CallReasonResponse> {
+export async function deleteCallReasonApi(id: number): Promise<Pick<CallReasonResponse, 'status' | 'message'>> {
   const response = await axiosInstance.delete<CallReasonResponse>(CALL_REASON_API_ENDPOINTS.DELETE(id));
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+  };
 }

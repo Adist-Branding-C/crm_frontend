@@ -27,7 +27,11 @@ export interface AdminToolbarProps {
   onAdd: () => void;
   addLabel: string;
   showAddButton?: boolean;
+  rowsPerPage: number;
+onRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
+
+
 
 export interface AdminPaginationProps {
   currentPage: number;

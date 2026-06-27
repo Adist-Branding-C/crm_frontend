@@ -1,3 +1,4 @@
+import { Check, X } from 'lucide-react';
 import { useBranchPage } from '../hooks';
 import AddBranchDrawer from '../components/AddBranchDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -79,6 +80,12 @@ const BranchPage = () => {
           onConfirm={handleConfirmDelete}
           onClose={handleCloseDeleteModal}
         />
+        {branch.showToast && (
+          <div className={`toast-notification toast-${branch.toastType}`} onClick={() => branch.setShowToast(false)}>
+            {branch.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+            <span>{branch.toastMessage}</span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -31,6 +31,7 @@ export function useTableData<T>({ fetchFn, initialPage = 1, initialLimit = DEFAU
   const fetchRef = useRef(0);
   const fetchFnRef = useRef(fetchFn);
   fetchFnRef.current = fetchFn;
+  const lastFetchedKey = useRef('');
 
   const fetchData = useCallback(async (page: number, limitVal: number, search: string) => {
     const fetchId = ++fetchRef.current;
@@ -60,6 +61,9 @@ export function useTableData<T>({ fetchFn, initialPage = 1, initialLimit = DEFAU
   }, []);
 
   useEffect(() => {
+    const key = JSON.stringify([pageNumber, limit, searchQuery]);
+    if (lastFetchedKey.current === key) return;
+    lastFetchedKey.current = key;
     fetchData(pageNumber, limit, searchQuery);
   }, [pageNumber, limit, searchQuery]);
 

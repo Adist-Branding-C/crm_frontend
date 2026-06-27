@@ -16,20 +16,39 @@ export async function fetchMeetingOutcomesApi(params: Record<string, string | nu
     : MEETING_OUTCOME_API_ENDPOINTS.GET_ALL;
 
   const response = await axiosInstance.get<MeetingOutcomeResponse>(url);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+  };
 }
 
 export async function createMeetingOutcomeApi(data: { name: string; status: string }): Promise<MeetingOutcomeResponse> {
   const response = await axiosInstance.post<MeetingOutcomeResponse>(MEETING_OUTCOME_API_ENDPOINTS.CREATE, data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
 export async function updateMeetingOutcomeApi(id: number, data: { name: string; status: string }): Promise<MeetingOutcomeResponse> {
   const response = await axiosInstance.patch<MeetingOutcomeResponse>(MEETING_OUTCOME_API_ENDPOINTS.UPDATE(id), data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
-export async function deleteMeetingOutcomeApi(id: number): Promise<MeetingOutcomeResponse> {
+export async function deleteMeetingOutcomeApi(id: number): Promise<Pick<MeetingOutcomeResponse, 'status' | 'message'>> {
   const response = await axiosInstance.delete<MeetingOutcomeResponse>(MEETING_OUTCOME_API_ENDPOINTS.DELETE(id));
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+  };
 }

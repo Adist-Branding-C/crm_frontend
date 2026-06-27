@@ -16,20 +16,39 @@ export async function fetchCallStatusesApi(params: Record<string, string | numbe
     : CALL_STATUS_API_ENDPOINTS.GET_ALL;
 
   const response = await axiosInstance.get<CallStatusResponse>(url);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+  };
 }
 
 export async function createCallStatusApi(data: { name: string; status: string }): Promise<CallStatusResponse> {
   const response = await axiosInstance.post<CallStatusResponse>(CALL_STATUS_API_ENDPOINTS.CREATE, data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
 export async function updateCallStatusApi(id: number, data: { name: string; status: string }): Promise<CallStatusResponse> {
   const response = await axiosInstance.patch<CallStatusResponse>(CALL_STATUS_API_ENDPOINTS.UPDATE(id), data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
-export async function deleteCallStatusApi(id: number): Promise<CallStatusResponse> {
+export async function deleteCallStatusApi(id: number): Promise<Pick<CallStatusResponse, 'status' | 'message'>> {
   const response = await axiosInstance.delete<CallStatusResponse>(CALL_STATUS_API_ENDPOINTS.DELETE(id));
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+  };
 }

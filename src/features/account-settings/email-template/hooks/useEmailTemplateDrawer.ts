@@ -25,11 +25,10 @@ export function useEmailTemplateDrawer() {
       ? {
           templateName: editingItem.templateName || editingItem.title || '',
           subject: editingItem.subject || '',
-          content: editingItem.content || editingItem.htmlCode || '',
-          isDefault: editingItem.isDefault ?? false,
+          content: editingItem.content || editingItem.htmlCode || editingItem.htmlContent || '',
           status: editingItem.status || '',
         }
-      : { templateName: '', subject: '', content: '', isDefault: false, status: '' },
+      : { templateName: '', subject: '', content: '', status: '' },
     [editingItem]
   );
 

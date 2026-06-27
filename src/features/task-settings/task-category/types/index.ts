@@ -1,3 +1,4 @@
+import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
 
 export interface TaskCategoryItem {
@@ -15,6 +16,8 @@ export interface TaskCategoryResponse {
   status: boolean;
   message: string;
   data?: unknown;
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface TaskCategoryTableProps {
@@ -24,10 +27,14 @@ export interface TaskCategoryTableProps {
   rowsPerPage: number;
   onRowsPerPageChange: (value: number) => void;
   totalRecords: number;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
   dropdownOpen: number | null;
   onToggleDropdown: (id: number | null) => void;
   onEdit: (item: TaskCategoryItem) => void;
   onDelete: (item: TaskCategoryItem) => void;
+  onAdd?: () => void;
 }
 
 export interface TaskCategoryActionsProps {
@@ -43,9 +50,10 @@ export interface AddTaskCategoryDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: TaskCategoryFormData;
-  onSubmit: (values: TaskCategoryFormData) => Promise<void>;
+  onSubmit: (values: TaskCategoryFormData, helpers: FormikHelpers<TaskCategoryFormData>) => Promise<void>;
   isLoading: boolean;
   error: string;
+  isEditing?: boolean;
 }
 
 export interface EditTaskCategoryDrawerProps {
@@ -53,10 +61,11 @@ export interface EditTaskCategoryDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: TaskCategoryFormData;
-  onSubmit: (values: TaskCategoryFormData) => Promise<void>;
+  onSubmit: (values: TaskCategoryFormData, helpers: FormikHelpers<TaskCategoryFormData>) => Promise<void>;
   isLoading: boolean;
   error: string;
   editingItem: TaskCategoryItem | null;
+  isEditing?: boolean;
 }
 
 export interface DeleteTaskCategoryDialogProps {

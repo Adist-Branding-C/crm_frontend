@@ -1,3 +1,4 @@
+import { Check, X } from 'lucide-react';
 import { useDesignationPage } from '../hooks';
 import AddDesignationDrawer from '../components/AddDesignationDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -73,12 +74,40 @@ const DesignationPage = () => {
           error={designation.error}
           isEditing={!!editingItem}
         />
-        <AdminDeleteModal
-          isOpen={!!deletingItem}
-          itemName={deletingItem?.designationName || deletingItem?.name || ''}
-          onConfirm={handleConfirmDelete}
-          onClose={handleCloseDeleteModal}
-        />
+        {!!deletingItem && !designation.dependencyError && (
+          <AdminDeleteModal
+            isOpen={!!deletingItem}
+            itemName={deletingItem?.designationName || deletingItem?.name || ''}
+            onConfirm={handleConfirmDelete}
+            onClose={handleCloseDeleteModal}
+          />
+        )}
+        {designation.dependencyError && (
+          <div className="modal-overlay" onClick={designation.clearDependencyError}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+              <div className="modal-header">
+                <h5>Cannot Delete Designation</h5>
+                <button className="modal-close" onClick={designation.clearDependencyError}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="modal-body">
+                <p className="delete-warning">
+                  This designation is currently assigned to one or more staff members. Please reassign or remove those staff members before deleting this designation.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-primary" onClick={designation.clearDependencyError}>OK</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {designation.showToast && (
+          <div className={`toast-notification toast-${designation.toastType}`} onClick={() => designation.setShowToast(false)}>
+            {designation.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+            <span>{designation.toastMessage}</span>
+          </div>
+        )}
       </div>
     </div>
   );

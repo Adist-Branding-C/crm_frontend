@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { whatsappTemplateService } from '../services/whatsappTemplate.service';
@@ -6,7 +6,22 @@ import { addWhatsappTemplateValidationSchema, editWhatsappTemplateValidationSche
 import { ADD_WHATSAPP_TEMPLATE_INITIAL_VALUES } from '../constants/whatsappTemplate.constants';
 import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types/whatsapp-template.types';
 
+const FIELD_MAP: Record<string, string> = {
+  template_name: 'templateName',
+};
+
 export function useWhatsappTemplate() {
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [showToast, setShowToast] = useState(false);
+
+  const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3500);
+  }, []);
+
   const pagination = useTableData<WhatsappTemplateItem>({
     fetchFn: async (params) => {
       const response = await whatsappTemplateService.getAllWhatsappTemplates(params as unknown as Record<string, string | number | undefined>);
@@ -26,16 +41,65 @@ export function useWhatsappTemplate() {
     },
   });
 
+  const applyFieldErrors = useCallback((
+    errors: Record<string, string[]> | undefined,
+    message: string | undefined,
+    field: string | undefined,
+    setFieldError: (field: string, msg: string) => void,
+  ): string | null => {
+    if (field && message) {
+      const mapped = FIELD_MAP[field] || field;
+      setFieldError(mapped, message);
+      return mapped;
+    }
+    if (errors && typeof errors === 'object') {
+      let firstField: string | null = null;
+      Object.entries(errors).forEach(([f, msgs]) => {
+        const mapped = FIELD_MAP[f] || f;
+        if (msgs?.length && !firstField) firstField = mapped;
+        if (msgs?.length) setFieldError(mapped, msgs[0]);
+      });
+      return firstField;
+    }
+    if (message) {
+      const lower = message.toLowerCase();
+      if (lower.includes('name')) { setFieldError('templateName', message); return 'templateName'; }
+      if (lower.includes('message')) { setFieldError('message', message); return 'message'; }
+    }
+    return null;
+  }, []);
+
+  const scrollAndFocusError = useCallback((fieldName: string) => {
+    setTimeout(() => {
+      const drawerBody = document.querySelector('.drawer-body');
+      if (!drawerBody) return;
+      const errorEl = drawerBody.querySelector('.input-error');
+      if (errorEl) {
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (errorEl as HTMLElement).focus();
+      }
+    }, 0);
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    setTimeout(() => {
+      const drawerBody = document.querySelector('.drawer-body');
+      if (drawerBody) {
+        drawerBody.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 0);
+  }, []);
+
   const handleAddWhatsappTemplate = useCallback(async (
     values: WhatsappTemplateFormData,
-    { setSubmitting, resetForm }: FormikHelpers<WhatsappTemplateFormData>,
+    { setSubmitting, resetForm, setFieldError }: FormikHelpers<WhatsappTemplateFormData>,
   ) => {
     pagination.setError('');
     pagination.setIsLoading(true);
 
     try {
       const { templateName, message, status } = values;
-      const requestData: WhatsappTemplateFormData = { templateName, message, status };
+      const requestData: WhatsappTemplateFormData = { templateName: templateName.trim(), message: message.trim(), status };
       const response = await whatsappTemplateService.createWhatsappTemplate(requestData);
 
       if (response.status) {
@@ -43,19 +107,38 @@ export function useWhatsappTemplate() {
         pagination.setSearchQuery('');
         pagination.refresh();
         resetForm();
+        showToastMessage('WhatsApp template added successfully', 'success');
         return true;
+      }
+
+      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      if (errorField) {
+        scrollAndFocusError(errorField);
       } else {
         pagination.setError(response.message || 'Failed to add WhatsApp template');
-        return false;
+        scrollToTop();
       }
+      return false;
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        pagination.setError(axiosErr.response?.data?.message || 'Failed to add WhatsApp template');
+        const axiosErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string; field?: string } } };
+        const serverErrors = axiosErr.response?.data?.errors;
+        const serverField = axiosErr.response?.data?.field;
+        const serverMessage = axiosErr.response?.data?.message;
+        if (serverErrors || (serverField && serverMessage)) {
+          const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
+          if (errorField) scrollAndFocusError(errorField);
+          else { pagination.setError(serverMessage || 'Failed to add WhatsApp template'); scrollToTop(); }
+        } else {
+          pagination.setError(serverMessage || 'Failed to add WhatsApp template');
+          scrollToTop();
+        }
       } else if (err && typeof err === 'object' && 'message' in err) {
         pagination.setError((err as { message: string }).message);
+        scrollToTop();
       } else {
         pagination.setError('Network error. Please try again.');
+        scrollToTop();
       }
       return false;
     } finally {
@@ -67,31 +150,50 @@ export function useWhatsappTemplate() {
   const handleUpdateWhatsappTemplate = useCallback(async (
     id: number,
     values: WhatsappTemplateFormData,
-    { setSubmitting }: FormikHelpers<WhatsappTemplateFormData>,
+    { setSubmitting, setFieldError }: FormikHelpers<WhatsappTemplateFormData>,
   ) => {
     pagination.setError('');
     pagination.setIsLoading(true);
 
     try {
       const { templateName, message, status } = values;
-      const requestData: WhatsappTemplateFormData = { templateName, message, status };
+      const requestData: WhatsappTemplateFormData = { templateName: templateName.trim(), message: message.trim(), status };
       const response = await whatsappTemplateService.updateWhatsappTemplate(id, requestData);
 
       if (response.status) {
         pagination.refresh();
+        showToastMessage('WhatsApp template updated successfully', 'success');
         return true;
+      }
+
+      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      if (errorField) {
+        scrollAndFocusError(errorField);
       } else {
         pagination.setError(response.message || 'Failed to update WhatsApp template');
-        return false;
+        scrollToTop();
       }
+      return false;
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        pagination.setError(axiosErr.response?.data?.message || 'Failed to update WhatsApp template');
+        const axiosErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string; field?: string } } };
+        const serverErrors = axiosErr.response?.data?.errors;
+        const serverField = axiosErr.response?.data?.field;
+        const serverMessage = axiosErr.response?.data?.message;
+        if (serverErrors || (serverField && serverMessage)) {
+          const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
+          if (errorField) scrollAndFocusError(errorField);
+          else { pagination.setError(serverMessage || 'Failed to update WhatsApp template'); scrollToTop(); }
+        } else {
+          pagination.setError(serverMessage || 'Failed to update WhatsApp template');
+          scrollToTop();
+        }
       } else if (err && typeof err === 'object' && 'message' in err) {
         pagination.setError((err as { message: string }).message);
+        scrollToTop();
       } else {
         pagination.setError('Network error. Please try again.');
+        scrollToTop();
       }
       return false;
     } finally {
@@ -108,6 +210,7 @@ export function useWhatsappTemplate() {
 
       if (response.status) {
         pagination.refresh();
+        showToastMessage('WhatsApp template deleted successfully', 'success');
         return true;
       } else {
         pagination.setError(response.message || 'Failed to delete WhatsApp template');
@@ -137,6 +240,10 @@ export function useWhatsappTemplate() {
     validationSchema: addWhatsappTemplateValidationSchema,
     editValidationSchema: editWhatsappTemplateValidationSchema,
     initialValues: ADD_WHATSAPP_TEMPLATE_INITIAL_VALUES,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
     pageNumber: pagination.pageNumber,
     setPageNumber: pagination.setPageNumber,
     limit: pagination.limit,
