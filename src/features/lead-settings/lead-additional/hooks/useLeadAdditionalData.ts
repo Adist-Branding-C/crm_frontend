@@ -52,7 +52,7 @@ export function useLeadAdditionalData() {
       const response = await leadAdditionalService.getAll(page, limit, search || undefined);
       setItems((response.data.items || []).map(mapApiToUI));
       setTotal(response.data.pagination?.total ?? 0);
-      setTotalPages(response.data.pagination?.totalPages ?? 1);
+      setTotalPages(response.data.pagination?.total_pages ?? 1);
     } catch (err: unknown) {
       setError(getErrorMessage(err, ERROR_MESSAGES.FETCH_ADDITIONAL_FIELDS));
     } finally {
@@ -60,12 +60,14 @@ export function useLeadAdditionalData() {
     }
   }, []);
 
+  const initalFetchDone = useRef(false);
+
   useEffect(() => {
+    if (initalFetchDone.current) return;
+    initalFetchDone.current = true;
     fetchData(1, rowsPerPage, '');
     fetchPurposes();
   }, []);
-
-  const isFirstSearch = useRef(true);
 
   const rowsPerPageRef = useRef(rowsPerPage);
 
@@ -73,11 +75,11 @@ export function useLeadAdditionalData() {
     rowsPerPageRef.current = rowsPerPage;
   }, [rowsPerPage]);
 
+  const prevSearchQuery = useRef(searchQuery);
+
   useEffect(() => {
-    if (isFirstSearch.current) {
-      isFirstSearch.current = false;
-      return;
-    }
+    if (searchQuery === prevSearchQuery.current) return;
+    prevSearchQuery.current = searchQuery;
     const timer = setTimeout(() => {
       setCurrentPage(1);
       fetchData(1, rowsPerPageRef.current, searchQuery);
@@ -93,6 +95,7 @@ export function useLeadAdditionalData() {
   const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = Number(e.target.value);
     setRowsPerPage(val);
+    setCurrentPage(1);
     fetchData(1, val, searchQuery);
   }, [searchQuery, fetchData]);
 
@@ -143,22 +146,28 @@ export function useLeadAdditionalData() {
     }
     const isDropdownOrCheckbox = formData.fieldType === FIELD_TYPES.DROPDOWN || formData.fieldType === FIELD_TYPES.CHECKBOX;
     if (editingItem) {
+      const payload: UpdateLeadAdditionalPayload = {};
+      if (formData.name !== editingItem.field) payload.name = formData.name;
+      if (formData.showInFilter !== editingItem.inFilter) payload.showInFilter = formData.showInFilter;
+      if (formData.showInList !== editingItem.inList) payload.showInList = formData.showInList;
+      if (formData.isRequired !== editingItem.required) payload.isRequired = formData.isRequired;
+      if (formData.connectWithLeadPurpose !== editingItem.purpose) payload.connectWithLeadPurpose = formData.connectWithLeadPurpose;
+      if (formData.purposeId !== (editingItem.purposeId || '')) payload.purposeId = formData.purposeId || null;
+      if (isDropdownOrCheckbox) {
+        payload.fieldType = formData.fieldType;
+        payload.values = formData.dropdownValues;
+      } else {
+        payload.values = [];
+      }
+      if (Object.keys(payload).length === 0) {
+        form.resetForm();
+        setShowForm(false);
+        setEditingItem(null);
+        return;
+      }
       setIsSaving(true);
       setError(null);
       try {
-        const payload: UpdateLeadAdditionalPayload = {};
-        if (formData.name !== editingItem.field) payload.name = formData.name;
-        if (formData.showInFilter !== editingItem.inFilter) payload.showInFilter = formData.showInFilter;
-        if (formData.showInList !== editingItem.inList) payload.showInList = formData.showInList;
-        if (formData.isRequired !== editingItem.required) payload.isRequired = formData.isRequired;
-        if (formData.connectWithLeadPurpose !== editingItem.purpose) payload.connectWithLeadPurpose = formData.connectWithLeadPurpose;
-        if (formData.purposeId !== (editingItem.purposeId || '')) payload.purposeId = formData.purposeId || null;
-        if (isDropdownOrCheckbox) {
-          payload.fieldType = formData.fieldType;
-          payload.values = formData.dropdownValues;
-        } else {
-          payload.values = [];
-        }
         await leadAdditionalService.update(editingItem.id, payload);
         form.resetForm();
         setShowForm(false);

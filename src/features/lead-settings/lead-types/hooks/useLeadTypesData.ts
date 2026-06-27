@@ -14,6 +14,8 @@ export function useLeadTypesData() {
   const [searchQuery, setSearchQuery] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
   const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPageRef = useRef(rowsPerPage);
+  useEffect(() => { rowsPerPageRef.current = rowsPerPage; }, [rowsPerPage]);
 
   const [items, setItems] = useState<LeadTypeItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -42,23 +44,25 @@ export function useLeadTypesData() {
     }
   }, []);
 
+  const initalFetchDone = useRef(false);
+
   useEffect(() => {
+    if (initalFetchDone.current) return;
+    initalFetchDone.current = true;
     fetchData(1, rowsPerPage, '');
   }, []);
 
-  const isFirstSearch = useRef(true);
+  const prevSearchQuery = useRef(searchQuery);
 
   useEffect(() => {
-    if (isFirstSearch.current) {
-      isFirstSearch.current = false;
-      return;
-    }
+    if (searchQuery === prevSearchQuery.current) return;
+    prevSearchQuery.current = searchQuery;
     const timer = setTimeout(() => {
       setCurrentPage(1);
-      fetchData(1, rowsPerPage, searchQuery);
+      fetchData(1, rowsPerPageRef.current, searchQuery);
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, fetchData]);
 
   const handleSetCurrentPage = useCallback((page: number) => {
     setCurrentPage(page);
@@ -68,6 +72,7 @@ export function useLeadTypesData() {
   const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = Number(e.target.value);
     setRowsPerPage(val);
+    setCurrentPage(1);
     fetchData(1, val, searchQuery);
   }, [searchQuery, fetchData]);
 
@@ -98,15 +103,21 @@ export function useLeadTypesData() {
 
   const handleSave = useCallback(async () => {
     if (editingItem) {
+      const payload: UpdateLeadTypePayload = {};
+      if (formData.type.trim() !== editingItem.type) payload.type = formData.type.trim();
+      if (Object.keys(payload).length === 0) {
+        setShowForm(false);
+        setEditingItem(null);
+        return;
+      }
       setIsSaving(true);
       setError(null);
       try {
-        const payload: UpdateLeadTypePayload = {};
-        if (formData.type !== editingItem.type) payload.type = formData.type;
-        await leadTypeService.updateLeadType(editingItem.id, payload);
+        const response = await leadTypeService.updateLeadType(editingItem.id, payload);
+        const updatedItem = mapApiToUI(response.data);
+        setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
         setShowForm(false);
         setEditingItem(null);
-        fetchData(currentPage, rowsPerPage, searchQuery);
       } catch (err: unknown) {
         setError(getErrorMessage(err, ERROR_MESSAGES.UPDATE_LEAD_TYPE));
       } finally {
@@ -117,7 +128,7 @@ export function useLeadTypesData() {
       setError(null);
       try {
         await leadTypeService.createLeadType({
-          type: formData.type,
+          type: formData.type.trim(),
         });
         setShowForm(false);
         setEditingItem(null);

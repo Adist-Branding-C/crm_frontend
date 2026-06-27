@@ -7,6 +7,7 @@ import AdminPagination from '../../../../shared/components/crud/AdminPagination'
 import AdminFormDrawer from '../../../../shared/components/crud/AdminFormDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
+import ValidationAlert from '../../../../shared/components/ValidationAlert';
 import './LeadStatusPage.css';
 import { formFields, columns } from '../constants';
 
@@ -20,10 +21,8 @@ const LeadStatusPage = () => {
       <div className="settings-content">
           <div className="table-container">
           <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Status" />
-          {d.error && (
-            <div className="alert alert-danger">
-              {d.error}
-            </div>
+          {d.error && !d.showForm && (
+            <ValidationAlert message={d.error} onClose={d.clearError} />
           )}
           {d.isLoading ? (
             <div className="table-loading">
@@ -38,7 +37,7 @@ const LeadStatusPage = () => {
               <AdminPagination currentPage={d.currentPage} totalPages={d.totalPages}
                 startIndex={d.startIndex} rowsPerPage={d.rowsPerPage} totalItems={d.totalItems}
                 onPageChange={d.setCurrentPage} onRowsPerPageChange={d.handleRowsPerPageChange}
-                prevNextOnly />
+                prevNextOnly showRowsSelector={true} />
             </>
           )}
           </div>

@@ -31,13 +31,13 @@ const LeadSourcePage = () => {
           <AdminPagination currentPage={d.currentPage} totalPages={d.totalPages}
             startIndex={d.startIndex} rowsPerPage={d.rowsPerPage} totalItems={d.totalItems}
             onPageChange={d.setCurrentPage} onRowsPerPageChange={d.handleRowsPerPageChange}
-            prevNextOnly />
+            prevNextOnly showRowsSelector={true} />
         </div>
       </div>
       <AdminFormDrawer isOpen={d.showForm} title="Lead Source" fields={formFields}
         formData={d.formData} onChange={d.setFormData} onSave={d.handleSave} onClose={d.handleCloseForm}
         isEditing={!!d.editingItem} error={d.error} onClearError={d.clearError} />
-      <AdminDeleteModal isOpen={!!d.deletingItem}
+      <AdminDeleteModal isOpen={!!d.deletingItem} itemName={d.deletingItem?.source} itemType="lead source"
         onConfirm={d.handleConfirmDelete} onClose={() => d.setDeletingItem(null)} />
     </div>
   );

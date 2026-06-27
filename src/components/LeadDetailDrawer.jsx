@@ -57,6 +57,22 @@ const modalFooterStyle = {
 };
 import './LeadDetailDrawer.css';
 import AddDealTaskDrawer from './AddDealTaskDrawer';
+import { useLeadActivities } from '../features/enquiries/hooks/useLeadActivities';
+
+function formatActivityDate(isoString) {
+  const d = new Date(isoString);
+  const datePart = d.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  const timePart = d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return datePart + ' at ' + timePart;
+}
 
 const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('activity');
@@ -144,6 +160,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
       });
     }
   }, [lead, isOpen]);
+
+  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError } = useLeadActivities(lead?.id, isOpen);
 
   if (!isVisible || !lead) return null;
 
@@ -418,52 +436,36 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                   <div className="leaddrawer-tab-header">
                     <h3 className="leaddrawer-tab-heading">Latest Activity</h3>
                   </div>
-                  <div className="leaddrawer-activity-list">
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">S</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">Sarah Khan</span>
-                          <span className="leaddrawer-activity-action">changed the status</span>
-                        </div>
-                        <span className="leaddrawer-activity-time">Apr 25 at 4:32 PM</span>
-                        <p className="leaddrawer-activity-desc">New to Junk Lead - Hindi/Arabic/Bengali</p>
-                      </div>
+                  {activitiesLoading ? (
+                    <div className="leaddrawer-activity-list">
+                      <div className="leaddrawer-loading">Loading activities...</div>
                     </div>
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">M</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">Mike Johnson</span>
-                          <span className="leaddrawer-activity-action">added a note</span>
-                        </div>
-                        <span className="leaddrawer-activity-time">Apr 25 at 2:15 PM</span>
-                        <p className="leaddrawer-activity-desc">Customer showed interest in premium package. Follow up needed next week.</p>
-                      </div>
+                  ) : activitiesError ? (
+                    <div className="leaddrawer-activity-list">
+                      <div className="leaddrawer-error">{activitiesError}</div>
                     </div>
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">J</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">Jane Smith</span>
-                          <span className="leaddrawer-activity-action">assigned to</span>
-                        </div>
-                        <span className="leaddrawer-activity-time">Apr 24 at 11:00 AM</span>
-                        <p className="leaddrawer-activity-desc">Assigned to John Doe</p>
-                      </div>
+                  ) : apiActivities.length === 0 ? (
+                    <div className="leaddrawer-activity-list">
+                      <div className="leaddrawer-empty">No activities found.</div>
                     </div>
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">S</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">System</span>
-                          <span className="leaddrawer-activity-action">created lead from</span>
+                  ) : (
+                    <div className="leaddrawer-activity-list">
+                      {apiActivities.map((item) => (
+                        <div className="leaddrawer-activity-card" key={item.id}>
+                          <div className="leaddrawer-activity-avatar">
+                            {(item.actorName || '?').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="leaddrawer-activity-content">
+                            <div className="leaddrawer-activity-header">
+                              <span className="leaddrawer-activity-user">{item.actorName}</span>
+                            </div>
+                            <span className="leaddrawer-activity-time">{formatActivityDate(item.createdAt)}</span>
+                            <p className="leaddrawer-activity-desc">{item.description}</p>
+                          </div>
                         </div>
-                        <span className="leaddrawer-activity-time">Apr 24 at 10:30 AM</span>
-                        <p className="leaddrawer-activity-desc">Lead created from Website inquiry</p>
-                      </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 

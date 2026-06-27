@@ -16,7 +16,7 @@ export interface PaginationResponse {
   page: number;
   limit: number;
   total: number;
-  totalPages: number;
+  total_pages: number;
 }
 
 export interface CreateLeadStatusPayload {

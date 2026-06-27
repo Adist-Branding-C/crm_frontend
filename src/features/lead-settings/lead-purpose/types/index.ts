@@ -4,7 +4,8 @@ export interface LeadPurposeItem {
 }
 
 export interface LeadPurposeApiItem {
-  purpose_id: string;
+  id: number;
+  purposeId: string;
   purpose: string;
 }
 
@@ -12,7 +13,7 @@ export interface PaginationResponse {
   page: number;
   limit: number;
   total: number;
-  totalPages: number;
+  total_pages: number;
 }
 
 export interface CreateLeadPurposePayload {
@@ -27,7 +28,7 @@ export interface CreateLeadPurposeResponse {
   status: boolean;
   message: string;
   data: {
-    purpose_id: string;
+    purposeId: string;
   };
 }
 

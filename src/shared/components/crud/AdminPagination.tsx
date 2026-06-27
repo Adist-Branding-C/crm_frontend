@@ -9,17 +9,17 @@ const AdminPagination: React.FC<AdminPaginationProps> = React.memo(({
   onPageChange, onRowsPerPageChange, showRowsSelector, prevNextOnly,
 }) => (
   <div className="table-footer">
-    {!prevNextOnly && (
-      <div className="entries-select">
-        <label>
-          {LABEL_SHOW}
-          <select value={rowsPerPage} onChange={onRowsPerPageChange}>
-            {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
-          </select>
-          {LABEL_ENTRIES}
-        </label>
-      </div>
-    )}
+      {(showRowsSelector ?? !prevNextOnly) && (
+        <div className="entries-select">
+          <label>
+            {LABEL_SHOW}
+            <select value={rowsPerPage} onChange={(e) => { console.log('[AdminPagination] select onChange fired, value:', e.target.value); onRowsPerPageChange?.(e); }}>
+              {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+            {LABEL_ENTRIES}
+          </label>
+        </div>
+      )}
     <div className="table-info">
       {LABEL_SHOWING} {Math.min(startIndex + 1, totalItems)} {LABEL_TO} {Math.min(startIndex + rowsPerPage, totalItems)} {LABEL_OF} {totalItems} {LABEL_ENTRIES}
     </div>

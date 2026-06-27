@@ -47,6 +47,7 @@ export interface AdminDeleteModalProps {
   itemType?: string;
   onConfirm: () => void;
   onClose: () => void;
+  isDeleting?: boolean;
 }
 
 export interface AdminTableProps<T extends { id: number | string }> {
@@ -72,4 +73,5 @@ export interface AdminFormDrawerProps {
   isEditing: boolean;
   error?: string | null;
   onClearError?: () => void;
+  isSaving?: boolean;
 }

@@ -25,7 +25,7 @@ const LeadPurposePage = () => {
           <AdminPagination currentPage={d.currentPage} totalPages={d.totalPages}
             startIndex={d.startIndex} rowsPerPage={d.rowsPerPage} totalItems={d.totalItems}
             onPageChange={d.setCurrentPage} onRowsPerPageChange={d.handleRowsPerPageChange}
-            prevNextOnly />
+            prevNextOnly showRowsSelector={true} />
           </div>
         </div>
       <AdminFormDrawer isOpen={d.showForm} title="Lead Purpose" fields={formFields}

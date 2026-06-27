@@ -8,7 +8,7 @@ const EnquiriesTable: React.FC<EnquiriesTableProps> = ({
   data, columns, sortConfig, onSort,
   paginatedIds, selectedIds, onSelectAll, onSelectRow,
   actionMenuOpen, actionMenuButtonRect, onSetActionMenuOpen, onSetActionMenuButtonRect,
-  onViewLead,
+  onViewLead, onEditLead, onDeleteLead,
 }) => {
 
   return (
@@ -52,13 +52,13 @@ const EnquiriesTable: React.FC<EnquiriesTableProps> = ({
                   </button>
                   {actionMenuOpen === row.id && actionMenuButtonRect && (
                     <ActionDropdownPortal isOpen={actionMenuOpen === row.id} buttonRect={actionMenuButtonRect} onClose={() => { onSetActionMenuOpen(null); onSetActionMenuButtonRect(null); }}>
-                      <button onClick={() => { onSetActionMenuOpen(null); onSetActionMenuButtonRect(null); }}>
+                      <button onClick={() => { onEditLead(row); onSetActionMenuOpen(null); onSetActionMenuButtonRect(null); }}>
                         <Edit2 size={14} /> Edit
                       </button>
-                      <button onClick={() => { onSetActionMenuOpen(null); onSetActionMenuButtonRect(null); }} className="delete">
+                      <button onClick={() => { onDeleteLead(row); onSetActionMenuOpen(null); onSetActionMenuButtonRect(null); }} className="delete">
                         <Trash2 size={14} /> Delete
                       </button>
-                      <button onClick={() => { onSetActionMenuOpen(null); onSetActionMenuButtonRect(null); }} className="whatsapp">
+                      <button onClick={() => { onViewLead(row); onSetActionMenuOpen(null); onSetActionMenuButtonRect(null); }} className="whatsapp">
                         <Eye size={14} /> View Details
                       </button>
                     </ActionDropdownPortal>

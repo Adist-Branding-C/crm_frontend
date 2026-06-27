@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import SettingsPage from '../features/settings/pages/SettingsPage';
+import ErrorBoundary from '../shared/components/ErrorBoundary';
 import LeadPurposePage from '../features/lead-settings/lead-purpose/pages/LeadPurposePage';
 import LeadStatusPage from '../features/lead-settings/lead-status/pages/LeadStatusPage';
 import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSourcePage';
@@ -20,11 +21,11 @@ import TaskCategoryPage from '../features/task-settings/task-category/TaskCatego
 export default (
   <>
     <Route path="settings" element={<SettingsPage />} />
-    <Route path="settings/lead-settings/purpose" element={<LeadPurposePage />} />
-    <Route path="settings/lead-settings/status" element={<LeadStatusPage />} />
-    <Route path="settings/lead-settings/source" element={<LeadSourcePage />} />
-    <Route path="settings/lead-settings/types" element={<LeadTypesPage />} />
-    <Route path="settings/lead-settings/additional" element={<LeadAdditionalPage />} />
+    <Route path="settings/lead-settings/purpose" element={<ErrorBoundary><LeadPurposePage /></ErrorBoundary>} />
+    <Route path="settings/lead-settings/status" element={<ErrorBoundary><LeadStatusPage /></ErrorBoundary>} />
+    <Route path="settings/lead-settings/source" element={<ErrorBoundary><LeadSourcePage /></ErrorBoundary>} />
+    <Route path="settings/lead-settings/types" element={<ErrorBoundary><LeadTypesPage /></ErrorBoundary>} />
+    <Route path="settings/lead-settings/additional" element={<ErrorBoundary><LeadAdditionalPage /></ErrorBoundary>} />
     <Route path="user/notifications-users" element={<NotificationSettingsPage />} />
     <Route path="user/payment-plans" element={<PaymentPlansPage />} />
     <Route path="user/gl-connect" element={<IntegrationsPage />} />

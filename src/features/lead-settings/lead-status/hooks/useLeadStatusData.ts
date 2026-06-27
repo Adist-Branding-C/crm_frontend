@@ -14,6 +14,8 @@ export function useLeadStatusData() {
   const [searchQuery, setSearchQuery] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
   const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPageRef = useRef(rowsPerPage);
+  useEffect(() => { rowsPerPageRef.current = rowsPerPage; }, [rowsPerPage]);
 
   const [items, setItems] = useState<LeadStatusItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -34,7 +36,7 @@ export function useLeadStatusData() {
       const response = await leadStatusService.getLeadStatuses(page, limit, search || undefined);
       setItems((response.data.items || []).map(mapApiToUI));
       setTotal(response.data.pagination?.total ?? 0);
-      setTotalPages(response.data.pagination?.totalPages ?? 1);
+      setTotalPages(response.data.pagination?.total_pages ?? 1);
     } catch (err: unknown) {
       setError(getErrorMessage(err, ERROR_MESSAGES.FETCH_LEAD_STATUSES));
     } finally {
@@ -42,23 +44,25 @@ export function useLeadStatusData() {
     }
   }, []);
 
+  const initalFetchDone = useRef(false);
+
   useEffect(() => {
+    if (initalFetchDone.current) return;
+    initalFetchDone.current = true;
     fetchData(1, rowsPerPage, '');
   }, []);
 
-  const isFirstSearch = useRef(true);
+  const prevSearchQuery = useRef(searchQuery);
 
   useEffect(() => {
-    if (isFirstSearch.current) {
-      isFirstSearch.current = false;
-      return;
-    }
+    if (searchQuery === prevSearchQuery.current) return;
+    prevSearchQuery.current = searchQuery;
     const timer = setTimeout(() => {
       setCurrentPage(1);
-      fetchData(1, rowsPerPage, searchQuery);
+      fetchData(1, rowsPerPageRef.current, searchQuery);
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, fetchData]);
 
   const handleSetCurrentPage = useCallback((page: number) => {
     setCurrentPage(page);
@@ -68,6 +72,7 @@ export function useLeadStatusData() {
   const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = Number(e.target.value);
     setRowsPerPage(val);
+    setCurrentPage(1);
     fetchData(1, val, searchQuery);
   }, [searchQuery, fetchData]);
 
@@ -98,17 +103,23 @@ export function useLeadStatusData() {
 
   const handleSave = useCallback(async () => {
     if (editingItem) {
+      const payload: UpdateLeadStatusPayload = {};
+      if (formData.status.trim() !== editingItem.status) payload.status = formData.status.trim();
+      if (formData.color !== editingItem.color) payload.color = formData.color;
+      if (formData.useForConversion !== editingItem.useForConversion) payload.conversion = formData.useForConversion;
+      if (Object.keys(payload).length === 0) {
+        setShowForm(false);
+        setEditingItem(null);
+        return;
+      }
       setIsSaving(true);
       setError(null);
       try {
-        const payload: UpdateLeadStatusPayload = {};
-        if (formData.status !== editingItem.status) payload.status = formData.status;
-        if (formData.color !== editingItem.color) payload.color = formData.color;
-        if (formData.useForConversion !== editingItem.useForConversion) payload.conversion = formData.useForConversion;
-        await leadStatusService.updateLeadStatus(String(editingItem.id), payload);
+        const response = await leadStatusService.updateLeadStatus(String(editingItem.id), payload);
+        const updatedItem = mapApiToUI(response.data);
+        setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
         setShowForm(false);
         setEditingItem(null);
-        fetchData(currentPage, rowsPerPage, searchQuery);
       } catch (err: unknown) {
         setError(getErrorMessage(err, ERROR_MESSAGES.UPDATE_LEAD_STATUS));
       } finally {
@@ -119,7 +130,7 @@ export function useLeadStatusData() {
       setError(null);
       try {
         await leadStatusService.createLeadStatus({
-          status: formData.status,
+          status: formData.status.trim(),
           color: formData.color,
           conversion: formData.useForConversion,
         });

@@ -14,6 +14,8 @@ export function useLeadPurposeData() {
   const [searchQuery, setSearchQuery] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
   const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPageRef = useRef(rowsPerPage);
+  useEffect(() => { rowsPerPageRef.current = rowsPerPage; }, [rowsPerPage]);
 
   const [items, setItems] = useState<LeadPurposeItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -34,7 +36,7 @@ export function useLeadPurposeData() {
       const response = await leadPurposeService.getLeadPurposes(page, limit, search || undefined);
       setItems((response.data.items || []).map(mapApiToUI));
       setTotal(response.data.pagination?.total ?? 0);
-      setTotalPages(response.data.pagination?.totalPages ?? 1);
+      setTotalPages(response.data.pagination?.total_pages ?? 1);
     } catch (err: unknown) {
       setError(getErrorMessage(err, ERROR_MESSAGES.FETCH_LEAD_PURPOSES));
     } finally {
@@ -42,23 +44,25 @@ export function useLeadPurposeData() {
     }
   }, []);
 
+  const initalFetchDone = useRef(false);
+
   useEffect(() => {
+    if (initalFetchDone.current) return;
+    initalFetchDone.current = true;
     fetchData(1, rowsPerPage, '');
   }, []);
 
-  const isFirstSearch = useRef(true);
+  const prevSearchQuery = useRef(searchQuery);
 
   useEffect(() => {
-    if (isFirstSearch.current) {
-      isFirstSearch.current = false;
-      return;
-    }
+    if (searchQuery === prevSearchQuery.current) return;
+    prevSearchQuery.current = searchQuery;
     const timer = setTimeout(() => {
       setCurrentPage(1);
-      fetchData(1, rowsPerPage, searchQuery);
+      fetchData(1, rowsPerPageRef.current, searchQuery);
     }, 400);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, fetchData]);
 
   const handleSetCurrentPage = useCallback((page: number) => {
     setCurrentPage(page);
@@ -68,6 +72,7 @@ export function useLeadPurposeData() {
   const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = Number(e.target.value);
     setRowsPerPage(val);
+    setCurrentPage(1);
     fetchData(1, val, searchQuery);
   }, [searchQuery, fetchData]);
 
@@ -98,15 +103,21 @@ export function useLeadPurposeData() {
 
   const handleSave = useCallback(async () => {
     if (editingItem) {
+      const payload: UpdateLeadPurposePayload = {};
+      if (formData.title.trim() !== editingItem.title) payload.purpose = formData.title.trim();
+      if (Object.keys(payload).length === 0) {
+        setShowForm(false);
+        setEditingItem(null);
+        return;
+      }
       setIsSaving(true);
       setError(null);
       try {
-        const payload: UpdateLeadPurposePayload = {};
-        if (formData.title !== editingItem.title) payload.purpose = formData.title;
-        await leadPurposeService.updateLeadPurpose(editingItem.id, payload);
+        const response = await leadPurposeService.updateLeadPurpose(editingItem.id, payload);
+        const updatedItem = mapApiToUI(response.data);
+        setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
         setShowForm(false);
         setEditingItem(null);
-        fetchData(currentPage, rowsPerPage, searchQuery);
       } catch (err: unknown) {
         setError(getErrorMessage(err, ERROR_MESSAGES.UPDATE_LEAD_PURPOSE));
       } finally {
@@ -117,7 +128,7 @@ export function useLeadPurposeData() {
       setError(null);
       try {
         await leadPurposeService.createLeadPurpose({
-          purpose: formData.title,
+          purpose: formData.title.trim(),
         });
         setShowForm(false);
         setEditingItem(null);

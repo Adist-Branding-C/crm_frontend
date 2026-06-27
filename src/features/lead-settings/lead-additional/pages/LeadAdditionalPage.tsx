@@ -71,6 +71,7 @@ const LeadAdditionalPage = () => {
                   onPageChange={d.setCurrentPage}
                   onRowsPerPageChange={d.handleRowsPerPageChange}
                   prevNextOnly
+                  showRowsSelector={true}
                 />
               </>
             )}

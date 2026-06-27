@@ -520,6 +520,19 @@
   line-height: 1.5;
 }
 
+.leaddrawer-loading,
+.leaddrawer-error,
+.leaddrawer-empty {
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.leaddrawer-error {
+  color: #dc2626;
+}
+
 .leaddrawer-empty-state {
   display: flex;
   flex-direction: column;

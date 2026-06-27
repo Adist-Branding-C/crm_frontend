@@ -1,10 +1,10 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { ACTION_CONFIRM, ACTION_CANCEL } from '../../constants/actionLabels';
 import { LABEL_CONFIRM_DELETE } from '../../constants/labels';
 import type { AdminDeleteModalProps } from '../../types/crud';
 
-const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, onConfirm, onClose }) => {
+const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, onConfirm, onClose, isDeleting }) => {
   if (!isOpen) return null;
 
   return (
@@ -24,7 +24,9 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
           </p>
         </div>
         <div className="modal-footer">
-          <button className="btn btn-danger" onClick={onConfirm}>{ACTION_CONFIRM}</button>
+          <button className="btn btn-danger" onClick={onConfirm} disabled={isDeleting}>
+            {isDeleting ? <><Loader2 size={16} className="spin" /> Deleting...</> : ACTION_CONFIRM}
+          </button>
           <button className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
         </div>
       </div>
