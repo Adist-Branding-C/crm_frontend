@@ -6,7 +6,14 @@
 @import '../../../shared/styles/drawers.css';
 @import '../../../shared/styles/modals.css';
 @import '../../../shared/styles/dropdowns.css';
-@import '../../../shared/styles/settings-layout.css';
+@import '../../../shared/styles/sidebar-layout.css';
+
+.task-settings-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow: hidden;
+}
 
 .call-reason-table-wrapper .table-container,
 .call-reason-table-wrapper .table-scroll {
@@ -15,11 +22,4 @@
 
 .call-reason-table-wrapper .dropdown-container {
   position: relative;
-}
-
-.call-reason-table-wrapper .dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  z-index: 9999;
 }

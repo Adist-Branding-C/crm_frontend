@@ -1,6 +1,7 @@
-import { Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import TaskCategoryActions from './TaskCategoryActions';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
+import TaskSettingsPagination from '../../components/TaskSettingsPagination';
 import type { TaskCategoryTableProps } from '../types/index';
 
 const TaskCategoryTable = ({
@@ -10,11 +11,17 @@ const TaskCategoryTable = ({
   rowsPerPage,
   onRowsPerPageChange,
   totalRecords,
+  currentPage,
+  totalPages,
+  onPageChange,
   dropdownOpen,
   onToggleDropdown,
   onEdit,
   onDelete,
+  onAdd,
 }: TaskCategoryTableProps) => {
+  const startIndex = (currentPage - 1) * rowsPerPage;
+
   return (
     <div className="table-container">
       <div className="table-header-controls">
@@ -26,9 +33,16 @@ const TaskCategoryTable = ({
             entries
           </label>
         </div>
-        <div className="search-input">
-          <Search size={16} />
-          <input type="search" placeholder="Search" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="search-input">
+            <Search size={16} />
+            <input type="search" placeholder="Search" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} />
+          </div>
+          {onAdd && (
+            <button className="btn btn-primary" onClick={onAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Plus size={16} /> Add Category
+            </button>
+          )}
         </div>
       </div>
       <div className="table-scroll">
@@ -49,7 +63,7 @@ const TaskCategoryTable = ({
             ) : (
               data.map((item, index) => (
                 <tr key={item.id}>
-                  <td>{index + 1}</td>
+                  <td>{startIndex + index + 1}</td>
                   <td>{item.category || '-'}</td>
                   <td>{item.action || '-'}</td>
                   <td>
@@ -67,11 +81,16 @@ const TaskCategoryTable = ({
           </tbody>
         </table>
       </div>
-      <div className="table-footer">
-        <div className="table-info">
-          Showing 1 to {Math.min(rowsPerPage, totalRecords)} of {totalRecords} entries
-        </div>
-      </div>
+      <TaskSettingsPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        startIndex={startIndex}
+        rowsPerPage={rowsPerPage}
+        totalItems={totalRecords}
+        onPageChange={onPageChange}
+        onRowsPerPageChange={(e) => onRowsPerPageChange(Number(e.target.value))}
+        showRowsSelector={false}
+      />
     </div>
   );
 };

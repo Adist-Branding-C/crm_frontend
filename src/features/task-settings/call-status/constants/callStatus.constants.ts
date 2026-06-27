@@ -7,5 +7,5 @@ export const CALL_STATUS_API_ENDPOINTS = {
 
 export const ADD_CALL_STATUS_INITIAL_VALUES = {
   name: '',
-  status: 'Active',
+  status: '',
 };

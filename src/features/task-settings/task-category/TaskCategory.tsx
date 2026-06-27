@@ -1,14 +1,18 @@
-import { useMemo, useCallback } from 'react';
-import { Plus, Phone, MessageSquare, Users, Tag } from 'lucide-react';
+import { useCallback } from 'react';
+import { Check, X, Phone, MessageSquare, Users, Tag } from 'lucide-react';
+import type { FormikHelpers } from 'formik';
 import { useTaskCategory } from './hooks/useTaskCategory';
 import { useTaskCategoryForm } from './hooks/useTaskCategoryForm';
+import { useTaskSettingsSearch } from '../hooks/useTaskSettingsSearch';
 import { addTaskCategoryValidationSchema, editTaskCategoryValidationSchema } from './validations/index';
 import { ADD_TASK_CATEGORY_INITIAL_VALUES } from './constants/index';
 import TaskCategoryTable from './components/TaskCategoryTable';
 import AddTaskCategoryDrawer from './components/AddTaskCategoryDrawer';
 import EditTaskCategoryDrawer from './components/EditTaskCategoryDrawer';
 import DeleteTaskCategoryDialog from './components/DeleteTaskCategoryDialog';
+import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../components/SettingsTabs/SettingsTabs';
+import type { TaskCategoryFormData } from './types/index';
 import './TaskCategory.css';
 
 const tabs = [
@@ -26,31 +30,50 @@ const TaskCategoryPage = () => {
     handleAdd,
     handleUpdate,
     handleDelete,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
+    pageNumber,
+    setPageNumber,
+    limit,
+    totalCount,
+    searchQuery,
+    handleSearchChange,
+    handleRowsPerPageChange,
   } = useTaskCategory();
 
   const form = useTaskCategoryForm();
 
-  const filteredData = useMemo(
-    () => {
-      const query = form.searchQuery.trim().toLowerCase();
-      return taskCategoryList.filter(item =>
-        (item.category || '').toLowerCase().includes(query) ||
-        (item.action || '').toLowerCase().includes(query)
-      );
-    },
-    [taskCategoryList, form.searchQuery]
-  );
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(searchQuery, handleSearchChange);
 
-  const handleAddSubmit = useCallback(async (values: { category: string; action: string }) => {
-    const success = await handleAdd(values);
+  const totalPages = Math.ceil(totalCount / limit) || 1;
+
+  const handleAddSubmit = useCallback(async (
+    values: TaskCategoryFormData,
+    helpers: FormikHelpers<TaskCategoryFormData>,
+  ) => {
+    const success = await handleAdd(values, helpers);
     if (success) {
       form.closeAddDrawer();
     }
   }, [handleAdd, form]);
 
-  const handleEditSubmit = useCallback(async (values: { category: string; action: string }) => {
+  const handleEditSubmit = useCallback(async (
+    values: TaskCategoryFormData,
+    helpers: FormikHelpers<TaskCategoryFormData>,
+  ) => {
     if (!form.editingItem) return;
-    const success = await handleUpdate(form.editingItem.id, values);
+    const item = form.editingItem;
+    const original: TaskCategoryFormData = {
+      category: item.category || '',
+      action: item.action || '',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await handleUpdate(form.editingItem.id, values, helpers);
     if (success) {
       form.closeEditDrawer();
     }
@@ -66,30 +89,25 @@ const TaskCategoryPage = () => {
 
   return (
     <div className="task-settings-page">
+      <PageHeader title="Task Settings" description="Manage task configurations and settings" />
       <SettingsTabs tabs={tabs} />
-      <div className="settings-content">
-        <div className="task-panel">
-          <span className="usage-quote">
-            <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{taskCategoryList.length}</span> Categories
-          </span>
-          <div className="task-nav">
-            <button className="btn btn-primary" onClick={form.openAddDrawer}>
-              <Plus size={16} /> Add Category
-            </button>
-          </div>
-        </div>
+      <div className="account-content">
         <div className="task-category-table-wrapper">
           <TaskCategoryTable
-            data={filteredData.slice(0, form.rowsPerPage)}
-            searchQuery={form.searchQuery}
-            onSearchChange={form.setSearchQuery}
-            rowsPerPage={form.rowsPerPage}
-            onRowsPerPageChange={form.setRowsPerPage}
-            totalRecords={filteredData.length}
+            data={taskCategoryList}
+            searchQuery={searchValue}
+            onSearchChange={handleSearchInput}
+            rowsPerPage={limit}
+            onRowsPerPageChange={handleRowsPerPageChange}
+            totalRecords={totalCount}
+            currentPage={pageNumber}
+            totalPages={totalPages}
+            onPageChange={setPageNumber}
             dropdownOpen={form.dropdownOpen}
             onToggleDropdown={form.toggleDropdown}
             onEdit={form.openEditDrawer}
             onDelete={form.handleDeleteClick}
+            onAdd={form.openAddDrawer}
           />
         </div>
         <AddTaskCategoryDrawer
@@ -118,6 +136,12 @@ const TaskCategoryPage = () => {
           onClose={form.closeDeleteDialog}
         />
       </div>
+      {showToast && (
+        <div className={`toast-notification toast-${toastType}`} onClick={() => setShowToast(false)}>
+          {toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 };

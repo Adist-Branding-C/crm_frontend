@@ -1,18 +1,24 @@
+import { useRef } from 'react';
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
+import ActionMenuPortal from '../../components/ActionMenuPortal';
 import type { CallStatusActionsProps } from '../types/index';
 
 const CallStatusActions = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: CallStatusActionsProps) => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   return (
     <div className="dropdown-container">
-      <button className="dropdown-toggle" onClick={() => onToggleDropdown(dropdownOpen === item.id ? null : item.id)}>
+      <button ref={buttonRef} className="dropdown-toggle" onClick={() => onToggleDropdown(dropdownOpen === item.id ? null : item.id)}>
         <MoreHorizontal size={16} />
       </button>
-      {dropdownOpen === item.id && (
-        <div className="dropdown-menu">
-          <a className="dropdown-item" onClick={() => onEdit(item)}><Edit2 size={14} /> Edit</a>
-          <a className="dropdown-item" onClick={() => onDelete(item)}><Trash2 size={14} /> Delete</a>
-        </div>
-      )}
+      <ActionMenuPortal
+        isOpen={dropdownOpen === item.id}
+        triggerRef={buttonRef}
+        onClose={() => onToggleDropdown(null)}
+      >
+        <button onClick={() => onEdit(item)}><Edit2 size={14} /> Edit</button>
+        <button className="delete" onClick={() => onDelete(item)}><Trash2 size={14} /> Delete</button>
+      </ActionMenuPortal>
     </div>
   );
 };
