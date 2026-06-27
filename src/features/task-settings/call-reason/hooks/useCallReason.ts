@@ -1,150 +1,235 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import type { FormikHelpers } from 'formik';
+import { useTableData } from '../../../../shared/hooks/useTableData';
 import { callReasonService } from '../services/callReason.service';
 import type { CallReasonItem, CallReasonFormData } from '../types/index';
 
+const FIELD_MAP: Record<string, string> = {};
+
 export function useCallReason() {
-  const [callReasonList, setCallReasonList] = useState<CallReasonItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [showToast, setShowToast] = useState(false);
 
-  const fetchCallReasons = useCallback(async (params: Record<string, string | number | undefined> = {}) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await callReasonService.getAll(params);
-
-      if (response.status) {
-        const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
-          ? (response.data as { items: CallReasonItem[] }).items
-          : Array.isArray(response.data)
-            ? response.data
-            : [];
-        setCallReasonList(Array.isArray(rawData) ? rawData : []);
-      } else {
-        setError(response.message || 'Failed to fetch call reasons');
-      }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch call reasons');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3500);
   }, []);
 
-  useEffect(() => {
-    fetchCallReasons();
-  }, [fetchCallReasons]);
+  const pagination = useTableData<CallReasonItem>({
+    fetchFn: async (params) => {
+      const response = await callReasonService.getAll(params as unknown as Record<string, string | number | undefined>);
+      if (response.status) {
+        const data = response.data as { items: CallReasonItem[]; pagination?: { total: number } } | undefined;
+        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
+        return { items: Array.isArray(items) ? items : [], total: data?.pagination?.total ?? (Array.isArray(items) ? items.length : 0) };
+      }
+      throw new Error(response.message || 'Failed to fetch call reasons');
+    },
+  });
 
-  const handleAdd = useCallback(async (values: CallReasonFormData) => {
-    setError('');
-    setIsLoading(true);
+  const applyFieldErrors = useCallback((
+    errors: Record<string, string[]> | undefined,
+    message: string | undefined,
+    field: string | undefined,
+    setFieldError: (field: string, msg: string) => void,
+  ): string | null => {
+    if (field && message) {
+      const mapped = FIELD_MAP[field] || field;
+      setFieldError(mapped, message);
+      return mapped;
+    }
+    if (errors && typeof errors === 'object') {
+      let firstField: string | null = null;
+      Object.entries(errors).forEach(([f, msgs]) => {
+        const mapped = FIELD_MAP[f] || f;
+        if (msgs?.length && !firstField) firstField = mapped;
+        if (msgs?.length) setFieldError(mapped, msgs[0]);
+      });
+      return firstField;
+    }
+    if (message) {
+      const lower = message.toLowerCase();
+      if (lower.includes('name')) { setFieldError('name', message); return 'name'; }
+    }
+    return null;
+  }, []);
+
+  const scrollAndFocusError = useCallback((fieldName: string) => {
+    setTimeout(() => {
+      const drawerBody = document.querySelector('.drawer-body');
+      if (!drawerBody) return;
+      const errorEl = drawerBody.querySelector('.input-error');
+      if (errorEl) {
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (errorEl as HTMLElement).focus();
+      }
+    }, 0);
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    setTimeout(() => {
+      const drawerBody = document.querySelector('.drawer-body');
+      if (drawerBody) {
+        drawerBody.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 0);
+  }, []);
+
+  const handleAdd = useCallback(async (
+    values: CallReasonFormData,
+    { setSubmitting, resetForm, setFieldError }: FormikHelpers<CallReasonFormData>,
+  ) => {
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { name, status } = values;
-      const response = await callReasonService.create({ name, status });
+      const response = await callReasonService.create({ name: name.trim(), status });
 
       if (response.status) {
-        const data = response.data as { id?: number } | undefined;
-        if (data?.id) {
-          setCallReasonList(prev => [...prev, { id: data.id, name, status } as unknown as CallReasonItem]);
+        pagination.setPageNumber(1);
+        pagination.setSearchQuery('');
+        pagination.refresh();
+        resetForm();
+        showToastMessage('Call reason added successfully', 'success');
+        return true;
+      }
+
+      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      if (errorField) {
+        scrollAndFocusError(errorField);
+      } else {
+        pagination.setError(response.message || 'Failed to add call reason');
+        scrollToTop();
+      }
+      return false;
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string; field?: string } } };
+        const serverErrors = axiosErr.response?.data?.errors;
+        const serverField = axiosErr.response?.data?.field;
+        const serverMessage = axiosErr.response?.data?.message;
+        if (serverErrors || (serverField && serverMessage)) {
+          const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
+          if (errorField) scrollAndFocusError(errorField);
+          else { pagination.setError(serverMessage || 'Failed to add call reason'); scrollToTop(); }
         } else {
-          fetchCallReasons();
+          pagination.setError(serverMessage || 'Failed to add call reason');
+          scrollToTop();
         }
-        return true;
-      } else {
-        setError(response.message || 'Failed to add call reason');
-        return false;
-      }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to add call reason');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
+        scrollToTop();
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
+        scrollToTop();
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, [fetchCallReasons]);
+  }, [applyFieldErrors, scrollAndFocusError, scrollToTop, showToastMessage, pagination]);
 
-  const handleUpdate = useCallback(async (id: number, values: CallReasonFormData) => {
-    setError('');
-    setIsLoading(true);
+  const handleUpdate = useCallback(async (
+    id: number,
+    values: CallReasonFormData,
+    { setSubmitting, setFieldError }: FormikHelpers<CallReasonFormData>,
+  ) => {
+    pagination.setError('');
+    pagination.setIsLoading(true);
 
     try {
       const { name, status } = values;
-      const response = await callReasonService.update(id, { name, status });
+      const response = await callReasonService.update(id, { name: name.trim(), status });
 
       if (response.status) {
-        setCallReasonList(prev => prev.map(item =>
-          item.id === id ? { ...item, name, status } : item
-        ));
+        pagination.refresh();
         return true;
-      } else {
-        setError(response.message || 'Failed to update call reason');
-        return false;
       }
+
+      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      if (errorField) {
+        scrollAndFocusError(errorField);
+      } else {
+        pagination.setError(response.message || 'Failed to update call reason');
+        scrollToTop();
+      }
+      return false;
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to update call reason');
+        const axiosErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string; field?: string } } };
+        const serverErrors = axiosErr.response?.data?.errors;
+        const serverField = axiosErr.response?.data?.field;
+        const serverMessage = axiosErr.response?.data?.message;
+        if (serverErrors || (serverField && serverMessage)) {
+          const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
+          if (errorField) scrollAndFocusError(errorField);
+          else { pagination.setError(serverMessage || 'Failed to update call reason'); scrollToTop(); }
+        } else {
+          pagination.setError(serverMessage || 'Failed to update call reason');
+          scrollToTop();
+        }
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
+        scrollToTop();
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
+        scrollToTop();
       }
       return false;
     } finally {
-      setIsLoading(false);
+      pagination.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, []);
+  }, [applyFieldErrors, scrollAndFocusError, scrollToTop, pagination]);
 
   const handleDelete = useCallback(async (id: number) => {
-    setError('');
-    setIsLoading(true);
+    pagination.setError('');
 
     try {
       const response = await callReasonService.delete(id);
 
       if (response.status) {
-        setCallReasonList(prev => prev.filter(item => item.id !== id));
+        pagination.refresh();
         return true;
       } else {
-        setError(response.message || 'Failed to delete call reason');
+        pagination.setError(response.message || 'Failed to delete call reason');
         return false;
       }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to delete call reason');
+        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete call reason');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
+        pagination.setError((err as { message: string }).message);
       } else {
-        setError('Network error. Please try again.');
+        pagination.setError('Network error. Please try again.');
       }
       return false;
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  }, [pagination]);
 
   return {
-    callReasonList,
-    isLoading,
-    error,
-    fetchCallReasons,
+    callReasonList: pagination.list,
+    isLoading: pagination.isLoading,
+    error: pagination.error,
     handleAdd,
     handleUpdate,
     handleDelete,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
+    pageNumber: pagination.pageNumber,
+    setPageNumber: pagination.setPageNumber,
+    limit: pagination.limit,
+    totalCount: pagination.totalCount,
+    searchQuery: pagination.searchQuery,
+    handleSearchChange: pagination.handleSearchChange,
+    handleRowsPerPageChange: pagination.handleRowsPerPageChange,
   };
 }

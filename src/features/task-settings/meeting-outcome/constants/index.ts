@@ -7,5 +7,5 @@ export const MEETING_OUTCOME_API_ENDPOINTS = {
 
 export const ADD_MEETING_OUTCOME_INITIAL_VALUES = {
   name: '',
-  status: 'Active',
+  status: '',
 };

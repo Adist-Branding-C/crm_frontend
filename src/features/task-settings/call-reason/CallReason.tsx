@@ -1,14 +1,18 @@
-import { useMemo, useCallback } from 'react';
-import { Plus, Phone, MessageSquare, Users, Tag } from 'lucide-react';
+import { useCallback } from 'react';
+import { Check, X, Phone, MessageSquare, Users, Tag } from 'lucide-react';
+import type { FormikHelpers } from 'formik';
 import { useCallReason } from './hooks/useCallReason';
 import { useCallReasonForm } from './hooks/useCallReasonForm';
+import { useTaskSettingsSearch } from '../hooks/useTaskSettingsSearch';
 import { addCallReasonValidationSchema, editCallReasonValidationSchema } from './validations/index';
 import { ADD_CALL_REASON_INITIAL_VALUES } from './constants/index';
 import CallReasonTable from './components/CallReasonTable';
 import AddCallReasonDrawer from './components/AddCallReasonDrawer';
 import EditCallReasonDrawer from './components/EditCallReasonDrawer';
 import DeleteCallReasonDialog from './components/DeleteCallReasonDialog';
+import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../components/SettingsTabs/SettingsTabs';
+import type { CallReasonFormData } from './types/index';
 import './CallReason.css';
 
 const tabs = [
@@ -26,27 +30,50 @@ const CallReasonPage = () => {
     handleAdd,
     handleUpdate,
     handleDelete,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
+    pageNumber,
+    setPageNumber,
+    limit,
+    totalCount,
+    searchQuery,
+    handleSearchChange,
+    handleRowsPerPageChange,
   } = useCallReason();
 
   const form = useCallReasonForm();
 
-  const filteredData = useMemo(
-    () => callReasonList.filter(item =>
-      (item.name || '').toLowerCase().includes(form.searchQuery.toLowerCase())
-    ),
-    [callReasonList, form.searchQuery]
-  );
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(searchQuery, handleSearchChange);
 
-  const handleAddSubmit = useCallback(async (values: { name: string; status: string }) => {
-    const success = await handleAdd(values);
+  const totalPages = Math.ceil(totalCount / limit) || 1;
+
+  const handleAddSubmit = useCallback(async (
+    values: CallReasonFormData,
+    helpers: FormikHelpers<CallReasonFormData>,
+  ) => {
+    const success = await handleAdd(values, helpers);
     if (success) {
       form.closeAddDrawer();
     }
   }, [handleAdd, form]);
 
-  const handleEditSubmit = useCallback(async (values: { name: string; status: string }) => {
+  const handleEditSubmit = useCallback(async (
+    values: CallReasonFormData,
+    helpers: FormikHelpers<CallReasonFormData>,
+  ) => {
     if (!form.editingItem) return;
-    const success = await handleUpdate(form.editingItem.id, values);
+    const item = form.editingItem;
+    const original: CallReasonFormData = {
+      name: item.name || '',
+      status: item.status || 'Active',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await handleUpdate(form.editingItem.id, values, helpers);
     if (success) {
       form.closeEditDrawer();
     }
@@ -62,30 +89,25 @@ const CallReasonPage = () => {
 
   return (
     <div className="task-settings-page">
+      <PageHeader title="Task Settings" description="Manage task configurations and settings" />
       <SettingsTabs tabs={tabs} />
-      <div className="settings-content">
-        <div className="task-panel">
-          <span className="usage-quote">
-            <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{callReasonList.length}</span> Reasons
-          </span>
-          <div className="task-nav">
-            <button className="btn btn-primary" onClick={form.openAddDrawer}>
-              <Plus size={16} /> Add Reason
-            </button>
-          </div>
-        </div>
+      <div className="account-content">
         <div className="call-reason-table-wrapper">
           <CallReasonTable
-            data={filteredData.slice(0, form.rowsPerPage)}
-            searchQuery={form.searchQuery}
-            onSearchChange={form.setSearchQuery}
-            rowsPerPage={form.rowsPerPage}
-            onRowsPerPageChange={form.setRowsPerPage}
-            totalRecords={filteredData.length}
+            data={callReasonList}
+            searchQuery={searchValue}
+            onSearchChange={handleSearchInput}
+            rowsPerPage={limit}
+            onRowsPerPageChange={handleRowsPerPageChange}
+            totalRecords={totalCount}
+            currentPage={pageNumber}
+            totalPages={totalPages}
+            onPageChange={setPageNumber}
             dropdownOpen={form.dropdownOpen}
             onToggleDropdown={form.toggleDropdown}
             onEdit={form.openEditDrawer}
             onDelete={form.handleDeleteClick}
+            onAdd={form.openAddDrawer}
           />
         </div>
         <AddCallReasonDrawer
@@ -114,6 +136,12 @@ const CallReasonPage = () => {
           onClose={form.closeDeleteDialog}
         />
       </div>
+      {showToast && (
+        <div className={`toast-notification toast-${toastType}`} onClick={() => setShowToast(false)}>
+          {toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 };

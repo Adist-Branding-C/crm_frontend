@@ -16,20 +16,39 @@ export async function fetchTaskCategoriesApi(params: Record<string, string | num
     : TASK_CATEGORY_API_ENDPOINTS.GET_ALL;
 
   const response = await axiosInstance.get<TaskCategoryResponse>(url);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+  };
 }
 
 export async function createTaskCategoryApi(data: { category: string; action: string }): Promise<TaskCategoryResponse> {
   const response = await axiosInstance.post<TaskCategoryResponse>(TASK_CATEGORY_API_ENDPOINTS.CREATE, data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
 export async function updateTaskCategoryApi(id: number, data: { category: string; action: string }): Promise<TaskCategoryResponse> {
   const response = await axiosInstance.patch<TaskCategoryResponse>(TASK_CATEGORY_API_ENDPOINTS.UPDATE(id), data);
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+    data: response.data.data,
+    errors: response.data.errors,
+    field: response.data.field,
+  };
 }
 
-export async function deleteTaskCategoryApi(id: number): Promise<TaskCategoryResponse> {
+export async function deleteTaskCategoryApi(id: number): Promise<Pick<TaskCategoryResponse, 'status' | 'message'>> {
   const response = await axiosInstance.delete<TaskCategoryResponse>(TASK_CATEGORY_API_ENDPOINTS.DELETE(id));
-  return response.data;
+  return {
+    status: response.data.status,
+    message: response.data.message,
+  };
 }

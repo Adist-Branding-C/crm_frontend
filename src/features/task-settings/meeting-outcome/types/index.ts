@@ -1,3 +1,4 @@
+import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
 
 export interface MeetingOutcomeItem {
@@ -15,6 +16,8 @@ export interface MeetingOutcomeResponse {
   status: boolean;
   message: string;
   data?: unknown;
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface MeetingOutcomeTableProps {
@@ -24,10 +27,14 @@ export interface MeetingOutcomeTableProps {
   rowsPerPage: number;
   onRowsPerPageChange: (value: number) => void;
   totalRecords: number;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
   dropdownOpen: number | null;
   onToggleDropdown: (id: number | null) => void;
   onEdit: (item: MeetingOutcomeItem) => void;
   onDelete: (item: MeetingOutcomeItem) => void;
+  onAdd?: () => void;
 }
 
 export interface MeetingOutcomeActionsProps {
@@ -43,9 +50,10 @@ export interface AddMeetingOutcomeDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: MeetingOutcomeFormData;
-  onSubmit: (values: MeetingOutcomeFormData) => Promise<void>;
+  onSubmit: (values: MeetingOutcomeFormData, helpers: FormikHelpers<MeetingOutcomeFormData>) => Promise<void>;
   isLoading: boolean;
   error: string;
+  isEditing?: boolean;
 }
 
 export interface EditMeetingOutcomeDrawerProps {
@@ -53,10 +61,11 @@ export interface EditMeetingOutcomeDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: MeetingOutcomeFormData;
-  onSubmit: (values: MeetingOutcomeFormData) => Promise<void>;
+  onSubmit: (values: MeetingOutcomeFormData, helpers: FormikHelpers<MeetingOutcomeFormData>) => Promise<void>;
   isLoading: boolean;
   error: string;
   editingItem: MeetingOutcomeItem | null;
+  isEditing?: boolean;
 }
 
 export interface DeleteMeetingOutcomeDialogProps {

@@ -1,14 +1,18 @@
-import { useMemo, useCallback } from 'react';
-import { Plus, Phone, MessageSquare, Users, Tag } from 'lucide-react';
+import { useCallback } from 'react';
+import { Check, X, Phone, MessageSquare, Users, Tag } from 'lucide-react';
+import type { FormikHelpers } from 'formik';
 import { useMeetingOutcome } from './hooks/useMeetingOutcome';
 import { useMeetingOutcomeForm } from './hooks/useMeetingOutcomeForm';
+import { useTaskSettingsSearch } from '../hooks/useTaskSettingsSearch';
 import { addMeetingOutcomeValidationSchema, editMeetingOutcomeValidationSchema } from './validations/index';
 import { ADD_MEETING_OUTCOME_INITIAL_VALUES } from './constants/index';
 import MeetingOutcomeTable from './components/MeetingOutcomeTable';
 import AddMeetingOutcomeDrawer from './components/AddMeetingOutcomeDrawer';
 import EditMeetingOutcomeDrawer from './components/EditMeetingOutcomeDrawer';
 import DeleteMeetingOutcomeDialog from './components/DeleteMeetingOutcomeDialog';
+import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../components/SettingsTabs/SettingsTabs';
+import type { MeetingOutcomeFormData } from './types/index';
 import './MeetingOutcome.css';
 
 const tabs = [
@@ -26,27 +30,50 @@ const MeetingOutcomePage = () => {
     handleAdd,
     handleUpdate,
     handleDelete,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
+    pageNumber,
+    setPageNumber,
+    limit,
+    totalCount,
+    searchQuery,
+    handleSearchChange,
+    handleRowsPerPageChange,
   } = useMeetingOutcome();
 
   const form = useMeetingOutcomeForm();
 
-  const filteredData = useMemo(
-    () => meetingOutcomeList.filter(item =>
-      (item.name || '').toLowerCase().includes(form.searchQuery.toLowerCase())
-    ),
-    [meetingOutcomeList, form.searchQuery]
-  );
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(searchQuery, handleSearchChange);
 
-  const handleAddSubmit = useCallback(async (values: { name: string; status: string }) => {
-    const success = await handleAdd(values);
+  const totalPages = Math.ceil(totalCount / limit) || 1;
+
+  const handleAddSubmit = useCallback(async (
+    values: MeetingOutcomeFormData,
+    helpers: FormikHelpers<MeetingOutcomeFormData>,
+  ) => {
+    const success = await handleAdd(values, helpers);
     if (success) {
       form.closeAddDrawer();
     }
   }, [handleAdd, form]);
 
-  const handleEditSubmit = useCallback(async (values: { name: string; status: string }) => {
+  const handleEditSubmit = useCallback(async (
+    values: MeetingOutcomeFormData,
+    helpers: FormikHelpers<MeetingOutcomeFormData>,
+  ) => {
     if (!form.editingItem) return;
-    const success = await handleUpdate(form.editingItem.id, values);
+    const item = form.editingItem;
+    const original: MeetingOutcomeFormData = {
+      name: item.name || '',
+      status: item.status || 'Active',
+    };
+    if (JSON.stringify(values) === JSON.stringify(original)) {
+      helpers.setSubmitting(false);
+      return;
+    }
+    const success = await handleUpdate(form.editingItem.id, values, helpers);
     if (success) {
       form.closeEditDrawer();
     }
@@ -62,30 +89,25 @@ const MeetingOutcomePage = () => {
 
   return (
     <div className="task-settings-page">
+      <PageHeader title="Task Settings" description="Manage task configurations and settings" />
       <SettingsTabs tabs={tabs} />
-      <div className="settings-content">
-        <div className="task-panel">
-          <span className="usage-quote">
-            <span className="usage-count">{filteredData.length}</span> / <span className="usage-total">{meetingOutcomeList.length}</span> Outcomes
-          </span>
-          <div className="task-nav">
-            <button className="btn btn-primary" onClick={form.openAddDrawer}>
-              <Plus size={16} /> Add Outcome
-            </button>
-          </div>
-        </div>
+      <div className="account-content">
         <div className="meeting-outcome-table-wrapper">
           <MeetingOutcomeTable
-            data={filteredData.slice(0, form.rowsPerPage)}
-            searchQuery={form.searchQuery}
-            onSearchChange={form.setSearchQuery}
-            rowsPerPage={form.rowsPerPage}
-            onRowsPerPageChange={form.setRowsPerPage}
-            totalRecords={filteredData.length}
+            data={meetingOutcomeList}
+            searchQuery={searchValue}
+            onSearchChange={handleSearchInput}
+            rowsPerPage={limit}
+            onRowsPerPageChange={handleRowsPerPageChange}
+            totalRecords={totalCount}
+            currentPage={pageNumber}
+            totalPages={totalPages}
+            onPageChange={setPageNumber}
             dropdownOpen={form.dropdownOpen}
             onToggleDropdown={form.toggleDropdown}
             onEdit={form.openEditDrawer}
             onDelete={form.handleDeleteClick}
+            onAdd={form.openAddDrawer}
           />
         </div>
         <AddMeetingOutcomeDrawer
@@ -114,6 +136,12 @@ const MeetingOutcomePage = () => {
           onClose={form.closeDeleteDialog}
         />
       </div>
+      {showToast && (
+        <div className={`toast-notification toast-${toastType}`} onClick={() => setShowToast(false)}>
+          {toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 };

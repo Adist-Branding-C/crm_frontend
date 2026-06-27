@@ -1,3 +1,4 @@
+import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
 
 export interface CallStatusItem {
@@ -15,6 +16,8 @@ export interface CallStatusResponse {
   status: boolean;
   message: string;
   data?: unknown;
+  errors?: Record<string, string[]>;
+  field?: string;
 }
 
 export interface CallStatusTableProps {
@@ -24,10 +27,14 @@ export interface CallStatusTableProps {
   rowsPerPage: number;
   onRowsPerPageChange: (value: number) => void;
   totalRecords: number;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
   dropdownOpen: number | null;
   onToggleDropdown: (id: number | null) => void;
   onEdit: (item: CallStatusItem) => void;
   onDelete: (item: CallStatusItem) => void;
+  onAdd?: () => void;
 }
 
 export interface CallStatusActionsProps {
@@ -43,9 +50,10 @@ export interface AddCallStatusDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CallStatusFormData;
-  onSubmit: (values: CallStatusFormData) => Promise<void>;
+  onSubmit: (values: CallStatusFormData, helpers: FormikHelpers<CallStatusFormData>) => Promise<void>;
   isLoading: boolean;
   error: string;
+  isEditing?: boolean;
 }
 
 export interface EditCallStatusDrawerProps {
@@ -53,10 +61,11 @@ export interface EditCallStatusDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CallStatusFormData;
-  onSubmit: (values: CallStatusFormData) => Promise<void>;
+  onSubmit: (values: CallStatusFormData, helpers: FormikHelpers<CallStatusFormData>) => Promise<void>;
   isLoading: boolean;
   error: string;
   editingItem: CallStatusItem | null;
+  isEditing?: boolean;
 }
 
 export interface DeleteCallStatusDialogProps {
