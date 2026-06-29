@@ -1,5 +1,8 @@
 import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
+import type { ApiResponse } from '../../../../shared/types/common';
+
+export type MeetingOutcomeApiResponse = ApiResponse<MeetingOutcomeItem> & { errors?: Record<string, string[]>; field?: string };
 
 export interface MeetingOutcomeItem {
   id: number;
@@ -10,14 +13,6 @@ export interface MeetingOutcomeItem {
 export interface MeetingOutcomeFormData {
   name: string;
   status: string;
-}
-
-export interface MeetingOutcomeResponse {
-  status: boolean;
-  message: string;
-  data?: unknown;
-  errors?: Record<string, string[]>;
-  field?: string;
 }
 
 export interface MeetingOutcomeTableProps {
@@ -50,9 +45,9 @@ export interface AddMeetingOutcomeDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: MeetingOutcomeFormData;
-  onSubmit: (values: MeetingOutcomeFormData, helpers: FormikHelpers<MeetingOutcomeFormData>) => Promise<void>;
+  onSubmit: (values: MeetingOutcomeFormData, helpers: FormikHelpers<MeetingOutcomeFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   isEditing?: boolean;
 }
 
@@ -61,9 +56,9 @@ export interface EditMeetingOutcomeDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: MeetingOutcomeFormData;
-  onSubmit: (values: MeetingOutcomeFormData, helpers: FormikHelpers<MeetingOutcomeFormData>) => Promise<void>;
+  onSubmit: (values: MeetingOutcomeFormData, helpers: FormikHelpers<MeetingOutcomeFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   editingItem: MeetingOutcomeItem | null;
   isEditing?: boolean;
 }

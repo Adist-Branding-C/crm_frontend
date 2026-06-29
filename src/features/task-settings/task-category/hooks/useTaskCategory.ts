@@ -1,31 +1,24 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { taskCategoryService } from '../services/taskCategory.service';
-import type { TaskCategoryItem, TaskCategoryFormData } from '../types/index';
+import { useDrawerScroll } from '../../hooks/useDrawerScroll';
+import { useToast } from '../../hooks/useToast';
+import { taskCategoryApiService } from '../services';
+import type { TaskCategoryItem, TaskCategoryFormData, TaskCategoryApiResponse } from '../types/index';
 
 const FIELD_MAP: Record<string, string> = {};
 
 export function useTaskCategory() {
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  const [showToast, setShowToast] = useState(false);
-
-  const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
-    setToastMessage(message);
-    setToastType(type);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3500);
-  }, []);
+  const { showToastMessage, toastMessage, toastType, showToast, setShowToast } = useToast();
 
   const pagination = useTableData<TaskCategoryItem>({
     fetchFn: async (params) => {
-      const response = await taskCategoryService.getAll(params as unknown as Record<string, string | number | undefined>);
+      const response = await taskCategoryApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
         const data = response.data as { items: TaskCategoryItem[]; pagination?: { total: number } } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
         return {
-          items: Array.isArray(items) ? items.map((item: Record<string, unknown>) => ({
+          items: Array.isArray(items) ? (items as unknown as Record<string, unknown>[]).map((item) => ({
             id: item.id as number,
             category: (item.category || item.taskCategory || '') as string,
             action: (item.action || '') as string,
@@ -36,6 +29,8 @@ export function useTaskCategory() {
       throw new Error(response.message || 'Failed to fetch task categories');
     },
   });
+
+  const { scrollAndFocusError, scrollToTop } = useDrawerScroll();
 
   const applyFieldErrors = useCallback((
     errors: Record<string, string[]> | undefined,
@@ -53,7 +48,7 @@ export function useTaskCategory() {
       Object.entries(errors).forEach(([f, msgs]) => {
         const mapped = FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -65,27 +60,6 @@ export function useTaskCategory() {
     return null;
   }, []);
 
-  const scrollAndFocusError = useCallback((fieldName: string) => {
-    setTimeout(() => {
-      const drawerBody = document.querySelector('.drawer-body');
-      if (!drawerBody) return;
-      const errorEl = drawerBody.querySelector('.input-error');
-      if (errorEl) {
-        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        (errorEl as HTMLElement).focus();
-      }
-    }, 0);
-  }, []);
-
-  const scrollToTop = useCallback(() => {
-    setTimeout(() => {
-      const drawerBody = document.querySelector('.drawer-body');
-      if (drawerBody) {
-        drawerBody.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 0);
-  }, []);
-
   const handleAdd = useCallback(async (
     values: TaskCategoryFormData,
     { setSubmitting, resetForm, setFieldError }: FormikHelpers<TaskCategoryFormData>,
@@ -95,7 +69,7 @@ export function useTaskCategory() {
 
     try {
       const { category, action } = values;
-      const response = await taskCategoryService.create({ category: category.trim(), action: action.trim() });
+      const response: TaskCategoryApiResponse = await taskCategoryApiService.create({ category: category.trim(), action: action.trim() });
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -108,7 +82,7 @@ export function useTaskCategory() {
 
       const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
       if (errorField) {
-        scrollAndFocusError(errorField);
+        scrollAndFocusError();
       } else {
         pagination.setError(response.message || 'Failed to add task category');
         scrollToTop();
@@ -122,7 +96,7 @@ export function useTaskCategory() {
         const serverMessage = axiosErr.response?.data?.message;
         if (serverErrors || (serverField && serverMessage)) {
           const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
-          if (errorField) scrollAndFocusError(errorField);
+          if (errorField) scrollAndFocusError();
           else { pagination.setError(serverMessage || 'Failed to add task category'); scrollToTop(); }
         } else {
           pagination.setError(serverMessage || 'Failed to add task category');
@@ -152,7 +126,7 @@ export function useTaskCategory() {
 
     try {
       const { category, action } = values;
-      const response = await taskCategoryService.update(id, { category: category.trim(), action: action.trim() });
+      const response: TaskCategoryApiResponse = await taskCategoryApiService.update(id, { category: category.trim(), action: action.trim() });
 
       if (response.status) {
         pagination.refresh();
@@ -161,7 +135,7 @@ export function useTaskCategory() {
 
       const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
       if (errorField) {
-        scrollAndFocusError(errorField);
+        scrollAndFocusError();
       } else {
         pagination.setError(response.message || 'Failed to update task category');
         scrollToTop();
@@ -175,7 +149,7 @@ export function useTaskCategory() {
         const serverMessage = axiosErr.response?.data?.message;
         if (serverErrors || (serverField && serverMessage)) {
           const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
-          if (errorField) scrollAndFocusError(errorField);
+          if (errorField) scrollAndFocusError();
           else { pagination.setError(serverMessage || 'Failed to update task category'); scrollToTop(); }
         } else {
           pagination.setError(serverMessage || 'Failed to update task category');
@@ -199,7 +173,7 @@ export function useTaskCategory() {
     pagination.setError('');
 
     try {
-      const response = await taskCategoryService.delete(id);
+      const response = await taskCategoryApiService.delete(id);
 
       if (response.status) {
         pagination.refresh();

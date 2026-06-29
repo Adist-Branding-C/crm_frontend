@@ -12,3 +12,10 @@ export interface DateRange {
   start: string;
   end: string;
 }
+
+
+export interface ApiResponse<T = unknown> {
+  status: boolean | number;
+  message: string;
+  data?: T;
+}

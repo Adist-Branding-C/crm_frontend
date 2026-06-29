@@ -1,5 +1,8 @@
 import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
+import type { ApiResponse } from '../../../../shared/types/common';
+
+export type CallStatusApiResponse = ApiResponse<CallStatusItem> & { errors?: Record<string, string[]>; field?: string };
 
 export interface CallStatusItem {
   id: number;
@@ -10,14 +13,6 @@ export interface CallStatusItem {
 export interface CallStatusFormData {
   name: string;
   status: string;
-}
-
-export interface CallStatusResponse {
-  status: boolean;
-  message: string;
-  data?: unknown;
-  errors?: Record<string, string[]>;
-  field?: string;
 }
 
 export interface CallStatusTableProps {
@@ -50,9 +45,9 @@ export interface AddCallStatusDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CallStatusFormData;
-  onSubmit: (values: CallStatusFormData, helpers: FormikHelpers<CallStatusFormData>) => Promise<void>;
+  onSubmit: (values: CallStatusFormData, helpers: FormikHelpers<CallStatusFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   isEditing?: boolean;
 }
 
@@ -61,9 +56,9 @@ export interface EditCallStatusDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CallStatusFormData;
-  onSubmit: (values: CallStatusFormData, helpers: FormikHelpers<CallStatusFormData>) => Promise<void>;
+  onSubmit: (values: CallStatusFormData, helpers: FormikHelpers<CallStatusFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   editingItem: CallStatusItem | null;
   isEditing?: boolean;
 }
