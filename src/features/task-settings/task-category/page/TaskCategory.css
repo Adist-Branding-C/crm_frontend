@@ -1,0 +1,25 @@
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/pagination.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/sidebar-layout.css';
+
+.task-settings-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.task-category-table-wrapper .table-container,
+.task-category-table-wrapper .table-scroll {
+  overflow: visible;
+}
+
+.task-category-table-wrapper .dropdown-container {
+  position: relative;
+}

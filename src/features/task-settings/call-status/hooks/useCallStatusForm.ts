@@ -1,66 +1,14 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import type { CallStatusItem, CallStatusFormData } from '../types/index';
 import { ADD_CALL_STATUS_INITIAL_VALUES } from '../constants/index';
 
-export function useCallStatusForm() {
-  const [showAddDrawer, setShowAddDrawer] = useState(false);
-  const [showEditDrawer, setShowEditDrawer] = useState(false);
-  const [editingItem, setEditingItem] = useState<CallStatusItem | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-  const [deletingItem, setDeletingItem] = useState<CallStatusItem | null>(null);
-
-  const openAddDrawer = useCallback(() => {
-    setShowAddDrawer(true);
-  }, []);
-
-  const closeAddDrawer = useCallback(() => {
-    setShowAddDrawer(false);
-  }, []);
-
-  const openEditDrawer = useCallback((item: CallStatusItem) => {
-    setEditingItem(item);
-    setShowEditDrawer(true);
-    setDropdownOpen(null);
-  }, []);
-
-  const closeEditDrawer = useCallback(() => {
-    setShowEditDrawer(false);
-    setEditingItem(null);
-  }, []);
-
-  const handleDeleteClick = useCallback((item: CallStatusItem) => {
-    setDeletingItem(item);
-    setDropdownOpen(null);
-  }, []);
-
-  const closeDeleteDialog = useCallback(() => {
-    setDeletingItem(null);
-  }, []);
-
-  const toggleDropdown = useCallback((id: number | null) => {
-    setDropdownOpen(id);
-  }, []);
-
+export function useCallStatusForm(editingItem: CallStatusItem | null) {
   const editInitialValues: CallStatusFormData = useMemo(
     () => editingItem
       ? { name: editingItem.name || '', status: editingItem.status || 'Active' }
       : ADD_CALL_STATUS_INITIAL_VALUES,
-    [editingItem]
+    [editingItem],
   );
 
-  return {
-    showAddDrawer,
-    showEditDrawer,
-    editingItem,
-    dropdownOpen,
-    toggleDropdown,
-    deletingItem,
-    openAddDrawer,
-    closeAddDrawer,
-    openEditDrawer,
-    closeEditDrawer,
-    handleDeleteClick,
-    closeDeleteDialog,
-    editInitialValues,
-  };
+  return { editInitialValues };
 }

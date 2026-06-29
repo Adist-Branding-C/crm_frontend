@@ -1,54 +1,35 @@
 import axiosInstance from '../../../../api/axiosInstance';
+import { ApiResponse } from '../../../../shared/types/common';
 import { CALL_STATUS_API_ENDPOINTS } from '../constants/index';
-import type { CallStatusResponse } from '../types/index';
+import type { CallStatusItem } from '../types/index';
 
-export async function fetchCallStatusesApi(params: Record<string, string | number | undefined> = {}): Promise<CallStatusResponse> {
-  const queryParams = new URLSearchParams();
+export class CallStatusApiService {
+  async fetchAll(params: Record<string, string | number | undefined> = {}): Promise<ApiResponse<CallStatusItem[]>> {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, String(value));
+      }
+    });
+    const url = queryParams.toString()
+      ? `${CALL_STATUS_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
+      : CALL_STATUS_API_ENDPOINTS.GET_ALL;
+    const response = await axiosInstance.get<ApiResponse<CallStatusItem[]>>(url);
+    return response.data;
+  }
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      queryParams.append(key, String(value));
-    }
-  });
+  async create(data: { name: string; status: string }): Promise<ApiResponse<CallStatusItem>> {
+    const response = await axiosInstance.post<ApiResponse<CallStatusItem>>(CALL_STATUS_API_ENDPOINTS.CREATE, data);
+    return response.data;
+  }
 
-  const url = queryParams.toString()
-    ? `${CALL_STATUS_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
-    : CALL_STATUS_API_ENDPOINTS.GET_ALL;
+  async update(id: number, data: { name: string; status: string }): Promise<ApiResponse<CallStatusItem>> {
+    const response = await axiosInstance.patch<ApiResponse<CallStatusItem>>(CALL_STATUS_API_ENDPOINTS.UPDATE(id), data);
+    return response.data;
+  }
 
-  const response = await axiosInstance.get<CallStatusResponse>(url);
-  return {
-    status: response.data.status,
-    message: response.data.message,
-    data: response.data.data,
-  };
-}
-
-export async function createCallStatusApi(data: { name: string; status: string }): Promise<CallStatusResponse> {
-  const response = await axiosInstance.post<CallStatusResponse>(CALL_STATUS_API_ENDPOINTS.CREATE, data);
-  return {
-    status: response.data.status,
-    message: response.data.message,
-    data: response.data.data,
-    errors: response.data.errors,
-    field: response.data.field,
-  };
-}
-
-export async function updateCallStatusApi(id: number, data: { name: string; status: string }): Promise<CallStatusResponse> {
-  const response = await axiosInstance.patch<CallStatusResponse>(CALL_STATUS_API_ENDPOINTS.UPDATE(id), data);
-  return {
-    status: response.data.status,
-    message: response.data.message,
-    data: response.data.data,
-    errors: response.data.errors,
-    field: response.data.field,
-  };
-}
-
-export async function deleteCallStatusApi(id: number): Promise<Pick<CallStatusResponse, 'status' | 'message'>> {
-  const response = await axiosInstance.delete<CallStatusResponse>(CALL_STATUS_API_ENDPOINTS.DELETE(id));
-  return {
-    status: response.data.status,
-    message: response.data.message,
-  };
+  async delete(id: number): Promise<ApiResponse<null>> {
+    const response = await axiosInstance.delete<ApiResponse<null>>(CALL_STATUS_API_ENDPOINTS.DELETE(id));
+    return response.data;
+  }
 }

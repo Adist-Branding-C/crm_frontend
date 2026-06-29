@@ -55,3 +55,11 @@ export interface ResetPasswordResponse {
   status: boolean
   message: string
 }
+
+export interface RefreshTokenResponse {
+  status: boolean;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}

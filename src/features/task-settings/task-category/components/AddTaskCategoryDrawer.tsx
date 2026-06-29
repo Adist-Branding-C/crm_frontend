@@ -1,17 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import { scrollToFirstError } from '../../utils/scrollToFirstError';
 import type { AddTaskCategoryDrawerProps } from '../types/index';
-
-const scrollToFirstError = (container: HTMLElement | null) => {
-  if (!container) return;
-  const errorEl = container.querySelector('.input-error');
-  if (errorEl) {
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (errorEl as HTMLElement).focus();
-  }
-};
 
 const AddTaskCategoryDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddTaskCategoryDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
@@ -49,24 +41,23 @@ const AddTaskCategoryDrawer = ({ isOpen, onClose, validationSchema, initialValue
                 }
               }
 
-              const formError = error;
-              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
-              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+              const fieldClass = (name: keyof typeof initialValues) =>
+                `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError} />}
+                  {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
                     <label>Category <span className="text-danger">*</span></label>
                     <Field type="text" name="category" className={fieldClass('category')} placeholder="Enter category" />
-                    {showError('category') && errors.category && <small className="field-error-text">{errors.category}</small>}
+                    <FormikError name="category" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>Action <span className="text-danger">*</span></label>
                     <Field type="text" name="action" className={fieldClass('action')} placeholder="Enter action" />
-                    {showError('action') && errors.action && <small className="field-error-text">{errors.action}</small>}
+                    <FormikError name="action" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-actions">
