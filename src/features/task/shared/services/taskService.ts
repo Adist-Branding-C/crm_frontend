@@ -1,38 +1,42 @@
 import axiosInstance from '../../../../api/axiosInstance';
+import { ApiResponse } from '../../../../shared/types/common';
 import { TASK_API } from '../constants/taskApiEndpoints';
 
-export interface TaskApiResponse {
-  status: boolean;
-  message: string;
-  data?: unknown;
+export interface TaskCategory {
+  id: string;
+  taskCategory: string;
 }
 
-const buildQueryString = (params: Record<string, string | number | undefined>): string => {
-  const queryParams = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      queryParams.append(key, String(value));
-    }
-  });
-  return queryParams.toString();
-};
+export interface StaffMember {
+  id: number;
+  name: string;
+  staff_id: string;
+}
+
+export interface LeadMember {
+  id: number;
+  name: string;
+}
 
 export const taskService = {
-  getTasks(params: Record<string, string | number | undefined> = {}): Promise<TaskApiResponse> {
-    const queryString = buildQueryString(params);
-    const url = queryString ? `${TASK_API.BASE}?${queryString}` : TASK_API.BASE;
-    return axiosInstance.get<TaskApiResponse>(url).then(r => r.data);
+  getTaskCategories(): Promise<ApiResponse<{ items: TaskCategory[] }>> {
+    return axiosInstance.get<ApiResponse<{ items: TaskCategory[] }>>(
+      TASK_API.CATEGORY,
+      { params: { pageNumber: 1, limit: 10 } }
+    ).then(r => r.data);
   },
 
-  createTask(data: Record<string, any>): Promise<TaskApiResponse> {
-    return axiosInstance.post<TaskApiResponse>(TASK_API.BASE, data).then(r => r.data);
+  getLeads(): Promise<ApiResponse<{ items: LeadMember[] }>> {
+    return axiosInstance.get<ApiResponse<{ items: LeadMember[] }>>(
+      TASK_API.LEAD,
+      { params: { pageNumber: 1, limit: 100 } }
+    ).then(r => r.data);
   },
 
-  updateTask(id: number, data: Record<string, any>): Promise<TaskApiResponse> {
-    return axiosInstance.patch<TaskApiResponse>(`${TASK_API.BASE}/${id}`, data).then(r => r.data);
-  },
-
-  deleteTask(id: number): Promise<Pick<TaskApiResponse, 'status' | 'message'>> {
-    return axiosInstance.delete<TaskApiResponse>(`${TASK_API.BASE}/${id}`).then(r => ({ status: r.data.status, message: r.data.message }));
+  getStaff(): Promise<ApiResponse<{ items: StaffMember[] }>> {
+    return axiosInstance.get<ApiResponse<{ items: StaffMember[] }>>(
+      TASK_API.STAFF,
+      { params: { pageNumber: 1, limit: 100 } }
+    ).then(r => r.data);
   },
 };

@@ -1,19 +1,11 @@
-import { X } from 'lucide-react';
-import TaskForm from './TaskForm';
-import type { AddTaskDrawerProps } from '../types/add-task-drawer.types';
+import { useEffect, useRef } from 'react';
+import { X, Loader2 } from 'lucide-react';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
+import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import GenericTaskForm from '../../shared/components/GenericTaskForm';
+import type { AddTaskDrawerProps } from '../types/index';
 
-const AddTaskDrawer = ({
-  isOpen,
-  onClose,
-  validationSchema,
-  initialValues,
-  onSubmit,
-  isLoading,
-  error,
-  isEditing,
-  categoryOptions,
-  staffOptions,
-}: AddTaskDrawerProps) => {
+const AddTaskDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing = false, categoryOptions, staffOptions, leadOptions, leadLoading }: AddTaskDrawerProps) => {
   if (!isOpen) return null;
 
   return (
@@ -26,7 +18,7 @@ const AddTaskDrawer = ({
           </button>
         </div>
         <div className="drawer-body">
-          <TaskForm
+          <GenericTaskForm
             validationSchema={validationSchema}
             initialValues={initialValues}
             onSubmit={onSubmit}
@@ -35,6 +27,8 @@ const AddTaskDrawer = ({
             isEditing={isEditing}
             categoryOptions={categoryOptions}
             staffOptions={staffOptions}
+            leadOptions={leadOptions}
+            leadLoading={leadLoading ?? false}
           />
         </div>
       </div>
