@@ -24,7 +24,7 @@ const TaskCategoryPage = () => {
       <div className="settings-content">
         <PageHeader title="Task Categories" description="Manage task category options" />
         <div className="table-container">
-          <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Category" />
+          <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Category" rowsPerPage={d.rowsPerPage} onRowsPerPageChange={d.handleRowsPerPageChange} />
           <AdminTable data={d.paginatedData} columns={columns} startIndex={d.startIndex}
             dropdownOpen={d.dropdownOpen} onToggleDropdown={d.setDropdownOpen}
             onEdit={d.handleEdit} onDelete={d.handleDeleteClick} />

@@ -1,50 +1,60 @@
 import { useCallback } from 'react';
-import { useTask, useTaskDrawer, useTaskDropdown, useTaskFilters, useTaskActions } from './index';
-import type { TaskItem } from '../types/task.types';
+import { useFetchTasks } from './useFetchTasks';
+import { useTaskSubmitHandlers } from './useTaskSubmitHandlers';
+import { useAddTaskDrawer } from './useAddTaskDrawer';
+import { useEditTaskDrawer } from './useEditTaskDrawer';
+import { useDeleteTaskDialog } from './useDeleteTaskDialog';
+import { useRowDropdown } from '../../shared/hooks/useRowDropdown';
+import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
+import { useCategoryOptions } from '../../shared/hooks/useCategoryOptions';
+import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
+import { useTaskSettingsSearch } from '../../../task-settings/hooks/useTaskSettingsSearch';
+import { useToast } from '../../hooks/useToast';
 
 export function useTaskPage() {
-  const task = useTask();
-  const drawer = useTaskDrawer();
-  const dropdown = useTaskDropdown();
-  const filters = useTaskFilters(task.taskList);
-  const actions = useTaskActions({ task, drawer });
+  const fetch = useFetchTasks();
+  const staff = useStaffOptions();
+  const categories = useCategoryOptions();
+  const leads = useLeadOptions();
+  const loadAddLookups = useCallback(() => {
+    staff.loadStaff();
+    categories.loadCategories();
+    leads.loadLeads();
+  }, [staff.loadStaff, categories.loadCategories, leads.loadLeads]);
+  const addDrawer = useAddTaskDrawer(loadAddLookups);
+  const editDrawer = useEditTaskDrawer(loadAddLookups);
+  const deleteDialog = useDeleteTaskDialog();
+  const dropdown = useRowDropdown();
+  const toast = useToast();
+  const handlers = useTaskSubmitHandlers(
+    {
+      onAddSuccess: addDrawer.closeAddDrawer,
+      onEditSuccess: editDrawer.closeEditDrawer,
+      onDeleteSuccess: deleteDialog.closeDeleteDialog,
+      editingItem: editDrawer.editingItem,
+      deletingItem: deleteDialog.deletingItem,
+    },
+    fetch,
+    toast,
+  );
 
-  const handleEditClick = useCallback((item: TaskItem) => {
-    drawer.openEditDrawer(item);
-    dropdown.closeDropdown();
-  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
 
-  const handleDeleteClick = useCallback((item: TaskItem) => {
-    actions.handleDeleteClick(item);
-    dropdown.closeDropdown();
-  }, [actions.handleDeleteClick, dropdown.closeDropdown]);
+  const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 
   return {
-    task,
-    searchQuery: task.search,
-    setSearchQuery: task.handleSearchChange,
-    showDrawer: drawer.showAddDrawer || drawer.showEditDrawer,
-    dropdownOpen: dropdown.dropdownOpen,
-    onToggleDropdown: dropdown.toggleDropdown,
-    editingItem: drawer.editingItem,
-    deletingItem: actions.deletingItem,
-    filteredData: filters.filteredData,
-    drawerInitialValues: drawer.drawerInitialValues,
-    handleAddClick: drawer.openAddDrawer,
-    handleCloseDrawer: () => { drawer.closeAddDrawer(); drawer.closeEditDrawer(); },
-    handleEditClick,
-    handleDeleteClick,
-    handleConfirmDelete: actions.handleConfirmDelete,
-    handleCloseDeleteModal: actions.closeDeleteModal,
-    handleSubmit: actions.handleSubmit,
-    handleEditSubmit: actions.handleEditSubmit,
-    categoryOptions: task.categoryOptions,
-    staffOptions: task.staffOptions,
-    page: task.page,
-    limit: task.limit,
-    totalPages: task.totalPages,
-    totalItems: task.totalItems,
-    handlePageChange: task.handlePageChange,
-    handleLimitChange: task.handleLimitChange,
+    fetch,
+    addDrawer,
+    editDrawer,
+    deleteDialog,
+    dropdown,
+    toast,
+    staff,
+    categories,
+    leads,
+    handlers,
+    searchValue,
+    handleSearchInput,
+    totalPages,
   };
 }
