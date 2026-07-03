@@ -1,4 +1,3 @@
-// Projectil repeated static values centralized in one file
 
 import {
   Users,

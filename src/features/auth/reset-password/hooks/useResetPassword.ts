@@ -1,18 +1,15 @@
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { FormikHelpers } from 'formik';
-import { authService } from '../services/AuthService';
-import type { ResetPasswordFormData } from '../types/auth.types';
-import { resetPasswordValidationSchema } from '../validations/resetPassword.schema';
+import { authService } from '../../services/AuthService';
+import type { ResetPasswordFormData } from '../types/resetPassword.types';
+import { resetPasswordValidationSchema } from '../validations/index';
+import { RESET_PASSWORD_INITIAL_VALUES } from '../constants/index';
 
-const resetPasswordInitialValues: ResetPasswordFormData = { password: '', confirmPassword: '' };
-
-export function useResetPasswordData() {
+export function useResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -53,11 +50,10 @@ export function useResetPasswordData() {
   }, [token]);
 
   return {
-    token, showPassword, setShowPassword,
-    showConfirmPassword, setShowConfirmPassword,
+    token,
     isLoading, isSuccess, error,
     handleSubmit,
     validationSchema: resetPasswordValidationSchema as any,
-    initialValues: resetPasswordInitialValues,
+    initialValues: RESET_PASSWORD_INITIAL_VALUES,
   };
 }

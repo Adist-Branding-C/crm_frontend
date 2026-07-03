@@ -35,10 +35,10 @@ export function useTaskDrawer() {
       ? {
           title: editingItem.title || '',
           description: editingItem.description || '',
-          category: editingItem.category || '',
+          category: typeof editingItem.category === 'string' ? editingItem.category : editingItem.category?.name || '',
           scheduledDate: editingItem.scheduledDate || '',
           scheduledTime: editingItem.scheduledTime || '',
-          assignedTo: editingItem.assignedTo || '',
+          assignedTo: typeof editingItem.assignedTo === 'string' ? editingItem.assignedTo : editingItem.assignedTo?.name || '',
           priority: editingItem.priority || '',
           status: editingItem.status || '',
         }

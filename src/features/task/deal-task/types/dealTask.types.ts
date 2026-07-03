@@ -1,13 +1,18 @@
+export interface PopulatedField {
+  id: number;
+  name: string;
+}
+
 export interface DealTaskItem {
   id: number;
   title: string;
   description: string;
-  deal: string;
+  deal: PopulatedField;
   dealId: string;
   amount: number;
   scheduledDate: string;
   scheduledTime: string;
-  assignedTo: string;
+  assignedTo: PopulatedField;
   priority: string;
   status: string;
 }

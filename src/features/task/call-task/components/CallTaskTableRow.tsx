@@ -9,7 +9,7 @@ const CallTaskTableRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit,
     <td>{item.contactPhone || '-'}</td>
     <td>{item.scheduledDate || '-'}</td>
     <td>{item.duration || '-'}</td>
-    <td>{item.assignedTo || '-'}</td>
+    <td>{item.assignedTo?.name || '-'}</td>
     <td>
       <span className={`status-badge status-${(item.status || '').toLowerCase()}`}>
         {item.status}

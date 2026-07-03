@@ -40,7 +40,7 @@ export function useCallTaskDrawer() {
           scheduledDate: editingItem.scheduledDate || '',
           scheduledTime: editingItem.scheduledTime || '',
           duration: editingItem.duration || '',
-          assignedTo: editingItem.assignedTo || '',
+          assignedTo: typeof editingItem.assignedTo === 'string' ? editingItem.assignedTo : editingItem.assignedTo?.name || '',
           status: editingItem.status || '',
         }
       : {

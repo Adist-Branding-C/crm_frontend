@@ -5,9 +5,9 @@ const TaskTableRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, onD
   <tr key={item.id}>
     <td>{index + 1}</td>
     <td>{item.title}</td>
-    <td>{item.category}</td>
+    <td>{item.category?.name || '-'}</td>
     <td>{item.scheduledDate || '-'}</td>
-    <td>{item.assignedTo || '-'}</td>
+    <td>{item.assignedTo?.name || '-'}</td>
     <td>
       <span className={`status-badge status-${(item.priority || '').toLowerCase()}`}>
         {item.priority || '-'}

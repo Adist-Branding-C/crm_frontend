@@ -8,7 +8,7 @@ const CampaignTaskTableRow = ({ item, index, dropdownOpen, onToggleDropdown, onE
     <td>{item.campaignName || '-'}</td>
     <td>{item.campaignType || '-'}</td>
     <td>{item.scheduledDate || '-'}</td>
-    <td>{item.assignedTo || '-'}</td>
+    <td>{item.assignedTo?.name || '-'}</td>
     <td>
       <span className={`status-badge status-${(item.status || '').toLowerCase()}`}>
         {item.status}

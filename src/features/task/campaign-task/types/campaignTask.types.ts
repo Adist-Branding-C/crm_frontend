@@ -1,3 +1,8 @@
+export interface PopulatedField {
+  id: number;
+  name: string;
+}
+
 export interface CampaignTaskItem {
   id: number;
   title: string;
@@ -6,7 +11,7 @@ export interface CampaignTaskItem {
   campaignType: string;
   scheduledDate: string;
   scheduledTime: string;
-  assignedTo: string;
+  assignedTo: PopulatedField;
   status: string;
 }
 

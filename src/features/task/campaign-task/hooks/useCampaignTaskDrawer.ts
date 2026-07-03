@@ -39,7 +39,7 @@ export function useCampaignTaskDrawer() {
           campaignType: editingItem.campaignType || '',
           scheduledDate: editingItem.scheduledDate || '',
           scheduledTime: editingItem.scheduledTime || '',
-          assignedTo: editingItem.assignedTo || '',
+          assignedTo: typeof editingItem.assignedTo === 'string' ? editingItem.assignedTo : editingItem.assignedTo?.name || '',
           status: editingItem.status || '',
         }
       : {

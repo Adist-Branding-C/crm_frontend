@@ -5,10 +5,10 @@ const DealTaskTableRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit,
   <tr key={item.id}>
     <td>{index + 1}</td>
     <td>{item.title}</td>
-    <td>{item.deal || '-'}</td>
+    <td>{item.deal?.name || '-'}</td>
     <td>{item.amount ? `$${item.amount.toLocaleString()}` : '-'}</td>
     <td>{item.scheduledDate || '-'}</td>
-    <td>{item.assignedTo || '-'}</td>
+    <td>{item.assignedTo?.name || '-'}</td>
     <td>
       <span className={`status-badge status-${(item.status || '').toLowerCase()}`}>
         {item.status}

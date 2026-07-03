@@ -35,12 +35,12 @@ export function useDealTaskDrawer() {
       ? {
           title: editingItem.title || '',
           description: editingItem.description || '',
-          deal: editingItem.deal || '',
+          deal: typeof editingItem.deal === 'string' ? editingItem.deal : editingItem.deal?.name || '',
           dealId: editingItem.dealId || '',
           amount: editingItem.amount ? String(editingItem.amount) : '',
           scheduledDate: editingItem.scheduledDate || '',
           scheduledTime: editingItem.scheduledTime || '',
-          assignedTo: editingItem.assignedTo || '',
+          assignedTo: typeof editingItem.assignedTo === 'string' ? editingItem.assignedTo : editingItem.assignedTo?.name || '',
           priority: editingItem.priority || '',
           status: editingItem.status || '',
         }

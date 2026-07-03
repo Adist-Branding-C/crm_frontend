@@ -1,14 +1,13 @@
 import { useNavigate, Navigate } from 'react-router-dom';
-import { Formik, Form, Field } from 'formik';
-import { Phone, ArrowLeft, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
-import { useForgotPasswordData } from '../hooks/useForgotPasswordData';
-import { useAuth } from '../hooks/useAuth';
-import ErrorMessage from '../../../shared/components/ErrorMessage';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { useForgotPassword } from '../hooks/useForgotPassword';
+import { useAuth } from '../../hooks/useAuth';
+import { ForgotPasswordForm } from '../components/ForgotPasswordForm';
 import './ForgotPassword.css';
 
-const ForgotPasswordPage = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate();
-  const forgotPasswordData = useForgotPasswordData();
+  const forgotPasswordData = useForgotPassword();
   const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
@@ -33,13 +32,12 @@ const ForgotPasswordPage = () => {
             <div className="success-animation">
               <CheckCircle size={48} />
             </div>
-            <h1>Check Your Phone</h1>
-            <p>Reset link sent to</p>
-            <p className="phone-highlight">{forgotPasswordData.submittedPhone}</p>
+            <h1>Check Your Email</h1>
+            <p>If an account exists with that phone number, we&apos;ve sent a password reset link to the registered email address.</p>
             <p className="resend-text">
-              Didn&apos;t receive?{' '}
-              <button 
-                type="button" 
+              Didn&apos;t receive an email?{' '}
+              <button
+                type="button"
                 className="resend-link"
                 onClick={() => forgotPasswordData.setIsSent(false)}
               >
@@ -84,49 +82,17 @@ const ForgotPasswordPage = () => {
             <p>Enter your phone number to receive a reset link</p>
           </div>
 
-          <Formik
+          <ForgotPasswordForm
             initialValues={forgotPasswordData.initialValues}
             validationSchema={forgotPasswordData.validationSchema}
             onSubmit={forgotPasswordData.handleSubmit}
-          >
-            {({ errors, touched, submitCount }) => {
-              const formError = forgotPasswordData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
-              return (
-                <Form className="auth-form">
-                  {formError && <ErrorMessage message={formError} />}
-                  
-                  <div className="form-group">
-                    <label htmlFor="phone">Phone Number</label>
-                    <div className="input-wrapper-with-icon">
-                      <span className="input-icon-left"><Phone size={18} /></span>
-                      <Field
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        placeholder="Enter your phone number"
-                        className="form-input"
-                      />
-                    </div>
-                  </div>
-
-                  <button type="submit" className="auth-btn" disabled={forgotPasswordData.isLoading}>
-                    {forgotPasswordData.isLoading ? (
-                      <Loader2 size={18} className="spin" />
-                    ) : (
-                      <>
-                        <span>Send Reset Link</span>
-                        <ArrowRight size={18} />
-                      </>
-                    )}
-                  </button>
-                </Form>
-              );
-            }}
-          </Formik>
+            isLoading={forgotPasswordData.isLoading}
+            error={forgotPasswordData.error}
+          />
         </div>
       </div>
     </div>
   );
 };
 
-export default ForgotPasswordPage;
+export default ForgotPassword;

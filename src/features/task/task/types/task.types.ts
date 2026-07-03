@@ -1,12 +1,17 @@
+export interface PopulatedField {
+  id: number;
+  name: string;
+}
+
 export interface TaskItem {
   id: number;
   title: string;
   description: string;
-  category: string;
+  category: PopulatedField;
   scheduledDate: string;
   scheduledTime: string;
   assignedBy: string;
-  assignedTo: string;
+  assignedTo: PopulatedField;
   priority: string;
   status: string;
 }

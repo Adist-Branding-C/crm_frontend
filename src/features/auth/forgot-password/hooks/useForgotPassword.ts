@@ -1,12 +1,11 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import { authService } from '../services/AuthService';
-import type { ForgotPasswordFormData } from '../types/auth.types';
-import { forgotPasswordValidationSchema } from '../validations/forgotPassword.schema';
+import { authService } from '../../services/AuthService';
+import type { ForgotPasswordFormData } from '../types/forgotPassword.types';
+import { forgotPasswordValidationSchema } from '../validations/index';
+import { FORGOT_PASSWORD_INITIAL_VALUES } from '../constants/index';
 
-const forgotPasswordInitialValues: ForgotPasswordFormData = { phone: '' };
-
-export function useForgotPasswordData() {
+export function useForgotPassword() {
   const [submittedPhone, setSubmittedPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
@@ -48,6 +47,6 @@ export function useForgotPasswordData() {
     isLoading, isSent, setIsSent, error,
     handleSubmit,
     validationSchema: forgotPasswordValidationSchema as any,
-    initialValues: forgotPasswordInitialValues,
+    initialValues: FORGOT_PASSWORD_INITIAL_VALUES,
   };
 }

@@ -1,16 +1,4 @@
-export interface LoginFormData {
-  phone: string
-  password: string
-}
-
-export interface ForgotPasswordFormData {
-  phone: string
-}
-
-export interface ResetPasswordFormData {
-  password: string
-  confirmPassword: string
-}
+import type { ApiResponse } from '../../../shared/types/common';
 
 export interface LoginRequest {
   phone: string
@@ -23,7 +11,7 @@ export interface AuthUser {
   name: string
 }
 
-export interface LoginResponseData {
+export interface LoginData {
   id: number
   phone: string
   name: string
@@ -31,19 +19,8 @@ export interface LoginResponseData {
   refreshToken: string
 }
 
-export interface LoginResponse {
-  status: boolean
-  message: string
-  data: LoginResponseData
-}
-
 export interface ForgotPasswordRequest {
   phone: string
-}
-
-export interface ForgotPasswordResponse {
-  status: boolean
-  message: string
 }
 
 export interface ResetPasswordRequest {
@@ -51,15 +28,11 @@ export interface ResetPasswordRequest {
   newPassword: string
 }
 
-export interface ResetPasswordResponse {
-  status: boolean
-  message: string
+export interface RefreshTokenData {
+  accessToken: string
+  refreshToken: string
 }
 
-export interface RefreshTokenResponse {
-  status: boolean;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-  };
-}
+export type {
+  ApiResponse,
+};

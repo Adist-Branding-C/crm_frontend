@@ -1,3 +1,8 @@
+export interface PopulatedField {
+  id: number;
+  name: string;
+}
+
 export interface CallTaskItem {
   id: number;
   title: string;
@@ -7,7 +12,7 @@ export interface CallTaskItem {
   scheduledDate: string;
   scheduledTime: string;
   duration: string;
-  assignedTo: string;
+  assignedTo: PopulatedField;
   status: string;
 }
 
