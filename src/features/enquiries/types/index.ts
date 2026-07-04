@@ -1,3 +1,9 @@
+export interface LeadAdditionalField {
+  fieldId: string;
+  name: string;
+  value: string;
+}
+
 export interface Lead {
   id: number;
   name: string;
@@ -12,6 +18,7 @@ export interface Lead {
   createdAt: string;
   updatedAt: string;
   nextFollowUp: string;
+  additionalFields: LeadAdditionalField[];
 }
 
 export interface LeadApiItem {
@@ -29,6 +36,7 @@ export interface LeadApiItem {
   createdAt: string | null;
   updatedAt: string | null;
   nextFollowUpDate: string | null;
+  additionalFields?: LeadAdditionalField[];
 }
 
 export interface PaginationInfo {
@@ -67,21 +75,23 @@ export interface UpdateLeadPayload {
   notes?: string;
   location?: string;
   address?: string;
+  additionalFields?: Array<{ fieldId: string; value: string }>;
 }
 
 export interface CreateLeadPayload {
   name: string;
   phone: string;
   email: string;
-  agentId: string;
-  purposeId: string;
-  typeId: string;
-  statusId: string;
   sourceId: string;
-  nextFollowUp: string;
-  notes: string;
-  location: string;
-  address: string;
+  agentId?: string;
+  purposeId?: string;
+  typeId?: string;
+  statusId?: string;
+  nextFollowUp?: string;
+  notes?: string;
+  location?: string;
+  address?: string;
+  additionalFields?: Array<{ fieldId: string; value: string }>;
 }
 
 export interface CreateLeadResponse {
@@ -92,8 +102,9 @@ export interface CreateLeadResponse {
   };
 }
 
+import type { DateRange } from '../../../shared/types/common';
+
 export interface Filters {
-  type: string;
   dateRange: DateRange;
   filterByDate: string;
   enquirySource: string;
@@ -106,59 +117,5 @@ export interface Filters {
   location: string;
   remarks: string;
   date: string;
+  additionalFields: Record<string, string>;
 }
-
-import type { SortConfig } from '../../../shared/types/sort';
-import type { Column } from '../../../shared/types/table';
-import type { DateRange } from '../../../shared/types/common';
-
-export interface EnquiriesFiltersProps {
-  filters: Filters;
-  onFilterChange: (filters: Filters) => void;
-  onApplyFilters: () => void;
-  onClearFilters: () => void;
-  onClose: () => void;
-}
-
-export interface EnquiriesTableProps {
-  data: Lead[];
-  columns: Column[];
-  sortConfig: SortConfig;
-  onSort: (key: string) => void;
-  paginatedIds: number[];
-  selectedIds: number[];
-  onSelectAll: (ids: number[], checked: boolean) => void;
-  onSelectRow: (id: number) => void;
-  actionMenuOpen: number | null;
-  actionMenuButtonRect: DOMRect | null;
-  onSetActionMenuOpen: (id: number | null) => void;
-  onSetActionMenuButtonRect: (rect: DOMRect | null) => void;
-  onViewLead: (lead: Lead) => void;
-  onEditLead: (lead: Lead) => void;
-  onDeleteLead: (lead: Lead) => void;
-}
-
-export interface EnquiriesToolbarProps {
-  searchQuery: string;
-  onSearchChange: (v: string) => void;
-  showFilters: boolean;
-  onToggleFilters: () => void;
-  sortConfig: SortConfig;
-  onSortDesc: (key: string) => void;
-  onSortAsc: (key: string) => void;
-  showSortDropdown: boolean;
-  sortDropdownClosing: boolean;
-  sortDropdownRef: React.RefObject<HTMLDivElement | null>;
-  onSetShowSortDropdown: (v: boolean) => void;
-  onCloseSortDropdown: () => void;
-  showActionsDropdown: boolean;
-  actionsDropdownClosing: boolean;
-  actionsDropdownRef: React.RefObject<HTMLDivElement | null>;
-  onSetShowActionsDropdown: (v: boolean) => void;
-  onCloseActionsDropdown: () => void;
-  onAddLead: () => void;
-}
-
-import type { PaginationProps } from '../../../shared/types/pagination';
-
-export interface EnquiriesPaginationProps extends PaginationProps {}

@@ -6,8 +6,10 @@ import AdminTable from '../../../../shared/components/crud/AdminTable';
 import AdminPagination from '../../../../shared/components/crud/AdminPagination';
 import AdminFormDrawer from '../../../../shared/components/crud/AdminFormDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
+import AdminConfirmationModal from '../../../../shared/components/crud/AdminConfirmationModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ValidationAlert from '../../../../shared/components/ValidationAlert';
+import Toast from '../../../../shared/components/Toast';
 import './LeadStatusPage.css';
 import { formFields, columns } from '../constants';
 
@@ -44,9 +46,16 @@ const LeadStatusPage = () => {
         </div>
       <AdminFormDrawer isOpen={d.showForm} title="Status" fields={formFields}
         formData={d.formData} onChange={d.setFormData} onSave={d.handleSave} onClose={d.handleCloseForm}
-        isEditing={!!d.editingItem} error={d.error} onClearError={d.clearError} />
+        isEditing={!!d.editingItem} error={d.error} onClearError={d.clearError}
+        isSaving={d.isSaving} saveDisabled={d.editingItem ? !d.hasChanges : false} />
+      <AdminConfirmationModal isOpen={d.showSaveConfirm}
+        title={d.saveConfirmMode === 'create' ? 'Create Status' : 'Update Status'}
+        message={d.saveConfirmMode === 'create' ? 'Are you sure you want to create this Lead Status?' : 'Are you sure you want to update this Lead Status?'}
+        isLoading={d.isSaving}
+        onConfirm={d.executeSave} onCancel={d.cancelSave} />
       <AdminDeleteModal isOpen={!!d.deletingItem} itemName={d.deletingItem?.status} itemType="status"
         onConfirm={d.handleConfirmDelete} onClose={() => d.setDeletingItem(null)} />
+      <Toast message={d.toastMessage} type={d.toastType} isVisible={d.showToast} onClose={d.clearToast} />
     </div>
   );
 };

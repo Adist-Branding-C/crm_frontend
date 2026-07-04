@@ -1,13 +1,13 @@
 import React from 'react';
-import { Search, Filter, ChevronDown, Plus, SortDesc, SortAsc, Upload, Edit2, UserPlus, Users, FolderPlus, Megaphone, Phone, Trash, Eye, Check, RefreshCw, ArrowDownNarrowWide, ArrowUpNarrowWide, MoreHorizontal, Download, RotateCcw, Send, Copy, Trash2 } from 'lucide-react';
-import type { EnquiriesToolbarProps } from '../types';
+import { Search, Filter, ChevronDown, Plus, SortDesc, SortAsc, Users, Check, RefreshCw, ArrowDownNarrowWide, ArrowUpNarrowWide, MoreHorizontal, Download, RotateCcw, Send, Copy, Trash2 } from 'lucide-react';
+import type { EnquiriesToolbarProps } from '../types/component.types';
 
 const EnquiriesToolbar: React.FC<EnquiriesToolbarProps> = ({
   searchQuery, onSearchChange, showFilters, onToggleFilters,
   sortConfig, onSortDesc, onSortAsc,
   showSortDropdown, sortDropdownClosing, sortDropdownRef, onSetShowSortDropdown, onCloseSortDropdown,
   showActionsDropdown, actionsDropdownClosing, actionsDropdownRef, onSetShowActionsDropdown, onCloseActionsDropdown,
-  onAddLead,
+  onAddLead, selectedCount, onExportSelected, onChangeStatus, onAssignStaff, onSendFollowUp, onDuplicateLead, onDeleteSelected,
 }) => {
   const toggleSort = () => {
     if (showSortDropdown) { onCloseSortDropdown(); } else { onSetShowSortDropdown(true); onSetShowActionsDropdown(false); }
@@ -63,28 +63,28 @@ const EnquiriesToolbar: React.FC<EnquiriesToolbarProps> = ({
         </div>
         <div className="dropdown-container" ref={actionsDropdownRef}>
           <button className={`btn btn-secondary ${showActionsDropdown ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); toggleActions(); }}>
-            <MoreHorizontal size={16} /> Actions <ChevronDown size={14} className={showActionsDropdown ? 'rotate' : ''} />
+            <MoreHorizontal size={16} /> Actions {selectedCount > 0 && <span className="selected-count-badge">{selectedCount}</span>} <ChevronDown size={14} className={showActionsDropdown ? 'rotate' : ''} />
           </button>
           {showActionsDropdown && (
             <div className={`premium-dropdown actions-dropdown ${actionsDropdownClosing ? 'closing' : ''}`}>
-              <div className="dropdown-header">Actions</div>
-              <button className="dropdown-item" onClick={() => { alert('Exporting selected leads...'); onCloseActionsDropdown(); }}>
+              <div className="dropdown-header">Actions {selectedCount > 0 && `(${selectedCount} selected)`}</div>
+              <button className="dropdown-item" onClick={() => { onExportSelected(); onCloseActionsDropdown(); }}>
                 <Download size={16} /> <span>Export Selected</span>
               </button>
-              <button className="dropdown-item" onClick={() => { alert('Changing status...'); onCloseActionsDropdown(); }}>
+              <button className="dropdown-item" onClick={() => { onChangeStatus(); onCloseActionsDropdown(); }}>
                 <RotateCcw size={16} /> <span>Change Status</span>
               </button>
-              <button className="dropdown-item" onClick={() => { alert('Assigning staff...'); onCloseActionsDropdown(); }}>
+              <button className="dropdown-item" onClick={() => { onAssignStaff(); onCloseActionsDropdown(); }}>
                 <Users size={16} /> <span>Assign Staff</span>
               </button>
-              <button className="dropdown-item" onClick={() => { alert('Sending follow up...'); onCloseActionsDropdown(); }}>
+              <button className="dropdown-item" onClick={() => { onSendFollowUp(); onCloseActionsDropdown(); }}>
                 <Send size={16} /> <span>Send Follow Up</span>
               </button>
-              <button className="dropdown-item" onClick={() => { alert('Duplicating lead...'); onCloseActionsDropdown(); }}>
+              <button className="dropdown-item" onClick={() => { onDuplicateLead(); onCloseActionsDropdown(); }}>
                 <Copy size={16} /> <span>Duplicate Lead</span>
               </button>
               <div className="dropdown-divider"></div>
-              <button className="dropdown-item danger" onClick={() => { alert('Deleting selected leads...'); onCloseActionsDropdown(); }}>
+              <button className="dropdown-item danger" onClick={() => { onDeleteSelected(); onCloseActionsDropdown(); }}>
                 <Trash2 size={16} /> <span>Delete Selected</span>
               </button>
             </div>

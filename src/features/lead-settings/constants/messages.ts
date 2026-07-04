@@ -28,4 +28,9 @@ export const ERROR_MESSAGES = {
   VALIDATION_LEAD_PURPOSE_REQUIRED: 'Please select a lead purpose.',
   VALIDATION_DROPDOWN_VALUES: 'Please add at least one dropdown value.',
   VALIDATION_CHECKBOX_VALUES: 'Please add at least one checkbox value.',
+
+  DUPLICATE_LEAD_SOURCE: 'This lead source already exists.',
+  DUPLICATE_LEAD_PURPOSE: 'This lead purpose already exists.',
+  DUPLICATE_LEAD_TYPE: 'This lead type already exists.',
+  DUPLICATE_LEAD_STATUS: 'This lead status already exists.',
 } as const;

@@ -10,6 +10,7 @@ interface AdditionalFieldFormProps {
   purposes: LeadPurposeOption[];
   editingItem: LeadAdditionalItem | null;
   isSaving: boolean;
+  saveDisabled?: boolean;
   error: string | null;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -31,6 +32,7 @@ const AdditionalFieldForm = ({
   onAddDropdownValue,
   onRemoveDropdownValue,
   onClearError,
+  saveDisabled,
 }: AdditionalFieldFormProps) => (
   <div className="additional-form-panel">
     <div className="card">
@@ -115,7 +117,7 @@ const AdditionalFieldForm = ({
               </select>
             </div>
           )}
-          {(formData.fieldType === 'dropdown' || formData.fieldType === 'checkbox') && (
+          {(formData.fieldType === 'Dropdown') && (
             <DropdownValuesInput
               currentValue={formData.currentDropdownValue}
               values={formData.dropdownValues}
@@ -124,7 +126,7 @@ const AdditionalFieldForm = ({
               onRemove={onRemoveDropdownValue}
             />
           )}
-          <button type="submit" className="btn btn-primary" disabled={isSaving}>
+          <button type="submit" className="btn btn-primary" disabled={isSaving || saveDisabled}>
             {isSaving ? (
               <><Loader2 size={16} className="spin" /> Saving...</>
             ) : (

@@ -2,7 +2,7 @@ import { Settings, Users, DollarSign, Clock, Bell, CreditCard, Link as LinkIcon,
 
 export const settingsItems = [
   { id: 'account', title: 'Account', description: 'Manage your login credentials, settings, and preferences', link: '/account', icon: <Settings size={24} /> },
-  { id: 'leads', title: 'Lead Settings', description: 'Configure status, source, purpose, and custom fields for seamless management', link: '/settings/lead-settings/purpose', icon: <Users size={24} /> },
+  { id: 'leads', title: 'Lead Settings', description: 'Configure status, source, purpose, and custom fields for seamless management', link: '/settings/lead-settings/types', icon: <Users size={24} /> },
   { id: 'deals', title: 'Deal Settings', description: 'Adjust Deal settings, and custom fields for streamlined management', link: '/user/deal-types', icon: <DollarSign size={24} /> },
   { id: 'tasks', title: 'Task Settings', description: 'Organize task categories, priorities, and customizations for improved productivity', link: '/user/call_status', icon: <Clock size={24} /> },
   { id: 'notifications', title: 'Notifications', description: 'Customize alerts, messages, and updates for your account', link: '/user/notifications-users', icon: <Bell size={24} /> },

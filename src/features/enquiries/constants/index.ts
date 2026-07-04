@@ -1,7 +1,6 @@
 export const DEFAULT_ROWS_PER_PAGE = 10;
 
 export const INITIAL_FILTERS = {
-  type: '',
   dateRange: { start: '', end: '' },
   filterByDate: '',
   enquirySource: '',
@@ -14,6 +13,7 @@ export const INITIAL_FILTERS = {
   location: '',
   remarks: '',
   date: '',
+  additionalFields: {},
 };
 
 export const COLUMNS = [

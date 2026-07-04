@@ -20,7 +20,7 @@ function buildValidationSchema(fields: FormField[]) {
   return Object.keys(shape).length > 0 ? Yup.object().shape(shape) : undefined;
 }
 
-const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields, formData, onChange, onSave, onClose, isEditing, error, onClearError, isSaving }) => {
+const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields, formData, onChange, onSave, onClose,   isEditing, error, onClearError, isSaving, saveDisabled }) => {
   if (!isOpen) return null;
 
   const validationSchema = React.useMemo(() => buildValidationSchema(fields), [fields]);
@@ -127,7 +127,7 @@ const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields
                     </div>
                   ))}
                   <div className="form-actions">
-                    <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                    <button type="submit" className="btn btn-primary" disabled={isSaving || saveDisabled}>
                       {isSaving ? <><Loader2 size={16} className="spin" /> Saving...</> : (isEditing ? ACTION_UPDATE : ACTION_SAVE)}
                     </button>
                     <button type="button" className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>

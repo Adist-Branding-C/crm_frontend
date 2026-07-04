@@ -1,8 +1,17 @@
 import { useState, useEffect } from 'react';
 import { activityService } from '../services/activityService';
 
+interface ActivityItem {
+  id: string;
+  type: string;
+  description: string;
+  createdAt: string;
+  performedBy: string;
+  [key: string]: unknown;
+}
+
 export function useLeadActivities(leadId: number | undefined, isOpen: boolean) {
-  const [activities, setActivities] = useState<any[]>([]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

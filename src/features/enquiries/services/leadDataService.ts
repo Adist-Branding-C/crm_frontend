@@ -19,7 +19,7 @@ class LeadDataService {
   }
 
   async updateLead(id: number, payload: UpdateLeadPayload): Promise<ApiResponse> {
-    const response = await axiosInstance.put<ApiResponse>(`${LEAD_API_ENDPOINTS.LEADS}/${id}`, payload);
+    const response = await axiosInstance.patch<ApiResponse>(`${LEAD_API_ENDPOINTS.LEADS}/${id}`, payload);
     return response.data;
   }
 }

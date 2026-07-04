@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { LeadAdditionalApiItem } from '../../features/lead-settings/lead-additional/types';
 
 export interface SampleDeal {
   id: number;
@@ -46,6 +47,7 @@ export interface CampaignFormData {
 export interface DealFormData {
   dealName: string;
   lead: string;
+  leadId?: string | number;
   mobile: string;
   amount: string;
   status: string;
@@ -53,6 +55,7 @@ export interface DealFormData {
   startDate: string;
   endDate: string;
   assignAgent: string;
+  agentId?: string | number;
 }
 
 export interface AddDealTaskDrawerProps {
@@ -76,8 +79,66 @@ export interface AddDealDrawerProps {
   deal?: DealFormData | null;
 }
 
+import type { Lead } from '../../features/enquiries/types';
+
 export interface AddLeadDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSaved?: () => void;
+  onSaved?: (action: 'created' | 'updated') => void;
+  lead?: Lead | null;
+}
+
+export interface AddLeadFormValues {
+  name: string;
+  phone: string;
+  email: string;
+  agentId: string;
+  purposeId: string;
+  typeId: string;
+  statusId: string;
+  sourceId: string;
+  nextFollowUp: string;
+  notes: string;
+  location: string;
+  address: string;
+}
+
+export interface DynamicAdditionalFieldsProps {
+  fields: LeadAdditionalApiItem[];
+  values: Record<string, unknown>;
+  errors: Record<string, unknown>;
+  touched: Record<string, unknown>;
+  handleChange: (e: React.ChangeEvent<unknown>) => void;
+  handleBlur: (e: React.FocusEvent<unknown>) => void;
+  setFieldValue?: (field: string, value: unknown) => void;
+}
+
+export interface ActivityLogItem {
+  id: string;
+  actorName: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface LeadDetailDrawerProps {
+  lead: {
+    id: number;
+    name: string;
+    phone: string;
+    email?: string;
+    location?: string;
+    assignedTo: string;
+    purpose: string;
+    type: string;
+    status: string;
+    source: string;
+    createdAt: string;
+    updatedAt: string;
+    nextFollowUp?: string;
+    additionalFields?: Array<{ fieldId: string; name: string; value: string }>;
+  } | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onLeadUpdated?: () => void;
+  onDeleteLead?: (lead: Lead) => void;
 }

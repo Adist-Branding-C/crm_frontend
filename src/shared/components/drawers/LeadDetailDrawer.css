@@ -649,6 +649,31 @@
   background-color: var(--bg-card);
 }
 
+.leaddrawer-remark-edit-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8125rem;
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-family: inherit;
+  min-height: 60px;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+.leaddrawer-remark-edit-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.leaddrawer-note-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .leaddrawer-task-filters {
   display: flex;
   gap: 0.5rem;
@@ -915,4 +940,32 @@
 
 .btn-danger:hover {
   background-color: #b91c1c;
+}
+
+.leaddrawer-action-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.leaddrawer-note-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-family: inherit;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.leaddrawer-note-actions-container {
+  margin-top: 0.5rem;
+}
+
+.leaddrawer-task-description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
 }

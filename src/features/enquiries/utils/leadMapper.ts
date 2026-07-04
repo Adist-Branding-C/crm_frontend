@@ -15,5 +15,6 @@ export function mapApiToUI(item: LeadApiItem): Lead {
     createdAt: item.createdAt ?? '',
     updatedAt: item.updatedAt ?? '',
     nextFollowUp: item.nextFollowUpDate ?? '',
+    additionalFields: item.additionalFields ?? [],
   };
 }
