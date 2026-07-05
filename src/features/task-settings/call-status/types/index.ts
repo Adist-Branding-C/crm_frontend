@@ -1,7 +1,7 @@
 export type {
   CallStatusItem,
   CallStatusFormData,
-  CallStatusResponse,
+  CallStatusApiResponse,
   CallStatusTableProps,
   CallStatusActionsProps,
   AddCallStatusDrawerProps,

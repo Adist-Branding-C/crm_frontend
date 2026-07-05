@@ -1,5 +1,8 @@
 import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
+import type { ApiResponse } from '../../../../shared/types/common';
+
+export type TaskCategoryApiResponse = ApiResponse<TaskCategoryItem> & { errors?: Record<string, string[]>; field?: string };
 
 export interface TaskCategoryItem {
   id: number;
@@ -10,14 +13,6 @@ export interface TaskCategoryItem {
 export interface TaskCategoryFormData {
   category: string;
   action: string;
-}
-
-export interface TaskCategoryResponse {
-  status: boolean;
-  message: string;
-  data?: unknown;
-  errors?: Record<string, string[]>;
-  field?: string;
 }
 
 export interface TaskCategoryTableProps {
@@ -50,9 +45,9 @@ export interface AddTaskCategoryDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: TaskCategoryFormData;
-  onSubmit: (values: TaskCategoryFormData, helpers: FormikHelpers<TaskCategoryFormData>) => Promise<void>;
+  onSubmit: (values: TaskCategoryFormData, helpers: FormikHelpers<TaskCategoryFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   isEditing?: boolean;
 }
 
@@ -61,9 +56,9 @@ export interface EditTaskCategoryDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: TaskCategoryFormData;
-  onSubmit: (values: TaskCategoryFormData, helpers: FormikHelpers<TaskCategoryFormData>) => Promise<void>;
+  onSubmit: (values: TaskCategoryFormData, helpers: FormikHelpers<TaskCategoryFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   editingItem: TaskCategoryItem | null;
   isEditing?: boolean;
 }
