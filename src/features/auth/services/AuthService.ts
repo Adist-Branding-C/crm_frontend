@@ -18,6 +18,10 @@ class AuthService {
     const response = await axiosInstance.post<ApiResponse>(AUTH_API_ENDPOINTS.RESET_PASSWORD, data);
     return response.data;
   }
+
+  async logout(): Promise<void> {
+    await axiosInstance.post(AUTH_API_ENDPOINTS.LOGOUT);
+  }
 }
 
 export const authService = new AuthService();

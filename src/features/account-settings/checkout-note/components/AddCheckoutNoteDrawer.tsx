@@ -12,7 +12,6 @@ const scrollToFirstError = (container: HTMLElement | null) => {
     (errorEl as HTMLElement).focus();
   }
 };
-
 const AddCheckoutNoteDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddCheckoutNoteDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
   const prevSubmitCountRef = useRef(0);
