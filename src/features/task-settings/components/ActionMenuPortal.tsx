@@ -20,7 +20,7 @@ const ActionMenuPortal = ({ isOpen, triggerRef, onClose, children }: ActionMenuP
       top: shouldOpenUp ? undefined : rect.bottom + 4,
       bottom: shouldOpenUp ? window.innerHeight - rect.top + 4 : undefined,
       right: window.innerWidth - rect.right,
-      zIndex: 9999,
+      zIndex: 500,
     });
   }, [isOpen, triggerRef]);
 

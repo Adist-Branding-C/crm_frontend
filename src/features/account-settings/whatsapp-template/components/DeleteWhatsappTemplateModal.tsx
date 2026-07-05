@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import type { DeleteWhatsappTemplateModalProps } from '../types/delete-whatsapp-template-modal.types';
+import type { DeleteWhatsappTemplateModalProps } from '../types';
 
 const DeleteWhatsappTemplateModal = ({ isOpen, itemName, onConfirm, onClose }: DeleteWhatsappTemplateModalProps) => {
   if (!isOpen) return null;

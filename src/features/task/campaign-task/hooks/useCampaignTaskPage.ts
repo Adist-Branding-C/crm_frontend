@@ -7,7 +7,7 @@ import { useDeleteCampaignTaskDialog } from './useDeleteCampaignTaskDialog';
 import { useRowDropdown } from '../../shared/hooks/useRowDropdown';
 import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
 import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
-import { useTaskSettingsSearch } from '../../../task-settings/hooks/useTaskSettingsSearch';
+import { useSearchInput } from '../../../../shared/hooks/useSearchInput';
 import { useToast } from '../../hooks/useToast';
 
 export function useCampaignTaskPage() {
@@ -35,7 +35,7 @@ export function useCampaignTaskPage() {
     toast,
   );
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useSearchInput(fetch.searchQuery, fetch.handleSearchChange);
 
   const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 

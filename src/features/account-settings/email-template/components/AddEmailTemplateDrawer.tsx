@@ -1,17 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { AddEmailTemplateDrawerProps } from '../types/add-email-template-drawer.types';
-
-const scrollToFirstError = (container: HTMLElement | null) => {
-  if (!container) return;
-  const errorEl = container.querySelector('.input-error');
-  if (errorEl) {
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (errorEl as HTMLElement).focus();
-  }
-};
+import { scrollToFirstError } from '../../../task-settings/utils/scrollToFirstError';
+import type { AddEmailTemplateDrawerProps } from '../types';
 
 const AddEmailTemplateDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddEmailTemplateDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
@@ -49,30 +41,28 @@ const AddEmailTemplateDrawer = ({ isOpen, onClose, validationSchema, initialValu
                 }
               }
 
-              const formError = error;
-              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
-              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+              const fieldClass = (name: keyof typeof initialValues) => `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError} />}
+                  {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
                     <label>Template Name <span className="text-danger">*</span></label>
                     <Field type="text" name="templateName" className={fieldClass('templateName')} placeholder="Enter template name" />
-                    {showError('templateName') && errors.templateName && <small className="field-error-text">{errors.templateName}</small>}
+                    <FormikError name="templateName" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>Subject <span className="text-danger">*</span></label>
                     <Field type="text" name="subject" className={fieldClass('subject')} placeholder="Enter email subject" />
-                    {showError('subject') && errors.subject && <small className="field-error-text">{errors.subject}</small>}
+                    <FormikError name="subject" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>Content <span className="text-danger">*</span></label>
                     <Field as="textarea" name="content" className={fieldClass('content')} placeholder="Enter template content" rows={6} />
-                    {showError('content') && errors.content && <small className="field-error-text">{errors.content}</small>}
+                    <FormikError name="content" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -82,7 +72,7 @@ const AddEmailTemplateDrawer = ({ isOpen, onClose, validationSchema, initialValu
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </Field>
-                    {showError('status') && errors.status && <small className="field-error-text">{errors.status}</small>}
+                    <FormikError name="status" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-actions flex flex-col sm:flex-row gap-3">

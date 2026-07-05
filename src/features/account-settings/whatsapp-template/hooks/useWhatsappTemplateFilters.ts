@@ -1,4 +1,4 @@
-import type { WhatsappTemplateItem } from '../types/whatsapp-template.types';
+import type { WhatsappTemplateItem } from '../types';
 
 export function useWhatsappTemplateFilters(whatsappTemplateList: WhatsappTemplateItem[]) {
   return {

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { CheckoutNoteItem, CheckoutNoteFormData } from '../types/checkoutNote.types';
+import type { CheckoutNoteItem, CheckoutNoteFormData } from '../types';
 
 export function useCheckoutNoteDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);

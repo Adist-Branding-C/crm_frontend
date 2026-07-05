@@ -1,5 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { BranchActionMenuProps } from '../types/branch-action-menu.types';
+import type { BranchActionMenuProps } from '../types';
 
 const BranchActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: BranchActionMenuProps) => {
   return (

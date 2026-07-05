@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useMeetingOutcome } from './hooks/useMeetingOutcome';
 import { useMeetingOutcomeForm } from './hooks/useMeetingOutcomeForm';
-import { useTaskSettingsSearch } from '../hooks/useTaskSettingsSearch';
+import { useSearchInput } from '../../../shared/hooks/useSearchInput';
 import { SETTINGS_TABS } from '../constants/index';
 import { addMeetingOutcomeValidationSchema, editMeetingOutcomeValidationSchema } from './validations/index';
 import { ADD_MEETING_OUTCOME_INITIAL_VALUES } from './constants/index';
@@ -10,7 +10,7 @@ import MeetingOutcomeTable from './components/MeetingOutcomeTable';
 import AddMeetingOutcomeDrawer from './components/AddMeetingOutcomeDrawer';
 import EditMeetingOutcomeDrawer from './components/EditMeetingOutcomeDrawer';
 import DeleteMeetingOutcomeDialog from './components/DeleteMeetingOutcomeDialog';
-import ToastNotification from '../components/ToastNotification';
+import ToastNotification from '../../../shared/components/ToastNotification';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../components/SettingsTabs/SettingsTabs';
 import type { MeetingOutcomeFormData } from './types/index';
@@ -39,7 +39,7 @@ const MeetingOutcomePage = () => {
 
   const form = useMeetingOutcomeForm();
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(searchQuery, handleSearchChange);
+  const { searchValue, handleSearchInput } = useSearchInput(searchQuery, handleSearchChange);
 
   const totalPages = Math.ceil(totalCount / limit) || 1;
 

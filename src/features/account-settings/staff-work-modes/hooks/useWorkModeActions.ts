@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { WorkModeItem, WorkModeFormData } from '../types/workMode.types';
-import type { UseWorkModeActionsParams } from '../types/use-work-mode-actions.types';
+import type { WorkModeItem, WorkModeFormData, UseWorkModeActionsParams } from '../types';
 
 export function useWorkModeActions({ workMode, drawer }: UseWorkModeActionsParams) {
   const [deletingItem, setDeletingItem] = useState<WorkModeItem | null>(null);

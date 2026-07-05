@@ -1,5 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { CheckoutNoteActionMenuProps } from '../types/checkout-note-action-menu.types';
+import type { CheckoutNoteActionMenuProps } from '../types';
 
 const CheckoutNoteActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: CheckoutNoteActionMenuProps) => {
   return (

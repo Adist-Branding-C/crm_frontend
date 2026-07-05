@@ -1,4 +1,4 @@
-import type { EmailTemplateItem } from '../types/emailTemplate.types';
+import type { EmailTemplateItem } from '../types';
 
 export function useEmailTemplateFilters(emailTemplateList: EmailTemplateItem[]) {
   return {

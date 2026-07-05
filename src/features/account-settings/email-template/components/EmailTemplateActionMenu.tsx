@@ -1,5 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { EmailTemplateActionMenuProps } from '../types/email-template-action-menu.types';
+import type { EmailTemplateActionMenuProps } from '../types';
 
 const EmailTemplateActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: EmailTemplateActionMenuProps) => {
   return (

@@ -1,15 +1,15 @@
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { workModeService } from '../services/workMode.service';
-import { addWorkModeValidationSchema, editWorkModeValidationSchema } from '../validations/workMode.validation';
-import { ADD_WORK_MODE_INITIAL_VALUES } from '../constants/workMode.constants';
-import type { WorkModeItem, WorkModeFormData } from '../types/workMode.types';
+import { workModeApiService } from '../services';
+import { addWorkModeValidationSchema, editWorkModeValidationSchema } from '../validations';
+import { ADD_WORK_MODE_INITIAL_VALUES } from '../constants';
+import type { WorkModeItem, WorkModeFormData } from '../types';
 
 export function useWorkMode() {
   const pagination = useTableData<WorkModeItem>({
     fetchFn: async (params) => {
-      const response = await workModeService.getAllWorkModes(params as unknown as Record<string, string | number | undefined>);
+      const response = await workModeApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
         const data = response.data as { items: WorkModeItem[]; pagination?: { total: number } } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
@@ -30,7 +30,7 @@ export function useWorkMode() {
       const { workModeName, description, status } = values;
       const requestData: WorkModeFormData = { workModeName, description, status };
 
-      const response = await workModeService.createWorkMode(requestData);
+      const response = await workModeApiService.create(requestData);
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -70,7 +70,7 @@ export function useWorkMode() {
       const { workModeName, description, status } = values;
       const requestData: WorkModeFormData = { workModeName, description, status };
 
-      const response = await workModeService.updateWorkMode(id, requestData);
+      const response = await workModeApiService.update(id, requestData);
 
       if (response.status) {
         pagination.refresh();
@@ -99,7 +99,7 @@ export function useWorkMode() {
     pagination.setError('');
 
     try {
-      const response = await workModeService.deleteWorkMode(id);
+      const response = await workModeApiService.delete(id);
 
       if (response.status) {
         pagination.refresh();

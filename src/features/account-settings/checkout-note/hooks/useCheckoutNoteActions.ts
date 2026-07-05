@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { CheckoutNoteItem, CheckoutNoteFormData } from '../types/checkoutNote.types';
-import type { UseCheckoutNoteActionsParams } from '../types/use-checkout-note-actions.types';
+import type { CheckoutNoteItem, CheckoutNoteFormData, UseCheckoutNoteActionsParams } from '../types';
 
 export function useCheckoutNoteActions({ checkoutNote, drawer }: UseCheckoutNoteActionsParams) {
   const [deletingItem, setDeletingItem] = useState<CheckoutNoteItem | null>(null);

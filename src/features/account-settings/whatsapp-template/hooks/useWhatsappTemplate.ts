@@ -1,14 +1,10 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { whatsappTemplateService } from '../services/whatsappTemplate.service';
-import { addWhatsappTemplateValidationSchema, editWhatsappTemplateValidationSchema } from '../validations/whatsapp-template.validation';
-import { ADD_WHATSAPP_TEMPLATE_INITIAL_VALUES } from '../constants/whatsappTemplate.constants';
-import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types/whatsapp-template.types';
-
-const FIELD_MAP: Record<string, string> = {
-  template_name: 'templateName',
-};
+import { whatsappTemplateApiService } from '../services';
+import { addWhatsappTemplateValidationSchema, editWhatsappTemplateValidationSchema } from '../validations';
+import { ADD_WHATSAPP_TEMPLATE_INITIAL_VALUES, WHATSAPP_TEMPLATE_FIELD_MAP } from '../constants';
+import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types';
 
 export function useWhatsappTemplate() {
   const [toastMessage, setToastMessage] = useState('');
@@ -24,7 +20,7 @@ export function useWhatsappTemplate() {
 
   const pagination = useTableData<WhatsappTemplateItem>({
     fetchFn: async (params) => {
-      const response = await whatsappTemplateService.getAllWhatsappTemplates(params as unknown as Record<string, string | number | undefined>);
+      const response = await whatsappTemplateApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
         const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
           ? (response.data as { items: WhatsappTemplateItem[]; pagination?: { total: number } }).items
@@ -48,16 +44,16 @@ export function useWhatsappTemplate() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = WHATSAPP_TEMPLATE_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = WHATSAPP_TEMPLATE_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -100,7 +96,8 @@ export function useWhatsappTemplate() {
     try {
       const { templateName, message, status } = values;
       const requestData: WhatsappTemplateFormData = { templateName: templateName.trim(), message: message.trim(), status };
-      const response = await whatsappTemplateService.createWhatsappTemplate(requestData);
+      const response = await whatsappTemplateApiService.create(requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -111,7 +108,7 @@ export function useWhatsappTemplate() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -158,7 +155,8 @@ export function useWhatsappTemplate() {
     try {
       const { templateName, message, status } = values;
       const requestData: WhatsappTemplateFormData = { templateName: templateName.trim(), message: message.trim(), status };
-      const response = await whatsappTemplateService.updateWhatsappTemplate(id, requestData);
+      const response = await whatsappTemplateApiService.update(id, requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.refresh();
@@ -166,7 +164,7 @@ export function useWhatsappTemplate() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -206,7 +204,7 @@ export function useWhatsappTemplate() {
     pagination.setError('');
 
     try {
-      const response = await whatsappTemplateService.deleteWhatsappTemplate(id);
+      const response = await whatsappTemplateApiService.delete(id);
 
       if (response.status) {
         pagination.refresh();

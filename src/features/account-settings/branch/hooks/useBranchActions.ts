@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { BranchItem, BranchFormData } from '../types/branch.types';
-import type { UseBranchActionsParams } from '../types/use-branch-actions.types';
+import type { BranchItem, BranchFormData, UseBranchActionsParams } from '../types';
 
 export function useBranchActions({ branch, drawer }: UseBranchActionsParams) {
   const [deletingItem, setDeletingItem] = useState<BranchItem | null>(null);

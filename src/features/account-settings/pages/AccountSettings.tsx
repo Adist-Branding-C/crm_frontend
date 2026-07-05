@@ -1,6 +1,6 @@
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
-import AgentPage from '../agent/pages/AgentPage';
+import AgentPage from '../agent/page/AgentPage';
 import './AccountSettings.css';
 
 const AccountSettings = () => {

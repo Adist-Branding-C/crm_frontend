@@ -1,5 +1,5 @@
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import type { WorkModeActionMenuProps } from '../types/work-mode-action-menu.types';
+import type { WorkModeActionMenuProps } from '../types';
 
 const WorkModeActionMenu = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: WorkModeActionMenuProps) => {
   return (

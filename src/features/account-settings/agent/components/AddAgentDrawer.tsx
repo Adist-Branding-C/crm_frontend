@@ -1,27 +1,20 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { AddAgentDrawerProps } from '../types/add-agent-drawer.types';
+import { scrollToFirstError } from '../../../task-settings/utils/scrollToFirstError';
+import type { AddAgentDrawerProps } from '../types';
 
-const scrollToFirstError = (container: HTMLElement | null) => {
-  if (!container) return;
-  const errorEl = container.querySelector('.input-error');
-  if (errorEl) {
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (errorEl as HTMLElement).focus();
-  }
-};
-
-const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing, designationOptions, onFetchDesignations }: AddAgentDrawerProps) => {
+const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing, designationOptions, onFetchDesignations, departmentOptions, onFetchDepartments }: AddAgentDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
   const prevSubmitCountRef = useRef(0);
 
   useEffect(() => {
     if (isOpen) {
       onFetchDesignations();
+      onFetchDepartments();
     }
-  }, [isOpen, onFetchDesignations]);
+  }, [isOpen, onFetchDesignations, onFetchDepartments]);
 
   useEffect(() => {
     if (error) {
@@ -57,18 +50,16 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
                 }
               }
 
-              const formError = error;
-              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
-              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+              const fieldClass = (name: keyof typeof initialValues) => `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError} />}
+                  {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
                     <label>Name <span className="text-danger">*</span></label>
                     <Field type="text" name="fullName" className={fieldClass('fullName')} placeholder="Enter name" />
-                    {showError('fullName') && errors.fullName && <small className="field-error-text">{errors.fullName}</small>}
+                    <FormikError name="fullName" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -93,7 +84,7 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
                         />
                       )}
                     </Field>
-                    {showError('phone') && errors.phone && <small className="field-error-text">{errors.phone}</small>}
+                    <FormikError name="phone" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -115,7 +106,7 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
                         />
                       )}
                     </Field>
-                    {showError('email') && errors.email && <small className="field-error-text">{errors.email}</small>}
+                    <FormikError name="email" component="small" className="field-error-text" />
                   </div>
 
                   {!isEditing && (
@@ -123,12 +114,12 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
                       <div className="form-group">
                         <label>Password <span className="text-danger">*</span></label>
                         <Field type="password" name="password" className={fieldClass('password')} placeholder="Enter password" />
-                        {showError('password') && errors.password && <small className="field-error-text">{errors.password}</small>}
+                        <FormikError name="password" component="small" className="field-error-text" />
                       </div>
                       <div className="form-group">
                         <label>Confirm Password <span className="text-danger">*</span></label>
                         <Field type="password" name="confirmPassword" className={fieldClass('confirmPassword')} placeholder="Enter confirm password" />
-                        {showError('confirmPassword') && errors.confirmPassword && <small className="field-error-text">{errors.confirmPassword}</small>}
+                        <FormikError name="confirmPassword" component="small" className="field-error-text" />
                       </div>
                     </>
                   )}
@@ -141,7 +132,18 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                       ))}
                     </Field>
-                    {showError('designationId') && errors.designationId && <small className="field-error-text">{errors.designationId}</small>}
+                    <FormikError name="designationId" component="small" className="field-error-text" />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Department <span className="text-danger">*</span></label>
+                    <Field as="select" name="departmentId" className={fieldClass('departmentId')}>
+                      <option value="">Select department</option>
+                      {departmentOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </Field>
+                    <FormikError name="departmentId" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -151,7 +153,7 @@ const AddAgentDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSu
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </Field>
-                    {showError('status') && errors.status && <small className="field-error-text">{errors.status}</small>}
+                    <FormikError name="status" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-actions flex flex-col sm:flex-row gap-3">

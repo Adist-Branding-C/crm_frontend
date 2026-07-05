@@ -11,8 +11,3 @@ export interface PasswordStrengthResult {
   text: string;
   color: string;
 }
-
-export interface ChangePasswordResponse {
-  status: boolean;
-  message: string;
-}

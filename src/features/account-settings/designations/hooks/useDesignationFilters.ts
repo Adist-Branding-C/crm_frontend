@@ -1,4 +1,4 @@
-import type { DesignationItem } from '../types/designation.types';
+import type { DesignationItem } from '../types';
 
 export function useDesignationFilters(designationList: DesignationItem[]) {
   return {

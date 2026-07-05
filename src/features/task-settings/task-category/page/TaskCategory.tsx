@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTaskCategory } from '../hooks/useTaskCategory';
 import { useTaskCategoryForm } from '../hooks/useTaskCategoryForm';
-import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
+import { useSearchInput } from '../../../../shared/hooks/useSearchInput';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addTaskCategoryValidationSchema, editTaskCategoryValidationSchema } from '../validations/index';
 import { ADD_TASK_CATEGORY_INITIAL_VALUES } from '../constants/index';
@@ -10,7 +10,7 @@ import TaskCategoryTable from '../components/TaskCategoryTable';
 import AddTaskCategoryDrawer from '../components/AddTaskCategoryDrawer';
 import EditTaskCategoryDrawer from '../components/EditTaskCategoryDrawer';
 import DeleteTaskCategoryDialog from '../components/DeleteTaskCategoryDialog';
-import ToastNotification from '../../components/ToastNotification';
+import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../components/SettingsTabs/SettingsTabs';
 import type { TaskCategoryFormData } from '../types/index';
@@ -39,7 +39,7 @@ const TaskCategoryPage = () => {
 
   const form = useTaskCategoryForm();
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(searchQuery, handleSearchChange);
+  const { searchValue, handleSearchInput } = useSearchInput(searchQuery, handleSearchChange);
 
   const totalPages = Math.ceil(totalCount / limit) || 1;
 

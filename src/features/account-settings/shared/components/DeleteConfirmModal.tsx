@@ -1,12 +1,5 @@
 import { X } from 'lucide-react';
-
-interface DeleteConfirmModalProps {
-  deletingStaff: { name: string; id: number } | null;
-  deleteConfirmText: string;
-  onDeleteConfirmTextChange: (text: string) => void;
-  onConfirmDelete: () => void;
-  onClose: () => void;
-}
+import type { DeleteConfirmModalProps } from '../types';
 
 const DeleteConfirmModal = ({ deletingStaff, deleteConfirmText, onDeleteConfirmTextChange, onConfirmDelete, onClose }: DeleteConfirmModalProps) => {
   if (!deletingStaff) return null;

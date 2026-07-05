@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { DepartmentItem, DepartmentFormData } from '../types/department.types';
+import type { DepartmentItem, DepartmentFormData } from '../types';
 
 export function useDepartmentDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);

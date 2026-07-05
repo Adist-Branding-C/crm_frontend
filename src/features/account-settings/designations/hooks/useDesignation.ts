@@ -1,14 +1,10 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { designationService } from '../services/designation.service';
-import { addDesignationValidationSchema, editDesignationValidationSchema } from '../validations/designation.validation';
-import { ADD_DESIGNATION_INITIAL_VALUES } from '../constants/designation.constants';
-import type { DesignationItem, DesignationFormData } from '../types/designation.types';
-
-const FIELD_MAP: Record<string, string> = {
-  designation_name: 'designationName',
-};
+import { designationApiService } from '../services';
+import { addDesignationValidationSchema, editDesignationValidationSchema } from '../validations';
+import { ADD_DESIGNATION_INITIAL_VALUES, DESIGNATION_FIELD_MAP } from '../constants';
+import type { DesignationItem, DesignationFormData } from '../types';
 
 export function useDesignation() {
   const [toastMessage, setToastMessage] = useState('');
@@ -25,7 +21,7 @@ export function useDesignation() {
 
   const pagination = useTableData<DesignationItem>({
     fetchFn: async (params) => {
-      const response = await designationService.getAllDesignations(params as unknown as Record<string, string | number | undefined>);
+      const response = await designationApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
         const data = response.data as { items: DesignationItem[]; pagination?: { total: number } } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
@@ -42,16 +38,16 @@ export function useDesignation() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = DESIGNATION_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = DESIGNATION_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -92,7 +88,8 @@ export function useDesignation() {
 
     try {
       const requestData = { ...values, description: values.description.trim() };
-      const response = await designationService.createDesignation(requestData);
+      const response = await designationApiService.create(requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -103,7 +100,7 @@ export function useDesignation() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -149,14 +146,15 @@ export function useDesignation() {
 
     try {
       const requestData = { ...values, description: values.description.trim() };
-      const response = await designationService.updateDesignation(id, requestData);
+      const response = await designationApiService.update(id, requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.refresh();
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -196,7 +194,7 @@ export function useDesignation() {
     pagination.setError('');
 
     try {
-      const response = await designationService.deleteDesignation(id);
+      const response = await designationApiService.delete(id);
 
       if (response.status) {
         pagination.refresh();

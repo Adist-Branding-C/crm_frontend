@@ -1,15 +1,10 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { branchService } from '../services/branch.service';
-import { addBranchValidationSchema, editBranchValidationSchema } from '../validations/branch.validation';
-import { ADD_BRANCH_INITIAL_VALUES } from '../constants/branch.constants';
-import type { BranchItem, BranchFormData } from '../types/branch.types';
-
-const FIELD_MAP: Record<string, string> = {
-  name: 'name',
-  branch_name: 'name',
-};
+import { branchApiService } from '../services';
+import { addBranchValidationSchema, editBranchValidationSchema } from '../validations';
+import { ADD_BRANCH_INITIAL_VALUES, BRANCH_FIELD_MAP } from '../constants';
+import type { BranchItem, BranchFormData } from '../types';
 
 export function useBranch() {
   const [toastMessage, setToastMessage] = useState('');
@@ -25,7 +20,7 @@ export function useBranch() {
 
   const pagination = useTableData<BranchItem>({
     fetchFn: async (params) => {
-      const response = await branchService.getAllBranches(params);
+      const response = await branchApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
         const data = response.data as { items: BranchItem[]; total?: number } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
@@ -42,16 +37,16 @@ export function useBranch() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = BRANCH_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = BRANCH_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -93,7 +88,8 @@ export function useBranch() {
     try {
       const { name, description, status } = values;
       const requestData = { name: name.trim(), description: description.trim(), status };
-      const response = await branchService.createBranch(requestData);
+      const response = await branchApiService.create(requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -104,7 +100,7 @@ export function useBranch() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -157,14 +153,15 @@ export function useBranch() {
     try {
       const { name, description, status } = values;
       const requestData = { name: name.trim(), description: description.trim(), status };
-      const response = await branchService.updateBranch(branchId, requestData);
+      const response = await branchApiService.update(branchId, requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.refresh();
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -209,7 +206,7 @@ export function useBranch() {
     pagination.setError('');
 
     try {
-      const response = await branchService.deleteBranch(branchId);
+      const response = await branchApiService.delete(branchId);
 
       if (response.status) {
         pagination.refresh();

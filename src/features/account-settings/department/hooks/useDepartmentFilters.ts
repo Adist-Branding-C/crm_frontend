@@ -1,4 +1,4 @@
-import type { DepartmentItem } from '../types/department.types';
+import type { DepartmentItem } from '../types';
 
 export function useDepartmentFilters(departmentList: DepartmentItem[]) {
   return {

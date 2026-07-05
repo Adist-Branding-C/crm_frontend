@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { useDrawerScroll } from '../../hooks/useDrawerScroll';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../../../shared/hooks/useToast';
 import { applyFieldErrors } from '../../call-reason/utils/applyFieldErrors';
 import { meetingOutcomeApiService } from '../services';
 import type { MeetingOutcomeItem, MeetingOutcomeFormData, MeetingOutcomeApiResponse } from '../types/index';

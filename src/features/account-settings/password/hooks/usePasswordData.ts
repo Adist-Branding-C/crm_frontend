@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import { passwordService } from '../services/password.service';
+import { passwordApiService } from '../services';
 import type { PasswordFormData, PasswordStrengthResult } from '../types';
 import { INITIAL_PASSWORD_FORM, MIN_PASSWORD_LENGTH } from '../constants';
 import { PASSWORD_UPPERCASE_REGEX, PASSWORD_DIGIT_REGEX } from '../../../../shared/constants/regex';
@@ -42,7 +42,7 @@ export const usePasswordData = () => {
         newPassword: values.newPassword,
       };
 
-      const response = await passwordService.changePassword(payload);
+      const response = await passwordApiService.changePassword(payload);
 
       if (response.status) {
         resetForm();

@@ -8,7 +8,7 @@ import { useRowDropdown } from '../../shared/hooks/useRowDropdown';
 import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
 import { useCategoryOptions } from '../../shared/hooks/useCategoryOptions';
 import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
-import { useTaskSettingsSearch } from '../../../task-settings/hooks/useTaskSettingsSearch';
+import { useSearchInput } from '../../../../shared/hooks/useSearchInput';
 import { useToast } from '../../hooks/useToast';
 
 export function useTaskPage() {
@@ -38,7 +38,7 @@ export function useTaskPage() {
     toast,
   );
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useSearchInput(fetch.searchQuery, fetch.handleSearchChange);
 
   const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 

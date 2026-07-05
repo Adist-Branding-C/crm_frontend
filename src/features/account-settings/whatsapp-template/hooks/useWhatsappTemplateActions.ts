@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types/whatsapp-template.types';
-import type { UseWhatsappTemplateActionsParams } from '../types/use-whatsapp-template-actions.types';
+import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types';
+import type { UseWhatsappTemplateActionsParams } from '../types';
 
 export function useWhatsappTemplateActions({ whatsappTemplate, drawer }: UseWhatsappTemplateActionsParams) {
   const [deletingItem, setDeletingItem] = useState<WhatsappTemplateItem | null>(null);

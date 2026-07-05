@@ -4,8 +4,8 @@ import { useAddCallReasonDrawer } from '../hooks/useAddCallReasonDrawer';
 import { useEditCallReasonDrawer } from '../hooks/useEditCallReasonDrawer';
 import { useDeleteCallReasonDialog } from '../hooks/useDeleteCallReasonDialog';
 import { useRowDropdown } from '../hooks/useRowDropdown';
-import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
-import { useToast } from '../../hooks/useToast';
+import { useSearchInput } from '../../../../shared/hooks/useSearchInput';
+import { useToast } from '../../../../shared/hooks/useToast';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addCallReasonValidationSchema, editCallReasonValidationSchema } from '../validations/index';
 import { ADD_CALL_REASON_INITIAL_VALUES } from '../constants/index';
@@ -13,7 +13,7 @@ import CallReasonTable from '../components/CallReasonTable';
 import AddCallReasonDrawer from '../components/AddCallReasonDrawer';
 import EditCallReasonDrawer from '../components/EditCallReasonDrawer';
 import DeleteCallReasonDialog from '../components/DeleteCallReasonDialog';
-import ToastNotification from '../../components/ToastNotification';
+import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../components/SettingsTabs/SettingsTabs';
 import './CallReason.css';
@@ -38,7 +38,7 @@ const CallReasonPage = () => {
     toast,
   );
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useSearchInput(fetch.searchQuery, fetch.handleSearchChange);
 
   const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 

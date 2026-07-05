@@ -7,9 +7,9 @@ import { useDeleteCallStatus } from '../hooks/useDeleteCallStatus';
 import { useCallStatusForm } from '../hooks/useCallStatusForm';
 import { useCallStatusDrawer } from '../hooks/useCallStatusDrawer';
 import { useCallStatusTable } from '../hooks/useCallStatusTable';
-import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
+import { useSearchInput } from '../../../../shared/hooks/useSearchInput';
 import { useDrawerScroll } from '../../hooks/useDrawerScroll';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../../../shared/hooks/useToast';
 import { applyFieldErrors } from '../../call-reason/utils/applyFieldErrors';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addCallStatusValidationSchema, editCallStatusValidationSchema } from '../validations/index';
@@ -20,7 +20,7 @@ import EditCallStatusDrawer from '../components/EditCallStatusDrawer';
 import DeleteCallStatusDialog from '../components/DeleteCallStatusDialog';
 import { Table, THead, TBody, TRow, TCell, TableToolbar, TablePagination } from '../../../../shared/components/table';
 import SettingsStatusBadge from '../../../../shared/components/settings/SettingsStatusBadge';
-import ToastNotification from '../../components/ToastNotification';
+import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../components/SettingsTabs/SettingsTabs';
 import type { CallStatusFormData, CallStatusApiResponse } from '../types/index';
@@ -37,7 +37,7 @@ const CallStatusPage = () => {
   const { scrollAndFocusError, scrollToTop } = useDrawerScroll();
   const { showToastMessage, toastMessage, toastType, showToast, setShowToast } = useToast();
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useSearchInput(fetch.searchQuery, fetch.handleSearchChange);
 
   const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 

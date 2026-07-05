@@ -1,4 +1,4 @@
-import type { AgentItem } from '../types/agent.types';
+import type { AgentItem } from '../types';
 
 export function useAgentFilters(agentList: AgentItem[]) {
   return {
