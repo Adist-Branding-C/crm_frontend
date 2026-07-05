@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import type { MailConfigItem, MailConfigFormData } from '../types';
-import type { UseMailConfigurationActionsParams } from '../types/use-mail-configuration-actions.types';
+import type { UseMailConfigurationActionsParams } from '../types';
 
 export function useMailConfigurationActions({ mailConfig, drawer }: UseMailConfigurationActionsParams) {
   const [deletingItem, setDeletingItem] = useState<MailConfigItem | null>(null);

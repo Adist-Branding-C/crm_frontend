@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { EmailTemplateItem, EmailTemplateFormData } from '../types/emailTemplate.types';
-import type { UseEmailTemplateActionsParams } from '../types/use-email-template-actions.types';
+import type { EmailTemplateItem, EmailTemplateFormData, UseEmailTemplateActionsParams } from '../types';
 
 export function useEmailTemplateActions({ emailTemplate, drawer }: UseEmailTemplateActionsParams) {
   const [deletingItem, setDeletingItem] = useState<EmailTemplateItem | null>(null);

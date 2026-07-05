@@ -1,47 +1,75 @@
-import { useCallback } from 'react';
-import { useAgent, useAgentDrawer, useAgentDropdown, useAgentFilters, useAgentActions } from './index';
-import type { AgentItem } from '../types/agent.types';
+import { useFetchAgents } from './useFetchAgents';
+import { useAgentSubmitHandlers } from './useAgentSubmitHandlers';
+import { useAgentDrawer } from './useAgentDrawer';
+import { useDesignationOptions } from './useDesignationOptions';
+import { useDepartmentOptions } from './useDepartmentOptions';
+import { useAgentDrawerState } from './useAgentDrawerState';
+import { useDeleteAgentDialog } from './useDeleteAgentDialog';
+import { useAgentDropdown } from './useAgentDropdown';
+import { useSearchInput } from '../../../../shared/hooks/useSearchInput';
+import { useToast } from '../../../../shared/hooks/useToast';
 
 export function useAgentPage() {
-  const agent = useAgent();
+  const fetch = useFetchAgents();
   const drawer = useAgentDrawer();
+  const designation = useDesignationOptions();
+  const department = useDepartmentOptions();
+  const deleteDialog = useDeleteAgentDialog();
   const dropdown = useAgentDropdown();
-  const filters = useAgentFilters(agent.agentList);
-  const actions = useAgentActions({ agent, drawer });
+  const toast = useToast();
 
-  const handleEditClick = useCallback((item: AgentItem) => {
-    drawer.openEditDrawer(item);
-    dropdown.closeDropdown();
-  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
+  const handlers = useAgentSubmitHandlers(
+    {
+      onAddSuccess: drawer.closeDrawer,
+      onEditSuccess: drawer.closeDrawer,
+      onDeleteSuccess: deleteDialog.closeDeleteDialog,
+      editingItem: drawer.editingItem,
+      deletingItem: deleteDialog.deletingItem,
+    },
+    fetch,
+    toast,
+  );
 
-  const handleDeleteClick = useCallback((item: AgentItem) => {
-    actions.handleDeleteClick(item);
-    dropdown.closeDropdown();
-  }, [actions.handleDeleteClick, dropdown.closeDropdown]);
+  const drawerState = useAgentDrawerState(drawer, handlers);
+
+  const { searchValue, handleSearchInput } = useSearchInput(fetch.searchQuery, fetch.handleSearchChange);
+
+  const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 
   return {
-    agent,
-    searchQuery: agent.searchQuery,
-    handleSearchChange: agent.handleSearchChange,
-    rowsPerPage: agent.limit,
-    handleRowsPerPageChange: agent.handleRowsPerPageChange,
-    pageNumber: agent.pageNumber,
-    setPageNumber: agent.setPageNumber,
-    totalCount: agent.totalCount,
-    showDrawer: drawer.showDrawer,
+    data: fetch.agentList,
+    searchQuery: searchValue,
+    onSearchChange: handleSearchInput,
+    rowsPerPage: fetch.limit,
+    onRowsPerPageChange: fetch.handleRowsPerPageChange,
+    totalRecords: fetch.totalCount,
+    currentPage: fetch.pageNumber,
+    totalPages,
+    onPageChange: fetch.setPageNumber,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,
-    editingItem: drawer.editingItem,
-    deletingItem: actions.deletingItem,
-    filteredData: filters.filteredData,
-    drawerInitialValues: drawer.drawerInitialValues,
-    handleAddClick: drawer.openAddDrawer,
-    handleCloseDrawer: drawer.closeDrawer,
-    handleEditClick,
-    handleDeleteClick,
-    handleConfirmDelete: actions.handleConfirmDelete,
-    handleCloseDeleteModal: actions.closeDeleteModal,
-    handleSubmit: actions.handleSubmit,
-    handleEditSubmit: actions.handleEditSubmit,
+    onEdit: drawer.openEditDrawer,
+    onDelete: deleteDialog.handleDeleteClick,
+    onAdd: drawer.openAddDrawer,
+    isLoading: fetch.isLoading,
+    error: fetch.error || '',
+    isOpen: drawerState.isOpen,
+    onClose: drawerState.onClose,
+    validationSchema: drawerState.validationSchema,
+    initialValues: drawerState.initialValues,
+    onSubmit: drawerState.onSubmit,
+    isEditing: drawerState.isEditing,
+    designationOptions: designation.designationOptions,
+    onFetchDesignations: designation.fetchDesignations,
+    departmentOptions: department.departmentOptions,
+    onFetchDepartments: department.fetchDepartments,
+    deletingItem: deleteDialog.deletingItem,
+    itemName: deleteDialog.deletingItem?.fullName || deleteDialog.deletingItem?.name || '',
+    onConfirmDelete: handlers.handleConfirmDelete,
+    onCloseDelete: deleteDialog.closeDeleteDialog,
+    toastMessage: toast.toastMessage,
+    toastType: toast.toastType,
+    showToast: toast.showToast,
+    onCloseToast: () => toast.setShowToast(false),
   };
 }

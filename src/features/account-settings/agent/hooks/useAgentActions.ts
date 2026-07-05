@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { AgentItem, AgentFormData } from '../types/agent.types';
-import type { UseAgentActionsParams } from '../types/use-agent-actions.types';
+import type { AgentItem, AgentFormData } from '../types';
+import type { UseAgentActionsParams } from '../types';
 
 export function useAgentActions({ agent, drawer }: UseAgentActionsParams) {
   const [deletingItem, setDeletingItem] = useState<AgentItem | null>(null);
@@ -28,14 +28,15 @@ export function useAgentActions({ agent, drawer }: UseAgentActionsParams) {
       phone: item.phone || item.phone_number || item.phoneNumber || item.mobile || '',
       password: '',
       confirmPassword: '',
-      designationId: item.designationId || String(item.designation_id ?? item.designation ?? ''),
+      designationId: item.designationId || String(item.designation_id ?? item.designation?.id ?? ''),
+      departmentId: item.departmentId || String(item.department_id ?? item.department?.id ?? ''),
       status: item.status || '',
     };
     if (JSON.stringify(values) === JSON.stringify(original)) {
       helpers.setSubmitting(false);
       return;
     }
-    const success = await agent.handleUpdateAgent(item.staff_id, values, helpers);
+    const success = await agent.handleUpdateAgent(item.staff_id!, values, helpers);
     if (success) {
       drawer.closeDrawer();
     }

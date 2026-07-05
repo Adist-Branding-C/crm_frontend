@@ -1,3 +1,7 @@
+export const PASSWORD_API_ENDPOINTS = {
+  CHANGE_PASSWORD: '/auth/change-password',
+};
+
 export const INITIAL_PASSWORD_FORM = {
   currentPassword: '',
   newPassword: '',

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { BranchItem, BranchFormData } from '../types/branch.types';
+import type { BranchItem, BranchFormData } from '../types';
 
 export function useBranchDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);

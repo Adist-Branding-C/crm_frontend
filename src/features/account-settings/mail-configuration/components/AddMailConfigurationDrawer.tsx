@@ -1,18 +1,10 @@
 import { useRef, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import { scrollToFirstError } from '../../../task-settings/utils/scrollToFirstError';
 import { MAIL_DRIVER_OPTIONS, ENCRYPTION_OPTIONS } from '../constants';
-import type { AddMailConfigurationDrawerProps } from '../types/add-mail-configuration-drawer.types';
-
-const scrollToFirstError = (container: HTMLElement | null) => {
-  if (!container) return;
-  const errorEl = container.querySelector('.input-error');
-  if (errorEl) {
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (errorEl as HTMLElement).focus();
-  }
-};
+import type { AddMailConfigurationDrawerProps } from '../types';
 
 const AddMailConfigurationDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddMailConfigurationDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
@@ -50,13 +42,11 @@ const AddMailConfigurationDrawer = ({ isOpen, onClose, validationSchema, initial
                 }
               }
 
-              const formError = error;
-              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
-              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+              const fieldClass = (name: keyof typeof initialValues) => `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError} />}
+                  {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
                     <label>Mail Driver <span className="text-danger">*</span></label>
@@ -64,19 +54,19 @@ const AddMailConfigurationDrawer = ({ isOpen, onClose, validationSchema, initial
                       <option value="">Select Driver</option>
                       {MAIL_DRIVER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </Field>
-                    {showError('driver') && errors.driver && <small className="field-error-text">{errors.driver}</small>}
+                    <FormikError name="driver" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>SMTP Host <span className="text-danger">*</span></label>
                     <Field type="text" name="host" className={fieldClass('host')} placeholder="mail.example.com" />
-                    {showError('host') && errors.host && <small className="field-error-text">{errors.host}</small>}
+                    <FormikError name="host" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>Port <span className="text-danger">*</span></label>
                     <Field type="text" name="port" className={fieldClass('port')} placeholder="587" />
-                    {showError('port') && errors.port && <small className="field-error-text">{errors.port}</small>}
+                    <FormikError name="port" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -85,33 +75,33 @@ const AddMailConfigurationDrawer = ({ isOpen, onClose, validationSchema, initial
                       <option value="">Select</option>
                       {ENCRYPTION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </Field>
-                    {showError('encryption') && errors.encryption && <small className="field-error-text">{errors.encryption}</small>}
+                    <FormikError name="encryption" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>Username</label>
                     <Field type="text" name="username" className={fieldClass('username')} placeholder="username" />
-                    {showError('username') && errors.username && <small className="field-error-text">{errors.username}</small>}
+                    <FormikError name="username" component="small" className="field-error-text" />
                   </div>
 
                   {!isEditing && (
                     <div className="form-group">
                       <label>Password <span className="text-danger">*</span></label>
                       <Field type="password" name="password" className={fieldClass('password')} placeholder="password" />
-                      {showError('password') && errors.password && <small className="field-error-text">{errors.password}</small>}
+                      <FormikError name="password" component="small" className="field-error-text" />
                     </div>
                   )}
 
                   <div className="form-group">
                     <label>From Email</label>
                     <Field type="email" name="fromEmail" className={fieldClass('fromEmail')} placeholder="noreply@example.com" />
-                    {showError('fromEmail') && errors.fromEmail && <small className="field-error-text">{errors.fromEmail}</small>}
+                    <FormikError name="fromEmail" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>From Name</label>
                     <Field type="text" name="fromName" className={fieldClass('fromName')} placeholder="Company Name" />
-                    {showError('fromName') && errors.fromName && <small className="field-error-text">{errors.fromName}</small>}
+                    <FormikError name="fromName" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-actions flex flex-col sm:flex-row gap-3">

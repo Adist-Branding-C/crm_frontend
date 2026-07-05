@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { AgentItem, AgentFormData } from '../types/agent.types';
+import type { AgentItem, AgentFormData } from '../types';
 
 export function useAgentDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);
@@ -28,10 +28,11 @@ export function useAgentDrawer() {
           phone: editingItem.phone || editingItem.phone_number || editingItem.phoneNumber || editingItem.mobile || '',
           password: '',
           confirmPassword: '',
-          designationId: editingItem.designationId || String(editingItem.designation_id ?? editingItem.designation ?? ''),
+          designationId: editingItem.designationId || String(editingItem.designation_id ?? editingItem.designation?.id ?? ''),
+          departmentId: editingItem.departmentId || String(editingItem.department_id ?? editingItem.department?.id ?? ''),
           status: editingItem.status || '',
         }
-      : { fullName: '', email: '', phone: '', password: '', confirmPassword: '', designationId: '', status: '' },
+      : { fullName: '', email: '', phone: '', password: '', confirmPassword: '', designationId: '', departmentId: '', status: '' },
     [editingItem]
   );
 

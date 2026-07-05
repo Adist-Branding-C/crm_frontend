@@ -1,4 +1,4 @@
-import type { CheckoutNoteItem } from '../types/checkoutNote.types';
+import type { CheckoutNoteItem } from '../types';
 
 export function useCheckoutNoteFilters(checkoutNoteList: CheckoutNoteItem[]) {
   return {

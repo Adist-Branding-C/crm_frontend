@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { DepartmentItem, DepartmentFormData } from '../types/department.types';
-import type { UseDepartmentActionsParams } from '../types/use-department-actions.types';
+import type { DepartmentItem, DepartmentFormData } from '../types';
+import type { UseDepartmentActionsParams } from '../types';
 
 export function useDepartmentActions({ department, drawer }: UseDepartmentActionsParams) {
   const [deletingItem, setDeletingItem] = useState<DepartmentItem | null>(null);

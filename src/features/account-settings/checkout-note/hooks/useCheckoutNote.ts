@@ -1,15 +1,10 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { checkoutNoteService } from '../services/checkoutNote.service';
-import { addCheckoutNoteValidationSchema, editCheckoutNoteValidationSchema } from '../validations/checkoutNote.validation';
-import { ADD_CHECKOUT_NOTE_INITIAL_VALUES } from '../constants/checkoutNote.constants';
-import type { CheckoutNoteItem, CheckoutNoteFormData } from '../types/checkoutNote.types';
-
-const FIELD_MAP: Record<string, string> = {
-  note: 'note',
-  title: 'title',
-};
+import { checkoutNoteApiService } from '../services';
+import { addCheckoutNoteValidationSchema, editCheckoutNoteValidationSchema } from '../validations';
+import { ADD_CHECKOUT_NOTE_INITIAL_VALUES, CHECKOUT_NOTE_FIELD_MAP } from '../constants';
+import type { CheckoutNoteItem, CheckoutNoteFormData } from '../types';
 
 export function useCheckoutNote() {
   const [toastMessage, setToastMessage] = useState('');
@@ -25,10 +20,11 @@ export function useCheckoutNote() {
 
   const pagination = useTableData<CheckoutNoteItem>({
     fetchFn: async (params) => {
-      const response = await checkoutNoteService.getAllCheckoutNotes(params);
+      const response = await checkoutNoteApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
-        const items = Array.isArray(response.data?.items) ? response.data.items : [];
-        return { items, total: response.data?.pagination?.total ?? items.length };
+        const data = response.data as { items: CheckoutNoteItem[]; pagination?: { total: number } } | undefined;
+        const items = Array.isArray(data?.items) ? data.items : [];
+        return { items, total: data?.pagination?.total ?? items.length };
       }
       throw new Error(response.message || 'Failed to fetch checkout notes');
     },
@@ -41,16 +37,16 @@ export function useCheckoutNote() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = CHECKOUT_NOTE_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = CHECKOUT_NOTE_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -94,7 +90,8 @@ export function useCheckoutNote() {
       const { title, note, status } = values;
       const requestData = { title: title.trim(), note: note.trim(), status };
 
-      const response = await checkoutNoteService.createCheckoutNote(requestData);
+      const response = await checkoutNoteApiService.create(requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -105,7 +102,7 @@ export function useCheckoutNote() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -159,14 +156,15 @@ export function useCheckoutNote() {
       const { title, note, status } = values;
       const requestData = { title: title.trim(), note: note.trim(), status };
 
-      const response = await checkoutNoteService.updateCheckoutNote(noteId, requestData);
+      const response = await checkoutNoteApiService.update(noteId, requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.refresh();
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -211,7 +209,7 @@ export function useCheckoutNote() {
     pagination.setError('');
 
     try {
-      const response = await checkoutNoteService.deleteCheckoutNote(noteId);
+      const response = await checkoutNoteApiService.delete(noteId);
 
       if (response.status) {
         pagination.refresh();

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types/whatsapp-template.types';
+import type { WhatsappTemplateItem, WhatsappTemplateFormData } from '../types';
 
 export function useWhatsappTemplateDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);

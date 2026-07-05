@@ -1,17 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { AddWhatsappTemplateDrawerProps } from '../types/add-whatsapp-template-drawer.types';
-
-const scrollToFirstError = (container: HTMLElement | null) => {
-  if (!container) return;
-  const errorEl = container.querySelector('.input-error');
-  if (errorEl) {
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (errorEl as HTMLElement).focus();
-  }
-};
+import { scrollToFirstError } from '../../../task-settings/utils/scrollToFirstError';
+import type { AddWhatsappTemplateDrawerProps } from '../types';
 
 const AddWhatsappTemplateDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddWhatsappTemplateDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
@@ -49,24 +41,22 @@ const AddWhatsappTemplateDrawer = ({ isOpen, onClose, validationSchema, initialV
                 }
               }
 
-              const formError = error;
-              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
-              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+              const fieldClass = (name: keyof typeof initialValues) => `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError} />}
+                  {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
                     <label>Template Name <span className="text-danger">*</span></label>
                     <Field type="text" name="templateName" className={fieldClass('templateName')} placeholder="Enter template name" />
-                    {showError('templateName') && errors.templateName && <small className="field-error-text">{errors.templateName}</small>}
+                    <FormikError name="templateName" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
                     <label>Message <span className="text-danger">*</span></label>
                     <Field as="textarea" name="message" className={fieldClass('message')} placeholder="Enter WhatsApp message" rows={4} />
-                    {showError('message') && errors.message && <small className="field-error-text">{errors.message}</small>}
+                    <FormikError name="message" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -76,7 +66,7 @@ const AddWhatsappTemplateDrawer = ({ isOpen, onClose, validationSchema, initialV
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </Field>
-                    {showError('status') && errors.status && <small className="field-error-text">{errors.status}</small>}
+                    <FormikError name="status" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-actions flex flex-col sm:flex-row gap-3">

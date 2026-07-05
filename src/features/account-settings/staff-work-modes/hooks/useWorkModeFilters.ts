@@ -1,4 +1,4 @@
-import type { WorkModeItem } from '../types/workMode.types';
+import type { WorkModeItem } from '../types';
 
 export function useWorkModeFilters(workModeList: WorkModeItem[]) {
   return {

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { WorkModeItem, WorkModeFormData } from '../types/workMode.types';
+import type { WorkModeItem, WorkModeFormData } from '../types';
 
 export function useWorkModeDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { DesignationItem, DesignationFormData } from '../types/designation.types';
+import type { DesignationItem, DesignationFormData } from '../types';
 
 export function useDesignationDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);

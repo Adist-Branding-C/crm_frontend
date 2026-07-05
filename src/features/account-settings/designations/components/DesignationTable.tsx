@@ -1,7 +1,7 @@
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import DesignationActionMenu from './DesignationActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { DesignationTableProps } from '../types/designation-table.types';
+import type { DesignationTableProps } from '../types';
 
 const DesignationTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, totalRecords, pageNumber, onPageChange, dropdownOpen, onToggleDropdown, onEdit, onDelete }: DesignationTableProps) => {
   const startEntry = totalRecords === 0 ? 0 : (pageNumber - 1) * rowsPerPage + 1;

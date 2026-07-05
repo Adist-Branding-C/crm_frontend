@@ -1,17 +1,11 @@
 import { useState, useCallback, useRef } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { agentService } from '../services/agent.service';
-import { addAgentValidationSchema, editAgentValidationSchema } from '../validations/agent.validation';
-import { designationService } from '../../designations/services/designation.service';
-import { ADD_AGENT_INITIAL_VALUES } from '../constants/agent.constants';
-import type { AgentItem, AgentFormData, DesignationOption } from '../types/agent.types';
-
-const FIELD_MAP: Record<string, string> = {
-  phone_number: 'phone',
-  full_name: 'fullName',
-  confirm_password: 'confirmPassword',
-};
+import { agentApiService } from '../services';
+import { addAgentValidationSchema, editAgentValidationSchema } from '../validations';
+import { designationApiService } from '../../designations/services';
+import { ADD_AGENT_INITIAL_VALUES, AGENT_FIELD_MAP } from '../constants';
+import type { AgentItem, AgentFormData, DesignationOption } from '../types';
 
 export function useAgent() {
   const [designationOptions, setDesignationOptions] = useState<DesignationOption[]>([]);
@@ -29,7 +23,7 @@ export function useAgent() {
 
   const pagination = useTableData<AgentItem>({
     fetchFn: async (params) => {
-      const response = await agentService.getAllAgents(params as unknown as Record<string, string | number | undefined>);
+      const response = await agentApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
         const data = response.data as { items: AgentItem[]; pagination?: { total: number } } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
@@ -42,7 +36,7 @@ export function useAgent() {
   const fetchDesignations = useCallback(async (force = false) => {
     if (!force && designationsLoaded.current) return;
     try {
-      const response = await designationService.getAllDesignations({ pageNumber: '1', limit: '100' });
+      const response = await designationApiService.fetchAll({ pageNumber: '1', limit: '100' });
 
       if (response.status) {
         const data = response.data as { items?: Array<{ designationName?: string; name?: string; id: number }> } | undefined;
@@ -67,16 +61,16 @@ export function useAgent() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = AGENT_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = AGENT_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -119,11 +113,12 @@ export function useAgent() {
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, password, designationId, status } = values;
+      const { fullName, email, password, designationId, departmentId, status } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, status };
+      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, departmentId, status };
 
-      const response = await agentService.createAgent(requestData);
+      const response = await agentApiService.create(requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -134,7 +129,7 @@ export function useAgent() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -179,18 +174,19 @@ export function useAgent() {
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, designationId, status } = values;
+      const { fullName, email, designationId, departmentId, status } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, designationId, status };
+      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, designationId, departmentId, status };
 
-      const response = await agentService.updateAgent(staffId, requestData);
+      const response = await agentApiService.update(staffId, requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.refresh();
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -230,7 +226,7 @@ export function useAgent() {
     pagination.setError('');
 
     try {
-      const response = await agentService.deleteAgent(staffId);
+      const response = await agentApiService.delete(staffId);
 
       if (response.status) {
         pagination.refresh();

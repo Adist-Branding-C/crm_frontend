@@ -1,14 +1,10 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { departmentService } from '../services/department.service';
-import { addDepartmentValidationSchema, editDepartmentValidationSchema } from '../validations/department.validation';
-import { ADD_DEPARTMENT_INITIAL_VALUES } from '../constants/department.constants';
-import type { DepartmentItem, DepartmentFormData } from '../types/department.types';
-
-const FIELD_MAP: Record<string, string> = {
-  department_name: 'departmentName',
-};
+import { departmentApiService } from '../services';
+import { addDepartmentValidationSchema, editDepartmentValidationSchema } from '../validations';
+import { ADD_DEPARTMENT_INITIAL_VALUES, DEPARTMENT_FIELD_MAP } from '../constants';
+import type { DepartmentItem, DepartmentFormData } from '../types';
 
 export function useDepartment() {
   const [toastMessage, setToastMessage] = useState('');
@@ -25,7 +21,7 @@ export function useDepartment() {
 
   const pagination = useTableData<DepartmentItem>({
     fetchFn: async (params) => {
-      const response = await departmentService.getAllDepartments(params as unknown as Record<string, string | number>);
+      const response = await departmentApiService.fetchAll(params as unknown as Record<string, string | number>);
       if (response.status) {
         const items = Array.isArray(response.data?.items) ? response.data.items : [];
         return { items, total: response.data?.pagination?.total ?? items.length };
@@ -41,16 +37,16 @@ export function useDepartment() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = DEPARTMENT_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = DEPARTMENT_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -91,7 +87,8 @@ export function useDepartment() {
 
     try {
       const requestData = { ...values, description: values.description.trim() };
-      const response = await departmentService.createDepartment(requestData);
+      const response = await departmentApiService.create(requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -102,7 +99,7 @@ export function useDepartment() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -148,14 +145,15 @@ export function useDepartment() {
 
     try {
       const requestData = { ...values, description: values.description.trim() };
-      const response = await departmentService.updateDepartment(id, requestData);
+      const response = await departmentApiService.update(id, requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.refresh();
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -195,7 +193,7 @@ export function useDepartment() {
     pagination.setError('');
 
     try {
-      const response = await departmentService.deleteDepartment(id);
+      const response = await departmentApiService.delete(id);
 
       if (response.status) {
         pagination.refresh();

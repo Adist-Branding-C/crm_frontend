@@ -1,14 +1,10 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { emailTemplateService } from '../services/emailTemplate.service';
-import { addEmailTemplateValidationSchema, editEmailTemplateValidationSchema } from '../validations/emailTemplate.validation';
-import { ADD_EMAIL_TEMPLATE_INITIAL_VALUES } from '../constants/emailTemplate.constants';
-import type { EmailTemplateItem, EmailTemplateFormData } from '../types/emailTemplate.types';
-
-const FIELD_MAP: Record<string, string> = {
-  template_name: 'templateName',
-};
+import { emailTemplateApiService } from '../services';
+import { addEmailTemplateValidationSchema, editEmailTemplateValidationSchema } from '../validations';
+import { ADD_EMAIL_TEMPLATE_INITIAL_VALUES, EMAIL_TEMPLATE_FIELD_MAP } from '../constants';
+import type { EmailTemplateItem, EmailTemplateFormData } from '../types';
 
 export function useEmailTemplate() {
   const [toastMessage, setToastMessage] = useState('');
@@ -23,7 +19,7 @@ export function useEmailTemplate() {
   }, []);
 
   const fetchFn = useCallback(async (params: { pageNumber: number; limit: number; search?: string }) => {
-    const response = await emailTemplateService.getAllEmailTemplates(params);
+    const response = await emailTemplateApiService.fetchAll(params);
     if (response.status) {
       const rawData = response.data && typeof response.data === 'object' && 'items' in response.data
         ? (response.data as { items: EmailTemplateItem[]; pagination?: { total: number } }).items
@@ -48,16 +44,16 @@ export function useEmailTemplate() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = EMAIL_TEMPLATE_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = EMAIL_TEMPLATE_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -101,7 +97,8 @@ export function useEmailTemplate() {
     try {
       const { templateName, subject, content, status } = values;
       const requestData = { templateName: templateName.trim(), subject: subject.trim(), content: content.trim(), status };
-      const response = await emailTemplateService.createEmailTemplate(requestData);
+      const response = await emailTemplateApiService.create(requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -112,7 +109,7 @@ export function useEmailTemplate() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -159,7 +156,8 @@ export function useEmailTemplate() {
     try {
       const { templateName, subject, content, status } = values;
       const requestData = { templateName: templateName.trim(), subject: subject.trim(), content: content.trim(), status };
-      const response = await emailTemplateService.updateEmailTemplate(id, requestData);
+      const response = await emailTemplateApiService.update(id, requestData);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         pagination.refresh();
@@ -167,7 +165,7 @@ export function useEmailTemplate() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -207,7 +205,7 @@ export function useEmailTemplate() {
     pagination.setError('');
 
     try {
-      const response = await emailTemplateService.deleteEmailTemplate(id);
+      const response = await emailTemplateApiService.delete(id);
 
       if (response.status) {
         pagination.refresh();

@@ -1,47 +1,67 @@
-import { useCallback } from 'react';
-import { useBranch, useBranchDrawer, useBranchDropdown, useBranchFilters, useBranchActions } from './index';
-import type { BranchItem } from '../types/branch.types';
+import { useFetchBranches } from './useFetchBranches';
+import { useBranchSubmitHandlers } from './useBranchSubmitHandlers';
+import { useBranchDrawer } from './useBranchDrawer';
+import { useBranchDrawerState } from './useBranchDrawerState';
+import { useDeleteBranchDialog } from './useDeleteBranchDialog';
+import { useBranchDropdown } from './useBranchDropdown';
+import { useSearchInput } from '../../../../shared/hooks/useSearchInput';
+import { useToast } from '../../../../shared/hooks/useToast';
 
 export function useBranchPage() {
-  const branchHook = useBranch();
+  const fetch = useFetchBranches();
   const drawer = useBranchDrawer();
+  const deleteDialog = useDeleteBranchDialog();
   const dropdown = useBranchDropdown();
-  const filters = useBranchFilters(branchHook.branchList);
-  const actions = useBranchActions({ branch: branchHook, drawer });
+  const toast = useToast();
 
-  const handleEditClick = useCallback((item: BranchItem) => {
-    drawer.openEditDrawer(item);
-    dropdown.closeDropdown();
-  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
+  const handlers = useBranchSubmitHandlers(
+    {
+      onAddSuccess: drawer.closeDrawer,
+      onEditSuccess: drawer.closeDrawer,
+      onDeleteSuccess: deleteDialog.closeDeleteDialog,
+      editingItem: drawer.editingItem,
+      deletingItem: deleteDialog.deletingItem,
+    },
+    fetch,
+    toast,
+  );
 
-  const handleDeleteClick = useCallback((item: BranchItem) => {
-    actions.handleDeleteClick(item);
-    dropdown.closeDropdown();
-  }, [actions.handleDeleteClick, dropdown.closeDropdown]);
+  const drawerState = useBranchDrawerState(drawer, handlers);
+
+  const { searchValue, handleSearchInput } = useSearchInput(fetch.searchQuery, fetch.handleSearchChange);
+
+  const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 
   return {
-    branch: branchHook,
-    searchQuery: branchHook.searchQuery,
-    handleSearchChange: branchHook.handleSearchChange,
-    rowsPerPage: branchHook.limit,
-    handleRowsPerPageChange: branchHook.handleRowsPerPageChange,
-    pageNumber: branchHook.pageNumber,
-    setPageNumber: branchHook.setPageNumber,
-    totalCount: branchHook.totalCount,
-    showDrawer: drawer.showDrawer,
+    data: fetch.branchList,
+    searchQuery: searchValue,
+    onSearchChange: handleSearchInput,
+    rowsPerPage: fetch.limit,
+    onRowsPerPageChange: fetch.handleRowsPerPageChange,
+    totalRecords: fetch.totalCount,
+    currentPage: fetch.pageNumber,
+    totalPages,
+    onPageChange: fetch.setPageNumber,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,
-    editingItem: drawer.editingItem,
-    deletingItem: actions.deletingItem,
-    filteredData: filters.filteredData,
-    drawerInitialValues: drawer.drawerInitialValues,
-    handleAddClick: drawer.openAddDrawer,
-    handleCloseDrawer: drawer.closeDrawer,
-    handleEditClick,
-    handleDeleteClick,
-    handleConfirmDelete: actions.handleConfirmDelete,
-    handleCloseDeleteModal: actions.closeDeleteModal,
-    handleSubmit: actions.handleSubmit,
-    handleEditSubmit: actions.handleEditSubmit,
+    onEdit: drawer.openEditDrawer,
+    onDelete: deleteDialog.handleDeleteClick,
+    onAdd: drawer.openAddDrawer,
+    isLoading: fetch.isLoading,
+    error: fetch.error,
+    isOpen: drawerState.isOpen,
+    onClose: drawerState.onClose,
+    validationSchema: drawerState.validationSchema,
+    initialValues: drawerState.initialValues,
+    onSubmit: drawerState.onSubmit,
+    isEditing: drawerState.isEditing,
+    deletingItem: deleteDialog.deletingItem,
+    itemName: deleteDialog.deletingItem?.name || deleteDialog.deletingItem?.branchName || '',
+    onConfirmDelete: handlers.handleConfirmDelete,
+    onCloseDelete: deleteDialog.closeDeleteDialog,
+    toastMessage: toast.toastMessage,
+    toastType: toast.toastType,
+    showToast: toast.showToast,
+    onCloseToast: () => toast.setShowToast(false),
   };
 }

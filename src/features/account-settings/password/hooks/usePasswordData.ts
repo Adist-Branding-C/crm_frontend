@@ -1,17 +1,11 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { FormikHelpers } from 'formik';
-import { passwordService } from '../services/password.service';
+import { passwordApiService } from '../services';
 import type { PasswordFormData, PasswordStrengthResult } from '../types';
 import { INITIAL_PASSWORD_FORM, MIN_PASSWORD_LENGTH } from '../constants';
 import { PASSWORD_UPPERCASE_REGEX, PASSWORD_DIGIT_REGEX } from '../../../../shared/constants/regex';
-import { AUTH_ROUTES } from '../../../auth/constants/auth.constants';
-import { clearAuthTokens } from '../../../auth/utils/tokenStorage';
-
-const POST_PASSWORD_CHANGE_LOGOUT_DELAY_MS = 2000;
 
 export const usePasswordData = () => {
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -48,15 +42,11 @@ export const usePasswordData = () => {
         newPassword: values.newPassword,
       };
 
-      const response = await passwordService.changePassword(payload);
+      const response = await passwordApiService.changePassword(payload);
 
       if (response.status) {
         resetForm();
-        showToastMessage('Password changed successfully! Please sign in again.', 'success');
-        setTimeout(() => {
-          clearAuthTokens();
-          navigate(AUTH_ROUTES.LOGIN);
-        }, POST_PASSWORD_CHANGE_LOGOUT_DELAY_MS);
+        showToastMessage('Password changed successfully!', 'success');
         return true;
       } else {
         showToastMessage(response.message || 'Failed to change password', 'error');
@@ -77,7 +67,7 @@ export const usePasswordData = () => {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, [showToastMessage, navigate]);
+  }, [showToastMessage]);
 
   return {
     isLoading,

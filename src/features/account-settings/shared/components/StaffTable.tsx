@@ -1,28 +1,5 @@
 import { Search, MoreHorizontal, Edit2, Trash2, MapPin } from 'lucide-react';
-import type { ReactNode } from 'react';
-
-interface StaffItem {
-  id: number;
-  name: string;
-  phone: string;
-  email: string;
-  role: string;
-  designation: string;
-  status: string;
-}
-
-interface StaffTableProps {
-  data: StaffItem[];
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  rowsPerPage: number;
-  onRowsPerPageChange: (rows: number) => void;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
-  onEdit: (item: StaffItem) => void;
-  onDelete: (item: StaffItem) => void;
-  children?: ReactNode;
-}
+import type { StaffItem, StaffTableProps } from '../types';
 
 const StaffTable = ({
   data,

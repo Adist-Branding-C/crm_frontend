@@ -1,7 +1,7 @@
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import WorkModeActionMenu from './WorkModeActionMenu';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../../shared/constants/pagination';
-import type { WorkModeTableProps } from '../types/work-mode-table.types';
+import type { WorkModeTableProps } from '../types';
 
 const WorkModeTable = ({ data, searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, totalRecords, pageNumber, onPageChange, dropdownOpen, onToggleDropdown, onEdit, onDelete }: WorkModeTableProps) => {
   const startEntry = totalRecords === 0 ? 0 : (pageNumber - 1) * rowsPerPage + 1;

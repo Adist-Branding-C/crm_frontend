@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { EmailTemplateItem, EmailTemplateFormData } from '../types/emailTemplate.types';
+import type { EmailTemplateItem, EmailTemplateFormData } from '../types';
 
 export function useEmailTemplateDrawer() {
   const [showDrawer, setShowDrawer] = useState(false);

@@ -1,30 +1,5 @@
 import { X } from 'lucide-react';
-import type { ChangeEvent } from 'react';
-
-interface StaffDataItem {
-  id: number;
-  name: string;
-  role: string;
-}
-
-interface FormData {
-  name: string;
-  phone: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  assignedStaff: string;
-}
-
-interface StaffFormDrawerProps {
-  isOpen: boolean;
-  editingStaff: { name: string } | null;
-  formData: FormData;
-  staffData: StaffDataItem[];
-  onInputChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onClose: () => void;
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-}
+import type { StaffDataItem, StaffFormDrawerFormData, StaffFormDrawerProps } from '../types';
 
 const StaffFormDrawer = ({ isOpen, editingStaff, formData, staffData, onInputChange, onClose, handleSubmit }: StaffFormDrawerProps) => {
   if (!isOpen) return null;

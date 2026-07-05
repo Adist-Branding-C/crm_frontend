@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import type { DesignationItem, DesignationFormData } from '../types/designation.types';
-import type { UseDesignationActionsParams } from '../types/use-designation-actions.types';
+import type { DesignationItem, DesignationFormData } from '../types';
+import type { UseDesignationActionsParams } from '../types';
 
 export function useDesignationActions({ designation, drawer }: UseDesignationActionsParams) {
   const [deletingItem, setDeletingItem] = useState<DesignationItem | null>(null);

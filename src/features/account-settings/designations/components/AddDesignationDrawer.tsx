@@ -1,17 +1,9 @@
 import { useRef, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import type { AddDesignationDrawerProps } from '../types/add-designation-drawer.types';
-
-const scrollToFirstError = (container: HTMLElement | null) => {
-  if (!container) return;
-  const errorEl = container.querySelector('.input-error');
-  if (errorEl) {
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (errorEl as HTMLElement).focus();
-  }
-};
+import { scrollToFirstError } from '../../../task-settings/utils/scrollToFirstError';
+import type { AddDesignationDrawerProps } from '../types';
 
 const AddDesignationDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddDesignationDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
@@ -49,24 +41,22 @@ const AddDesignationDrawer = ({ isOpen, onClose, validationSchema, initialValues
                 }
               }
 
-              const formError = error;
-              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
-              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+              const fieldClass = (name: keyof typeof initialValues) => `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError} />}
+                  {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
                     <label>Designation Name <span className="text-danger">*</span></label>
                     <Field type="text" name="designationName" className={fieldClass('designationName')} placeholder="Enter designation name" />
-                    {showError('designationName') && errors.designationName && <small className="field-error-text">{errors.designationName}</small>}
+                    <FormikError name="designationName" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
-                    <label>Description</label>
+                    <label>Description <span className="text-danger">*</span></label>
                     <Field as="textarea" name="description" className={fieldClass('description')} placeholder="Enter description" rows={4} />
-                    {showError('description') && errors.description && <small className="field-error-text">{errors.description}</small>}
+                    <FormikError name="description" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -76,7 +66,7 @@ const AddDesignationDrawer = ({ isOpen, onClose, validationSchema, initialValues
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </Field>
-                    {showError('status') && errors.status && <small className="field-error-text">{errors.status}</small>}
+                    <FormikError name="status" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-actions flex flex-col sm:flex-row gap-3">

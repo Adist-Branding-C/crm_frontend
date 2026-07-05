@@ -1,16 +1,9 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import { addMailConfigurationValidationSchema, editMailConfigurationValidationSchema } from '../validations/mailConfiguration.validation';
-import { ADD_MAIL_CONFIG_INITIAL_VALUES } from '../constants/mailConfiguration.constants';
-import { mailConfigurationService } from '../services/mailConfiguration.service';
-import type { MailConfigFormData } from '../types/mailConfiguration.types';
-
-const FIELD_MAP: Record<string, string> = {
-  host: 'host',
-  port: 'port',
-  username: 'username',
-  from_email: 'fromEmail',
-};
+import { addMailConfigurationValidationSchema, editMailConfigurationValidationSchema } from '../validations';
+import { ADD_MAIL_CONFIG_INITIAL_VALUES, MAIL_CONFIG_FIELD_MAP } from '../constants';
+import { mailConfigurationApiService } from '../services';
+import type { MailConfigFormData } from '../types';
 
 export function useMailConfiguration() {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,16 +26,16 @@ export function useMailConfiguration() {
     setFieldError: (field: string, msg: string) => void,
   ): string | null => {
     if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
+      const mapped = MAIL_CONFIG_FIELD_MAP[field] || field;
       setFieldError(mapped, message);
       return mapped;
     }
     if (errors && typeof errors === 'object') {
       let firstField: string | null = null;
       Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
+        const mapped = MAIL_CONFIG_FIELD_MAP[f] || f;
         if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
+        if (msgs?.length) setFieldError(mapped, msgs[0]!);
       });
       return firstField;
     }
@@ -85,7 +78,8 @@ export function useMailConfiguration() {
     setIsLoading(true);
 
     try {
-      const response = await mailConfigurationService.createMailConfig(values);
+      const response = await mailConfigurationApiService.createMailConfig(values);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         resetForm();
@@ -93,7 +87,7 @@ export function useMailConfiguration() {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -138,13 +132,14 @@ export function useMailConfiguration() {
     setIsLoading(true);
 
     try {
-      const response = await mailConfigurationService.updateMailConfig(id, values);
+      const response = await mailConfigurationApiService.updateMailConfig(id, values);
+      const resp = response as typeof response & { errors?: Record<string, string[]>; field?: string };
 
       if (response.status) {
         return true;
       }
 
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
+      const errorField = applyFieldErrors(resp.errors, response.message, resp.field, setFieldError);
       if (errorField) {
         scrollAndFocusError(errorField);
       } else {
@@ -184,7 +179,7 @@ export function useMailConfiguration() {
     setError('');
 
     try {
-      const response = await mailConfigurationService.deleteMailConfig(id);
+      const response = await mailConfigurationApiService.deleteMailConfig(id);
 
       if (response.status) {
         return true;
