@@ -83,7 +83,7 @@ const ResetPasswordPage = () => {
                 <Form className="auth-form">
                   {formError && <ErrorMessage message={formError} />}
                   
-                  <div className="form-group">
+                  <div className="auth-form-group">
                     <label htmlFor="password">New Password</label>
                     <div className="input-wrapper">
                       <Lock size={18} className="input-icon" />
@@ -105,7 +105,7 @@ const ResetPasswordPage = () => {
                     </div>
                   </div>
 
-                  <div className="form-group">
+                  <div className="auth-form-group">
                     <label htmlFor="confirmPassword">Confirm Password</label>
                     <div className="input-wrapper">
                       <Lock size={18} className="input-icon" />

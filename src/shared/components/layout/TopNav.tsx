@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, FileText, Phone, UserCircle, Settings, Users, CreditCard, Shield, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout } from 'lucide-react';
 import type { NotificationIconInfo, TopNavProps } from '../../types/layout';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import './TopNav.css';
 
 const addOptions = [
@@ -57,6 +58,7 @@ const searchResults = [
 
 const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -407,7 +409,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
               <div className="profile-dropdown-divider" />
 
               <div className="profile-dropdown-footer">
-                <div className="profile-dropdown-item logout-item" onClick={() => console.log('Logout')}>
+                <div className="profile-dropdown-item logout-item" onClick={() => logout()}>
                   <LogOut size={16} />
                   <span>Logout</span>
                 </div>
