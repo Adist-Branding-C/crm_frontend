@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { ChangeEvent } from 'react';
 import { useDesignation, useDesignationDrawer, useDesignationDropdown, useDesignationFilters, useDesignationActions } from './index';
 import type { DesignationItem } from '../types/designation.types';
 
@@ -8,6 +9,12 @@ export function useDesignationPage() {
   const dropdown = useDesignationDropdown();
   const filters = useDesignationFilters(designation.designationList);
   const actions = useDesignationActions({ designation, drawer });
+
+  const startIndex = (designation.pageNumber - 1) * designation.limit;
+  const totalPages = useMemo(
+    () => Math.ceil(designation.totalCount / designation.limit) || 1,
+    [designation.totalCount, designation.limit]
+  );
 
   const handleEditClick = useCallback((item: DesignationItem) => {
     drawer.openEditDrawer(item);
@@ -19,15 +26,22 @@ export function useDesignationPage() {
     dropdown.closeDropdown();
   }, [actions.handleDeleteClick, dropdown.closeDropdown]);
 
+  const { handleRowsPerPageChange: setRowsPerPage } = designation;
+  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
+  }, [setRowsPerPage]);
+
   return {
     designation,
     searchQuery: designation.searchQuery,
     handleSearchChange: designation.handleSearchChange,
     rowsPerPage: designation.limit,
-    handleRowsPerPageChange: designation.handleRowsPerPageChange,
+    handleRowsPerPageChange,
     pageNumber: designation.pageNumber,
     setPageNumber: designation.setPageNumber,
     totalCount: designation.totalCount,
+    startIndex,
+    totalPages,
     showDrawer: drawer.showDrawer,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,

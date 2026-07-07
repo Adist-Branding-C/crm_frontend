@@ -13,12 +13,33 @@ const descriptionValidation = yup
   .trim()
   .max(500, 'Description must not exceed 500 characters');
 
+/**
+ * Validation schema for creating a new branch.
+ *
+ * Used by:
+ * - AddBranchDrawer (create / "Add Branch" mode)
+ *
+ * Notes:
+ * - name allows letters, digits, spaces, hyphens, and apostrophes only; uniqueness per branch
+ *   name is enforced by the backend, not here.
+ * - description is optional free text, capped to match the backend column length.
+ */
 export const addBranchValidationSchema = yup.object({
   name: nameValidation,
   description: descriptionValidation,
   status: yup.string().required('Please select a status'),
 });
 
+/**
+ * Validation schema for editing an existing branch.
+ *
+ * Used by:
+ * - AddBranchDrawer (edit mode)
+ *
+ * Notes:
+ * - Same field rules as addBranchValidationSchema; branch records have no credential/password
+ *   fields to relax in edit mode, unlike staff.
+ */
 export const editBranchValidationSchema = yup.object({
   name: nameValidation,
   description: descriptionValidation,

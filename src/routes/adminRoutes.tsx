@@ -1,7 +1,6 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import AccountPage from '../features/account-settings/pages/AccountSettings';
-import RolesPage from '../features/roles/pages/RolesPage';
 import DepartmentPage from '../features/account-settings/department/pages/DepartmentPage';
 import WorkModePage from '../features/account-settings/staff-work-modes/pages/WorkModePage';
 import CheckoutNotePage from '../features/account-settings/checkout-note/pages/CheckoutNotePage';
@@ -16,7 +15,6 @@ import WhatsAppTemplatePage from '../features/account-settings/whatsapp-template
 export default (
   <>
     <Route path="account" element={<AccountPage />} />
-    <Route path="account/roles" element={<RolesPage />} />
     <Route path="account/department" element={<DepartmentPage />} />
     <Route path="account/workmode" element={<WorkModePage />} />
     <Route path="account/checkout" element={<CheckoutNotePage />} />

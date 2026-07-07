@@ -15,7 +15,7 @@ export interface DepartmentFormData {
 export interface DepartmentListResponse {
   status: boolean;
   message: string;
-  data: {
+  data?: {
     items: DepartmentItem[];
     pagination?: {
       total: number;
@@ -26,7 +26,7 @@ export interface DepartmentListResponse {
 export interface DepartmentResponse {
   status: boolean;
   message: string;
-  data: DepartmentItem | undefined;
+  data?: DepartmentItem;
   errors?: Record<string, string[]>;
   field?: string;
 }

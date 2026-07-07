@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { ChangeEvent } from 'react';
 import { useCheckoutNote, useCheckoutNoteDrawer, useCheckoutNoteDropdown, useCheckoutNoteFilters, useCheckoutNoteActions } from './index';
 import type { CheckoutNoteItem } from '../types/checkoutNote.types';
 
@@ -8,6 +9,12 @@ export function useCheckoutNotePage() {
   const dropdown = useCheckoutNoteDropdown();
   const filters = useCheckoutNoteFilters(checkoutNote.checkoutNoteList);
   const actions = useCheckoutNoteActions({ checkoutNote, drawer });
+
+  const startIndex = (checkoutNote.pageNumber - 1) * checkoutNote.limit;
+  const totalPages = useMemo(
+    () => Math.ceil(checkoutNote.totalCount / checkoutNote.limit) || 1,
+    [checkoutNote.totalCount, checkoutNote.limit],
+  );
 
   const handleEditClick = useCallback((item: CheckoutNoteItem) => {
     drawer.openEditDrawer(item);
@@ -19,15 +26,22 @@ export function useCheckoutNotePage() {
     dropdown.closeDropdown();
   }, [actions.handleDeleteClick, dropdown.closeDropdown]);
 
+  const { handleRowsPerPageChange: setRowsPerPage } = checkoutNote;
+  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
+  }, [setRowsPerPage]);
+
   return {
     checkoutNote,
     searchQuery: checkoutNote.searchQuery,
     handleSearchChange: checkoutNote.handleSearchChange,
     rowsPerPage: checkoutNote.limit,
-    handleRowsPerPageChange: checkoutNote.handleRowsPerPageChange,
+    handleRowsPerPageChange,
     pageNumber: checkoutNote.pageNumber,
     setPageNumber: checkoutNote.setPageNumber,
     totalCount: checkoutNote.totalCount,
+    startIndex,
+    totalPages,
     showDrawer: drawer.showDrawer,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,

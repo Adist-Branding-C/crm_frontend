@@ -3,9 +3,8 @@ import AddWorkModeDrawer from '../components/AddWorkModeDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
-import type { WorkModeItem } from '../types/workMode.types';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { WORK_MODE_TABLE_COLUMNS } from '../constants/workModeTableColumns';
 
 const WorkModePage = () => {
   const {
@@ -14,6 +13,8 @@ const WorkModePage = () => {
     rowsPerPage, handleRowsPerPageChange,
     pageNumber, setPageNumber,
     totalCount,
+    startIndex,
+    totalPages,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
@@ -30,15 +31,6 @@ const WorkModePage = () => {
     handleEditSubmit,
   } = useWorkModePage();
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
-
-  const columns: Column<WorkModeItem>[] = [
-    { key: 'workModeName', label: 'Work Mode', render: (item) => item.workModeName || item.name || '-' },
-    { key: 'description', label: 'Description' },
-    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
-  ];
-
   return (
     <div className="account-page">
       <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
@@ -50,7 +42,7 @@ const WorkModePage = () => {
           onAdd={handleAddClick}
           addLabel="Add Work Mode"
           data={filteredData}
-          columns={columns}
+          columns={WORK_MODE_TABLE_COLUMNS}
           startIndex={startIndex}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
@@ -61,7 +53,7 @@ const WorkModePage = () => {
           rowsPerPage={rowsPerPage}
           totalItems={totalCount}
           onPageChange={setPageNumber}
-          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
         <AddWorkModeDrawer
           isOpen={showDrawer}

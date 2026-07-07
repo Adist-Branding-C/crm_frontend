@@ -4,9 +4,8 @@ import AddCheckoutNoteDrawer from '../components/AddCheckoutNoteDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
-import type { CheckoutNoteItem } from '../types/checkoutNote.types';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { CHECKOUT_NOTE_TABLE_COLUMNS } from '../constants/checkoutNoteTableColumns';
 
 const CheckoutNotePage = () => {
   const {
@@ -15,6 +14,8 @@ const CheckoutNotePage = () => {
     rowsPerPage, handleRowsPerPageChange,
     pageNumber, setPageNumber,
     totalCount,
+    startIndex,
+    totalPages,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
@@ -31,14 +32,6 @@ const CheckoutNotePage = () => {
     handleEditSubmit,
   } = useCheckoutNotePage();
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
-
-  const columns: Column<CheckoutNoteItem>[] = [
-    { key: 'title', label: 'Title', render: (item) => item.title || '-' },
-    { key: 'note', label: 'Note', render: (item) => item.note || '-' },
-  ];
-
   return (
     <div className="account-page">
       <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
@@ -50,7 +43,7 @@ const CheckoutNotePage = () => {
           onAdd={handleAddClick}
           addLabel="Add Note"
           data={filteredData}
-          columns={columns}
+          columns={CHECKOUT_NOTE_TABLE_COLUMNS}
           startIndex={startIndex}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
@@ -61,7 +54,7 @@ const CheckoutNotePage = () => {
           rowsPerPage={rowsPerPage}
           totalItems={totalCount}
           onPageChange={setPageNumber}
-          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
         <AddCheckoutNoteDrawer
           isOpen={showDrawer}
