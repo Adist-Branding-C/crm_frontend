@@ -1,3 +1,4 @@
+// Department CRUD routes consumed by department.service.ts (account-settings/department).
 export const DEPARTMENT_API_ENDPOINTS = {
   GET_ALL: '/department',
   CREATE: '/department',

@@ -26,7 +26,8 @@ export interface GetAllCheckoutNotesParams {
 export interface GetAllCheckoutNotesResponse {
   status: boolean
   message: string
-  data: {
+  // Optional to match ServiceResponseUtil.normalize()'s shape, which only sets `data` when the API actually returned it.
+  data?: {
     items: CheckoutNoteItem[]
     total?: number
     pagination?: {
@@ -42,7 +43,8 @@ export interface CheckoutNoteResponseData {
 export interface CheckoutNoteResponse {
   status: boolean
   message: string
-  data: CheckoutNoteResponseData | undefined
+  // Optional (not `| undefined`) to match ServiceResponseUtil.normalize()'s shape, which only sets `data` when the API actually returned it.
+  data?: CheckoutNoteResponseData
   errors?: Record<string, string[]>;
   field?: string;
 }

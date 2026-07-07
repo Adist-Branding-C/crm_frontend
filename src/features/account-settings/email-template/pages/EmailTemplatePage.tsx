@@ -4,9 +4,8 @@ import AddEmailTemplateDrawer from '../components/AddEmailTemplateDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
-import type { EmailTemplateItem } from '../types/emailTemplate.types';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { EMAIL_TEMPLATE_TABLE_COLUMNS } from '../constants/emailTemplateTableColumns';
 
 const EmailTemplatePage = () => {
   const {
@@ -15,6 +14,8 @@ const EmailTemplatePage = () => {
     rowsPerPage, handleRowsPerPageChange,
     pageNumber, setPageNumber,
     totalCount,
+    startIndex,
+    totalPages,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
@@ -31,23 +32,6 @@ const EmailTemplatePage = () => {
     handleEditSubmit,
   } = useEmailTemplatePage();
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
-
-  const columns: Column<EmailTemplateItem>[] = [
-    { key: 'title', label: 'Template Name', render: (item) => item.title || item.templateName || '-' },
-    { key: 'subject', label: 'Subject', render: (item) => item.subject || '-' },
-    {
-      key: 'htmlContent',
-      label: 'Content',
-      render: (item) => {
-        const content = item.htmlContent || item.content || '';
-        return content.length > 50 ? content.substring(0, 50) + '...' : content || '-';
-      },
-    },
-    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
-  ];
-
   return (
     <div className="account-page">
       <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
@@ -59,7 +43,7 @@ const EmailTemplatePage = () => {
           onAdd={handleAddClick}
           addLabel="Add Template"
           data={filteredData}
-          columns={columns}
+          columns={EMAIL_TEMPLATE_TABLE_COLUMNS}
           startIndex={startIndex}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
@@ -70,7 +54,7 @@ const EmailTemplatePage = () => {
           rowsPerPage={rowsPerPage}
           totalItems={totalCount}
           onPageChange={setPageNumber}
-          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
         <AddEmailTemplateDrawer
           isOpen={showDrawer}

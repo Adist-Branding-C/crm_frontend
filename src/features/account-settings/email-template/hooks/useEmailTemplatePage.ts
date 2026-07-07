@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { ChangeEvent } from 'react';
 import { useEmailTemplate, useEmailTemplateDrawer, useEmailTemplateDropdown, useEmailTemplateFilters, useEmailTemplateActions } from './index';
 import type { EmailTemplateItem } from '../types/emailTemplate.types';
 
@@ -8,6 +9,12 @@ export function useEmailTemplatePage() {
   const dropdown = useEmailTemplateDropdown();
   const filters = useEmailTemplateFilters(emailTemplate.emailTemplateList);
   const actions = useEmailTemplateActions({ emailTemplate, drawer });
+
+  const startIndex = (emailTemplate.pageNumber - 1) * emailTemplate.limit;
+  const totalPages = useMemo(
+    () => Math.ceil(emailTemplate.totalCount / emailTemplate.limit) || 1,
+    [emailTemplate.totalCount, emailTemplate.limit],
+  );
 
   const handleEditClick = useCallback((item: EmailTemplateItem) => {
     drawer.openEditDrawer(item);
@@ -19,15 +26,22 @@ export function useEmailTemplatePage() {
     dropdown.closeDropdown();
   }, [actions.handleDeleteClick, dropdown.closeDropdown]);
 
+  const { handleRowsPerPageChange: setRowsPerPage } = emailTemplate;
+  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
+  }, [setRowsPerPage]);
+
   return {
     emailTemplate,
     searchQuery: emailTemplate.searchQuery,
     handleSearchChange: emailTemplate.handleSearchChange,
     rowsPerPage: emailTemplate.limit,
-    handleRowsPerPageChange: emailTemplate.handleRowsPerPageChange,
+    handleRowsPerPageChange,
     pageNumber: emailTemplate.pageNumber,
     setPageNumber: emailTemplate.setPageNumber,
     totalCount: emailTemplate.totalCount,
+    startIndex,
+    totalPages,
     showDrawer: drawer.showDrawer,
     dropdownOpen: dropdown.dropdownOpen,
     onToggleDropdown: dropdown.toggleDropdown,

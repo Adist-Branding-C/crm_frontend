@@ -12,3 +12,23 @@ export interface ProfileData {
   accountStatus: string;
   firstLetter: string;
 }
+
+export interface ProfileApiData {
+  companyId: string;
+  companyName: string;
+  email: string;
+  phone: string;
+  address: string;
+  gstNumber: string;
+}
+
+export interface GetProfileResponse {
+  status: boolean;
+  message: string;
+  data: ProfileApiData;
+}
+
+export interface UpdateProfileResponse {
+  status: boolean;
+  message: string;
+}

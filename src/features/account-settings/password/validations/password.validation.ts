@@ -1,13 +1,18 @@
 import * as yup from 'yup';
-import { STRONG_PASSWORD_REGEX, STRONG_PASSWORD_MESSAGE } from '../../../../shared/constants/regex';
+import { strongPasswordYupSchema } from '../../../../shared/validations/password.validation';
 
 export const changePasswordValidationSchema = yup.object({
+  // Used by PasswordPage's change-password form (account-settings/password) to require the
+  // user's existing password before allowing a change.
   currentPassword: yup.string().required('Current password is required'),
-  newPassword: yup
-    .string()
+  // Used by PasswordPage's change-password form (account-settings/password); reuses the shared
+  // strongPasswordYupSchema (src/shared/validations/password.validation.ts) for the strength rule
+  // and layers on the "must differ from current password" check.
+  newPassword: strongPasswordYupSchema
     .required('New password is required')
-    .matches(STRONG_PASSWORD_REGEX, STRONG_PASSWORD_MESSAGE)
     .notOneOf([yup.ref('currentPassword')], 'New password must be different from current password'),
+  // Used by PasswordPage's change-password form (account-settings/password) to ensure the user
+  // retyped the new password correctly before submitting.
   confirmPassword: yup
     .string()
     .required('Please confirm your new password')

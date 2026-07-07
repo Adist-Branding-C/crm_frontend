@@ -1,19 +1,23 @@
-import { MoreHorizontal, Edit2, Trash2, Plus, Search, X } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, Plus, Search, Loader2, Check, X } from 'lucide-react';
+import { Formik, Form, Field } from 'formik';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
+import DrawerShell from '../../../shared/components/crud/DrawerShell';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
 import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
 import { MAIL_DRIVER_OPTIONS, ENCRYPTION_OPTIONS } from '../constants';
+import { mailConfigValidationSchema } from '../validations/mailConfig.validation';
 import { useMailConfigData } from '../hooks/useMailConfigData';
 import './MailConfigPage.css';
 
 const MailConfigPage = () => {
   const {
+    isLoading,
     showForm,
     editingItem,
     deletingItem,
     setDeletingItem,
-    formData,
+    drawerInitialValues,
     searchQuery,
     setSearchQuery,
     rowsPerPage,
@@ -21,12 +25,16 @@ const MailConfigPage = () => {
     dropdownOpen,
     setDropdownOpen,
     filteredData,
-    handleInputChange,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
     handleAddClick,
     handleEditClick,
     handleDeleteClick,
     handleConfirmDelete,
     handleCloseForm,
+    handleSubmit,
   } = useMailConfigData();
 
   return (
@@ -73,13 +81,17 @@ const MailConfigPage = () => {
                     <th>Sl No</th>
                     <th>Driver/Host</th>
                     <th>Port/Encryption</th>
-                    <th>Authentication</th>
+                    <th>Username</th>
                     <th>Active</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.length === 0 ? (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="dataTables_empty">Loading...</td>
+                    </tr>
+                  ) : filteredData.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="dataTables_empty">
                         No data available in table
@@ -89,10 +101,10 @@ const MailConfigPage = () => {
                     filteredData.slice(0, rowsPerPage).map((item, index) => (
                       <tr key={item.id}>
                         <td>{index + 1}</td>
-                        <td>{item.driver}</td>
-                        <td>{item.port}/{item.encryption}</td>
-                        <td>{item.auth}</td>
-                        <td>{item.active ? 'Yes' : 'No'}</td>
+                        <td>{item.driver} {item.host ? `(${item.host})` : ''}</td>
+                        <td>{item.port}/{item.encryption || '-'}</td>
+                        <td>{item.username || '-'}</td>
+                        <td>{item.isActive ? 'Yes' : 'No'}</td>
                         <td>
                           <div className="dropdown-container">
                             <button
@@ -132,66 +144,76 @@ const MailConfigPage = () => {
         </div>
       </div>
 
-      {showForm && (
-        <div className="drawer-overlay" onClick={handleCloseForm}>
-          <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
-            <div className="drawer-header">
-              <h5>{editingItem ? 'Edit Mail Config' : 'Add Mail Config'}</h5>
-              <button className="drawer-close" onClick={handleCloseForm}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="drawer-body">
-              <form>
+      <DrawerShell isOpen={showForm} title={editingItem ? 'Edit Mail Config' : 'Add Mail Config'} onClose={handleCloseForm}>
+        <Formik
+          enableReinitialize
+          initialValues={drawerInitialValues}
+          validationSchema={mailConfigValidationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched, dirty, submitCount, isSubmitting }) => {
+            const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
+            const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+
+            return (
+              <Form noValidate>
                 <div className="form-group">
                   <label>Mail Driver <span className="text-danger">*</span></label>
-                  <select name="driver" className="form-control" value={formData.driver} onChange={handleInputChange}>
+                  <Field as="select" name="driver" className={fieldClass('driver')}>
                     <option value="">Select Driver</option>
                     {MAIL_DRIVER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  </Field>
+                  {showError('driver') && errors.driver && <small className="field-error-text">{errors.driver}</small>}
                 </div>
                 <div className="form-group">
-                  <label>Host</label>
-                  <input type="text" name="host" className="form-control" placeholder="mail.example.com" value={formData.host} onChange={handleInputChange} />
+                  <label>Host <span className="text-danger">*</span></label>
+                  <Field type="text" name="host" className={fieldClass('host')} placeholder="mail.example.com" />
+                  {showError('host') && errors.host && <small className="field-error-text">{errors.host}</small>}
                 </div>
                 <div className="form-group">
-                  <label>Port</label>
-                  <input type="text" name="port" className="form-control" placeholder="587" value={formData.port} onChange={handleInputChange} />
+                  <label>Port <span className="text-danger">*</span></label>
+                  <Field type="text" name="port" className={fieldClass('port')} placeholder="587" />
+                  {showError('port') && errors.port && <small className="field-error-text">{errors.port}</small>}
                 </div>
                 <div className="form-group">
                   <label>Encryption</label>
-                  <select name="encryption" className="form-control" value={formData.encryption} onChange={handleInputChange}>
+                  <Field as="select" name="encryption" className="form-control">
                     <option value="">Select</option>
                     {ENCRYPTION_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  </Field>
                 </div>
                 <div className="form-group">
                   <label>Username</label>
-                  <input type="text" name="username" className="form-control" placeholder="username" value={formData.username} onChange={handleInputChange} />
+                  <Field type="text" name="username" className="form-control" placeholder="username" />
                 </div>
                 <div className="form-group">
                   <label>Password</label>
-                  <input type="password" name="password" className="form-control" placeholder="password" value={formData.password} onChange={handleInputChange} />
+                  <Field type="password" name="password" className="form-control" placeholder="password" />
                 </div>
                 <div className="form-group">
-                  <label>From Email</label>
-                  <input type="email" name="fromEmail" className="form-control" placeholder="noreply@example.com" value={formData.fromEmail} onChange={handleInputChange} />
+                  <label>From Email <span className="text-danger">*</span></label>
+                  <Field type="email" name="fromEmail" className={fieldClass('fromEmail')} placeholder="noreply@example.com" />
+                  {showError('fromEmail') && errors.fromEmail && <small className="field-error-text">{errors.fromEmail}</small>}
                 </div>
                 <div className="form-group">
                   <label>From Name</label>
-                  <input type="text" name="fromName" className="form-control" placeholder="Company Name" value={formData.fromName} onChange={handleInputChange} />
+                  <Field type="text" name="fromName" className="form-control" placeholder="Company Name" />
+                </div>
+                <div className="form-group form-check">
+                  <Field type="checkbox" id="isActive" name="isActive" className="form-check-input" />
+                  <label htmlFor="isActive" className="form-check-label">Active</label>
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn btn-primary">
-                    {editingItem ? 'Update' : 'Save'}
+                  <button type="submit" className="btn btn-primary" disabled={isLoading || isSubmitting || (!!editingItem && !dirty)}>
+                    {isLoading || isSubmitting ? <Loader2 size={16} className="spin" /> : (editingItem ? 'Update' : 'Save')}
                   </button>
                   <button type="button" className="btn btn-secondary" onClick={handleCloseForm}>Cancel</button>
                 </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+              </Form>
+            );
+          }}
+        </Formik>
+      </DrawerShell>
 
       {deletingItem && (
         <div className="modal-overlay" onClick={() => setDeletingItem(null)}>
@@ -214,6 +236,13 @@ const MailConfigPage = () => {
               <button className="btn btn-secondary" onClick={() => setDeletingItem(null)}>Cancel</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {showToast && (
+        <div className={`toast-notification toast-${toastType}`} onClick={() => setShowToast(false)}>
+          {toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

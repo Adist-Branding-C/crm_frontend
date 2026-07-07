@@ -4,16 +4,8 @@ import AddWhatsappTemplateDrawer from '../components/AddWhatsappTemplateDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
-import type { WhatsappTemplateItem } from '../types/whatsapp-template.types';
-
-const MESSAGE_TRUNCATE_LENGTH = 80;
-
-const truncate = (text: string | undefined | null, maxLength: number): string => {
-  if (!text) return '-';
-  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-};
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { WHATSAPP_TEMPLATE_TABLE_COLUMNS } from '../constants/whatsappTemplateTableColumns';
 
 const WhatsappTemplatePage = () => {
   const {
@@ -22,6 +14,8 @@ const WhatsappTemplatePage = () => {
     rowsPerPage, handleRowsPerPageChange,
     pageNumber, setPageNumber,
     totalCount,
+    startIndex,
+    totalPages,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
@@ -38,15 +32,6 @@ const WhatsappTemplatePage = () => {
     handleEditSubmit,
   } = useWhatsappTemplatePage();
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
-
-  const columns: Column<WhatsappTemplateItem>[] = [
-    { key: 'templateName', label: 'Template Name', render: (item) => item.templateName || item.name || '-' },
-    { key: 'message', label: 'Message', render: (item) => truncate(item.message || item.content, MESSAGE_TRUNCATE_LENGTH) },
-    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
-  ];
-
   return (
     <div className="account-page">
       <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
@@ -58,7 +43,7 @@ const WhatsappTemplatePage = () => {
           onAdd={handleAddClick}
           addLabel="Add Template"
           data={filteredData}
-          columns={columns}
+          columns={WHATSAPP_TEMPLATE_TABLE_COLUMNS}
           startIndex={startIndex}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
@@ -69,7 +54,7 @@ const WhatsappTemplatePage = () => {
           rowsPerPage={rowsPerPage}
           totalItems={totalCount}
           onPageChange={setPageNumber}
-          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
         <AddWhatsappTemplateDrawer
           isOpen={showDrawer}

@@ -1,4 +1,4 @@
-import type { ReactNode, ChangeEvent } from 'react';
+import type { ReactNode, ChangeEvent, Ref } from 'react';
 
 export interface Column<T> {
   key: string;
@@ -63,6 +63,14 @@ export interface AdminTableProps<T extends { id: number | string }> {
   onDelete: (item: T) => void;
   renderActions?: (item: T) => ReactNode;
   emptyMessage?: string;
+}
+
+export interface DrawerShellProps {
+  isOpen: boolean;
+  title: string;
+  onClose: () => void;
+  bodyRef?: Ref<HTMLDivElement>;
+  children: ReactNode;
 }
 
 export interface AdminFormDrawerProps {

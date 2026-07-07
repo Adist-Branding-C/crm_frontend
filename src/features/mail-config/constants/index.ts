@@ -1,4 +1,4 @@
-import type { MailConfigItem } from '../types';
+import type { MailConfigFormData } from '../types';
 
 export const MAIL_DRIVER_OPTIONS = [
   { value: 'smtp', label: 'SMTP' },
@@ -11,11 +11,12 @@ export const ENCRYPTION_OPTIONS = [
   { value: 'ssl', label: 'SSL' },
 ];
 
-export const MAIL_CONFIG_DATA: MailConfigItem[] = [
-  { id: 1, driver: 'SMTP', port: 587, encryption: 'TLS', auth: 'Yes', active: true },
-];
+export const MAIL_CONFIG_API_ENDPOINTS = {
+  BASE: '/mail-configs',
+  BY_ID: (id: string) => `/mail-configs/${id}`,
+};
 
-export const INITIAL_MAIL_FORM = {
+export const INITIAL_MAIL_FORM: MailConfigFormData = {
   driver: '', host: '', port: '', encryption: '',
-  username: '', password: '', fromEmail: '', fromName: '',
+  username: '', password: '', fromEmail: '', fromName: '', isActive: true,
 };
