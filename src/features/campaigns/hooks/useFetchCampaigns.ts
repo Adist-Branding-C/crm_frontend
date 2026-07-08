@@ -1,7 +1,7 @@
 import { useTableData } from '../../../shared/hooks/useTableData';
 import { campaignApiService } from '../services';
-import { computeSlNo } from '../utils/campaign.utils';
-import type { Campaign } from '../types';
+import { CampaignMapper } from '../mappers/campaign.mapper';
+import type { Campaign } from '../types/interface';
 
 export function useFetchCampaigns() {
   const pagination = useTableData<Campaign>({
@@ -11,12 +11,8 @@ export function useFetchCampaigns() {
         limit: params.limit,
         search: params.search,
       });
-      const body = response.data as { items?: Campaign[]; pagination?: { total: number } } | undefined;
-      const items = (body?.items ?? []).map((item, idx) => ({
-        ...item,
-        slNo: computeSlNo(idx, params.pageNumber, params.limit),
-      }));
-      const total = body?.pagination?.total ?? 0;
+      const items = CampaignMapper.toEntityList(response.data?.items ?? [], params.pageNumber, params.limit);
+      const total = response.data?.pagination?.total ?? 0;
       return { items, total };
     },
   });
@@ -29,6 +25,7 @@ export function useFetchCampaigns() {
     setPageNumber: pagination.setPageNumber,
     limit: pagination.limit,
     totalCount: pagination.totalCount,
+    totalPages: Math.ceil(pagination.totalCount / pagination.limit) || 1,
     searchQuery: pagination.searchQuery,
     handleSearchChange: pagination.handleSearchChange,
     handleRowsPerPageChange: pagination.handleRowsPerPageChange,

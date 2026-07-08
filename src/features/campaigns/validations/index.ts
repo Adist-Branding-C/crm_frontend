@@ -26,6 +26,20 @@ const agentsValidation = yup
   .of(yup.string())
   .min(1, 'Select at least one agent');
 
+/**
+ * Validation schema for creating and editing a campaign.
+ *
+ * Used by:
+ * - CampaignForm (shared by the Add Campaign and Edit Campaign drawers on CampaignsPage)
+ *
+ * Notes:
+ * - A single schema covers both create and edit since the two forms share the
+ *   exact same field shape (CampaignFormData) and conditional rules.
+ * - Fields are conditionally required based on `type`: Lead Campaign requires
+ *   name/agents, Data Pool requires poolName/poolAgents.
+ * - End date is validated against start date on the frontend for immediate
+ *   feedback; the backend re-validates all fields on submit.
+ */
 const campaignValidationSchema = yup.object({
   type: typeValidation,
   name: yup.string().when('type', {
@@ -70,5 +84,4 @@ const campaignValidationSchema = yup.object({
   }),
 });
 
-export const addCampaignValidationSchema = campaignValidationSchema;
-export const editCampaignValidationSchema = campaignValidationSchema;
+export { campaignValidationSchema };

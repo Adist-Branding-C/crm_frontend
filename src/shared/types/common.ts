@@ -17,5 +17,5 @@ export interface DateRange {
 export interface ApiResponse<T = unknown> {
   status: boolean | number;
   message: string;
-  data?: T;
+  data?: T | undefined;
 }

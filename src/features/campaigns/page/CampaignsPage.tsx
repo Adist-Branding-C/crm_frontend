@@ -1,94 +1,156 @@
+import { useCallback, useMemo, useRef } from 'react';
+import { Download, Plus } from 'lucide-react';
+import { useDrawer } from '../../../shared/hooks/useDrawer';
+import { useRowDropdown } from '../../../shared/hooks/useRowDropdown';
+import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useFetchCampaigns } from '../hooks/useFetchCampaigns';
 import { useCampaignSubmitHandlers } from '../hooks/useCampaignSubmitHandlers';
-import { useAddCampaignDrawer } from '../hooks/useAddCampaignDrawer';
-import { useEditCampaignDrawer } from '../hooks/useEditCampaignDrawer';
-import { useDeleteCampaignDialog } from '../hooks/useDeleteCampaignDialog';
-import { useRowDropdown } from '../hooks/useRowDropdown';
-import { useCampaignsSearch } from '../hooks/useCampaignsSearch';
+import { useCampaignExport } from '../hooks/useCampaignExport';
 import { useToast } from '../../task-settings/hooks/useToast';
-import { addCampaignValidationSchema, editCampaignValidationSchema } from '../validations/index';
+import { CampaignMapper } from '../mappers/campaign.mapper';
+import { campaignValidationSchema } from '../validations/index';
 import { ADD_CAMPAIGN_INITIAL_VALUES } from '../constants/index';
-import CampaignTable from '../components/CampaignTable';
-import AddCampaignDrawer from '../components/AddCampaignDrawer';
-import EditCampaignDrawer from '../components/EditCampaignDrawer';
+import { LABEL_NO_DATA } from '../../../shared/constants/labels';
+import CampaignForm from '../components/CampaignForm';
+import CampaignRow from '../components/CampaignRow';
 import DeleteCampaignDialog from '../components/DeleteCampaignDialog';
 import ToastNotification from '../../task-settings/components/ToastNotification';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
+import Drawer from '../../../shared/components/Drawer';
+import Modal from '../../../shared/components/Modal';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
+import type { Campaign } from '../types';
 import './CampaignsPage.css';
 
 const CampaignsPage = () => {
   const fetch = useFetchCampaigns();
-  const addDrawer = useAddCampaignDrawer();
-  const editDrawer = useEditCampaignDrawer();
-  const deleteDialog = useDeleteCampaignDialog();
+  const addDrawer = useDrawer();
+  const editDrawer = useDrawer<Campaign>();
+  const deleteDialog = useDrawer<Campaign>();
   const dropdown = useRowDropdown();
   const toast = useToast();
+  const { handleExportCSV } = useCampaignExport(fetch.campaignList);
+  const formBodyRef = useRef<HTMLDivElement>(null);
 
   const handlers = useCampaignSubmitHandlers(
     {
-      onAddSuccess: addDrawer.closeAddDrawer,
-      onEditSuccess: editDrawer.closeEditDrawer,
-      onDeleteSuccess: deleteDialog.closeDeleteDialog,
-      editingItem: editDrawer.editingItem,
-      deletingItem: deleteDialog.deletingItem,
+      onAddSuccess: addDrawer.close,
+      onEditSuccess: editDrawer.close,
+      onDeleteSuccess: deleteDialog.close,
+      editingItem: editDrawer.item,
+      deletingItem: deleteDialog.item,
     },
     fetch,
     toast,
   );
 
-  const { searchValue, handleSearchInput } = useCampaignsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
 
-  const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
+  const editInitialValues = useMemo(
+    () => CampaignMapper.toFormValues(editDrawer.item),
+    [editDrawer.item],
+  );
+
+  const handleView = useCallback((_campaign: Campaign) => {}, []);
+  const handleAssignClick = useCallback((_campaign: Campaign) => {}, []);
 
   return (
     <PageContainer>
       <PageHeader title="Campaigns" description="Manage campaign tasks and activities." />
-      <CampaignTable
-        data={fetch.campaignList}
-        searchQuery={searchValue}
-        onSearchChange={handleSearchInput}
-        rowsPerPage={fetch.limit}
-        onRowsPerPageChange={fetch.handleRowsPerPageChange}
-        totalRecords={fetch.totalCount}
-        currentPage={fetch.pageNumber}
-        totalPages={totalPages}
-        onPageChange={fetch.setPageNumber}
-        dropdownOpen={dropdown.dropdownOpen}
-        onToggleDropdown={dropdown.toggleDropdown}
-        onView={handlers.handleView}
-        onEdit={editDrawer.openEditDrawer}
-        onAssign={handlers.handleAssignClick}
-        onDelete={deleteDialog.handleDeleteClick}
-        onAdd={addDrawer.openAddDrawer}
-        onExport={handlers.handleExportCSV}
-        addLabel="Campaign"
-      />
-      <AddCampaignDrawer
-        isOpen={addDrawer.showAddDrawer}
-        onClose={addDrawer.closeAddDrawer}
-        validationSchema={addCampaignValidationSchema}
-        initialValues={ADD_CAMPAIGN_INITIAL_VALUES}
-        onSubmit={handlers.handleAddSubmit}
-        isLoading={fetch.isLoading}
-        error={fetch.error}
-      />
-      <EditCampaignDrawer
-        isOpen={editDrawer.showEditDrawer}
-        onClose={editDrawer.closeEditDrawer}
-        validationSchema={editCampaignValidationSchema}
-        initialValues={editDrawer.editInitialValues}
-        onSubmit={handlers.handleEditSubmit}
-        isLoading={fetch.isLoading}
-        error={fetch.error}
-        editingItem={editDrawer.editingItem}
-      />
-      <DeleteCampaignDialog
-        isOpen={!!deleteDialog.deletingItem}
-        itemName={deleteDialog.deletingItem?.name || ''}
-        onConfirm={handlers.handleConfirmDelete}
-        onClose={deleteDialog.closeDeleteDialog}
-      />
+
+      <div className="table-container">
+        <TableNav
+          searchQuery={searchValue}
+          onSearchChange={handleSearchInput}
+          rowsPerPage={fetch.limit}
+          onRowsPerPageChange={fetch.handleRowsPerPageChange}
+        >
+          <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Download size={16} />Export
+          </button>
+          <button className="btn btn-primary" onClick={() => addDrawer.open()} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Plus size={16} /> Campaign
+          </button>
+        </TableNav>
+
+        <Table wrapperClassName="table-scroll" className="data-table">
+          <THead>
+            <TRow>
+              <TCell variant="th">Sl No</TCell>
+              <TCell variant="th">Name</TCell>
+              <TCell variant="th">Type</TCell>
+              <TCell variant="th">Total Tasks</TCell>
+              <TCell variant="th">Completed Tasks</TCell>
+              <TCell variant="th">Completed %</TCell>
+              <TCell variant="th">Created By</TCell>
+              <TCell variant="th">Created At</TCell>
+              <TCell variant="th">Actions</TCell>
+            </TRow>
+          </THead>
+          <TBody>
+            {fetch.campaignList.length === 0 ? (
+              <EmptyState colSpan={9} message={LABEL_NO_DATA} />
+            ) : (
+              fetch.campaignList.map((campaign) => (
+                <CampaignRow
+                  key={campaign.id}
+                  campaign={campaign}
+                  dropdownOpen={dropdown.dropdownOpen}
+                  onToggleDropdown={dropdown.toggleDropdown}
+                  onView={handleView}
+                  onEdit={editDrawer.open}
+                  onAssign={handleAssignClick}
+                  onDelete={deleteDialog.open}
+                />
+              ))
+            )}
+          </TBody>
+        </Table>
+
+        <Pagination
+          currentPage={fetch.pageNumber}
+          totalPages={fetch.totalPages}
+          totalItems={fetch.totalCount}
+          rowsPerPage={fetch.limit}
+          onPageChange={fetch.setPageNumber}
+        />
+      </div>
+
+      <Drawer ref={formBodyRef} isOpen={addDrawer.isOpen} onClose={addDrawer.close} title="Add Campaign">
+        <CampaignForm
+          editingItem={null}
+          validationSchema={campaignValidationSchema}
+          initialValues={ADD_CAMPAIGN_INITIAL_VALUES}
+          onSubmit={handlers.handleAddSubmit}
+          isLoading={fetch.isLoading}
+          error={fetch.error}
+          onCancel={addDrawer.close}
+          scrollContainerRef={formBodyRef}
+        />
+      </Drawer>
+
+      <Drawer ref={formBodyRef} isOpen={editDrawer.isOpen} onClose={editDrawer.close} title="Edit Campaign">
+        <CampaignForm
+          editingItem={editDrawer.item}
+          validationSchema={campaignValidationSchema}
+          initialValues={editInitialValues}
+          onSubmit={handlers.handleEditSubmit}
+          isLoading={fetch.isLoading}
+          error={fetch.error}
+          onCancel={editDrawer.close}
+          scrollContainerRef={formBodyRef}
+        />
+      </Drawer>
+
+      <Modal isOpen={deleteDialog.isOpen} onClose={deleteDialog.close} title="Confirm Delete" maxWidth="450px">
+        <DeleteCampaignDialog
+          itemName={deleteDialog.item?.name || ''}
+          onConfirm={handlers.handleConfirmDelete}
+          onCancel={deleteDialog.close}
+        />
+      </Modal>
+
       <ToastNotification
         message={toast.toastMessage}
         type={toast.toastType}

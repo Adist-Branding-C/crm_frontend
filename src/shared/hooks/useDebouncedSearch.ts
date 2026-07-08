@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useCampaignsSearch(
+export function useDebouncedSearch(
   externalSearchQuery: string,
   onSearchChange: (value: string) => void,
+  debounceMs = 2000,
 ) {
   const [searchValue, setSearchValue] = useState(externalSearchQuery);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -11,6 +12,7 @@ export function useCampaignsSearch(
     if (searchValue !== externalSearchQuery) {
       setSearchValue(externalSearchQuery);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalSearchQuery]);
 
   const handleSearchInput = useCallback((value: string) => {
@@ -18,8 +20,8 @@ export function useCampaignsSearch(
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       onSearchChange(value);
-    }, 2000);
-  }, [onSearchChange]);
+    }, debounceMs);
+  }, [onSearchChange, debounceMs]);
 
   useEffect(() => {
     return () => {

@@ -1,13 +1,11 @@
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import { useCreateCampaign } from './useCreateCampaign';
-import { useUpdateCampaign } from './useUpdateCampaign';
-import { useDeleteCampaign } from './useDeleteCampaign';
+import { useCampaignApi } from './useCampaignApi';
 import { useDrawerScroll } from '../../task-settings/hooks/useDrawerScroll';
 import { parseApiError } from '../../task-settings/call-reason/utils/parseApiError';
 import { applyFieldErrors } from '../../task-settings/call-reason/utils/applyFieldErrors';
-import { buildCampaignPayload } from '../utils/campaign.utils';
-import type { Campaign, CampaignFormData, SubmitHandlerConfig, FetchHandlers, ToastHandlers } from '../types';
+import { CampaignMapper } from '../mappers/campaign.mapper';
+import type { CampaignFormData, SubmitHandlerConfig, FetchHandlers, ToastHandlers } from '../types';
 import type { CreateCampaignPayload, UpdateCampaignPayload } from '../types';
 
 export function useCampaignSubmitHandlers(
@@ -15,9 +13,7 @@ export function useCampaignSubmitHandlers(
   fetch: FetchHandlers,
   toast: ToastHandlers,
 ) {
-  const create = useCreateCampaign();
-  const update = useUpdateCampaign();
-  const removal = useDeleteCampaign();
+  const api = useCampaignApi();
   const { scrollAndFocusError, scrollToTop } = useDrawerScroll();
 
   const handleAddSubmit = useCallback(async (
@@ -28,8 +24,8 @@ export function useCampaignSubmitHandlers(
     fetch.setIsLoading(true);
 
     try {
-      const payload = buildCampaignPayload(values) as CreateCampaignPayload;
-      const response = await create.create(payload);
+      const payload = CampaignMapper.toRequest(values) as CreateCampaignPayload;
+      const response = await api.create(payload);
 
       if (!response) {
         fetch.setError('Network error. Please try again.');
@@ -78,7 +74,7 @@ export function useCampaignSubmitHandlers(
       fetch.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [create, fetch, config, toast, scrollAndFocusError, scrollToTop]);
+  }, [api, fetch, config, toast, scrollAndFocusError, scrollToTop]);
 
   const handleEditSubmit = useCallback(async (
     values: CampaignFormData,
@@ -90,8 +86,8 @@ export function useCampaignSubmitHandlers(
     fetch.setIsLoading(true);
 
     try {
-      const payload = buildCampaignPayload(values) as UpdateCampaignPayload;
-      const response = await update.update(String(config.editingItem.id), payload);
+      const payload = CampaignMapper.toRequest(values) as UpdateCampaignPayload;
+      const response = await api.update(String(config.editingItem.id), payload);
 
       if (!response) {
         fetch.setError('Network error. Please try again.');
@@ -137,7 +133,7 @@ export function useCampaignSubmitHandlers(
       fetch.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [update, fetch, config, toast, scrollAndFocusError, scrollToTop]);
+  }, [api, fetch, config, toast, scrollAndFocusError, scrollToTop]);
 
   const handleConfirmDelete = useCallback(async () => {
     if (!config.deletingItem) return;
@@ -145,7 +141,7 @@ export function useCampaignSubmitHandlers(
     fetch.setError('');
 
     try {
-      const response = await removal.remove(String(config.deletingItem.id));
+      const response = await api.remove(String(config.deletingItem.id));
 
       if (response?.status) {
         fetch.refresh();
@@ -159,27 +155,7 @@ export function useCampaignSubmitHandlers(
         : 'Failed to delete campaign';
       fetch.setError(msg);
     }
-  }, [removal, fetch, config]);
+  }, [api, fetch, config]);
 
-  const handleExportCSV = useCallback(() => {
-    const csvContent = [
-      ['Sl No', 'Name', 'Type', 'Total Tasks', 'Completed Tasks', 'Completed %', 'Created By', 'Created At'].join(','),
-      ...fetch.campaignList.map(c =>
-        [c.slNo, `"${c.name}"`, c.type, c.totalTasks, c.completedTasks, c.completedPercent + '%', String(c.createdBy ?? ''), c.createdAt].join(',')
-      ),
-    ].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'campaigns.csv';
-    link.click();
-  }, [fetch.campaignList]);
-
-  const handleView = useCallback((_campaign: Campaign) => {
-  }, []);
-
-  const handleAssignClick = useCallback((_campaign: Campaign) => {
-  }, []);
-
-  return { handleAddSubmit, handleEditSubmit, handleConfirmDelete, handleExportCSV, handleView, handleAssignClick };
+  return { handleAddSubmit, handleEditSubmit, handleConfirmDelete };
 }
