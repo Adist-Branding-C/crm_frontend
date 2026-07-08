@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
-import type { DeleteCampaignModalProps } from '../types/delete-campaign-modal.types';
+import type { DeleteCampaignDialogProps } from '../types';
 
-const DeleteCampaignModal = ({ isOpen, campaignName, onConfirm, onClose }: DeleteCampaignModalProps) => {
+const DeleteCampaignDialog = ({ isOpen, itemName, onConfirm, onClose }: DeleteCampaignDialogProps) => {
   if (!isOpen) return null;
 
   return (
@@ -15,7 +15,7 @@ const DeleteCampaignModal = ({ isOpen, campaignName, onConfirm, onClose }: Delet
         </div>
         <div className="modal-body">
           <p className="delete-warning">
-            Are you sure you want to delete <strong>{campaignName}</strong>? This action cannot be undone.
+            Are you sure you want to delete <strong>{itemName}</strong>? This action cannot be undone.
           </p>
         </div>
         <div className="modal-footer">
@@ -27,4 +27,4 @@ const DeleteCampaignModal = ({ isOpen, campaignName, onConfirm, onClose }: Delet
   );
 };
 
-export default DeleteCampaignModal;
+export default DeleteCampaignDialog;
