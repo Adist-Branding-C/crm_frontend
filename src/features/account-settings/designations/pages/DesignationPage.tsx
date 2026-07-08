@@ -4,9 +4,8 @@ import AddDesignationDrawer from '../components/AddDesignationDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
-import type { DesignationItem } from '../types/designation.types';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { DESIGNATION_TABLE_COLUMNS } from '../constants/designationTableColumns';
 
 const DesignationPage = () => {
   const {
@@ -15,6 +14,8 @@ const DesignationPage = () => {
     rowsPerPage, handleRowsPerPageChange,
     pageNumber, setPageNumber,
     totalCount,
+    startIndex,
+    totalPages,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
@@ -31,15 +32,6 @@ const DesignationPage = () => {
     handleEditSubmit,
   } = useDesignationPage();
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
-
-  const columns: Column<DesignationItem>[] = [
-    { key: 'designationName', label: 'Designation', render: (item) => item.designationName || item.name || '-' },
-    { key: 'description', label: 'Description' },
-    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
-  ];
-
   return (
     <div className="account-page">
       <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
@@ -51,7 +43,7 @@ const DesignationPage = () => {
           onAdd={handleAddClick}
           addLabel="Add Designation"
           data={filteredData}
-          columns={columns}
+          columns={DESIGNATION_TABLE_COLUMNS}
           startIndex={startIndex}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
@@ -62,7 +54,7 @@ const DesignationPage = () => {
           rowsPerPage={rowsPerPage}
           totalItems={totalCount}
           onPageChange={setPageNumber}
-          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
         <AddDesignationDrawer
           isOpen={showDrawer}

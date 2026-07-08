@@ -1,46 +1,16 @@
-import { useState, useMemo, useCallback } from 'react';
-import type { AgentItem, AgentFormData } from '../types/agent.types';
+import { useEditDrawer } from '../../../../shared/hooks/useEditDrawer';
+import { mapAgentToFormData } from '../utils/mapAgentToFormData';
+import { ADD_AGENT_INITIAL_VALUES } from '../constants/agent.constants';
 
+/**
+ * Add/edit drawer state for the account-settings/agent ("Staff") tab.
+ *
+ * Notes:
+ * - Thin wrapper around the shared useEditDrawer, configured with the agent item->form mapper.
+ */
 export function useAgentDrawer() {
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [editingItem, setEditingItem] = useState<AgentItem | null>(null);
-
-  const openAddDrawer = useCallback(() => {
-    setEditingItem(null);
-    setShowDrawer(true);
-  }, []);
-
-  const openEditDrawer = useCallback((item: AgentItem) => {
-    setEditingItem(item);
-    setShowDrawer(true);
-  }, []);
-
-  const closeDrawer = useCallback(() => {
-    setShowDrawer(false);
-    setEditingItem(null);
-  }, []);
-
-  const drawerInitialValues: AgentFormData = useMemo(
-    () => editingItem
-      ? {
-          fullName: editingItem.fullName || editingItem.name || '',
-          email: editingItem.email || '',
-          phone: editingItem.phone || editingItem.phone_number || editingItem.phoneNumber || editingItem.mobile || '',
-          password: '',
-          confirmPassword: '',
-          designationId: editingItem.designationId || String(editingItem.designation_id ?? editingItem.designation ?? ''),
-          status: editingItem.status || '',
-        }
-      : { fullName: '', email: '', phone: '', password: '', confirmPassword: '', designationId: '', status: '' },
-    [editingItem]
-  );
-
-  return {
-    showDrawer,
-    editingItem,
-    openAddDrawer,
-    openEditDrawer,
-    closeDrawer,
-    drawerInitialValues,
-  };
+  return useEditDrawer({
+    mapItemToFormData: mapAgentToFormData,
+    emptyFormData: ADD_AGENT_INITIAL_VALUES,
+  });
 }

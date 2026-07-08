@@ -1,44 +1,59 @@
+import { useCallback } from 'react';
+import type { ChangeEvent } from 'react';
 import { Check, X } from 'lucide-react';
-import { useBranchPage } from '../hooks';
+import { useTableData } from '../../../../shared/hooks/useTableData';
+import { useToast } from '../../../../shared/hooks/useToast';
+import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
+import { useBranchCrud, useBranchDrawer, useBranchDeleteConfirm, useBranchFormSubmit } from '../hooks';
+import { branchService } from '../services/branch.service';
 import AddBranchDrawer from '../components/AddBranchDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { BRANCH_TABLE_COLUMNS } from '../constants/branchTableColumns';
+import { addBranchValidationSchema, editBranchValidationSchema } from '../validations/branch.validation';
 import type { BranchItem } from '../types/branch.types';
 
 const BranchPage = () => {
-  const {
-    branch,
-    searchQuery, handleSearchChange,
-    rowsPerPage, handleRowsPerPageChange,
-    pageNumber, setPageNumber,
-    totalCount,
-    showDrawer,
-    dropdownOpen, onToggleDropdown,
-    editingItem,
-    deletingItem,
-    filteredData,
-    drawerInitialValues,
-    handleAddClick,
-    handleCloseDrawer,
-    handleEditClick,
-    handleDeleteClick,
-    handleConfirmDelete,
-    handleCloseDeleteModal,
-    handleSubmit,
-    handleEditSubmit,
-  } = useBranchPage();
+  const pagination = useTableData<BranchItem>({
+    fetchFn: async (params) => {
+      const response = await branchService.getAllBranches(params);
+      if (response.status) {
+        const data = response.data;
+        const items = data?.items ?? [];
+        return { items, total: data?.total ?? items.length };
+      }
+      throw new Error(response.message || 'Failed to fetch branches');
+    },
+  });
+  
+  const toast = useToast();
+  const crud = useBranchCrud({ pagination, showToastMessage: toast.showToastMessage });
+  const drawer = useBranchDrawer();
+  const dropdown = useDropdownMenu<number>();
+  const deleteConfirm = useBranchDeleteConfirm({ handleDeleteBranch: crud.handleDeleteBranch });
+  const formSubmit = useBranchFormSubmit({
+    editingItem: drawer.editingItem,
+    closeDrawer: drawer.closeDrawer,
+    handleAddBranch: crud.handleAddBranch,
+    handleUpdateBranch: crud.handleUpdateBranch,
+  });
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
+  const handleEditClick = useCallback((item: BranchItem) => {
+    drawer.openEditDrawer(item);
+    dropdown.closeDropdown();
+  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
 
-  const columns: Column<BranchItem>[] = [
-    { key: 'branchName', label: 'Branch Name', render: (item) => item.name || item.branchName || '-' },
-    { key: 'description', label: 'Description' },
-    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
-  ];
+  const handleDeleteClick = useCallback((item: BranchItem) => {
+    deleteConfirm.handleDeleteClick(item);
+    dropdown.closeDropdown();
+  }, [deleteConfirm.handleDeleteClick, dropdown.closeDropdown]);
+
+  const { handleRowsPerPageChange: setRowsPerPage } = pagination;
+  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
+  }, [setRowsPerPage]);
 
   return (
     <div className="account-page">
@@ -46,44 +61,44 @@ const BranchPage = () => {
       <SettingsTabs />
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
         <SettingsTableLayout
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          onAdd={handleAddClick}
+          searchQuery={pagination.searchQuery}
+          onSearchChange={pagination.handleSearchChange}
+          onAdd={drawer.openAddDrawer}
           addLabel="Add Branch"
-          data={filteredData}
-          columns={columns}
-          startIndex={startIndex}
-          dropdownOpen={dropdownOpen}
-          onToggleDropdown={onToggleDropdown}
+          data={pagination.list}
+          columns={BRANCH_TABLE_COLUMNS}
+          startIndex={pagination.startIndex}
+          dropdownOpen={dropdown.dropdownOpen}
+          onToggleDropdown={dropdown.toggleDropdown}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
-          currentPage={pageNumber}
-          totalPages={totalPages}
-          rowsPerPage={rowsPerPage}
-          totalItems={totalCount}
-          onPageChange={setPageNumber}
-          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+          currentPage={pagination.pageNumber}
+          totalPages={pagination.totalPages}
+          rowsPerPage={pagination.limit}
+          totalItems={pagination.totalCount}
+          onPageChange={pagination.setPageNumber}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
         <AddBranchDrawer
-          isOpen={showDrawer}
-          onClose={handleCloseDrawer}
-          validationSchema={editingItem ? branch.editValidationSchema : branch.validationSchema}
-          initialValues={drawerInitialValues}
-          onSubmit={editingItem ? handleEditSubmit : handleSubmit}
-          isLoading={branch.isLoading}
-          error={branch.error}
-          isEditing={!!editingItem}
+          visibility={{ isOpen: drawer.showDrawer, onClose: drawer.closeDrawer }}
+          form={{
+            validationSchema: drawer.editingItem ? editBranchValidationSchema : addBranchValidationSchema,
+            initialValues: drawer.drawerInitialValues,
+            onSubmit: drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit,
+            isEditing: !!drawer.editingItem,
+          }}
+          status={{ isLoading: pagination.isLoading, error: pagination.error }}
         />
         <AdminDeleteModal
-          isOpen={!!deletingItem}
-          itemName={deletingItem?.name || deletingItem?.branchName || ''}
-          onConfirm={handleConfirmDelete}
-          onClose={handleCloseDeleteModal}
+          isOpen={!!deleteConfirm.deletingItem}
+          itemName={deleteConfirm.deletingItem?.name || deleteConfirm.deletingItem?.branchName || ''}
+          onConfirm={deleteConfirm.handleConfirmDelete}
+          onClose={deleteConfirm.closeDeleteModal}
         />
-        {branch.showToast && (
-          <div className={`toast-notification toast-${branch.toastType}`} onClick={() => branch.setShowToast(false)}>
-            {branch.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
-            <span>{branch.toastMessage}</span>
+        {toast.showToast && (
+          <div className={`toast-notification toast-${toast.toastType}`} onClick={() => toast.setShowToast(false)}>
+            {toast.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+            <span>{toast.toastMessage}</span>
           </div>
         )}
       </div>

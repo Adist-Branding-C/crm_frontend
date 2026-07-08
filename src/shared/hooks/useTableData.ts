@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DEFAULT_ROWS_PER_PAGE } from '../constants/pagination';
 
 interface FetchParams {
@@ -81,11 +81,15 @@ export function useTableData<T>({ fetchFn, initialPage = 1, initialLimit = DEFAU
     setPageNumber(1);
   }, []);
 
+  const startIndex = (pageNumber - 1) * limit;
+  const totalPages = useMemo(() => Math.ceil(totalCount / limit) || 1, [totalCount, limit]);
+
   return {
     list, isLoading, error,
     pageNumber, setPageNumber,
     limit,
     totalCount,
+    startIndex, totalPages,
     searchQuery, setSearchQuery, handleSearchChange,
     handleRowsPerPageChange,
     refresh,

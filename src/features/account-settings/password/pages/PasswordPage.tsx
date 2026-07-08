@@ -4,7 +4,7 @@ import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import { usePasswordData } from '../hooks/usePasswordData';
 import { changePasswordValidationSchema } from '../validations/password.validation';
-import { INITIAL_PASSWORD_FORM } from '../constants';
+import { INITIAL_PASSWORD_FORM, PASSWORD_PAGE_CONTENT_STYLE } from '../constants';
 import './PasswordPage.css';
 
 const PasswordPage = () => {
@@ -27,7 +27,7 @@ const PasswordPage = () => {
   return (
     <div className="account-page">
       <div className="account-layout">
-        <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
+        <div className="account-content" style={PASSWORD_PAGE_CONTENT_STYLE}>
           <PageHeader title="Change Password" description="Update your account password" />
 
           <SettingsTabs />

@@ -2,7 +2,11 @@ export const EMAIL_REGEX = /\S+@\S+\.\S+/;
 
 export const PASSWORD_UPPERCASE_REGEX = /[A-Z]/;
 
+export const PASSWORD_LOWERCASE_REGEX = /[a-z]/;
+
 export const PASSWORD_DIGIT_REGEX = /[0-9]/;
+
+export const PASSWORD_SPECIAL_CHAR_REGEX = /[@$!%*?&#^()_\-+=]/;
 
 // Mirrors backend STRONG_PASSWORD_REGEX in crm_backend/src/shared/validators/is-strong-password.validator.ts
 export const STRONG_PASSWORD_REGEX =
