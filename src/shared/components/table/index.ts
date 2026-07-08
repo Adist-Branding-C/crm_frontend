@@ -9,4 +9,6 @@ export { default as THead } from './THead';
 export { default as TBody } from './TBody';
 export { default as TRow } from './TRow';
 export { default as TCell } from './TCell';
+export { default as TableNav } from './TableNav';
+export { default as Pagination } from './Pagination';
 export type { Column, DataTableProps } from './types';

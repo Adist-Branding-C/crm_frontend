@@ -1,4 +1,4 @@
-import { Plus, Search } from 'lucide-react';
+import { Download, Plus, Search } from 'lucide-react';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
 
 interface TableToolbarProps {
@@ -8,9 +8,10 @@ interface TableToolbarProps {
   onRowsPerPageChange: (value: number) => void;
   onAdd?: () => void;
   addLabel?: string;
+  onExport?: () => void;
 }
 
-const TableToolbar = ({ searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, onAdd, addLabel }: TableToolbarProps) => (
+const TableToolbar = ({ searchQuery, onSearchChange, rowsPerPage, onRowsPerPageChange, onAdd, addLabel, onExport }: TableToolbarProps) => (
   <div className="table-header-controls">
     <div className="entries-select">
       <label>Show
@@ -25,6 +26,11 @@ const TableToolbar = ({ searchQuery, onSearchChange, rowsPerPage, onRowsPerPageC
         <Search size={16} />
         <input type="search" placeholder="Search" value={searchQuery} onChange={(e) => onSearchChange(e.target.value)} />
       </div>
+      {onExport && (
+        <button className="btn btn-secondary" onClick={onExport} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Download size={16} />Export
+        </button>
+      )}
       {onAdd && (
         <button className="btn btn-primary" onClick={onAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
           <Plus size={16} /> {addLabel || 'Add'}

@@ -24,4 +24,5 @@ export interface DataTableProps<T> {
   onRowsPerPageChange: (value: number) => void;
   isLoading?: boolean;
   emptyMessage?: string;
+  onExport?: () => void;
 }

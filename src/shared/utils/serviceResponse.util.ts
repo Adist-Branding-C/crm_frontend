@@ -1,15 +1,20 @@
-import type { ServiceResponseShape, ServiceResponseInput } from '../types/serviceResponse.types';
+import type { ApiResponse } from '../types/common';
+import type { ServiceResponseInput } from '../types/response';
 
-// Centralizes the axios response.data -> service return shape mapping so every
-// account-settings service builds its response the same way (crm-frontend-coding-standerd check #4).
-// Keys are only set when defined so the result stays assignable to callers' response
-// types under exactOptionalPropertyTypes (no explicit `undefined` writes).
+/**
+ * Builds the standard { status, message, data } envelope every service method returns.
+ *
+ * Used by:
+ * - All feature API service classes (e.g. CampaignApiService), in place of returning
+ *   the raw axios response body or an inline object literal.
+ *
+ * Notes:
+ * - Callers must name every property explicitly (status/message/data) rather than
+ *   forwarding a whole response object, so it stays obvious which fields actually flow
+ *   from the backend response into the app.
+ */
 export class ServiceResponseUtil {
-  static normalize<T>(payload: ServiceResponseInput<T>): ServiceResponseShape<T> {
-    const result: ServiceResponseShape<T> = { status: payload.status, message: payload.message };
-    if (payload.data !== undefined) result.data = payload.data;
-    if (payload.errors !== undefined) result.errors = payload.errors;
-    if (payload.field !== undefined) result.field = payload.field;
-    return result;
+  static successResponse<T>({ status, message, data }: ServiceResponseInput<T>): ApiResponse<T> {
+    return { status, message, data };
   }
 }
