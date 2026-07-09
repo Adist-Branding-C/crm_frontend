@@ -1,6 +1,8 @@
 export interface Remark {
   id: number;
-  agentName: string;
+  remarkId: string;
+  agentId: string;
+  agentName: string | null;
   remarkNote: string;
   createdAt: string;
   referenceId: number;

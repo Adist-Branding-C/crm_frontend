@@ -10,6 +10,7 @@ import AdminDeleteModal from '../crud/AdminDeleteModal';
 import { useLeadRemarks } from '../../../features/enquiries/hooks/useLeadRemarks';
 import { useLeadTasks } from '../../../features/enquiries/hooks/useLeadTasks';
 import { useLeadTaskDropdowns } from '../../../features/enquiries/hooks/useLeadTaskDropdowns';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { dealService } from '../../../features/deal/services/deal.service';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../../utils/dateUtils';
 import type { LeadDetailDrawerProps, DealFormData, ActivityLogItem } from '../../types/drawers';
@@ -19,11 +20,12 @@ import type { DealItem } from '../../../features/deal/types';
 import type { Lead } from '../../../features/enquiries/types';
 
 const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onDeleteLead }: LeadDetailDrawerProps) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'activity' | 'note' | 'task' | 'deal'>('activity');
   const [showTaskDrawer, setShowTaskDrawer] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [newRemarkText, setNewRemarkText] = useState('');
-  const [editingRemarkId, setEditingRemarkId] = useState<number | null>(null);
+  const [editingRemarkId, setEditingRemarkId] = useState<string | null>(null);
   const [editingRemarkText, setEditingRemarkText] = useState('');
   const [showDeleteRemarkModal, setShowDeleteRemarkModal] = useState(false);
   const [remarkToDelete, setRemarkToDelete] = useState<Remark | null>(null);
@@ -261,7 +263,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
   };
 
   const startEditRemark = (remark: Remark) => {
-    setEditingRemarkId(remark.id);
+    setEditingRemarkId(remark.remarkId);
     setEditingRemarkText(remark.remarkNote);
   };
 
@@ -272,7 +274,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
 
   const handleSaveEdit = async () => {
     const trimmed = editingRemarkText.trim();
-    const original = remarks.find((r: Remark) => r.id === editingRemarkId);
+    const original = remarks.find((r: Remark) => r.remarkId === editingRemarkId);
     if (!trimmed) {
       cancelEditRemark();
       return;
@@ -300,7 +302,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
   const handleDeleteConfirm = async () => {
     if (!remarkToDelete) return;
     try {
-      await deleteRemark(remarkToDelete.id);
+      await deleteRemark(remarkToDelete.remarkId);
       setShowDeleteRemarkModal(false);
       setRemarkToDelete(null);
       showToastMessage('Remark deleted successfully.', 'success');
@@ -541,7 +543,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
                   ) : (
                     <div>
                       {remarks.map((remark: Remark) => (
-                        <div key={remark.id} className="leaddrawer-note-card">
+                        <div key={remark.remarkId} className="leaddrawer-note-card">
                           <div className="leaddrawer-note-avatar">
                             {(remark.agentName || '?').charAt(0).toUpperCase()}
                           </div>
@@ -550,7 +552,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
                               <span className="leaddrawer-note-user">{remark.agentName}</span>
                               <span className="leaddrawer-note-time">{formatDateTime(remark.createdAt)}</span>
                             </div>
-                            {editingRemarkId === remark.id ? (
+                            {editingRemarkId === remark.remarkId ? (
                               <div>
                                 <textarea
                                   className="leaddrawer-remark-edit-textarea"
@@ -578,14 +580,16 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
                             ) : (
                               <p className="leaddrawer-note-text">{remark.remarkNote}</p>
                             )}
-                            <div className="leaddrawer-note-actions">
-                              <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
-                                <Edit2 size={14} />
-                              </button>
-                              <button className="leaddrawer-note-action" onClick={() => handleDeleteClick(remark)}>
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
+                            {((!!remark.agentId && !!user?.staffId && String(remark.agentId) === String(user.staffId)) || user?.isAdmin) && (
+                              <div className="leaddrawer-note-actions">
+                                <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
+                                  <Edit2 size={14} />
+                                </button>
+                                <button className="leaddrawer-note-action" onClick={() => handleDeleteClick(remark)}>
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}

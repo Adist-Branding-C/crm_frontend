@@ -12,12 +12,12 @@ class RemarkService {
     return response.data;
   }
 
-  async updateRemark(id: number, payload: UpdateRemarkPayload): Promise<RemarkApiResponse> {
+  async updateRemark(id: string, payload: UpdateRemarkPayload): Promise<RemarkApiResponse> {
     const response = await axiosInstance.patch<RemarkApiResponse>(`/remarks/${id}`, payload);
     return response.data;
   }
 
-  async deleteRemark(id: number): Promise<RemarkApiResponse> {
+  async deleteRemark(id: string): Promise<RemarkApiResponse> {
     const response = await axiosInstance.delete<RemarkApiResponse>(`/remarks/${id}`);
     return response.data;
   }
