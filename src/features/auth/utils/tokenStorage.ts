@@ -11,6 +11,7 @@ interface AccessTokenClaims {
   authId?: string;
   staffId?: string;
   companyId?: string;
+  isAdmin?: boolean;
   exp?: number;
 }
 
@@ -31,10 +32,11 @@ function decodeTokenExpiry(token: string): Date | undefined {
 }
 
 /**
- * Reads staffId/companyId directly from the current access token's JWT claims.
- * The token always carries these (set at issue time on the backend), so this is the
- * source of truth — unlike the cached `user` object in localStorage, it can't go stale
- * for sessions that logged in before some other field was added to that cache.
+ * Reads staffId/companyId/isAdmin directly from the current access token's JWT claims.
+ * The token always carries these (set at issue time on the backend, refreshed on every
+ * silent token refresh), so this is the source of truth — unlike the cached `user` object
+ * in localStorage, it can't go stale for sessions that logged in before some field was
+ * added to that cache, and it stays correct if the staff's admin flag changes later too.
  */
 export function getAccessTokenClaims(): AccessTokenClaims | undefined {
   const token = Cookies.get(AUTH_STORAGE_KEYS.ACCESS_TOKEN);

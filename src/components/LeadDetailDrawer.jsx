@@ -483,7 +483,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
                             ) : (
                               <p className="leaddrawer-note-text">{remark.remarkNote}</p>
                             )}
-                            {(String(remark.agentId) === String(user.staffId) || user?.isAdmin) && (
+                            {((!!remark.agentId && !!user?.staffId && String(remark.agentId) === String(user.staffId)) || user?.isAdmin) && (
                               <div className="leaddrawer-note-actions">
                                 <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
                                   <Edit2 size={14} />
