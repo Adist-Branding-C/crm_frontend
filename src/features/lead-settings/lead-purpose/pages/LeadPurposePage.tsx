@@ -40,6 +40,7 @@ const LeadPurposePage = () => {
   const drawer = useEditDrawer<LeadPurposeItem, LeadPurposeFormData>({
     mapItemToFormData,
     emptyFormData: EMPTY_LEAD_PURPOSE_FORM_DATA,
+    onOpen: () => table.setError(''),
   });
   const crud = useLeadPurposeCrud({ table });
   const deleteConfirm = useLeadPurposeDeleteConfirm({ handleDeleteLeadPurpose: crud.handleDeleteLeadPurpose });
@@ -118,7 +119,7 @@ const LeadPurposePage = () => {
         />
       </DrawerShell>
       <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.title} itemType="lead purpose"
-        onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
+        error={table.error} onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
     </div>
   );
 };

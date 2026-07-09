@@ -49,6 +49,7 @@ export interface AdminDeleteModalProps {
   isOpen: boolean;
   itemName?: string | undefined;
   itemType?: string;
+  error?: string | null;
   onConfirm: () => void;
   onClose: () => void;
 }

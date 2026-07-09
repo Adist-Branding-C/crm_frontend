@@ -18,7 +18,7 @@ export function mapApiToUI(item: LeadAdditionalApiItem): LeadAdditionalItem {
 }
 
 export function mapPurposeApiToUI(item: LeadPurposeApiItem): LeadPurposeOption {
-  return { id: item.purpose_id, title: item.purpose };
+  return { id: item.purposeId, title: item.purpose };
 }
 
 export function mapItemToFormData(item: LeadAdditionalItem): AdditionalFieldFormData {

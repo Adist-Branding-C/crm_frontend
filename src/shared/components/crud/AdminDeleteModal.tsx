@@ -3,8 +3,9 @@ import { X } from 'lucide-react';
 import { ACTION_CONFIRM, ACTION_CANCEL } from '../../constants/actionLabels';
 import { LABEL_CONFIRM_DELETE } from '../../constants/labels';
 import type { AdminDeleteModalProps } from '../../types/crud';
+import ValidationAlert from '../ValidationAlert';
 
-const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, onConfirm, onClose }) => {
+const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, error, onConfirm, onClose }) => {
   if (!isOpen) return null;
 
   return (
@@ -15,6 +16,7 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
         <div className="modal-body">
+          <ValidationAlert message={error || null} />
           <p className="delete-warning">
             {itemName ? (
               <>Are you sure you want to delete <strong>{itemName}</strong>{itemType ? ` ${itemType}` : ''}?</>

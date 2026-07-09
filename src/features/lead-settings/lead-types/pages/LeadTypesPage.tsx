@@ -40,6 +40,7 @@ const LeadTypesPage = () => {
   const drawer = useEditDrawer<LeadTypeItem, LeadTypeFormData>({
     mapItemToFormData,
     emptyFormData: EMPTY_LEAD_TYPE_FORM_DATA,
+    onOpen: () => table.setError(''),
   });
   const crud = useLeadTypeCrud({ table });
   const deleteConfirm = useLeadTypeDeleteConfirm({ handleDeleteLeadType: crud.handleDeleteLeadType });
@@ -119,7 +120,7 @@ const LeadTypesPage = () => {
         />
       </DrawerShell>
       <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.type} itemType="lead type"
-        onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
+        error={table.error} onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
     </div>
   );
 };

@@ -52,6 +52,7 @@ const LeadAdditionalPage = () => {
   const drawer = useEditDrawer<LeadAdditionalItem, AdditionalFieldFormData>({
     mapItemToFormData,
     emptyFormData: EMPTY_ADDITIONAL_FIELD_FORM_DATA,
+    onOpen: () => table.setError(''),
   });
   const crud = useLeadAdditionalCrud({ table });
   const deleteConfirm = useLeadAdditionalDeleteConfirm({ handleDeleteAdditionalField: crud.handleDeleteAdditionalField });
@@ -146,6 +147,7 @@ const LeadAdditionalPage = () => {
         isOpen={!!deleteConfirm.deletingItem}
         itemName={deleteConfirm.deletingItem?.field}
         itemType="additional field"
+        error={table.error}
         onConfirm={deleteConfirm.handleConfirmDelete}
         onClose={deleteConfirm.closeDeleteModal}
       />

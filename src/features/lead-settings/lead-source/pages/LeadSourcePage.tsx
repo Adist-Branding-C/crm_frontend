@@ -45,6 +45,7 @@ const LeadSourcePage = () => {
   const drawer = useEditDrawer<LeadSourceItem, LeadSourceFormData>({
     mapItemToFormData,
     emptyFormData: EMPTY_LEAD_SOURCE_FORM_DATA,
+    onOpen: () => table.setError(''),
   });
   const crud = useLeadSourceCrud({ table });
   const deleteConfirm = useLeadSourceDeleteConfirm({ handleDeleteLeadSource: crud.handleDeleteLeadSource });
@@ -124,7 +125,7 @@ const LeadSourcePage = () => {
         />
       </DrawerShell>
       <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.source} itemType="lead source"
-        onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
+        error={table.error} onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
     </div>
   );
 };

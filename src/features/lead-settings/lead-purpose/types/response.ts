@@ -8,7 +8,7 @@ export interface PaginationResponse {
 }
 
 export interface CreateLeadPurposeData {
-  purpose_id: string;
+  purposeId: string;
 }
 
 export interface LeadPurposeListData {

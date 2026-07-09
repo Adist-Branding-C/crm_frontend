@@ -46,6 +46,7 @@ const LeadStatusPage = () => {
   const drawer = useEditDrawer<LeadStatusItem, LeadStatusFormData>({
     mapItemToFormData,
     emptyFormData: EMPTY_LEAD_STATUS_FORM_DATA,
+    onOpen: () => table.setError(''),
   });
   const crud = useLeadStatusCrud({ table });
   const deleteConfirm = useLeadStatusDeleteConfirm({ handleDeleteLeadStatus: crud.handleDeleteLeadStatus });
@@ -126,7 +127,7 @@ const LeadStatusPage = () => {
         />
       </DrawerShell>
       <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.status} itemType="status"
-        onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
+        error={table.error} onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
     </div>
   );
 };

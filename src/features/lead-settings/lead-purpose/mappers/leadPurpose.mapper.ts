@@ -2,7 +2,7 @@ import type { LeadPurposeItem, LeadPurposeApiItem, LeadPurposeFormData } from '.
 
 export function mapApiToUI(item: LeadPurposeApiItem): LeadPurposeItem {
   return {
-    id: item.purpose_id,
+    id: item.purposeId,
     title: item.purpose,
   };
 }

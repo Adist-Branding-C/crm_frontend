@@ -4,7 +4,7 @@ export interface LeadPurposeItem {
 }
 
 export interface LeadPurposeApiItem {
-  purpose_id: string;
+  purposeId: string;
   purpose: string;
 }
 
