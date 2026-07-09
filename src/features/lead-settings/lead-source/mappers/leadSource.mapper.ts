@@ -1,4 +1,4 @@
-import type { LeadSourceItem, LeadSourceApiItem } from '../types';
+import type { LeadSourceItem, LeadSourceApiItem, LeadSourceFormData } from '../types/interface';
 
 export function mapApiToUI(item: LeadSourceApiItem): LeadSourceItem {
   return {
@@ -6,4 +6,8 @@ export function mapApiToUI(item: LeadSourceApiItem): LeadSourceItem {
     source: item.source,
     addedBy: item.createdBy,
   };
+}
+
+export function mapItemToFormData(item: LeadSourceItem): LeadSourceFormData {
+  return { source: item.source };
 }

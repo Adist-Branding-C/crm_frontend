@@ -1,4 +1,5 @@
-import type { LeadAdditionalItem, LeadAdditionalApiItem, LeadPurposeOption } from '../types';
+import type { LeadPurposeApiItem } from '../../lead-purpose/types/interface';
+import type { LeadAdditionalItem, LeadAdditionalApiItem, LeadPurposeOption, AdditionalFieldFormData } from '../types/interface';
 
 export function mapApiToUI(item: LeadAdditionalApiItem): LeadAdditionalItem {
   return {
@@ -16,6 +17,19 @@ export function mapApiToUI(item: LeadAdditionalApiItem): LeadAdditionalItem {
   };
 }
 
-export function mapPurposeApiToUI(item: { purpose_id: string; purpose: string }): LeadPurposeOption {
+export function mapPurposeApiToUI(item: LeadPurposeApiItem): LeadPurposeOption {
   return { id: item.purpose_id, title: item.purpose };
+}
+
+export function mapItemToFormData(item: LeadAdditionalItem): AdditionalFieldFormData {
+  return {
+    name: item.field,
+    fieldType: item.type.toLowerCase(),
+    showInFilter: item.inFilter,
+    showInList: item.inList,
+    isRequired: item.required,
+    connectWithLeadPurpose: item.purpose,
+    purposeId: item.purposeId || '',
+    dropdownValues: item.dropdownValues ? [...item.dropdownValues] : [],
+  };
 }

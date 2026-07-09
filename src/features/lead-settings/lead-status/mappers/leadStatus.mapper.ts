@@ -1,4 +1,4 @@
-import type { LeadStatusItem, LeadStatusApiItem } from '../types';
+import type { LeadStatusItem, LeadStatusApiItem, LeadStatusFormData } from '../types/interface';
 
 export function mapApiToUI(item: LeadStatusApiItem): LeadStatusItem {
   return {
@@ -6,5 +6,13 @@ export function mapApiToUI(item: LeadStatusApiItem): LeadStatusItem {
     status: item.status,
     color: item.color,
     useForConversion: item.conversion,
+  };
+}
+
+export function mapItemToFormData(item: LeadStatusItem): LeadStatusFormData {
+  return {
+    status: item.status,
+    color: item.color,
+    useForConversion: item.useForConversion,
   };
 }
