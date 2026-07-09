@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { taskCategoryService } from '../../task-settings/task-category/services/taskCategory.service';
+import { taskCategoryApiService } from '../../task-settings/task-category/services';
 import { staffService } from '../../deal/services/staff.service';
 import type { LabelValuePair } from '../../../shared/types/common';
 
@@ -18,7 +18,7 @@ export function useLeadTaskDropdowns(isOpen: boolean) {
 
       setIsLoadingCategories(true);
       setCategoriesError(null);
-      taskCategoryService.getAll({ pageNumber: 1, limit: 10 })
+      taskCategoryApiService.fetchAll({ pageNumber: 1, limit: 10 })
         .then((response) => {
           const raw = response.data as Record<string, unknown> | undefined;
           const items = (raw && 'items' in raw

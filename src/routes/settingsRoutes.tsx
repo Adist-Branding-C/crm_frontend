@@ -7,6 +7,7 @@ import LeadStatusPage from '../features/lead-settings/lead-status/pages/LeadStat
 import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSourcePage';
 import LeadTypesPage from '../features/lead-settings/lead-types/pages/LeadTypesPage';
 import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/LeadAdditionalPage';
+import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
 import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
 import IntegrationsPage from '../features/integrations/pages/IntegrationsPage';
 import LeadGenerationAPIPage from '../features/lead-generation-api/pages/LeadGenerationAPIPage';
