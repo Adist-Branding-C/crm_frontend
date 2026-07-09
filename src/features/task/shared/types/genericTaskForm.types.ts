@@ -1,20 +1,18 @@
 import type { ReactNode } from 'react';
 import type { Schema } from 'yup';
 import type { FormikHelpers } from 'formik';
+import type { CategoryOption, StaffOption, LeadOption } from './options';
 
-export interface CategoryOption {
-  value: string;
-  label: string;
-}
-
-export interface StaffOption {
-  value: number;
-  label: string;
-}
-
-export interface LeadOption {
-  value: number;
-  label: string;
+export interface GenericTaskFormValues {
+  title: string;
+  description: string;
+  categoryId?: string;
+  scheduledDate: string;
+  scheduledTime: string;
+  assignedTo: string;
+  leadId?: string | number;
+  priority: string;
+  status: string;
 }
 
 export interface GenericTaskFormProps {
@@ -31,16 +29,4 @@ export interface GenericTaskFormProps {
   categoryOptions?: CategoryOption[];
   hideCategory?: boolean;
   children?: ReactNode;
-}
-
-export interface GenericTaskFormValues {
-  title: string;
-  description: string;
-  categoryId?: string;
-  scheduledDate: string;
-  scheduledTime: string;
-  assignedTo: string;
-  leadId?: string | number;
-  priority: string;
-  status: string;
 }

@@ -3,8 +3,10 @@
 @import '../../../../shared/styles/badges.css';
 @import '../../../../shared/styles/dropdowns.css';
 @import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/filters.css';
 @import '../../../../shared/styles/forms.css';
 @import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/pagination.css';
 @import '../../../../shared/styles/tabs.css';
 @import '../../../../shared/styles/toolbars.css';
 
@@ -15,10 +17,6 @@
 
 .task-settings-page .dropdown-menu {
   z-index: 9999;
-}
-
-.task-table-wrapper {
-  width: 100%;
 }
 
 .form-row {
