@@ -1,0 +1,55 @@
+import { useState, useCallback, useRef } from 'react';
+import { INITIAL_FILTERS } from '../constants';
+import type { Filters } from '../types';
+import type { UseLeadFiltersReturn } from '../types/hook.types';
+
+export function useLeadFilters(
+  onFetch: (page: number, limit: number, search: string, extraParams: Record<string, string | number>) => void,
+  searchQueryRef: React.MutableRefObject<string>,
+  rowsPerPageRef: React.MutableRefObject<number>,
+): UseLeadFiltersReturn {
+  const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
+  const [showFilters, setShowFilters] = useState(false);
+  const activeFiltersRef = useRef<Record<string, string | number>>({});
+
+  const handleApplyFilters = useCallback(() => {
+    const params: Record<string, string | number> = {};
+    if (filters.leadType) params.leadType = filters.leadType;
+    if (filters.leadStatus) params.leadStatusId = filters.leadStatus;
+    if (filters.enquirySource) params.enquirySource = filters.enquirySource;
+    if (filters.enquiryPurpose) params.enquiryPurpose = filters.enquiryPurpose;
+    if (filters.assignedTo) params.assignedTo = filters.assignedTo;
+    if (filters.location) params.location = filters.location;
+    if (filters.dateRange.start && filters.dateRange.end) {
+      params.startDate = filters.dateRange.start;
+      params.endDate = filters.dateRange.end;
+    }
+    if (filters.filterByDate) params.dateFilterBy = filters.filterByDate;
+    const additionalFieldFilters = Object.entries(filters.additionalFields)
+      .filter(([, value]) => value)
+      .map(([fieldId, value]) => ({ fieldId, value }));
+    if (additionalFieldFilters.length > 0) {
+      params.additionalFieldFilters = JSON.stringify(additionalFieldFilters);
+    }
+    activeFiltersRef.current = params;
+    setShowFilters(false);
+    onFetch(1, rowsPerPageRef.current, searchQueryRef.current, params);
+  }, [filters, onFetch, searchQueryRef, rowsPerPageRef]);
+
+  const clearFilters = useCallback(() => {
+    setFilters({ ...INITIAL_FILTERS, additionalFields: {} });
+    setShowFilters(false);
+    activeFiltersRef.current = {};
+    onFetch(1, rowsPerPageRef.current, '', {});
+  }, [onFetch, searchQueryRef, rowsPerPageRef]);
+
+  return {
+    filters,
+    showFilters,
+    activeFiltersRef,
+    setFilters,
+    setShowFilters,
+    handleApplyFilters,
+    clearFilters,
+  };
+}

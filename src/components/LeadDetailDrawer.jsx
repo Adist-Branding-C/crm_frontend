@@ -1,108 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { X, Phone, MessageSquare, Trash2, Plus, Mail, Briefcase, ShoppingCart, User, Building, Mail as MailIcon, Send, Check, Clock, Star, ArrowLeft, ChevronDown, Edit2, MapPin, Calendar, UserPlus, FileText, MoreVertical, Pencil, AlertTriangle } from 'lucide-react';
+import { X, Phone, MessageSquare, Trash2, Plus, Mail, Mail as MailIcon, Send, Check, Clock, ArrowLeft, Edit2, Calendar, User, FileText, AlertTriangle, Loader2 } from 'lucide-react';
 import './LeadDetailDrawer.css';
+import AddLeadTaskDrawer from './AddLeadTaskDrawer';
+import AddLeadDrawer from '../shared/components/drawers/AddLeadDrawer';
+import { useLeadActivities } from '../features/enquiries/hooks/useLeadActivities';
+import Toast from '../shared/components/Toast';
+import AdminDeleteModal from '../shared/components/crud/AdminDeleteModal';
+import { useLeadRemarks } from '../features/enquiries/hooks/useLeadRemarks';
+import { useLeadTasks } from '../features/enquiries/hooks/useLeadTasks';
+import { useLeadTaskDropdowns } from '../features/enquiries/hooks/useLeadTaskDropdowns';
+import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../shared/utils/dateUtils';
 
-const deleteConfirmModalStyle = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  background: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 9999,
-};
-
-const modalStyle = {
-  background: 'white',
-  borderRadius: '12px',
-  width: '100%',
-  maxWidth: '420px',
-  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
-};
-
-const modalHeaderStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '1.25rem 1.5rem',
-  borderBottom: '1px solid #e5e7eb',
-};
-
-const modalBodyStyle = {
-  padding: '1.5rem',
-  textAlign: 'center',
-};
-
-const iconContainerStyle = {
-  width: '60px',
-  height: '60px',
-  background: '#fef2f2',
-  borderRadius: '50%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  margin: '0 auto 1.25rem',
-  color: '#dc2626',
-};
-
-const modalFooterStyle = {
-  display: 'flex',
-  gap: '1rem',
-  padding: '1rem 1.5rem',
-  borderTop: '1px solid #e5e7eb',
-  justifyContent: 'center',
-};
-import './LeadDetailDrawer.css';
-import AddDealTaskDrawer from './AddDealTaskDrawer';
-
-const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
+const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
   const [activeTab, setActiveTab] = useState('activity');
   const [showTaskDrawer, setShowTaskDrawer] = useState(false);
+  const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [notes, setNotes] = useState([
-    { id: 1, user: 'Sarah Khan', content: 'Customer showed interest in premium package. Follow up needed next week.', date: 'Apr 25, 2024 at 4:32 PM' },
-    { id: 2, user: 'Mike Johnson', content: 'Called but no response. Left voicemail.', date: 'Apr 24, 2024 at 2:15 PM' },
-  ]);
-  const [newNote, setNewNote] = useState('');
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Follow up call', category: 'call', date: '2024-04-28', priority: 'high', status: 'pending', assignedTo: 'John Doe' },
-    { id: 2, title: 'Send proposal', category: 'email', date: '2024-04-26', priority: 'medium', status: 'in-progress', assignedTo: 'Jane Smith' },
-    { id: 3, title: 'Schedule demo', category: 'meeting', date: '2024-04-25', priority: 'low', status: 'completed', assignedTo: 'John Doe' },
-  ]);
-  const [deals, setDeals] = useState([
-    { id: 1, title: 'Enterprise Package', amount: 250000, stage: 'proposal', expectedClose: '2024-05-15', progress: 65, owner: 'John Doe' },
-    { id: 2, title: 'Basic Plan', amount: 50000, stage: 'won', expectedClose: '2024-04-20', progress: 100, owner: 'Jane Smith' },
-  ]);
-  const [taskFilter, setTaskFilter] = useState('all');
+  const [newRemarkText, setNewRemarkText] = useState('');
+  const [editingRemarkId, setEditingRemarkId] = useState(null);
+  const [editingRemarkText, setEditingRemarkText] = useState('');
+  const [showDeleteRemarkModal, setShowDeleteRemarkModal] = useState(false);
+  const [remarkToDelete, setRemarkToDelete] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+  const [showToast, setShowToast] = useState(false);
+  const [editTask, setEditTask] = useState(null);
+  const [deleteTaskTarget, setDeleteTaskTarget] = useState(null);
+  const [showDeleteTaskModal, setShowDeleteTaskModal] = useState(false);
+  const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [editingField, setEditingField] = useState(null);
-  const [editValue, setEditValue] = useState('');
-  const [leadInfo, setLeadInfo] = useState({
-    source: '',
-    purpose: '',
-    status: '',
-    assignedTo: '',
-    type: '',
-    nextFollowUp: '',
-    address: '',
-    location: '',
-    remarks: '',
-    date: '',
-    assignedDate: ''
-  });
-
-  const fieldOptions = {
-    source: ['Website', 'Referral', 'Social Media', 'Email Campaign', 'Direct', 'Ads'],
-    purpose: ['Sales', 'Support', 'Demo', 'Partnership', 'Other'],
-    status: ['Active', 'Inactive', 'Pending', 'Converted', 'Lost'],
-    type: ['Hot Lead', 'Warm Lead', 'Cold Lead'],
-    assignedTo: ['John Doe', 'Jane Smith', 'Mike Johnson', 'Admin']
-  };
-
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
@@ -127,30 +54,161 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
     }
   }, [isOpen, onClose]);
 
-  useEffect(() => {
-    if (lead && isOpen) {
-      setLeadInfo({
-        source: lead.source || 'Website',
-        purpose: lead.purpose || 'Sales',
-        status: lead.status || 'Active',
-        assignedTo: lead.assignedTo || 'John Doe',
-        type: lead.type || 'Hot Lead',
-        nextFollowUp: lead.nextFollowUp || '2024-04-30',
-        address: '123 Main Street, City',
-        location: 'New York, USA',
-        remarks: '',
-        date: lead.createdAt || '2024-01-15',
-        assignedDate: '2024-01-15'
-      });
-    }
-  }, [lead, isOpen]);
+  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError } = useLeadActivities(lead?.id, isOpen);
+  const {
+    remarks,
+    isLoading: isLoadingRemarks,
+    error: errorRemarks,
+    isAdding: isAddingRemark,
+    isUpdating: isUpdatingRemark,
+    isDeleting: isDeletingRemark,
+    addRemark,
+    updateRemark,
+    deleteRemark,
+  } = useLeadRemarks(lead?.id, isOpen, activeTab);
+
+  const {
+    tasks,
+    isLoading: isLoadingTasks,
+    error: tasksError,
+    addTask,
+    updateTask,
+    deleteTask,
+  } = useLeadTasks(lead?.id, isOpen, activeTab);
+
+  const {
+    categoryOptions,
+    staffOptions,
+    isLoadingCategories,
+    isLoadingStaff,
+    categoriesError,
+    staffError,
+  } = useLeadTaskDropdowns(showTaskDrawer);
 
   if (!isVisible || !lead) return null;
 
-  const handleAddNote = () => {
-    if (newNote.trim()) {
-      setNotes([{ id: Date.now(), user: 'Current User', content: newNote, date: new Date().toLocaleString() }, ...notes]);
-      setNewNote('');
+  const showToastMessage = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
+
+  const handleAddTask = async (formData) => {
+    const success = await addTask(formData);
+    if (success) {
+      showToastMessage('Task created successfully', 'success');
+    } else {
+      showToastMessage('Failed to create task', 'error');
+    }
+    return success;
+  };
+
+  const handleEditTask = async (formData) => {
+    if (!editTask) return false;
+    const success = await updateTask(editTask.id, formData);
+    if (success) {
+      setEditTask(null);
+      showToastMessage('Task updated successfully', 'success');
+    } else {
+      showToastMessage('Failed to update task', 'error');
+    }
+    return success;
+  };
+
+  const handleDeleteTaskClick = (task) => {
+    setDeleteTaskTarget(task);
+    setShowDeleteTaskModal(true);
+  };
+
+  const handleDeleteTaskConfirm = async () => {
+    if (!deleteTaskTarget || isDeletingTask) return;
+    setIsDeletingTask(true);
+    try {
+      const success = await deleteTask(deleteTaskTarget.id);
+      if (success) {
+        showToastMessage('Task deleted successfully', 'success');
+      } else {
+        showToastMessage('Failed to delete task', 'error');
+      }
+    } catch {
+      showToastMessage('Failed to delete task', 'error');
+    } finally {
+      setShowDeleteTaskModal(false);
+      setDeleteTaskTarget(null);
+      setIsDeletingTask(false);
+    }
+  };
+
+  const handleEditLeadSaved = (action) => {
+    setShowEditDrawer(false);
+    showToastMessage('Lead updated successfully', 'success');
+    onLeadUpdated?.();
+    onClose();
+  };
+
+  const getPriorityClass = (priority) => (priority || '').toLowerCase();
+  const getStatusClass = (status) => {
+    const s = (status || '').toLowerCase();
+    return s === 'in progress' ? 'in-progress' : s;
+  };
+
+  const handleAddRemark = async () => {
+    const trimmed = newRemarkText.trim();
+    if (!trimmed) return;
+    try {
+      await addRemark(trimmed);
+      setNewRemarkText('');
+      showToastMessage('Remark added successfully.', 'success');
+    } catch {
+      showToastMessage('Failed to add remark.', 'error');
+    }
+  };
+
+  const startEditRemark = (remark) => {
+    setEditingRemarkId(remark.id);
+    setEditingRemarkText(remark.remarkNote);
+  };
+
+  const cancelEditRemark = () => {
+    setEditingRemarkId(null);
+    setEditingRemarkText('');
+  };
+
+  const handleSaveEdit = async () => {
+    const trimmed = editingRemarkText.trim();
+    const original = remarks.find((r) => r.id === editingRemarkId);
+    if (!trimmed) {
+      cancelEditRemark();
+      return;
+    }
+    if (trimmed === original?.remarkNote) {
+      cancelEditRemark();
+      return;
+    }
+    try {
+      await updateRemark(editingRemarkId, trimmed);
+      setEditingRemarkId(null);
+      setEditingRemarkText('');
+      showToastMessage('Remark updated successfully.', 'success');
+    } catch {
+      showToastMessage('Failed to update remark.', 'error');
+    }
+  };
+
+  const handleDeleteClick = (remark) => {
+    setRemarkToDelete(remark);
+    setShowDeleteRemarkModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!remarkToDelete) return;
+    try {
+      await deleteRemark(remarkToDelete.id);
+      setShowDeleteRemarkModal(false);
+      setRemarkToDelete(null);
+      showToastMessage('Remark deleted successfully.', 'success');
+    } catch {
+      showToastMessage('Failed to delete remark.', 'error');
     }
   };
 
@@ -158,24 +216,6 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
     if (!type) return '';
     return type.toLowerCase().replace(' ', '-');
   };
-
-  const startEdit = (field, value) => {
-    setEditingField(field);
-    setEditValue(value);
-  };
-
-  const saveEdit = () => {
-    setLeadInfo(prev => ({ ...prev, [editingField]: editValue }));
-    setEditingField(null);
-    setEditValue('');
-  };
-
-  const cancelEdit = () => {
-    setEditingField(null);
-    setEditValue('');
-  };
-
-  const filteredTasks = taskFilter === 'all' ? tasks : tasks.filter(t => t.status === taskFilter);
 
   return (
     <div className={`leaddrawer-overlay ${isOpen ? 'visible' : ''}`} onClick={onClose}>
@@ -206,7 +246,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
               </div>
 
               <div className="leaddrawer-actions">
-                <button className="leaddrawer-action-btn" title="Edit"><Edit2 size={16} /></button>
+                <button className="leaddrawer-action-btn" title="Edit" onClick={() => setShowEditDrawer(true)}><Edit2 size={16} /></button>
                 <button className="leaddrawer-action-btn" title="WhatsApp"><MessageSquare size={16} /></button>
                 <button className="leaddrawer-action-btn" title="SMS"><Phone size={16} /></button>
                 <button className="leaddrawer-action-btn delete" title="Delete" onClick={() => setShowDeleteConfirm(true)}><Trash2 size={16} /></button>
@@ -219,14 +259,21 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                     <div className="leaddrawer-info-icon"><User size={14} /></div>
                     <div className="leaddrawer-info-content">
                       <span className="leaddrawer-info-label">Created By</span>
-                      <span className="leaddrawer-info-value">{lead.assignedTo}</span>
+                      <span className="leaddrawer-info-value">{lead.assignedTo || '-'}</span>
                     </div>
                   </div>
                   <div className="leaddrawer-info-item">
                     <div className="leaddrawer-info-icon"><Calendar size={14} /></div>
                     <div className="leaddrawer-info-content">
                       <span className="leaddrawer-info-label">Created At</span>
-                      <span className="leaddrawer-info-value">{lead.createdAt}</span>
+                      <span className="leaddrawer-info-value">{formatRelativeDate(lead.createdAt)}</span>
+                    </div>
+                  </div>
+                  <div className="leaddrawer-info-item">
+                    <div className="leaddrawer-info-icon"><Calendar size={14} /></div>
+                    <div className="leaddrawer-info-content">
+                      <span className="leaddrawer-info-label">Updated At</span>
+                      <span className="leaddrawer-info-value">{formatRelativeDate(lead.updatedAt)}</span>
                     </div>
                   </div>
                 </div>
@@ -239,14 +286,14 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                     <div className="leaddrawer-info-icon"><Phone size={14} /></div>
                     <div className="leaddrawer-info-content">
                       <span className="leaddrawer-info-label">Phone</span>
-                      <span className="leaddrawer-info-value">{lead.phone}</span>
+                      <span className="leaddrawer-info-value">{lead.phone || '-'}</span>
                     </div>
                   </div>
                   <div className="leaddrawer-info-item">
                     <div className="leaddrawer-info-icon"><MailIcon size={14} /></div>
                     <div className="leaddrawer-info-content">
                       <span className="leaddrawer-info-label">Email</span>
-                      <span className="leaddrawer-info-value">{lead.name?.toLowerCase().replace(' ', '.')}@email.com</span>
+                      <span className="leaddrawer-info-value">{lead.email || '-'}</span>
                     </div>
                   </div>
                 </div>
@@ -255,139 +302,41 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
               <div className="leaddrawer-section">
                 <div className="leaddrawer-section-title">More Info</div>
                 <div className="leaddrawer-details-grid">
-                  <div className="leaddrawer-detail-card" onClick={() => startEdit('source', leadInfo.source)}>
+                  <div className="leaddrawer-detail-card">
                     <div className="leaddrawer-detail-label">Source</div>
-                    {editingField === 'source' ? (
-                      <select 
-                        className="leaddrawer-edit-select"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      >
-                        {fieldOptions.source.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                      </select>
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.source} <Pencil size={12} /></div>
-                    )}
+                    <div className="leaddrawer-detail-value">{lead.source || '-'}</div>
                   </div>
-                  <div className="leaddrawer-detail-card" onClick={() => startEdit('purpose', leadInfo.purpose)}>
+                  <div className="leaddrawer-detail-card">
                     <div className="leaddrawer-detail-label">Purpose</div>
-                    {editingField === 'purpose' ? (
-                      <select 
-                        className="leaddrawer-edit-select"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      >
-                        {fieldOptions.purpose.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                      </select>
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.purpose} <Pencil size={12} /></div>
-                    )}
+                    <div className="leaddrawer-detail-value">{lead.purpose || '-'}</div>
                   </div>
-                  <div className="leaddrawer-detail-card" onClick={() => startEdit('status', leadInfo.status)}>
+                  <div className="leaddrawer-detail-card">
                     <div className="leaddrawer-detail-label">Status</div>
-                    {editingField === 'status' ? (
-                      <select 
-                        className="leaddrawer-edit-select"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      >
-                        {fieldOptions.status.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                      </select>
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.status} <Pencil size={12} /></div>
-                    )}
+                    <div className="leaddrawer-detail-value">{lead.status || '-'}</div>
                   </div>
-                  <div className="leaddrawer-detail-card" onClick={() => startEdit('assignedTo', leadInfo.assignedTo)}>
+                  <div className="leaddrawer-detail-card">
                     <div className="leaddrawer-detail-label">Assigned To</div>
-                    {editingField === 'assignedTo' ? (
-                      <select 
-                        className="leaddrawer-edit-select"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      >
-                        {fieldOptions.assignedTo.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                      </select>
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.assignedTo} <Pencil size={12} /></div>
-                    )}
+                    <div className="leaddrawer-detail-value">{lead.assignedTo || '-'}</div>
                   </div>
-                  <div className="leaddrawer-detail-card" onClick={() => startEdit('type', leadInfo.type)}>
+                  <div className="leaddrawer-detail-card">
                     <div className="leaddrawer-detail-label">Type</div>
-                    {editingField === 'type' ? (
-                      <select 
-                        className="leaddrawer-edit-select"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      >
-                        {fieldOptions.type.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                      </select>
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.type} <Pencil size={12} /></div>
-                    )}
+                    <div className="leaddrawer-detail-value">{lead.type || '-'}</div>
                   </div>
-                  <div className="leaddrawer-detail-card" onClick={() => startEdit('nextFollowUp', leadInfo.nextFollowUp)}>
+                  <div className="leaddrawer-detail-card">
                     <div className="leaddrawer-detail-label">Follow Up</div>
-                    {editingField === 'nextFollowUp' ? (
-                      <input 
-                        type="date"
-                        className="leaddrawer-edit-input"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      />
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.nextFollowUp} <Pencil size={12} /></div>
-                    )}
+                    <div className="leaddrawer-detail-value">{formatFollowUpDate(lead.nextFollowUp)}</div>
                   </div>
-                  <div className="leaddrawer-detail-card leaddrawer-detail-full" onClick={() => startEdit('address', leadInfo.address)}>
-                    <div className="leaddrawer-detail-label">Address</div>
-                    {editingField === 'address' ? (
-                      <input 
-                        type="text"
-                        className="leaddrawer-edit-input"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      />
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.address} <Pencil size={12} /></div>
-                    )}
-                  </div>
-                  <div className="leaddrawer-detail-card leaddrawer-detail-full" onClick={() => startEdit('location', leadInfo.location)}>
+                  <div className="leaddrawer-detail-card leaddrawer-detail-full">
                     <div className="leaddrawer-detail-label">Location</div>
-                    {editingField === 'location' ? (
-                      <input 
-                        type="text"
-                        className="leaddrawer-edit-input"
-                        value={editValue} 
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={saveEdit}
-                        onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                        autoFocus
-                      />
-                    ) : (
-                      <div className="leaddrawer-detail-value">{leadInfo.location} <Pencil size={12} /></div>
-                    )}
+                    <div className="leaddrawer-detail-value">{lead.location || '-'}</div>
                   </div>
+
+                  {(lead.additionalFields || []).map((af) => (
+                    <div key={af.fieldId} className="leaddrawer-detail-card">
+                      <div className="leaddrawer-detail-label">{af.name}</div>
+                      <div className="leaddrawer-detail-value">{af.value != null ? af.value : '-'}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -407,9 +356,6 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
               <button className={`leaddrawer-tab ${activeTab === 'email' ? 'active' : ''}`} onClick={() => setActiveTab('email')}>
                 <Mail size={14} /> Email
               </button>
-              <button className={`leaddrawer-tab ${activeTab === 'deal' ? 'active' : ''}`} onClick={() => setActiveTab('deal')}>
-                <Briefcase size={14} /> Deal
-              </button>
             </div>
 
             <div className="leaddrawer-tab-content">
@@ -418,52 +364,36 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                   <div className="leaddrawer-tab-header">
                     <h3 className="leaddrawer-tab-heading">Latest Activity</h3>
                   </div>
-                  <div className="leaddrawer-activity-list">
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">S</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">Sarah Khan</span>
-                          <span className="leaddrawer-activity-action">changed the status</span>
-                        </div>
-                        <span className="leaddrawer-activity-time">Apr 25 at 4:32 PM</span>
-                        <p className="leaddrawer-activity-desc">New to Junk Lead - Hindi/Arabic/Bengali</p>
-                      </div>
+                  {activitiesLoading ? (
+                    <div className="leaddrawer-activity-list">
+                      <div className="leaddrawer-loading">Loading activities...</div>
                     </div>
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">M</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">Mike Johnson</span>
-                          <span className="leaddrawer-activity-action">added a note</span>
-                        </div>
-                        <span className="leaddrawer-activity-time">Apr 25 at 2:15 PM</span>
-                        <p className="leaddrawer-activity-desc">Customer showed interest in premium package. Follow up needed next week.</p>
-                      </div>
+                  ) : activitiesError ? (
+                    <div className="leaddrawer-activity-list">
+                      <div className="leaddrawer-error">{activitiesError}</div>
                     </div>
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">J</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">Jane Smith</span>
-                          <span className="leaddrawer-activity-action">assigned to</span>
-                        </div>
-                        <span className="leaddrawer-activity-time">Apr 24 at 11:00 AM</span>
-                        <p className="leaddrawer-activity-desc">Assigned to John Doe</p>
-                      </div>
+                  ) : apiActivities.length === 0 ? (
+                    <div className="leaddrawer-activity-list">
+                      <div className="leaddrawer-empty">No activities found.</div>
                     </div>
-                    <div className="leaddrawer-activity-card">
-                      <div className="leaddrawer-activity-avatar">S</div>
-                      <div className="leaddrawer-activity-content">
-                        <div className="leaddrawer-activity-header">
-                          <span className="leaddrawer-activity-user">System</span>
-                          <span className="leaddrawer-activity-action">created lead from</span>
+                  ) : (
+                    <div className="leaddrawer-activity-list">
+                      {apiActivities.map((item) => (
+                        <div className="leaddrawer-activity-card" key={item.id}>
+                          <div className="leaddrawer-activity-avatar">
+                            {(item.actorName || '?').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="leaddrawer-activity-content">
+                            <div className="leaddrawer-activity-header">
+                              <span className="leaddrawer-activity-user">{item.actorName}</span>
+                            </div>
+                            <span className="leaddrawer-activity-time">{formatDateTime(item.createdAt)}</span>
+                            <p className="leaddrawer-activity-desc">{item.description}</p>
+                          </div>
                         </div>
-                        <span className="leaddrawer-activity-time">Apr 24 at 10:30 AM</span>
-                        <p className="leaddrawer-activity-desc">Lead created from Website inquiry</p>
-                      </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -471,16 +401,13 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                 <div>
                   <div className="leaddrawer-tab-header">
                     <h3 className="leaddrawer-tab-heading">Notes Timeline</h3>
-                    <button className="btn btn-primary btn-sm" onClick={document.getElementById('note-input')?.focus()}>
-                      <Plus size={14} /> Add Note
-                    </button>
                   </div>
                   <div style={{ marginBottom: '1rem' }}>
                     <textarea
                       id="note-input"
                       placeholder="Write a note..."
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
+                      value={newRemarkText}
+                      onChange={(e) => setNewRemarkText(e.target.value)}
                       style={{
                         width: '100%',
                         padding: '0.75rem',
@@ -493,29 +420,88 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                         minHeight: '80px',
                         resize: 'vertical'
                       }}
+                      disabled={isAddingRemark}
                     />
-                    {newNote.trim() && (
-                      <button className="btn btn-primary btn-sm" onClick={handleAddNote} style={{ marginTop: '0.5rem' }}>Save Note</button>
-                    )}
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={handleAddRemark}
+                      disabled={isAddingRemark || !newRemarkText.trim()}
+                      style={{ marginTop: '0.5rem' }}
+                    >
+                      {isAddingRemark ? <><Loader2 size={14} className="spin" /> Adding...</> : 'Save Note'}
+                    </button>
                   </div>
-                  <div>
-                    {notes.map(note => (
-                      <div key={note.id} className="leaddrawer-note-card">
-                        <div className="leaddrawer-note-avatar">{note.user.charAt(0)}</div>
-                        <div className="leaddrawer-note-content">
-                          <div className="leaddrawer-note-header">
-                            <span className="leaddrawer-note-user">{note.user}</span>
-                            <span className="leaddrawer-note-time">{note.date}</span>
+                  {isLoadingRemarks ? (
+                    <div className="leaddrawer-loading">Loading remarks...</div>
+                  ) : errorRemarks ? (
+                    <div className="leaddrawer-error">{errorRemarks}</div>
+                  ) : remarks.length === 0 ? (
+                    <div className="leaddrawer-empty-state">
+                      <div className="leaddrawer-empty-icon"><FileText size={24} /></div>
+                      <h4 className="leaddrawer-empty-title">No remarks yet</h4>
+                      <p className="leaddrawer-empty-text">Add a note to start tracking updates.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      {remarks.map((remark) => (
+                        <div key={remark.id} className="leaddrawer-note-card">
+                          <div className="leaddrawer-note-avatar">
+                            {(remark.agentName || '?').charAt(0).toUpperCase()}
                           </div>
-                          <p className="leaddrawer-note-text">{note.content}</p>
-                          <div className="leaddrawer-note-actions">
-                            <button className="leaddrawer-note-action"><Edit2 size={14} /></button>
-                            <button className="leaddrawer-note-action"><Trash2 size={14} /></button>
+                          <div className="leaddrawer-note-content">
+                            <div className="leaddrawer-note-header">
+                              <span className="leaddrawer-note-user">{remark.agentName}</span>
+                              <span className="leaddrawer-note-time">{formatDateTime(remark.createdAt)}</span>
+                            </div>
+                            {editingRemarkId === remark.id ? (
+                              <div>
+                                <textarea
+                                  className="leaddrawer-remark-edit-textarea"
+                                  value={editingRemarkText}
+                                  onChange={(e) => setEditingRemarkText(e.target.value)}
+                                  disabled={isUpdatingRemark}
+                                />
+                                <div className="leaddrawer-note-edit-actions">
+                                  <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={handleSaveEdit}
+                                    disabled={isUpdatingRemark || !editingRemarkText.trim()}
+                                  >
+                                    {isUpdatingRemark ? <><Loader2 size={14} className="spin" /> Saving...</> : 'Save'}
+                                  </button>
+                                  <button
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={cancelEditRemark}
+                                    disabled={isUpdatingRemark}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="leaddrawer-note-text">{remark.remarkNote}</p>
+                            )}
+                            <div className="leaddrawer-note-actions">
+                              <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
+                                <Edit2 size={14} />
+                              </button>
+                              <button className="leaddrawer-note-action" onClick={() => handleDeleteClick(remark)}>
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
+                  <AdminDeleteModal
+                    isOpen={showDeleteRemarkModal}
+                    itemName="this remark"
+                    onConfirm={handleDeleteConfirm}
+                    onClose={() => { setShowDeleteRemarkModal(false); setRemarkToDelete(null); }}
+                    isDeleting={isDeletingRemark}
+                  />
+                  <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
                 </div>
               )}
 
@@ -523,38 +509,48 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                 <div>
                   <div className="leaddrawer-tab-header">
                     <h3 className="leaddrawer-tab-heading">Tasks</h3>
-                    <button className="btn btn-primary btn-sm" onClick={() => setShowTaskDrawer(true)}>
+                    <button className="btn btn-primary btn-sm" onClick={() => { setEditTask(null); setShowTaskDrawer(true); }}>
                       <Plus size={14} /> Add Task
                     </button>
                   </div>
-                  <div className="leaddrawer-task-filters">
-                    <button className={`leaddrawer-filter-btn ${taskFilter === 'all' ? 'active' : ''}`} onClick={() => setTaskFilter('all')}>All</button>
-                    <button className={`leaddrawer-filter-btn ${taskFilter === 'pending' ? 'active' : ''}`} onClick={() => setTaskFilter('pending')}>Pending</button>
-                    <button className={`leaddrawer-filter-btn ${taskFilter === 'in-progress' ? 'active' : ''}`} onClick={() => setTaskFilter('in-progress')}>In Progress</button>
-                    <button className={`leaddrawer-filter-btn ${taskFilter === 'completed' ? 'active' : ''}`} onClick={() => setTaskFilter('completed')}>Completed</button>
-                  </div>
-                  <div>
-                    {filteredTasks.map(task => (
-                      <div key={task.id} className="leaddrawer-task-card">
-                        <div className="leaddrawer-task-info">
-                          <div className="leaddrawer-task-title">{task.title}</div>
-                          <div className="leaddrawer-task-meta">
-                            <span>{task.date}</span>
-                            <span>{task.assignedTo}</span>
+                  {isLoadingTasks ? (
+                    <div className="leaddrawer-loading">Loading tasks...</div>
+                  ) : tasksError ? (
+                    <div className="leaddrawer-error">{tasksError}</div>
+                  ) : tasks.length === 0 ? (
+                    <div className="leaddrawer-empty-state">
+                      <div className="leaddrawer-empty-icon"><Check size={24} /></div>
+                      <h4 className="leaddrawer-empty-title">No tasks yet</h4>
+                      <p className="leaddrawer-empty-text">Add a task to keep track of work.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      {tasks.map(task => (
+                        <div key={task.id} className="leaddrawer-task-card">
+                          <div className="leaddrawer-task-info">
+                            <div className="leaddrawer-task-title">{task.title}</div>
+                            <div className="leaddrawer-task-meta">
+                              {task.scheduledDate && <span>{(task.scheduledTime ? `${task.scheduledDate} ${task.scheduledTime}` : task.scheduledDate)}</span>}
+                              <span>{task.assignedTo || '-'}</span>
+                            </div>
+                            {task.description && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{task.description}</p>}
+                          </div>
+                          <div className="leaddrawer-task-badges">
+                            {task.priority && <span className={`leaddrawer-task-badge ${getPriorityClass(task.priority)}`}>{task.priority}</span>}
+                            {task.status && <span className={`leaddrawer-task-badge ${getStatusClass(task.status)}`}>{task.status}</span>}
+                          </div>
+                          <div className="leaddrawer-task-actions">
+                            <button className="leaddrawer-note-action" onClick={() => { setEditTask(task); setShowTaskDrawer(true); }}>
+                              <Edit2 size={14} />
+                            </button>
+                            <button className="leaddrawer-note-action" onClick={() => handleDeleteTaskClick(task)}>
+                              <Trash2 size={14} />
+                            </button>
                           </div>
                         </div>
-                        <div className="leaddrawer-task-badges">
-                          <span className={`leaddrawer-task-badge ${task.priority}`}>{task.priority}</span>
-                          <span className={`leaddrawer-task-badge ${task.status === 'in-progress' ? 'in-progress' : task.status}`}>{task.status === 'in-progress' ? 'In Progress' : task.status}</span>
-                        </div>
-                        <div className="leaddrawer-task-actions">
-                          <button className="leaddrawer-note-action"><Edit2 size={14} /></button>
-                          <button className="leaddrawer-note-action"><Check size={14} /></button>
-                          <button className="leaddrawer-note-action"><Trash2 size={14} /></button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -568,7 +564,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                   </div>
                   <div className="leaddrawer-email-compose">
                     <div className="leaddrawer-form-group">
-                      <input type="email" placeholder="To" defaultValue={`${lead.name?.toLowerCase().replace(' ', '.')}@email.com`} />
+                      <input type="email" placeholder="To" defaultValue={lead.email || ''} />
                     </div>
                     <div className="leaddrawer-form-group">
                       <input type="text" placeholder="Subject" />
@@ -579,52 +575,36 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                   </div>
                 </div>
               )}
-
-              {activeTab === 'deal' && (
-                <div>
-                  <div className="leaddrawer-tab-header">
-                    <h3 className="leaddrawer-tab-heading">Deals</h3>
-                    <button className="btn btn-primary btn-sm">
-                      <Plus size={14} /> Add Deal
-                    </button>
-                  </div>
-                  <div>
-                    {deals.map(deal => (
-                      <div key={deal.id} className="leaddrawer-deal-card">
-                        <div className="leaddrawer-deal-header">
-                          <div>
-                            <div className="leaddrawer-deal-title">{deal.title}</div>
-                            <div className="leaddrawer-task-meta">
-                              <span>Expected: {deal.expectedClose}</span>
-                              <span>Owner: {deal.owner}</span>
-                            </div>
-                          </div>
-                          <span className="leaddrawer-deal-amount">₹{deal.amount.toLocaleString()}</span>
-                        </div>
-                        <span className={`leaddrawer-deal-stage ${deal.stage}`}>{deal.stage}</span>
-                        <div className="leaddrawer-deal-progress">
-                          <div className="leaddrawer-deal-progress-bar" style={{ width: `${deal.progress}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
       {showDeleteConfirm && (
-        <div style={deleteConfirmModalStyle} onClick={() => setShowDeleteConfirm(false)}>
-          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-            <div style={modalHeaderStyle}>
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 9999,
+        }} onClick={() => setShowDeleteConfirm(false)}>
+          <div style={{
+            background: 'white', borderRadius: '12px', width: '100%',
+            maxWidth: '420px', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between',
+              alignItems: 'center', padding: '1.25rem 1.5rem',
+              borderBottom: '1px solid #e5e7eb',
+            }}>
               <h5 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>Confirm Delete</h5>
               <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }} onClick={() => setShowDeleteConfirm(false)}>
                 <X size={20} />
               </button>
             </div>
-            <div style={modalBodyStyle}>
-              <div style={iconContainerStyle}>
+            <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+              <div style={{
+                width: '60px', height: '60px', background: '#fef2f2',
+                borderRadius: '50%', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', margin: '0 auto 1.25rem', color: '#dc2626',
+              }}>
                 <AlertTriangle size={40} />
               </div>
               <p style={{ fontSize: '14px', color: '#1a1b1d', marginBottom: '0.5rem' }}>
@@ -632,22 +612,52 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose }) => {
                 This action cannot be undone.
               </p>
             </div>
-            <div style={modalFooterStyle}>
-              <button style={{ padding: '0.625rem 1.25rem', borderRadius: '6px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', background: '#dc2626', color: 'white', border: 'none' }} onClick={() => { setShowDeleteConfirm(false); onClose(); }}>
+            <div style={{
+              display: 'flex', gap: '1rem', padding: '1rem 1.5rem',
+              borderTop: '1px solid #e5e7eb', justifyContent: 'center',
+            }}>
+              <button style={{
+                padding: '0.625rem 1.25rem', borderRadius: '6px', fontSize: '14px',
+                fontWeight: 500, cursor: 'pointer', background: '#dc2626',
+                color: 'white', border: 'none',
+              }} onClick={() => { setShowDeleteConfirm(false); onClose(); }}>
                 Delete Lead
               </button>
-              <button style={{ padding: '0.625rem 1.25rem', borderRadius: '6px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', background: '#f3f4f6', color: '#374151', border: 'none' }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+              <button style={{
+                padding: '0.625rem 1.25rem', borderRadius: '6px', fontSize: '14px',
+                fontWeight: 500, cursor: 'pointer', background: '#f3f4f6',
+                color: '#374151', border: 'none',
+              }} onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
             </div>
           </div>
         </div>
       )}
-      <AddDealTaskDrawer 
-        isOpen={showTaskDrawer} 
-        onClose={() => setShowTaskDrawer(false)}
-        onSave={(taskData) => {
-          setTasks([...tasks, { ...taskData, id: Date.now() }]);
-          setShowTaskDrawer(false);
-        }}
+      <AddLeadTaskDrawer
+        isOpen={showTaskDrawer}
+        onClose={() => { setShowTaskDrawer(false); setEditTask(null); }}
+        onSubmit={editTask ? handleEditTask : handleAddTask}
+        task={editTask}
+        isLoading={isLoadingTasks}
+        error={tasksError}
+        categoryOptions={categoryOptions}
+        staffOptions={staffOptions}
+        isLoadingCategories={isLoadingCategories}
+        isLoadingStaff={isLoadingStaff}
+        categoriesError={categoriesError}
+        staffError={staffError}
+      />
+      <AddLeadDrawer
+        isOpen={showEditDrawer}
+        onClose={() => setShowEditDrawer(false)}
+        onSaved={handleEditLeadSaved}
+        lead={lead}
+      />
+      <AdminDeleteModal
+        isOpen={showDeleteTaskModal}
+        itemName={deleteTaskTarget?.title || 'this task'}
+        onConfirm={handleDeleteTaskConfirm}
+        onClose={() => { setShowDeleteTaskModal(false); setDeleteTaskTarget(null); }}
+        isDeleting={isDeletingTask}
       />
     </div>
   );

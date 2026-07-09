@@ -5,6 +5,8 @@ import AdminToolbar from '../../../../shared/components/crud/AdminToolbar';
 import AdminTable from '../../../../shared/components/crud/AdminTable';
 import AdminPagination from '../../../../shared/components/crud/AdminPagination';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
+import AdminConfirmationModal from '../../../../shared/components/crud/AdminConfirmationModal';
+import Toast from '../../../../shared/components/Toast';
 import AdditionalFieldForm from '../components/AdditionalFieldForm';
 import { useLeadAdditionalData } from '../hooks/useLeadAdditionalData';
 import { columns } from '../constants';
@@ -26,6 +28,7 @@ const LeadAdditionalPage = () => {
             purposes={d.purposes}
             editingItem={d.editingItem}
             isSaving={d.isSaving}
+            saveDisabled={d.editingItem ? !d.hasChanges : false}
             error={d.error}
             onClearError={d.clearError}
             onInputChange={d.handleInputChange}
@@ -71,6 +74,7 @@ const LeadAdditionalPage = () => {
                   onPageChange={d.setCurrentPage}
                   onRowsPerPageChange={d.handleRowsPerPageChange}
                   prevNextOnly
+                  showRowsSelector={true}
                 />
               </>
             )}
@@ -78,6 +82,11 @@ const LeadAdditionalPage = () => {
         </div>
       </div>
 
+      <AdminConfirmationModal isOpen={d.showSaveConfirm}
+        title={d.saveConfirmMode === 'create' ? 'Create Additional Field' : 'Update Additional Field'}
+        message={d.saveConfirmMode === 'create' ? 'Are you sure you want to create this Additional Field?' : 'Are you sure you want to update this Additional Field?'}
+        isLoading={d.isSaving}
+        onConfirm={d.executeSave} onCancel={d.cancelSave} />
       <AdminDeleteModal
         isOpen={!!d.deletingItem}
         itemName={d.deletingItem?.field}
@@ -85,6 +94,7 @@ const LeadAdditionalPage = () => {
         onConfirm={d.handleConfirmDelete}
         onClose={() => d.setDeletingItem(null)}
       />
+      <Toast message={d.toastMessage} type={d.toastType} isVisible={d.showToast} onClose={d.clearToast} />
     </div>
   );
 };

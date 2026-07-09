@@ -27,8 +27,8 @@ export interface AdminToolbarProps {
   onAdd: () => void;
   addLabel: string;
   showAddButton?: boolean;
-  rowsPerPage: number;
-onRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  rowsPerPage?: number;
+  onRowsPerPageChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 
@@ -51,6 +51,7 @@ export interface AdminDeleteModalProps {
   itemType?: string;
   onConfirm: () => void;
   onClose: () => void;
+  isDeleting?: boolean;
 }
 
 export interface AdminTableProps<T extends { id: number | string }> {
@@ -65,12 +66,16 @@ export interface AdminTableProps<T extends { id: number | string }> {
   emptyMessage?: string;
 }
 
-export interface DrawerShellProps {
+export interface AdminConfirmationModalProps {
   isOpen: boolean;
   title: string;
-  onClose: () => void;
-  bodyRef?: Ref<HTMLDivElement>;
-  children: ReactNode;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmButtonVariant?: 'primary' | 'danger';
+  isLoading?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export interface AdminFormDrawerProps {
@@ -84,4 +89,6 @@ export interface AdminFormDrawerProps {
   isEditing: boolean;
   error?: string | null;
   onClearError?: () => void;
+  isSaving?: boolean;
+  saveDisabled?: boolean;
 }

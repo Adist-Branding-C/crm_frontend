@@ -1,8 +1,8 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { EnquiriesPaginationProps } from '../types';
+import type { EnquiriesPaginationProps } from '../types/component.types';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
-import { LABEL_SHOW_ENTRIES,LABEL_ROWS_PER_PAGE, LABEL_SHOWING, LABEL_OF, LABEL_FIRST, LABEL_PAGE, LABEL_LAST } from '../../../shared/constants/labels';
+import { LABEL_ROWS_PER_PAGE, LABEL_SHOWING, LABEL_OF, LABEL_FIRST, LABEL_PAGE, LABEL_LAST } from '../../../shared/constants/labels';
 
 const EnquiriesPagination: React.FC<EnquiriesPaginationProps> = React.memo(({
   currentPage, totalPages, startIndex, rowsPerPage, totalItems, onPageChange, onRowsPerPageChange,

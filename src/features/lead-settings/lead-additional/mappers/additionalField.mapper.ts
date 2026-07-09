@@ -16,6 +16,6 @@ export function mapApiToUI(item: LeadAdditionalApiItem): LeadAdditionalItem {
   };
 }
 
-export function mapPurposeApiToUI(item: { purpose_id: string; purpose: string }): LeadPurposeOption {
-  return { id: item.purpose_id, title: item.purpose };
+export function mapPurposeApiToUI(item: { purposeId: string; purpose: string }): LeadPurposeOption {
+  return { id: item.purposeId, title: item.purpose };
 }

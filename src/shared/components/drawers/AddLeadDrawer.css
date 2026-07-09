@@ -306,3 +306,18 @@
 .dropdown-list button:hover {
   background-color: var(--bg-main);
 }
+
+.additional-fields-heading {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}

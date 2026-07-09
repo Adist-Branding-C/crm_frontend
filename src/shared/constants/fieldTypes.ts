@@ -1,8 +1,7 @@
 export const FIELD_TYPE_OPTIONS = [
-  { value: 'text', label: 'Text' },
-  { value: 'number', label: 'Number' },
-  { value: 'date', label: 'Date' },
-  { value: 'datetime', label: 'DateTime' },
-  { value: 'dropdown', label: 'Dropdown' },
-  { value: 'checkbox', label: 'Checkbox' },
+  { value: 'Text', label: 'Text' },
+  { value: 'Number', label: 'Number' },
+  { value: 'Date', label: 'Date' },
+  { value: 'DateTime', label: 'DateTime' },
+  { value: 'Dropdown', label: 'Dropdown' },
 ];
