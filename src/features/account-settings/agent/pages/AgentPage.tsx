@@ -1,89 +1,105 @@
-import { Check, X } from 'lucide-react';
-import { useAgentPage } from '../hooks';
+import { useCallback, useMemo } from 'react';
+import type { ChangeEvent } from 'react';
+import { useTableData } from '../../../../shared/hooks/useTableData';
+import { useToast } from '../../../../shared/hooks/useToast';
+import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
+import { useAgentCrud, useAgentDesignationOptions, useAgentDrawer, useAgentDeleteConfirm, useAgentFormSubmit } from '../hooks';
+import { agentService } from '../services/agent.service';
 import AddAgentDrawer from '../components/AddAgentDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
+import ToastNotification from '../../../../shared/components/ToastNotification';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { AGENT_TABLE_COLUMNS } from '../constants/agentTableColumns';
+import { addAgentValidationSchema, editAgentValidationSchema } from '../validations/agent.validation';
 import type { AgentItem } from '../types/agent.types';
 
 const AgentPage = () => {
-  const {
-    agent,
-    searchQuery, handleSearchChange,
-    rowsPerPage, handleRowsPerPageChange,
-    pageNumber, setPageNumber,
-    totalCount,
-    showDrawer,
-    dropdownOpen, onToggleDropdown,
-    editingItem,
-    deletingItem,
-    filteredData,
-    drawerInitialValues,
-    handleAddClick,
-    handleCloseDrawer,
-    handleEditClick,
-    handleDeleteClick,
-    handleConfirmDelete,
-    handleCloseDeleteModal,
-    handleSubmit,
-    handleEditSubmit,
-  } = useAgentPage();
+  const pagination = useTableData<AgentItem>({
+    fetchFn: async (params) => {
+      const response = await agentService.getAllAgents(params);
+      if (response.status) {
+        const data = response.data;
+        const items = data?.items ?? [];
+        return { items, total: data?.pagination?.total ?? items.length };
+      }
+      throw new Error(response.message || 'Failed to fetch agents');
+    },
+  });
+  const toast = useToast();
+  const crud = useAgentCrud({ pagination, showToastMessage: toast.showToastMessage });
+  const designation = useAgentDesignationOptions();
+  const drawer = useAgentDrawer();
+  const dropdown = useDropdownMenu<number>();
+  const deleteConfirm = useAgentDeleteConfirm({ handleDeleteAgent: crud.handleDeleteAgent });
+  const formSubmit = useAgentFormSubmit({
+    editingItem: drawer.editingItem,
+    closeDrawer: drawer.closeDrawer,
+    handleAddAgent: crud.handleAddAgent,
+    handleUpdateAgent: crud.handleUpdateAgent,
+  });
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
+  const startIndex = (pagination.pageNumber - 1) * pagination.limit;
+  const totalPages = useMemo(() => Math.ceil(pagination.totalCount / pagination.limit) || 1, [pagination.totalCount, pagination.limit]);
 
-  const columns: Column<AgentItem>[] = [
-    { key: 'fullName', label: 'Name', render: (item) => item.fullName || item.name || '-' },
-    { key: 'email', label: 'Email' },
-    { key: 'mobile', label: 'Mobile', render: (item) => item.mobile || item.phone || item.phone_number || item.phoneNumber || '-' },
-    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
-  ];
+  const handleEditClick = useCallback((item: AgentItem) => {
+    drawer.openEditDrawer(item);
+    dropdown.closeDropdown();
+  }, [drawer.openEditDrawer, dropdown.closeDropdown]);
+
+  const handleDeleteClick = useCallback((item: AgentItem) => {
+    deleteConfirm.handleDeleteClick(item);
+    dropdown.closeDropdown();
+  }, [deleteConfirm.handleDeleteClick, dropdown.closeDropdown]);
+
+  const { handleRowsPerPageChange: setRowsPerPage } = pagination;
+  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
+  }, [setRowsPerPage]);
 
   return (
     <>
       <SettingsTableLayout
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onAdd={handleAddClick}
+        searchQuery={pagination.searchQuery}
+        onSearchChange={pagination.handleSearchChange}
+        onAdd={drawer.openAddDrawer}
         addLabel="Add Staff"
-        data={filteredData}
-        columns={columns}
+        data={pagination.list}
+        columns={AGENT_TABLE_COLUMNS}
         startIndex={startIndex}
-        dropdownOpen={dropdownOpen}
-        onToggleDropdown={onToggleDropdown}
+        dropdownOpen={dropdown.dropdownOpen}
+        onToggleDropdown={dropdown.toggleDropdown}
         onEdit={handleEditClick}
         onDelete={handleDeleteClick}
-        currentPage={pageNumber}
+        currentPage={pagination.pageNumber}
         totalPages={totalPages}
-        rowsPerPage={rowsPerPage}
-        totalItems={totalCount}
-        onPageChange={setPageNumber}
-        onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+        rowsPerPage={pagination.limit}
+        totalItems={pagination.totalCount}
+        onPageChange={pagination.setPageNumber}
+        onRowsPerPageChange={handleRowsPerPageChange}
       />
       <AddAgentDrawer
-        isOpen={showDrawer}
-        onClose={handleCloseDrawer}
-        validationSchema={editingItem ? agent.editValidationSchema : agent.validationSchema}
-        initialValues={drawerInitialValues}
-        onSubmit={editingItem ? handleEditSubmit : handleSubmit}
-        isLoading={agent.isLoading}
-        error={agent.error}
-        isEditing={!!editingItem}
-        designationOptions={agent.designationOptions}
-        onFetchDesignations={agent.fetchDesignations}
+        visibility={{ isOpen: drawer.showDrawer, onClose: drawer.closeDrawer }}
+        form={{
+          validationSchema: drawer.editingItem ? editAgentValidationSchema : addAgentValidationSchema,
+          initialValues: drawer.drawerInitialValues,
+          onSubmit: drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit,
+          isEditing: !!drawer.editingItem,
+        }}
+        status={{ isLoading: pagination.isLoading, error: pagination.error }}
+        designation={{ options: designation.designationOptions, onFetch: designation.fetchDesignations }}
       />
       <AdminDeleteModal
-        isOpen={!!deletingItem}
-        itemName={deletingItem?.fullName || deletingItem?.name || ''}
-        onConfirm={handleConfirmDelete}
-        onClose={handleCloseDeleteModal}
+        isOpen={!!deleteConfirm.deletingItem}
+        itemName={deleteConfirm.deletingItem?.fullName || deleteConfirm.deletingItem?.name || ''}
+        onConfirm={deleteConfirm.handleConfirmDelete}
+        onClose={deleteConfirm.closeDeleteModal}
       />
-      {agent.showToast && (
-        <div className={`toast-notification toast-${agent.toastType}`} onClick={() => agent.setShowToast(false)}>
-          {agent.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
-          <span>{agent.toastMessage}</span>
-        </div>
-      )}
+      <ToastNotification
+        isVisible={toast.showToast}
+        type={toast.toastType}
+        message={toast.toastMessage}
+        onDismiss={() => toast.setShowToast(false)}
+      />
     </>
   );
 };

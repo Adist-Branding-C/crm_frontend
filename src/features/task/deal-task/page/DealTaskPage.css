@@ -1,0 +1,46 @@
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/tabs.css';
+@import '../../../../shared/styles/toolbars.css';
+
+.task-settings-page .table-container,
+.task-settings-page .table-scroll {
+  overflow: visible;
+}
+
+.task-settings-page .dropdown-menu {
+  z-index: 9999;
+}
+
+.deal-task-table-wrapper {
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.field-error-text {
+  display: block;
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-control.input-error {
+  border-color: #dc2626;
+}
+
+.form-control.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}

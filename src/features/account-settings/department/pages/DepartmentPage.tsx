@@ -4,9 +4,8 @@ import AddDepartmentDrawer from '../components/AddDepartmentDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { SettingsTableLayout, SettingsStatusBadge } from '../../../../shared/components/settings';
-import type { Column } from '../../../../shared/types/crud';
-import type { DepartmentItem } from '../types/department.types';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { DEPARTMENT_TABLE_COLUMNS } from '../constants/departmentTableColumns';
 
 const DepartmentPage = () => {
   const {
@@ -15,6 +14,8 @@ const DepartmentPage = () => {
     rowsPerPage, handleRowsPerPageChange,
     pageNumber, setPageNumber,
     totalCount,
+    startIndex,
+    totalPages,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
@@ -31,15 +32,6 @@ const DepartmentPage = () => {
     handleEditSubmit,
   } = useDepartmentPage();
 
-  const startIndex = (pageNumber - 1) * rowsPerPage;
-  const totalPages = Math.ceil(totalCount / rowsPerPage) || 1;
-
-  const columns: Column<DepartmentItem>[] = [
-    { key: 'departmentName', label: 'Department Name', render: (item) => item.departmentName || item.name || '-' },
-    { key: 'description', label: 'Description' },
-    { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
-  ];
-
   return (
     <div className="account-page">
       <PageHeader title="Account Settings" description="Manage your login credentials, settings, and preferences" />
@@ -51,7 +43,7 @@ const DepartmentPage = () => {
           onAdd={handleAddClick}
           addLabel="Add Department"
           data={filteredData}
-          columns={columns}
+          columns={DEPARTMENT_TABLE_COLUMNS}
           startIndex={startIndex}
           dropdownOpen={dropdownOpen}
           onToggleDropdown={onToggleDropdown}
@@ -62,7 +54,7 @@ const DepartmentPage = () => {
           rowsPerPage={rowsPerPage}
           totalItems={totalCount}
           onPageChange={setPageNumber}
-          onRowsPerPageChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+          onRowsPerPageChange={handleRowsPerPageChange}
         />
         <AddDepartmentDrawer
           isOpen={showDrawer}

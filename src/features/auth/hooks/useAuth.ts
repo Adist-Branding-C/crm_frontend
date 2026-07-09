@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { AUTH_STORAGE_KEYS, AUTH_ROUTES } from '../constants/auth.constants';
 import type { AuthUser } from '../types/auth.types';
+import { authService } from '../services/AuthService';
+import { clearAuthTokens } from '../utils/tokenStorage';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -14,12 +16,16 @@ export const useAuth = () => {
     setIsLoading(false);
   }, []);
 
-  const logout = useCallback(() => {
-    Cookies.remove(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
-    Cookies.remove(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(AUTH_STORAGE_KEYS.USER);
-    setIsAuthenticated(false);
-    navigate(AUTH_ROUTES.LOGIN);
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Best-effort server-side revoke; local session must still be cleared even if this fails.
+    } finally {
+      clearAuthTokens();
+      setIsAuthenticated(false);
+      navigate(AUTH_ROUTES.LOGIN);
+    }
   }, [navigate]);
 
   let user: AuthUser | null = null;

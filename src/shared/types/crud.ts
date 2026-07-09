@@ -1,4 +1,4 @@
-import type { ReactNode, ChangeEvent } from 'react';
+import type { ReactNode, ChangeEvent, Ref } from 'react';
 
 export interface Column<T> {
   key: string;

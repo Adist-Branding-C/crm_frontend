@@ -7,16 +7,14 @@ import LeadStatusPage from '../features/lead-settings/lead-status/pages/LeadStat
 import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSourcePage';
 import LeadTypesPage from '../features/lead-settings/lead-types/pages/LeadTypesPage';
 import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/LeadAdditionalPage';
-import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
 import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
 import IntegrationsPage from '../features/integrations/pages/IntegrationsPage';
 import LeadGenerationAPIPage from '../features/lead-generation-api/pages/LeadGenerationAPIPage';
-import GeneralSettingsPage from '../features/general-settings/pages/GeneralSettingsPage';
 import UserLayout from '../features/task-settings/components/UserLayout';
-import CallStatusPage from '../features/task-settings/call-status/CallStatus';
-import CallReasonPage from '../features/task-settings/call-reason/CallReason';
+import CallStatusPage from '../features/task-settings/call-status/page/CallStatus';
+import CallReasonPage from '../features/task-settings/call-reason/page/CallReason';
 import MeetingOutcomePage from '../features/task-settings/meeting-outcome/MeetingOutcome';
-import TaskCategoryPage from '../features/task-settings/task-category/TaskCategory';
+import TaskCategoryPage from '../features/task-settings/task-category/page/TaskCategory';
 
 export default (
   <>
@@ -30,7 +28,6 @@ export default (
     <Route path="user/payment-plans" element={<PaymentPlansPage />} />
     <Route path="user/gl-connect" element={<IntegrationsPage />} />
     <Route path="user/gl-connect/lead-api" element={<LeadGenerationAPIPage />} />
-    <Route path="user/general-settings" element={<GeneralSettingsPage />} />
     <Route path="user" element={<UserLayout />}>
       <Route path="call_status" element={<CallStatusPage />} />
       <Route path="call_reasons" element={<CallReasonPage />} />

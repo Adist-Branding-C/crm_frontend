@@ -32,6 +32,23 @@ export interface AgentResponse {
   field?: string;
 }
 
+export interface GetAllAgentsParams {
+  pageNumber?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface AgentListData {
+  items: AgentItem[];
+  pagination?: { total: number };
+}
+
+export interface GetAllAgentsResponse {
+  status: boolean;
+  message: string;
+  data?: AgentListData;
+}
+
 export interface DesignationOption {
   label: string;
   value: string;

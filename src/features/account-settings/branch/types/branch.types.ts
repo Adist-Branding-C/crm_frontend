@@ -20,17 +20,19 @@ export interface BranchRequest {
 
 export interface GetAllBranchesParams {
   search?: string
-  page?: number
+  pageNumber?: number
   limit?: number
+}
+
+export interface BranchListData {
+  items: BranchItem[]
+  total?: number
 }
 
 export interface GetAllBranchesResponse {
   status: boolean
   message: string
-  data: {
-    items: BranchItem[]
-    total?: number
-  }
+  data?: BranchListData
 }
 
 export interface BranchResponseData {
@@ -41,7 +43,7 @@ export interface BranchResponseData {
 export interface BranchResponse {
   status: boolean
   message: string
-  data: BranchResponseData | undefined
+  data?: BranchResponseData
   errors?: Record<string, string[]>;
   field?: string;
 }

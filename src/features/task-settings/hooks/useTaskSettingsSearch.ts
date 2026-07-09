@@ -5,7 +5,7 @@ export function useTaskSettingsSearch(
   onSearchChange: (value: string) => void,
 ) {
   const [searchValue, setSearchValue] = useState(externalSearchQuery);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (searchValue !== externalSearchQuery) {

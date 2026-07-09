@@ -1,17 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
+import { scrollToFirstError } from '../../utils/scrollToFirstError';
 import type { AddMeetingOutcomeDrawerProps } from '../types/index';
-
-const scrollToFirstError = (container: HTMLElement | null) => {
-  if (!container) return;
-  const errorEl = container.querySelector('.input-error');
-  if (errorEl) {
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    (errorEl as HTMLElement).focus();
-  }
-};
 
 const AddMeetingOutcomeDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddMeetingOutcomeDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
@@ -49,18 +41,17 @@ const AddMeetingOutcomeDrawer = ({ isOpen, onClose, validationSchema, initialVal
                 }
               }
 
-              const formError = error;
-              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
-              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+              const fieldClass = (name: keyof typeof initialValues) =>
+                `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
-                  {formError && <ErrorMessage message={formError} />}
+                  {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
                     <label>Outcome <span className="text-danger">*</span></label>
                     <Field type="text" name="name" className={fieldClass('name')} placeholder="Enter meeting outcome" />
-                    {showError('name') && errors.name && <small className="field-error-text">{errors.name}</small>}
+                    <FormikError name="name" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
@@ -70,7 +61,7 @@ const AddMeetingOutcomeDrawer = ({ isOpen, onClose, validationSchema, initialVal
                       <option value="Active">Active</option>
                       <option value="Inactive">Inactive</option>
                     </Field>
-                    {showError('status') && errors.status && <small className="field-error-text">{errors.status}</small>}
+                    <FormikError name="status" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-actions">

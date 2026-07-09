@@ -1,11 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { FormikHelpers } from 'formik';
 import { passwordService } from '../services/password.service';
-import type { PasswordFormData, PasswordStrengthResult } from '../types';
-import { INITIAL_PASSWORD_FORM, MIN_PASSWORD_LENGTH } from '../constants';
-import { PASSWORD_UPPERCASE_REGEX, PASSWORD_DIGIT_REGEX } from '../../../../shared/constants/regex';
+import type { PasswordFormData } from '../types';
+import { INITIAL_PASSWORD_FORM } from '../constants';
+import { getPasswordStrength } from '../../../../shared/validations/password.validation';
+import { AUTH_ROUTES } from '../../../auth/constants/auth.constants';
+import { clearAuthTokens } from '../../../auth/utils/tokenStorage';
+
+const POST_PASSWORD_CHANGE_LOGOUT_DELAY_MS = 2000;
 
 export const usePasswordData = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -13,6 +19,13 @@ export const usePasswordData = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const logoutTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    return () => {
+      if (logoutTimeoutRef.current) clearTimeout(logoutTimeoutRef.current);
+    };
+  }, []);
 
   const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
     setToastMessage(message);
@@ -20,16 +33,6 @@ export const usePasswordData = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3500);
   }, []);
-
-  const getPasswordStrength = (password: string): PasswordStrengthResult => {
-    if (!password) return { strength: 0, text: '', color: '' };
-    if (password.length < MIN_PASSWORD_LENGTH) return { strength: 1, text: 'Weak', color: '#ef4444' };
-    if (password.length < 8) return { strength: 2, text: 'Fair', color: '#f59e0b' };
-    if (password.length >= 8 && PASSWORD_UPPERCASE_REGEX.test(password) && PASSWORD_DIGIT_REGEX.test(password)) {
-      return { strength: 4, text: 'Strong', color: '#22c55e' };
-    }
-    return { strength: 3, text: 'Good', color: '#3b82f6' };
-  };
 
   const handleSubmit = useCallback(async (
     values: PasswordFormData,
@@ -46,7 +49,11 @@ export const usePasswordData = () => {
 
       if (response.status) {
         resetForm();
-        showToastMessage('Password changed successfully!', 'success');
+        showToastMessage('Password changed successfully! Please sign in again.', 'success');
+        logoutTimeoutRef.current = setTimeout(() => {
+          clearAuthTokens();
+          navigate(AUTH_ROUTES.LOGIN);
+        }, POST_PASSWORD_CHANGE_LOGOUT_DELAY_MS);
         return true;
       } else {
         showToastMessage(response.message || 'Failed to change password', 'error');
@@ -67,7 +74,7 @@ export const usePasswordData = () => {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, [showToastMessage]);
+  }, [showToastMessage, navigate]);
 
   return {
     isLoading,

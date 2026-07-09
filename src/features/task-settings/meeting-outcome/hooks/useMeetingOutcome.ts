@@ -1,26 +1,18 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
-import { meetingOutcomeService } from '../services/meetingOutcome.service';
-import type { MeetingOutcomeItem, MeetingOutcomeFormData } from '../types/index';
-
-const FIELD_MAP: Record<string, string> = {};
+import { useDrawerScroll } from '../../hooks/useDrawerScroll';
+import { useToast } from '../../hooks/useToast';
+import { applyFieldErrors } from '../../call-reason/utils/applyFieldErrors';
+import { meetingOutcomeApiService } from '../services';
+import type { MeetingOutcomeItem, MeetingOutcomeFormData, MeetingOutcomeApiResponse } from '../types/index';
 
 export function useMeetingOutcome() {
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  const [showToast, setShowToast] = useState(false);
-
-  const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
-    setToastMessage(message);
-    setToastType(type);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3500);
-  }, []);
+  const { showToastMessage, toastMessage, toastType, showToast, setShowToast } = useToast();
 
   const pagination = useTableData<MeetingOutcomeItem>({
     fetchFn: async (params) => {
-      const response = await meetingOutcomeService.getAll(params as unknown as Record<string, string | number | undefined>);
+      const response = await meetingOutcomeApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
       if (response.status) {
         const data = response.data as { items: MeetingOutcomeItem[]; pagination?: { total: number } } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
@@ -30,53 +22,7 @@ export function useMeetingOutcome() {
     },
   });
 
-  const applyFieldErrors = useCallback((
-    errors: Record<string, string[]> | undefined,
-    message: string | undefined,
-    field: string | undefined,
-    setFieldError: (field: string, msg: string) => void,
-  ): string | null => {
-    if (field && message) {
-      const mapped = FIELD_MAP[field] || field;
-      setFieldError(mapped, message);
-      return mapped;
-    }
-    if (errors && typeof errors === 'object') {
-      let firstField: string | null = null;
-      Object.entries(errors).forEach(([f, msgs]) => {
-        const mapped = FIELD_MAP[f] || f;
-        if (msgs?.length && !firstField) firstField = mapped;
-        if (msgs?.length) setFieldError(mapped, msgs[0]);
-      });
-      return firstField;
-    }
-    if (message) {
-      const lower = message.toLowerCase();
-      if (lower.includes('name')) { setFieldError('name', message); return 'name'; }
-    }
-    return null;
-  }, []);
-
-  const scrollAndFocusError = useCallback((fieldName: string) => {
-    setTimeout(() => {
-      const drawerBody = document.querySelector('.drawer-body');
-      if (!drawerBody) return;
-      const errorEl = drawerBody.querySelector('.input-error');
-      if (errorEl) {
-        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        (errorEl as HTMLElement).focus();
-      }
-    }, 0);
-  }, []);
-
-  const scrollToTop = useCallback(() => {
-    setTimeout(() => {
-      const drawerBody = document.querySelector('.drawer-body');
-      if (drawerBody) {
-        drawerBody.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 0);
-  }, []);
+  const { scrollAndFocusError, scrollToTop } = useDrawerScroll();
 
   const handleAdd = useCallback(async (
     values: MeetingOutcomeFormData,
@@ -87,7 +33,7 @@ export function useMeetingOutcome() {
 
     try {
       const { name, status } = values;
-      const response = await meetingOutcomeService.create({ name: name.trim(), status });
+      const response: MeetingOutcomeApiResponse = await meetingOutcomeApiService.create({ name: name.trim(), status });
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -100,7 +46,7 @@ export function useMeetingOutcome() {
 
       const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
       if (errorField) {
-        scrollAndFocusError(errorField);
+        scrollAndFocusError();
       } else {
         pagination.setError(response.message || 'Failed to add meeting outcome');
         scrollToTop();
@@ -114,7 +60,7 @@ export function useMeetingOutcome() {
         const serverMessage = axiosErr.response?.data?.message;
         if (serverErrors || (serverField && serverMessage)) {
           const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
-          if (errorField) scrollAndFocusError(errorField);
+          if (errorField) scrollAndFocusError();
           else { pagination.setError(serverMessage || 'Failed to add meeting outcome'); scrollToTop(); }
         } else {
           pagination.setError(serverMessage || 'Failed to add meeting outcome');
@@ -144,7 +90,7 @@ export function useMeetingOutcome() {
 
     try {
       const { name, status } = values;
-      const response = await meetingOutcomeService.update(id, { name: name.trim(), status });
+      const response: MeetingOutcomeApiResponse = await meetingOutcomeApiService.update(id, { name: name.trim(), status });
 
       if (response.status) {
         pagination.refresh();
@@ -153,7 +99,7 @@ export function useMeetingOutcome() {
 
       const errorField = applyFieldErrors(response.errors, response.message, response.field, setFieldError);
       if (errorField) {
-        scrollAndFocusError(errorField);
+        scrollAndFocusError();
       } else {
         pagination.setError(response.message || 'Failed to update meeting outcome');
         scrollToTop();
@@ -167,7 +113,7 @@ export function useMeetingOutcome() {
         const serverMessage = axiosErr.response?.data?.message;
         if (serverErrors || (serverField && serverMessage)) {
           const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, setFieldError);
-          if (errorField) scrollAndFocusError(errorField);
+          if (errorField) scrollAndFocusError();
           else { pagination.setError(serverMessage || 'Failed to update meeting outcome'); scrollToTop(); }
         } else {
           pagination.setError(serverMessage || 'Failed to update meeting outcome');
@@ -191,7 +137,7 @@ export function useMeetingOutcome() {
     pagination.setError('');
 
     try {
-      const response = await meetingOutcomeService.delete(id);
+      const response = await meetingOutcomeApiService.delete(id);
 
       if (response.status) {
         pagination.refresh();

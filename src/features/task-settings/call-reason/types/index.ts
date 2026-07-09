@@ -1,5 +1,6 @@
 import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
+import type { ApiResponse } from '../../../../shared/types/common';
 
 export interface CallReasonItem {
   id: number;
@@ -12,12 +13,10 @@ export interface CallReasonFormData {
   status: string;
 }
 
-export interface CallReasonResponse {
-  status: boolean;
-  message: string;
-  data?: unknown;
-  errors?: Record<string, string[]>;
-  field?: string;
+export interface CallReason {
+  id: number;
+  name: string;
+  status: string;
 }
 
 export interface CallReasonTableProps {
@@ -50,9 +49,9 @@ export interface AddCallReasonDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CallReasonFormData;
-  onSubmit: (values: CallReasonFormData, helpers: FormikHelpers<CallReasonFormData>) => Promise<void>;
+  onSubmit: (values: CallReasonFormData, helpers: FormikHelpers<CallReasonFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   isEditing?: boolean;
 }
 
@@ -61,9 +60,9 @@ export interface EditCallReasonDrawerProps {
   onClose: () => void;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CallReasonFormData;
-  onSubmit: (values: CallReasonFormData, helpers: FormikHelpers<CallReasonFormData>) => Promise<void>;
+  onSubmit: (values: CallReasonFormData, helpers: FormikHelpers<CallReasonFormData>) => Promise<void | boolean>;
   isLoading: boolean;
-  error: string;
+  error: string | null;
   editingItem: CallReasonItem | null;
   isEditing?: boolean;
 }
@@ -74,3 +73,31 @@ export interface DeleteCallReasonDialogProps {
   onConfirm: () => void;
   onClose: () => void;
 }
+
+export interface SubmitHandlerConfig {
+  onAddSuccess: () => void;
+  onEditSuccess: () => void;
+  onDeleteSuccess: () => void;
+  editingItem: CallReasonItem | null;
+  deletingItem: CallReasonItem | null;
+}
+
+export interface FetchHandlers {
+  setError: (msg: string) => void;
+  setIsLoading: (loading: boolean) => void;
+  setPageNumber: (page: number) => void;
+  setSearchQuery: (q: string) => void;
+  refresh: () => void;
+}
+
+export interface ToastHandlers {
+  showToastMessage: (msg: string, type: 'success' | 'error') => void;
+}
+
+export interface ParsedApiError {
+  message: string;
+  errors?: Record<string, string[]>;
+  field?: string;
+}
+
+export type CallReasonApiResponse = ApiResponse<CallReason> & { errors?: Record<string, string[]>; field?: string };

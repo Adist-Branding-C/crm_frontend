@@ -27,6 +27,10 @@ class AuthService {
       message: response.data.message,
     };
   }
+
+  async logout(): Promise<void> {
+    await axiosInstance.post(AUTH_API_ENDPOINTS.LOGOUT);
+  }
 }
 
 export const authService = new AuthService();
