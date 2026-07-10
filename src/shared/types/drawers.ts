@@ -123,10 +123,12 @@ export interface ActivityLogItem {
 export interface LeadDetailDrawerProps {
   lead: {
     id: number;
+    leadId?: string;
     name: string;
     phone: string;
     email?: string;
     location?: string;
+    address?: string;
     assignedTo: string;
     purpose: string;
     type: string;

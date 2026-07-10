@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { leadDataService } from '../services/leadDataService';
 import type { UpdateLeadPayload } from '../types';
 import type { UseLeadBulkActionsReturn, UseLeadBulkActionsOptions } from '../types/hook.types';
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages';
 
 export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadBulkActionsReturn {
   const { selectedIds, onRefresh, onShowToast, onClearSelection } = options;
@@ -13,7 +14,7 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
 
   const handleChangeStatusClick = useCallback(() => {
     if (selectedIds.length === 0) {
-      onShowToast('Please select at least one lead', 'error');
+      onShowToast(ERROR_MESSAGES.SELECT_AT_LEAST_ONE, 'error');
       return;
     }
     setShowChangeStatusModal(true);
@@ -35,16 +36,16 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
     onClearSelection([]);
     setIsProcessingSelected(false);
     if (failCount === 0) {
-      onShowToast(`Status updated for ${successCount} lead(s)`, 'success');
+      onShowToast(SUCCESS_MESSAGES.STATUS_UPDATED(successCount), 'success');
     } else {
-      onShowToast(`${successCount} updated, ${failCount} failed`, 'error');
+      onShowToast(ERROR_MESSAGES.PARTIAL_SUCCESS(successCount, failCount), 'error');
     }
     onRefresh();
   }, [selectedIds, onRefresh, onShowToast, onClearSelection]);
 
   const handleAssignStaffClick = useCallback(() => {
     if (selectedIds.length === 0) {
-      onShowToast('Please select at least one lead', 'error');
+      onShowToast(ERROR_MESSAGES.SELECT_AT_LEAST_ONE, 'error');
       return;
     }
     setShowAssignStaffModal(true);
@@ -66,16 +67,16 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
     onClearSelection([]);
     setIsProcessingSelected(false);
     if (failCount === 0) {
-      onShowToast(`Staff assigned to ${successCount} lead(s)`, 'success');
+      onShowToast(SUCCESS_MESSAGES.STAFF_ASSIGNED(successCount), 'success');
     } else {
-      onShowToast(`${successCount} assigned, ${failCount} failed`, 'error');
+      onShowToast(ERROR_MESSAGES.PARTIAL_ASSIGN(successCount, failCount), 'error');
     }
     onRefresh();
   }, [selectedIds, onRefresh, onShowToast, onClearSelection]);
 
   const handleDeleteSelectedClick = useCallback(() => {
     if (selectedIds.length === 0) {
-      onShowToast('Please select at least one lead', 'error');
+      onShowToast(ERROR_MESSAGES.SELECT_AT_LEAST_ONE, 'error');
       return;
     }
     setShowDeleteSelectedModal(true);
@@ -97,23 +98,23 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
     onClearSelection([]);
     setIsProcessingSelected(false);
     if (failCount === 0) {
-      onShowToast(`${successCount} lead(s) deleted successfully`, 'success');
+      onShowToast(SUCCESS_MESSAGES.LEADS_DELETED(successCount), 'success');
     } else {
-      onShowToast(`${successCount} deleted, ${failCount} failed`, 'error');
+      onShowToast(ERROR_MESSAGES.PARTIAL_DELETE(successCount, failCount), 'error');
     }
     onRefresh();
   }, [selectedIds, onRefresh, onShowToast, onClearSelection]);
 
   const handleExportSelected = useCallback(() => {
-    onShowToast('Export API not available', 'error');
+    onShowToast(ERROR_MESSAGES.EXPORT_NOT_AVAILABLE, 'error');
   }, [onShowToast]);
 
   const handleSendFollowUp = useCallback(() => {
-    onShowToast('Follow Up API not available', 'error');
+    onShowToast(ERROR_MESSAGES.FOLLOW_UP_NOT_AVAILABLE, 'error');
   }, [onShowToast]);
 
   const handleDuplicateLeadAction = useCallback(() => {
-    onShowToast('Duplicate Lead API not available', 'error');
+    onShowToast(ERROR_MESSAGES.DUPLICATE_NOT_AVAILABLE, 'error');
   }, [onShowToast]);
 
   return {

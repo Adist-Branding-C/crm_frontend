@@ -1,135 +1,236 @@
-import React, { useMemo } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
 import LeadDetailDrawer from '../../../shared/components/drawers/LeadDetailDrawer';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
+import AdminConfirmationModal from '../../../shared/components/crud/AdminConfirmationModal';
 import Toast from '../../../shared/components/Toast';
-import { useEnquiriesData } from '../hooks/useEnquiriesData';
-import { COLUMNS } from '../constants';
-import EnquiriesToolbar from '../components/EnquiriesToolbar';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useDrawer } from '../../../shared/hooks/useDrawer';
+import { useTableSelection } from '../../../shared/hooks/useTableSelection';
+import { useLeadListData } from '../hooks/useLeadListData';
+import { useLeadPagination } from '../hooks/useLeadPagination';
+import { useLeadSearch } from '../hooks/useLeadSearch';
+import { useLeadSort } from '../hooks/useLeadSort';
+import { useLeadFilters } from '../hooks/useLeadFilters';
+import { useLeadBulkActions } from '../hooks/useLeadBulkActions';
+import { useLeadDeleteConfirm } from '../hooks/useLeadDeleteConfirm';
+import { useLeadToolbarDropdowns } from '../hooks/useLeadToolbarDropdowns';
+import { useLeadActionMenu } from '../hooks/useLeadActionMenu';
+import { useLeadRowActions } from '../hooks/useLeadRowActions';
+import { useLeadClearFilters } from '../hooks/useLeadClearFilters';
+import { getLeadColumns } from '../utils/leadColumns';
+import { getLeadIds } from '../utils/leadMapper';
+import { LABEL_NO_DATA } from '../../../shared/constants/labels';
 import EnquiriesFilters from '../components/EnquiriesFilters';
-import EnquiriesTable from '../components/EnquiriesTable';
-import EnquiriesPagination from '../components/EnquiriesPagination';
+import EnquiriesRow from '../components/EnquiriesRow';
+import EnquiriesToolbarActions from '../components/EnquiriesToolbarActions';
 import ChangeStatusModal from '../components/ChangeStatusModal';
 import AssignStaffModal from '../components/AssignStaffModal';
-import DeleteSelectedModal from '../components/DeleteSelectedModal';
-import type { Column } from '../../../shared/types/table';
 import type { Lead } from '../../../features/enquiries/types';
 import './EnquiriesPage.css';
 
 const EnquiriesPage = () => {
-  const d = useEnquiriesData();
+  const toast = useToast();
+  const crud = useLeadListData(toast.showToastMessage);
 
-  const dynamicColumns: Column[] = useMemo(() => {
-    const fieldNames = new Set<string>();
-    for (const lead of d.paginatedData) {
-      for (const field of lead.additionalFields) {
-        fieldNames.add(field.name);
-      }
+  const rowsPerPageRef = useRef(10);
+  const searchQueryRef = useRef('');
+
+  const filtersHook = useLeadFilters(crud.fetchLeads, searchQueryRef, rowsPerPageRef);
+  const { activeFiltersRef } = filtersHook;
+
+  const sortHook = useLeadSort(crud.fetchLeads, activeFiltersRef, searchQueryRef, rowsPerPageRef);
+
+  const pagination = useLeadPagination(crud.fetchLeads, activeFiltersRef, searchQueryRef, crud.total);
+
+  const leadSearch = useLeadSearch(crud.fetchLeads, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
+
+  useEffect(() => {
+    rowsPerPageRef.current = pagination.rowsPerPage;
+    searchQueryRef.current = leadSearch.searchQuery;
+  });
+
+  const selection = useTableSelection<string>();
+
+  const { sortDropdown, actionsDropdown, toggleSort, toggleActions } = useLeadToolbarDropdowns();
+
+  const addDrawer = useDrawer();
+  const detailDrawer = useDrawer<Lead>();
+
+  const actionMenu = useLeadActionMenu();
+
+  const deleteConfirm = useLeadDeleteConfirm(crud.deleteLead);
+  const rowActions = useLeadRowActions(actionMenu, detailDrawer, deleteConfirm);
+
+  const initialFetchDone = useRef(false);
+  useEffect(() => {
+    if (initialFetchDone.current) return;
+    initialFetchDone.current = true;
+    crud.fetchLeads(1, 10, '', {});
+  }, []);
+
+  useEffect(() => {
+    if (!detailDrawer.item) return;
+    const updated = crud.leads.find(l => l.id === detailDrawer.item!.id);
+    if (updated && updated.updatedAt !== detailDrawer.item!.updatedAt) {
+      detailDrawer.open(updated);
     }
-    return Array.from(fieldNames).map(name => ({ key: name, label: name }));
-  }, [d.paginatedData]);
+  }, [crud.leads, detailDrawer.item, detailDrawer.open]);
 
-  const columns = useMemo(() => [...COLUMNS, ...dynamicColumns], [dynamicColumns]);
+  const paginatedIds = useMemo(() => getLeadIds(crud.leads), [crud.leads]);
+
+  const clearFilters = useLeadClearFilters(filtersHook, leadSearch, pagination, sortHook, crud.fetchLeads, rowsPerPageRef);
+
+  const bulkActions = useLeadBulkActions({
+    selectedIds: selection.selectedIds,
+    onRefresh: crud.refreshCurrentPage,
+    onShowToast: toast.showToastMessage,
+    onClearSelection: selection.setSelectedIds,
+  });
+
+  const columns = useMemo(() => getLeadColumns(crud.leads), [crud.leads]);
 
   return (
     <PageContainer>
       <PageHeader title="Leads" description="Potential customers showing interest in a product or service." />
 
-      <EnquiriesToolbar
-        searchQuery={d.searchQuery}
-        onSearchChange={d.setSearchQuery}
-        showFilters={d.showFilters}
-        onToggleFilters={() => d.setShowFilters(!d.showFilters)}
-        sortConfig={d.sortConfig}
-        onSortDesc={d.handleSortDesc}
-        onSortAsc={d.handleSortAsc}
-        showSortDropdown={d.showSortDropdown}
-        sortDropdownClosing={d.sortDropdownClosing}
-        sortDropdownRef={d.sortDropdownRef}
-        onSetShowSortDropdown={d.setShowSortDropdown}
-        onCloseSortDropdown={d.closeSortDropdown}
-        showActionsDropdown={d.showActionsDropdown}
-        actionsDropdownClosing={d.actionsDropdownClosing}
-        actionsDropdownRef={d.actionsDropdownRef}
-        onSetShowActionsDropdown={d.setShowActionsDropdown}
-        onCloseActionsDropdown={d.closeActionsDropdown}
-        onAddLead={() => d.setIsDrawerOpen(true)}
-        selectedCount={d.selectedIds.length}
-        onExportSelected={d.handleExportSelected}
-        onChangeStatus={d.handleChangeStatusClick}
-        onAssignStaff={d.handleAssignStaffClick}
-        onSendFollowUp={d.handleSendFollowUp}
-        onDuplicateLead={d.handleDuplicateLeadAction}
-        onDeleteSelected={d.handleDeleteSelectedClick}
-      />
+      <div className="table-container">
+        <TableNav
+          searchQuery={leadSearch.searchQuery}
+          onSearchChange={leadSearch.setSearchQuery}
+          searchPlaceholder="Search enquiries..."
+          rowsPerPage={pagination.rowsPerPage}
+          onRowsPerPageChange={pagination.handleRowsPerPageChange}
+        >
+          <EnquiriesToolbarActions
+            showFilters={filtersHook.showFilters}
+            onToggleFilters={() => filtersHook.setShowFilters(!filtersHook.showFilters)}
+            sortConfig={sortHook.sortConfig}
+            onSortDesc={sortHook.handleSortDesc}
+            onSortAsc={sortHook.handleSortAsc}
+            sortDropdown={sortDropdown}
+            actionsDropdown={actionsDropdown}
+            onToggleSort={toggleSort}
+            onToggleActions={toggleActions}
+            selectedCount={selection.selectedIds.length}
+            bulkActions={{
+              onExportSelected: bulkActions.handleExportSelected,
+              onChangeStatus: bulkActions.handleChangeStatusClick,
+              onAssignStaff: bulkActions.handleAssignStaffClick,
+              onSendFollowUp: bulkActions.handleSendFollowUp,
+              onDuplicateLead: bulkActions.handleDuplicateLeadAction,
+              onDeleteSelected: bulkActions.handleDeleteSelectedClick,
+            }}
+            onAddLead={addDrawer.open}
+          />
+        </TableNav>
 
-      {d.showFilters && (
-        <EnquiriesFilters
-          filters={d.filters}
-          onFilterChange={d.setFilters}
-          onApplyFilters={d.handleApplyFilters}
-          onClearFilters={d.clearFilters}
-          onClose={() => d.setShowFilters(false)}
+        {filtersHook.showFilters && (
+          <EnquiriesFilters
+            filters={filtersHook.filters}
+            onFilterChange={filtersHook.setFilters}
+            onApplyFilters={filtersHook.handleApplyFilters}
+            onClearFilters={clearFilters}
+          />
+        )}
+
+        <Table wrapperClassName="table-scroll" className="enquiries-table">
+          <THead>
+            <TRow>
+              {columns.map(col => (
+                <TCell
+                  key={col.key}
+                  variant="th"
+                  className={col.sortable ? 'sortable' : ''}
+                  onClick={col.sortable ? () => sortHook.handleSort(col.key) : undefined}
+                >
+                  {col.key === 'checkbox' ? (
+                    <input
+                      type="checkbox"
+                      checked={crud.leads.length > 0 && crud.leads.every(row => selection.selectedIds.includes(row.leadId))}
+                      onChange={(e) => selection.handleSelectAll(paginatedIds, e.target.checked)}
+                    />
+                  ) : (
+                    <>
+                      {col.label}
+                      {col.sortable && sortHook.sortConfig.key === col.key && (
+                        sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                      )}
+                    </>
+                  )}
+                </TCell>
+              ))}
+            </TRow>
+          </THead>
+          <TBody>
+            {crud.leads.length === 0 ? (
+              <EmptyState colSpan={columns.length} message={LABEL_NO_DATA} />
+            ) : (
+              crud.leads.map(lead => (
+                <EnquiriesRow
+                  key={lead.leadId}
+                  lead={lead}
+                  columns={columns}
+                  isSelected={selection.selectedIds.includes(lead.leadId)}
+                  onSelectRow={selection.handleSelectRow}
+                  actionMenu={{
+                    isOpen: actionMenu.openId === lead.leadId,
+                    buttonRect: actionMenu.openId === lead.leadId ? actionMenu.buttonRect : null,
+                    onOpen: actionMenu.open,
+                    onClose: actionMenu.close,
+                  }}
+                  onViewLead={detailDrawer.open}
+                  onDeleteLead={rowActions.handleDeleteFromRow}
+                />
+              ))
+            )}
+          </TBody>
+        </Table>
+
+        {crud.isLoading && <div className="table-loading">Loading...</div>}
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={crud.totalPages}
+          totalItems={pagination.totalItems}
+          rowsPerPage={pagination.rowsPerPage}
+          onPageChange={pagination.handleSetCurrentPage}
         />
-      )}
+      </div>
 
-      <EnquiriesTable
-        data={d.paginatedData}
-        columns={columns}
-        sortConfig={d.sortConfig}
-        onSort={d.handleSort}
-        paginatedIds={d.paginatedIds}
-        selectedIds={d.selectedIds}
-        onSelectAll={d.handleSelectAll}
-        onSelectRow={d.handleSelectRow}
-        actionMenuOpen={d.actionMenuOpen}
-        actionMenuButtonRect={d.actionMenuButtonRect}
-        onSetActionMenuOpen={d.setActionMenuOpen}
-        onSetActionMenuButtonRect={d.setActionMenuButtonRect}
-        onViewLead={d.setSelectedLead}
-        onEditLead={d.setSelectedLead}
-        onDeleteLead={d.handleDeleteClick}
-      />
-
-      {d.isLoading && <div className="table-loading">Loading...</div>}
-      <EnquiriesPagination
-        currentPage={d.currentPage}
-        totalPages={d.totalPages}
-        startIndex={d.startIndex}
-        rowsPerPage={d.rowsPerPage}
-        totalItems={d.totalItems}
-        onPageChange={d.setCurrentPage}
-        onRowsPerPageChange={d.handleRowsPerPageChange}
-      />
-
-      <AddLeadDrawer isOpen={d.isDrawerOpen} onClose={() => d.setIsDrawerOpen(false)} onSaved={(action) => { d.refreshCurrentPage(); d.showToastMessage(action === 'created' ? 'Lead created successfully' : 'Lead updated successfully', 'success'); }} />
-      <LeadDetailDrawer lead={d.selectedLead} isOpen={!!d.selectedLead} onClose={() => d.setSelectedLead(null)} onLeadUpdated={() => d.refreshCurrentPage()} onDeleteLead={(lead: Lead) => { d.setSelectedLead(null); d.handleDeleteClick(lead); }} />
-      <AdminDeleteModal isOpen={!!d.deleteTargetLead} itemName={d.deleteTargetLead?.name} itemType="lead"
-        onConfirm={d.handleConfirmDelete} onClose={d.handleCloseDelete} />
-      <Toast message={d.toastMessage} type={d.toastType} isVisible={d.showToast} onClose={() => d.setShowToast(false)} />
+      <AddLeadDrawer isOpen={addDrawer.isOpen} onClose={addDrawer.close} onSaved={crud.handleLeadSaved} />
+      <LeadDetailDrawer lead={detailDrawer.item} isOpen={detailDrawer.isOpen} onClose={detailDrawer.close} onLeadUpdated={crud.refreshCurrentPage} onDeleteLead={rowActions.handleDeleteFromDrawer} />
+      <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.name} itemType="lead"
+        onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
+      <Toast message={toast.toastMessage} type={toast.toastType} isVisible={toast.showToast} onClose={() => toast.setShowToast(false)} />
 
       <ChangeStatusModal
-        isOpen={d.showChangeStatusModal}
-        selectedCount={d.selectedIds.length}
-        isProcessing={d.isProcessingSelected}
-        onConfirm={d.handleConfirmChangeStatus}
-        onClose={() => d.setShowChangeStatusModal(false)}
+        isOpen={bulkActions.showChangeStatusModal}
+        selectedCount={selection.selectedIds.length}
+        isProcessing={bulkActions.isProcessingSelected}
+        onConfirm={bulkActions.handleConfirmChangeStatus}
+        onClose={() => bulkActions.setShowChangeStatusModal(false)}
       />
       <AssignStaffModal
-        isOpen={d.showAssignStaffModal}
-        selectedCount={d.selectedIds.length}
-        isProcessing={d.isProcessingSelected}
-        onConfirm={d.handleConfirmAssignStaff}
-        onClose={() => d.setShowAssignStaffModal(false)}
+        isOpen={bulkActions.showAssignStaffModal}
+        selectedCount={selection.selectedIds.length}
+        isProcessing={bulkActions.isProcessingSelected}
+        onConfirm={bulkActions.handleConfirmAssignStaff}
+        onClose={() => bulkActions.setShowAssignStaffModal(false)}
       />
-      <DeleteSelectedModal
-        isOpen={d.showDeleteSelectedModal}
-        selectedCount={d.selectedIds.length}
-        isProcessing={d.isProcessingSelected}
-        onConfirm={d.handleConfirmDeleteSelected}
-        onClose={() => d.setShowDeleteSelectedModal(false)}
+      <AdminConfirmationModal
+        isOpen={bulkActions.showDeleteSelectedModal}
+        title="Delete Selected Leads"
+        message={`Are you sure you want to delete ${selection.selectedIds.length} selected lead(s)? This action cannot be undone.`}
+        confirmText="Delete Selected"
+        confirmButtonVariant="danger"
+        isLoading={bulkActions.isProcessingSelected}
+        onConfirm={bulkActions.handleConfirmDeleteSelected}
+        onCancel={() => bulkActions.setShowDeleteSelectedModal(false)}
       />
     </PageContainer>
   );

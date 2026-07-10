@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { taskService } from '../../task/shared/services/taskService';
-import type { LeadTaskItem, LeadTaskFormData } from '../types/task.types';
+import type { LeadTaskItem, LeadTaskFormData } from '../types';
+import { ERROR_MESSAGES } from '../constants/messages';
 
 export function useLeadTasks(leadId: number | undefined, isOpen: boolean, activeTab: string) {
   const [tasks, setTasks] = useState<LeadTaskItem[]>([]);
@@ -20,10 +21,10 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
         setTasks(Array.isArray(items) ? items : []);
 
       } else {
-        setError(response.message || 'Failed to fetch tasks');
+        setError(response.message || ERROR_MESSAGES.FETCH_TASKS);
       }
     } catch {
-      setError('Failed to load tasks');
+      setError(ERROR_MESSAGES.FETCH_TASKS);
     } finally {
       setIsLoading(false);
     }
@@ -47,11 +48,11 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
         await fetchTasks();
         return true;
       } else {
-        setError(response.message || 'Failed to add task');
+        setError(response.message || ERROR_MESSAGES.ADD_TASK);
         return false;
       }
     } catch {
-      setError('Failed to add task');
+      setError(ERROR_MESSAGES.ADD_TASK);
       return false;
     }
   }, [leadId, fetchTasks]);
@@ -64,11 +65,11 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
         await fetchTasks();
         return true;
       } else {
-        setError(response.message || 'Failed to update task');
+        setError(response.message || ERROR_MESSAGES.UPDATE_TASK);
         return false;
       }
     } catch {
-      setError('Failed to update task');
+      setError(ERROR_MESSAGES.UPDATE_TASK);
       return false;
     }
   }, [fetchTasks]);
@@ -80,11 +81,11 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
         await fetchTasks();
         return true;
       } else {
-        setError(response.message || 'Failed to delete task');
+        setError(response.message || ERROR_MESSAGES.DELETE_TASK);
         return false;
       }
     } catch {
-      setError('Failed to delete task');
+      setError(ERROR_MESSAGES.DELETE_TASK);
       return false;
     }
   }, [fetchTasks]);

@@ -36,13 +36,6 @@ export function useLeadFilters(
     onFetch(1, rowsPerPageRef.current, searchQueryRef.current, params);
   }, [filters, onFetch, searchQueryRef, rowsPerPageRef]);
 
-  const clearFilters = useCallback(() => {
-    setFilters({ ...INITIAL_FILTERS, additionalFields: {} });
-    setShowFilters(false);
-    activeFiltersRef.current = {};
-    onFetch(1, rowsPerPageRef.current, '', {});
-  }, [onFetch, searchQueryRef, rowsPerPageRef]);
-
   return {
     filters,
     showFilters,
@@ -50,6 +43,5 @@ export function useLeadFilters(
     setFilters,
     setShowFilters,
     handleApplyFilters,
-    clearFilters,
   };
 }

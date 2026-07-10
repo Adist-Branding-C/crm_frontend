@@ -12,11 +12,11 @@ import { useLeadTasks } from '../../../features/enquiries/hooks/useLeadTasks';
 import { useLeadTaskDropdowns } from '../../../features/enquiries/hooks/useLeadTaskDropdowns';
 import { dealService } from '../../../features/deal/services/deal.service';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../../utils/dateUtils';
+import { badgeClass } from '../../utils/badgeUtils';
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../../features/enquiries/constants/messages';
 import type { LeadDetailDrawerProps, DealFormData, ActivityLogItem } from '../../types/drawers';
-import type { Remark } from '../../../features/enquiries/types/remark.types';
-import type { LeadTaskItem } from '../../../features/enquiries/types/task.types';
 import type { DealItem } from '../../../features/deal/types';
-import type { Lead } from '../../../features/enquiries/types';
+import type { Lead, Remark, LeadTaskItem } from '../../../features/enquiries/types';
 
 const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onDeleteLead }: LeadDetailDrawerProps) => {
   const [activeTab, setActiveTab] = useState<'activity' | 'note' | 'task' | 'deal'>('activity');
@@ -97,66 +97,48 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
     staffError,
   } = useLeadTaskDropdowns(showTaskDrawer);
 
-  useEffect(() => {
-    if (!isOpen || !lead?.id) return;
-    const fetchDeals = async () => {
-      setDealsLoading(true);
-      setDealsError('');
-      try {
-        const res = await dealService.getAllDeals({ pageNumber: 1, limit: 100 });
-        if (res.status) {
-          const data = res.data as { items?: DealItem[] };
-          const items = data?.items ?? [];
-          const filtered = items.filter(
-            (d) => String(d.leadId) === String(lead.id)
-          );
-          setLeadDeals(filtered);
-        } else {
-          setDealsError(res.message || 'Failed to fetch deals');
-        }
-      } catch {
-        setDealsError('Failed to load deals');
-        setLeadDeals([]);
-      } finally {
-        setDealsLoading(false);
-      }
-    };
-    fetchDeals();
-  }, [isOpen, lead?.id]);
-
-  const refreshDeals = async () => {
-    if (!lead?.id) return;
+  const refreshDeals = useCallback(async () => {
+    if (!lead?.leadId) return;
     setDealsLoading(true);
+    setDealsError('');
     try {
       const res = await dealService.getAllDeals({ pageNumber: 1, limit: 100 });
       if (res.status) {
         const data = res.data as { items?: DealItem[] };
         const items = data?.items ?? [];
         const filtered = items.filter(
-          (d) => String(d.leadId) === String(lead.id)
+          (d) => String(d.leadId) === String(lead.leadId)
         );
         setLeadDeals(filtered);
+      } else {
+        setDealsError(res.message || ERROR_MESSAGES.FETCH_DEALS);
       }
     } catch {
+      setDealsError(ERROR_MESSAGES.FETCH_DEALS);
       setLeadDeals([]);
     } finally {
       setDealsLoading(false);
     }
-  };
+  }, [lead?.leadId]);
+
+  useEffect(() => {
+    if (!isOpen || !lead?.id) return;
+    refreshDeals();
+  }, [isOpen, lead?.id, refreshDeals]);
 
   const handleDealSave = async (formData: any) => {
     setIsAddingDeal(true);
     try {
       const res = await dealService.createDeal(formData);
       if (res.status) {
-        showToastMessage('Deal created successfully', 'success');
+        showToastMessage(SUCCESS_MESSAGES.DEAL_CREATED, 'success');
         setShowAddDealDrawer(false);
         await refreshDeals();
       } else {
-        showToastMessage(res.message || 'Failed to create deal', 'error');
+        showToastMessage(res.message || ERROR_MESSAGES.CREATE_DEAL, 'error');
       }
     } catch {
-      showToastMessage('Failed to create deal', 'error');
+      showToastMessage(ERROR_MESSAGES.CREATE_DEAL, 'error');
     } finally {
       setIsAddingDeal(false);
     }
@@ -193,9 +175,9 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
   const handleAddTask = async (formData: any) => {
     const success = await addTask(formData);
     if (success) {
-      showToastMessage('Task created successfully', 'success');
+      showToastMessage(SUCCESS_MESSAGES.TASK_CREATED, 'success');
     } else {
-      showToastMessage('Failed to create task', 'error');
+      showToastMessage(ERROR_MESSAGES.ADD_TASK, 'error');
     }
     return success;
   };
@@ -205,9 +187,9 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
     const success = await updateTask(editTask.id, formData);
     if (success) {
       setEditTask(null);
-      showToastMessage('Task updated successfully', 'success');
+      showToastMessage(SUCCESS_MESSAGES.TASK_UPDATED, 'success');
     } else {
-      showToastMessage('Failed to update task', 'error');
+      showToastMessage(ERROR_MESSAGES.UPDATE_TASK, 'error');
     }
     return success;
   };
@@ -223,12 +205,12 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
     try {
       const success = await deleteTask(deleteTaskTarget.id);
       if (success) {
-        showToastMessage('Task deleted successfully', 'success');
+        showToastMessage(SUCCESS_MESSAGES.TASK_DELETED, 'success');
       } else {
-        showToastMessage('Failed to delete task', 'error');
+        showToastMessage(ERROR_MESSAGES.DELETE_TASK, 'error');
       }
     } catch {
-      showToastMessage('Failed to delete task', 'error');
+      showToastMessage(ERROR_MESSAGES.DELETE_TASK, 'error');
     } finally {
       setShowDeleteTaskModal(false);
       setDeleteTaskTarget(null);
@@ -238,7 +220,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
 
   const handleEditLeadSaved = () => {
     setShowEditDrawer(false);
-    showToastMessage('Lead updated successfully', 'success');
+    showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
     onLeadUpdated?.();
   };
 
@@ -254,9 +236,9 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
     try {
       await addRemark(trimmed);
       setNewRemarkText('');
-      showToastMessage('Remark added successfully.', 'success');
+      showToastMessage(SUCCESS_MESSAGES.REMARK_ADDED, 'success');
     } catch {
-      showToastMessage('Failed to add remark.', 'error');
+      showToastMessage(ERROR_MESSAGES.ADD_REMARK, 'error');
     }
   };
 
@@ -286,9 +268,9 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
       await updateRemark(editingRemarkId, trimmed);
       setEditingRemarkId(null);
       setEditingRemarkText('');
-      showToastMessage('Remark updated successfully.', 'success');
+      showToastMessage(SUCCESS_MESSAGES.REMARK_UPDATED, 'success');
     } catch {
-      showToastMessage('Failed to update remark.', 'error');
+      showToastMessage(ERROR_MESSAGES.UPDATE_REMARK, 'error');
     }
   };
 
@@ -303,15 +285,10 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
       await deleteRemark(remarkToDelete.id);
       setShowDeleteRemarkModal(false);
       setRemarkToDelete(null);
-      showToastMessage('Remark deleted successfully.', 'success');
+      showToastMessage(SUCCESS_MESSAGES.REMARK_DELETED, 'success');
     } catch {
-      showToastMessage('Failed to delete remark.', 'error');
+      showToastMessage(ERROR_MESSAGES.DELETE_REMARK, 'error');
     }
-  };
-
-  const getTypeBadgeClass = (type: string) => {
-    if (!type) return '';
-    return type.toLowerCase().replace(' ', '-');
   };
 
   return (
@@ -337,8 +314,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
                 </div>
                 <h2 className="leaddrawer-name">{lead.name}</h2>
                 <div className="leaddrawer-badges">
-                  <span className={`leaddrawer-badge ${getTypeBadgeClass(lead.type)}`}>{lead.type}</span>
-                  <span className={`leaddrawer-badge ${lead.status?.toLowerCase()}`}>{lead.status}</span>
+                  <span className={`leaddrawer-badge ${lead.type ? badgeClass(lead.type) : ''}`}>{lead.type}</span>
+                  <span className={`leaddrawer-badge ${lead.status ? badgeClass(lead.status) : ''}`}>{lead.status}</span>
                 </div>
               </div>
 
@@ -683,7 +660,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
                             </div>
                             {deal.amount != null && <span className="leaddrawer-deal-amount">₹{Number(deal.amount).toLocaleString()}</span>}
                           </div>
-                          <span className={`leaddrawer-deal-stage ${(deal.stage || deal.status || '').toLowerCase().replace(' ', '-')}`}>{deal.stage || deal.status || '-'}</span>
+                          <span className={`leaddrawer-deal-stage ${badgeClass(deal.stage || deal.status || '')}`}>{deal.stage || deal.status || '-'}</span>
                         </div>
                       ))}
                     </div>
@@ -725,7 +702,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onD
       <AddDealDrawer
         isOpen={showAddDealDrawer}
         onClose={() => setShowAddDealDrawer(false)}
-        deal={{ lead: lead?.name, leadId: String(lead?.id) } as DealFormData}
+        deal={{ lead: lead?.name, leadId: lead?.leadId ?? '' } as DealFormData}
         onSave={handleDealSave}
       />
     </div>

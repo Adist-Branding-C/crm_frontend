@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
-import * as yup from 'yup';
 import type { AddLeadDrawerProps, AddLeadFormValues } from '../../types/drawers';
 import type { LabelValuePair } from '../../types/common';
 import { staffService } from '../../../features/deal/services/staff.service';
@@ -18,12 +17,10 @@ import {
   getFieldKey,
   getInitialValues,
   buildAdditionalFieldsPayload,
-  getValidationSchema,
 } from '../../../features/enquiries/utils/additionalFields';
-import {
-  BASE_INITIAL_VALUES,
-  BASE_VALIDATION_SHAPE,
-} from '../../../features/enquiries/constants/addLead.constants';
+import { getAddLeadValidationSchema } from '../../../features/enquiries/validations/addLead.validation';
+import { BASE_INITIAL_VALUES } from '../../../features/enquiries/constants/addLead.constants';
+import { ERROR_MESSAGES } from '../../../features/enquiries/constants/messages';
 import DynamicAdditionalFields from './DynamicAdditionalFields';
 import './AddLeadDrawer.css';
 
@@ -94,7 +91,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
         setAdditionalFieldDefs(addFieldsData);
         hasLoadedRef.current = true;
       } catch {
-        setLoadError('Failed to load form options. Please try again.');
+        setLoadError(ERROR_MESSAGES.LOAD_FORM_OPTIONS);
       }
     };
 
@@ -119,44 +116,28 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
 
     const additionalFields = buildAdditionalFieldsPayload(trimmed, visibleFieldDefs);
 
+    const payload: CreateLeadPayload & UpdateLeadPayload = {
+      name: trimmed.name,
+      phone: trimmed.phone,
+      email: trimmed.email,
+      sourceId: trimmed.sourceId,
+    };
+    if (trimmed.agentId) payload.agentId = trimmed.agentId;
+    if (trimmed.purposeId) payload.purposeId = trimmed.purposeId;
+    if (trimmed.typeId) payload.typeId = trimmed.typeId;
+    if (trimmed.statusId) payload.statusId = trimmed.statusId;
+    if (trimmed.nextFollowUp) payload.nextFollowUp = trimmed.nextFollowUp;
+    if (trimmed.notes) payload.notes = trimmed.notes;
+    if (trimmed.location) payload.location = trimmed.location;
+    if (trimmed.address) payload.address = trimmed.address;
+    if (additionalFields.length > 0) {
+      payload.additionalFields = additionalFields;
+    }
+
     try {
       if (isEditing && lead) {
-        const payload: UpdateLeadPayload = {
-          name: trimmed.name,
-          phone: trimmed.phone,
-          email: trimmed.email,
-          sourceId: trimmed.sourceId,
-        };
-        if (trimmed.agentId) payload.agentId = trimmed.agentId;
-        if (trimmed.purposeId) payload.purposeId = trimmed.purposeId;
-        if (trimmed.typeId) payload.typeId = trimmed.typeId;
-        if (trimmed.statusId) payload.statusId = trimmed.statusId;
-        if (trimmed.nextFollowUp) payload.nextFollowUp = trimmed.nextFollowUp;
-        if (trimmed.notes) payload.notes = trimmed.notes;
-        if (trimmed.location) payload.location = trimmed.location;
-        if (trimmed.address) payload.address = trimmed.address;
-        if (additionalFields.length > 0) {
-          payload.additionalFields = additionalFields;
-        }
-        await leadDataService.updateLead(lead.id, payload);
+        await leadDataService.updateLead(lead.leadId, payload);
       } else {
-        const payload: CreateLeadPayload = {
-          name: trimmed.name,
-          phone: trimmed.phone,
-          email: trimmed.email,
-          sourceId: trimmed.sourceId,
-        };
-        if (trimmed.agentId) payload.agentId = trimmed.agentId;
-        if (trimmed.purposeId) payload.purposeId = trimmed.purposeId;
-        if (trimmed.typeId) payload.typeId = trimmed.typeId;
-        if (trimmed.statusId) payload.statusId = trimmed.statusId;
-        if (trimmed.nextFollowUp) payload.nextFollowUp = trimmed.nextFollowUp;
-        if (trimmed.notes) payload.notes = trimmed.notes;
-        if (trimmed.location) payload.location = trimmed.location;
-        if (trimmed.address) payload.address = trimmed.address;
-        if (additionalFields.length > 0) {
-          payload.additionalFields = additionalFields;
-        }
         await leadDataService.createLead(payload);
       }
       onSaved?.(isEditing ? 'updated' : 'created');
@@ -176,6 +157,11 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
       const match = options.find(o => o.label === label);
       return match ? match.value : '';
     };
+
+    // <input type="date"> only accepts YYYY-MM-DD; the API returns a full ISO
+    // datetime string, which the input silently rejects (renders blank).
+    const toDateInputValue = (value: string | null | undefined): string =>
+      value ? value.slice(0, 10) : '';
 
     const leadAddFields: Record<string, string | string[]> = {};
     for (const af of lead.additionalFields || []) {
@@ -200,8 +186,9 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
       typeId: findId(typeOptions, lead.type),
       statusId: findId(statusOptions, lead.status),
       sourceId: findId(sourceOptions, lead.source),
-      nextFollowUp: lead.nextFollowUp || '',
+      nextFollowUp: toDateInputValue(lead.nextFollowUp),
       location: lead.location || '',
+      address: lead.address || '',
       ...leadAddFields,
     };
   }, [lead, staffOptions, purposeOptions, typeOptions, statusOptions, sourceOptions, additionalFieldDefs]);
@@ -222,10 +209,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
       if (!f.connectWithLeadPurpose || !f.purposeId) return true;
       return f.purposeId === activePurposeId;
     });
-    return yup.object({
-      ...BASE_VALIDATION_SHAPE,
-      ...getValidationSchema(filtered),
-    });
+    return getAddLeadValidationSchema(filtered);
   }, [additionalFieldDefs, activePurposeId]);
 
   if (!isOpen) return null;
@@ -319,7 +303,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
                       {errors.email && touched.email && <div className="error-text">{errors.email}</div>}
                     </div>
                     <div className="form-group">
-                      <label>Assigned To</label>
+                      <label>Assigned To <span className="required">*</span></label>
                       <Field as="select" name="agentId" className={errors.agentId && touched.agentId ? 'error' : ''}>
                         <option value="">Select</option>
                         {staffOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -359,7 +343,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
                       <FormikError name="sourceId" component="div" className="error-text" />
                     </div>
                     <div className="form-group">
-                      <label>Location</label>
+                      <label>Location <span className="required">*</span></label>
                       <input
                         type="text"
                         name="location"
@@ -372,7 +356,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
                       {errors.location && touched.location && <div className="error-text">{errors.location}</div>}
                     </div>
                     <div className="form-group">
-                      <label>Address</label>
+                      <label>Address <span className="required">*</span></label>
                       <input
                         type="text"
                         name="address"
@@ -385,7 +369,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead }: AddLeadDrawerProps) =
                       {errors.address && touched.address && <div className="error-text">{errors.address}</div>}
                     </div>
                     <div className="form-group">
-                      <label>Next Follow Up</label>
+                      <label>Next Follow Up <span className="required">*</span></label>
                       <input
                         type="date"
                         name="nextFollowUp"

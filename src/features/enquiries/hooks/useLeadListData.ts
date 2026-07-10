@@ -1,16 +1,16 @@
 import { useState, useCallback, useRef } from 'react';
 import { leadDataService } from '../services/leadDataService';
 import { mapApiToUI } from '../utils/leadMapper';
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages';
 import type { Lead } from '../types';
-import type { UseLeadCrudReturn } from '../types/hook.types';
+import type { GetLeadsParams } from '../types/request';
+import type { UseLeadListDataReturn } from '../types/hook.types';
 
-export function useLeadCrud(onShowToast: (message: string, type: 'success' | 'error') => void): UseLeadCrudReturn {
+export function useLeadListData(onShowToast: (message: string, type: 'success' | 'error') => void): UseLeadListDataReturn {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [deleteTargetLead, setDeleteTargetLead] = useState<Lead | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const requestSeqRef = useRef(0);
   const currentFetchParams = useRef({ page: 1, limit: 10, search: '', extraParams: {} as Record<string, string | number> });
 
@@ -19,11 +19,11 @@ export function useLeadCrud(onShowToast: (message: string, type: 'success' | 'er
     currentFetchParams.current = { page, limit, search, extraParams };
     setIsLoading(true);
     try {
-      const params: Record<string, string | number> = { pageNumber: page, limit, sort_by: 'createdAt', sort_order: 'DESC', ...extraParams };
+      const params: GetLeadsParams = { pageNumber: page, limit, sort_by: 'createdAt', sort_order: 'DESC', ...extraParams };
       if (search) params.search = search;
       const response = await leadDataService.getLeads(params);
       if (requestSeq !== requestSeqRef.current) return;
-      if (response.status) {
+      if (response.status && response.data) {
         setLeads(response.data.items.map(mapApiToUI));
         setTotal(response.data.pagination?.total ?? 0);
         setTotalPages(response.data.pagination?.totalPages ?? 1);
@@ -47,42 +47,31 @@ export function useLeadCrud(onShowToast: (message: string, type: 'success' | 'er
     fetchLeads(page, limit, search, extraParams);
   }, [fetchLeads]);
 
-  const handleDeleteClick = useCallback((lead: Lead) => {
-    setDeleteTargetLead(lead);
-  }, []);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deleteTargetLead || isDeleting) return;
-    setIsDeleting(true);
+  const deleteLead = useCallback(async (leadId: string) => {
     try {
-      await leadDataService.deleteLead(deleteTargetLead.id);
-      onShowToast('Lead deleted successfully', 'success');
-      setDeleteTargetLead(null);
+      await leadDataService.deleteLead(leadId);
+      onShowToast(SUCCESS_MESSAGES.LEAD_DELETED, 'success');
       refreshCurrentPage();
+      return true;
     } catch {
-      onShowToast('Failed to delete lead', 'error');
-      setDeleteTargetLead(null);
-    } finally {
-      setIsDeleting(false);
+      onShowToast(ERROR_MESSAGES.DELETE_LEAD, 'error');
+      return false;
     }
-  }, [deleteTargetLead, isDeleting, refreshCurrentPage, onShowToast]);
+  }, [onShowToast, refreshCurrentPage]);
 
-  const handleCloseDelete = useCallback(() => {
-    if (isDeleting) return;
-    setDeleteTargetLead(null);
-  }, [isDeleting]);
+  const handleLeadSaved = useCallback((action: 'created' | 'updated') => {
+    refreshCurrentPage();
+    onShowToast(action === 'created' ? SUCCESS_MESSAGES.LEAD_CREATED : SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
+  }, [refreshCurrentPage, onShowToast]);
 
   return {
     leads,
     total,
     totalPages,
     isLoading,
-    deleteTargetLead,
-    isDeleting,
     fetchLeads,
-    handleDeleteClick,
-    handleConfirmDelete,
-    handleCloseDelete,
     refreshCurrentPage,
+    deleteLead,
+    handleLeadSaved,
   };
 }

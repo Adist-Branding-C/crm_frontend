@@ -11,33 +11,24 @@ export function useLeadDropdownState() {
   }, [isOpen]);
 
   const close = useCallback(() => {
-    if (isOpenRef.current) {
-      setIsClosing(true);
-      setTimeout(() => {
-        setIsOpen(false);
-        setIsClosing(false);
-      }, 150);
-    }
+    if (!isOpenRef.current) return;
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 150);
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node) && isOpenRef.current) {
-        setIsClosing(true);
-        setTimeout(() => {
-          setIsOpen(false);
-          setIsClosing(false);
-        }, 150);
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        close();
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpenRef.current) {
-        setIsClosing(true);
-        setTimeout(() => {
-          setIsOpen(false);
-          setIsClosing(false);
-        }, 150);
+      if (event.key === 'Escape') {
+        close();
       }
     };
 
@@ -47,7 +38,7 @@ export function useLeadDropdownState() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [close]);
 
   return { isOpen, isClosing, ref, close, setIsOpen };
 }
