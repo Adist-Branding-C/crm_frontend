@@ -21,9 +21,10 @@ class LeadPurposeService {
     });
   }
 
-  async getLeadPurposes(page = 1, limit = 10, search?: string): Promise<LeadPurposeListResponse> {
+  async getLeadPurposes(page = 1, limit = 10, search?: string, sortOrder?: 'ASC' | 'DESC'): Promise<LeadPurposeListResponse> {
     const params: Record<string, string | number> = { pageNumber: page, limit };
     if (search) params.search = search;
+    if (sortOrder) params.sort_order = sortOrder;
     const response = await axiosInstance.get<LeadPurposeListResponse>(LEAD_PURPOSE_API_ENDPOINTS.PURPOSES, { params });
     return ServiceResponseUtil.normalize({
       status: response.data.status,

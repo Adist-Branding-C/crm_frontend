@@ -1,6 +1,14 @@
 import type { FieldErrorMap, FieldErrorFallback } from '../../../../shared/types/formFieldError.types';
 
 /**
+ * "Added By" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_ADDED_BY = 'Added By';
+
+/**
  * "Field" column header for the lead additional-fields table.
  *
  * Used by:

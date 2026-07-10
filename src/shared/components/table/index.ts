@@ -11,4 +11,5 @@ export { default as TRow } from './TRow';
 export { default as TCell } from './TCell';
 export { default as RowActionsMenu } from './RowActionsMenu';
 export { default as TableNav } from './TableNav';
+export { default as SortToggleButton } from './SortToggleButton';
 export type { Column, DataTableProps } from './types';

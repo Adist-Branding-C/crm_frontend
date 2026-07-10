@@ -8,7 +8,7 @@ import { useLeadSourceCrud } from '../hooks/useLeadSourceCrud';
 import { useLeadSourceDeleteConfirm } from '../hooks/useLeadSourceDeleteConfirm';
 import { useLeadSourceFormSubmit } from '../hooks/useLeadSourceFormSubmit';
 import { useLeadSourceTableActions } from '../hooks/useLeadSourceTableActions';
-import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav } from '../../../../shared/components/table';
+import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, SortToggleButton } from '../../../../shared/components/table';
 import AdminPagination from '../../../../shared/components/crud/AdminPagination';
 import DrawerShell from '../../../../shared/components/crud/DrawerShell';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -31,8 +31,9 @@ import type { LeadSourceItem, LeadSourceFormData } from '../types/interface';
 
 const LeadSourcePage = () => {
   const table = useTableData<LeadSourceItem>({
+    initialSortOrder: 'DESC',
     fetchFn: async (params) => {
-      const response = await leadSourceService.getLeadSources(params.pageNumber, params.limit, params.search);
+      const response = await leadSourceService.getLeadSources(params.pageNumber, params.limit, params.search, params.sortOrder);
       return {
         items: (response.data?.items ?? []).map(mapApiToUI),
         total: response.data?.pagination?.total ?? 0,
@@ -65,6 +66,7 @@ const LeadSourcePage = () => {
         <div className="table-container">
           <TableNav searchQuery={search.searchValue} onSearchChange={search.handleSearchChange}
             rowsPerPage={table.limit} onRowsPerPageChange={actions.handleRowsPerPageChange}>
+            <SortToggleButton sortOrder={table.sortOrder} onToggle={table.toggleSortOrder} />
             <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
               <Plus size={16} /> {ADD_LEAD_SOURCE_LABEL}
             </button>
@@ -101,7 +103,7 @@ const LeadSourcePage = () => {
           <AdminPagination currentPage={table.pageNumber} totalPages={table.totalPages}
             startIndex={table.startIndex} rowsPerPage={table.limit} totalItems={table.totalCount}
             onPageChange={table.setPageNumber} onRowsPerPageChange={actions.handleRowsPerPageChange}
-            prevNextOnly />
+            prevNextOnly alwaysShowNav />
         </div>
       </div>
       <DrawerShell

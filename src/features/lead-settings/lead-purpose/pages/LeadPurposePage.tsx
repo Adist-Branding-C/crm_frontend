@@ -8,7 +8,7 @@ import { useLeadPurposeCrud } from '../hooks/useLeadPurposeCrud';
 import { useLeadPurposeDeleteConfirm } from '../hooks/useLeadPurposeDeleteConfirm';
 import { useLeadPurposeFormSubmit } from '../hooks/useLeadPurposeFormSubmit';
 import { useLeadPurposeTableActions } from '../hooks/useLeadPurposeTableActions';
-import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav } from '../../../../shared/components/table';
+import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, SortToggleButton } from '../../../../shared/components/table';
 import AdminPagination from '../../../../shared/components/crud/AdminPagination';
 import DrawerShell from '../../../../shared/components/crud/DrawerShell';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -16,7 +16,12 @@ import PageHeader from '../../../../shared/components/layout/PageHeader';
 import { LABEL_SL_NO, LABEL_ACTIONS, LABEL_NO_DATA } from '../../../../shared/constants/labels';
 import { ACTION_EDIT, ACTION_ADD } from '../../../../shared/constants/actionLabels';
 import './LeadPurposePage.css';
-import { EMPTY_LEAD_PURPOSE_FORM_DATA, ADD_LEAD_PURPOSE_LABEL, LEAD_PURPOSE_COLUMN_TITLE } from '../constants';
+import {
+  EMPTY_LEAD_PURPOSE_FORM_DATA,
+  ADD_LEAD_PURPOSE_LABEL,
+  LEAD_PURPOSE_COLUMN_ADDED_BY,
+  LEAD_PURPOSE_COLUMN_TITLE,
+} from '../constants';
 import { leadPurposeService } from '../services';
 import { mapApiToUI, mapItemToFormData } from '../mappers/leadPurpose.mapper';
 import { leadPurposeValidationSchema } from '../validations/leadPurpose.validation';
@@ -26,8 +31,9 @@ import type { LeadPurposeItem, LeadPurposeFormData } from '../types/interface';
 
 const LeadPurposePage = () => {
   const table = useTableData<LeadPurposeItem>({
+    initialSortOrder: 'DESC',
     fetchFn: async (params) => {
-      const response = await leadPurposeService.getLeadPurposes(params.pageNumber, params.limit, params.search);
+      const response = await leadPurposeService.getLeadPurposes(params.pageNumber, params.limit, params.search, params.sortOrder);
       return {
         items: (response.data?.items ?? []).map(mapApiToUI),
         total: response.data?.pagination?.total ?? 0,
@@ -60,6 +66,7 @@ const LeadPurposePage = () => {
         <div className="table-container">
           <TableNav searchQuery={search.searchValue} onSearchChange={search.handleSearchChange}
             rowsPerPage={table.limit} onRowsPerPageChange={actions.handleRowsPerPageChange}>
+            <SortToggleButton sortOrder={table.sortOrder} onToggle={table.toggleSortOrder} />
             <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
               <Plus size={16} /> {ADD_LEAD_PURPOSE_LABEL}
             </button>
@@ -69,13 +76,14 @@ const LeadPurposePage = () => {
             <THead>
               <TRow>
                 <TCell variant="th">{LABEL_SL_NO}</TCell>
+                <TCell variant="th">{LEAD_PURPOSE_COLUMN_ADDED_BY}</TCell>
                 <TCell variant="th">{LEAD_PURPOSE_COLUMN_TITLE}</TCell>
                 <TCell variant="th">{LABEL_ACTIONS}</TCell>
               </TRow>
             </THead>
             <TBody>
               {table.list.length === 0 ? (
-                <EmptyState colSpan={3} message={LABEL_NO_DATA} />
+                <EmptyState colSpan={4} message={LABEL_NO_DATA} />
               ) : (
                 table.list.map((item, idx) => (
                   <LeadPurposeRow
@@ -95,7 +103,7 @@ const LeadPurposePage = () => {
           <AdminPagination currentPage={table.pageNumber} totalPages={table.totalPages}
             startIndex={table.startIndex} rowsPerPage={table.limit} totalItems={table.totalCount}
             onPageChange={table.setPageNumber} onRowsPerPageChange={actions.handleRowsPerPageChange}
-            prevNextOnly />
+            prevNextOnly alwaysShowNav />
         </div>
       </div>
       <DrawerShell

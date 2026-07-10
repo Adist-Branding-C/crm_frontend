@@ -9,7 +9,7 @@ import { useLeadAdditionalCrud } from '../hooks/useLeadAdditionalCrud';
 import { useLeadAdditionalDeleteConfirm } from '../hooks/useLeadAdditionalDeleteConfirm';
 import { useLeadAdditionalFormSubmit } from '../hooks/useLeadAdditionalFormSubmit';
 import { useLeadAdditionalTableActions } from '../hooks/useLeadAdditionalTableActions';
-import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav } from '../../../../shared/components/table';
+import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, SortToggleButton } from '../../../../shared/components/table';
 import AdminPagination from '../../../../shared/components/crud/AdminPagination';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import AdditionalFieldForm from '../components/AdditionalFieldForm';
@@ -21,6 +21,7 @@ import { additionalFieldValidationSchema } from '../validations/additionalField.
 import { EMPTY_ADDITIONAL_FIELD_FORM_DATA } from '../constants/form.constants';
 import { LABEL_SL_NO, LABEL_ACTIONS, LABEL_NO_DATA } from '../../../../shared/constants/labels';
 import {
+  LEAD_ADDITIONAL_COLUMN_ADDED_BY,
   LEAD_ADDITIONAL_COLUMN_FIELD,
   LEAD_ADDITIONAL_COLUMN_TYPE,
   LEAD_ADDITIONAL_COLUMN_VALUES,
@@ -34,8 +35,9 @@ import type { LeadAdditionalItem, AdditionalFieldFormData } from '../types/inter
 
 const LeadAdditionalPage = () => {
   const table = useTableData<LeadAdditionalItem>({
+    initialSortOrder: 'DESC',
     fetchFn: async (params) => {
-      const response = await leadAdditionalService.getAll(params.pageNumber, params.limit, params.search);
+      const response = await leadAdditionalService.getAll(params.pageNumber, params.limit, params.search, params.sortOrder);
       return {
         items: (response.data?.items ?? []).map(mapApiToUI),
         total: response.data?.pagination?.total ?? 0,
@@ -93,13 +95,16 @@ const LeadAdditionalPage = () => {
               onSearchChange={search.handleSearchChange}
               rowsPerPage={table.limit}
               onRowsPerPageChange={actions.handleRowsPerPageChange}
-            />
+            >
+              <SortToggleButton sortOrder={table.sortOrder} onToggle={table.toggleSortOrder} />
+            </TableNav>
 
             <div className="table-container">
               <Table wrapperClassName="table-scroll" className="data-table">
                 <THead>
                   <TRow>
                     <TCell variant="th">{LABEL_SL_NO}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_ADDED_BY}</TCell>
                     <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_FIELD}</TCell>
                     <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_TYPE}</TCell>
                     <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_VALUES}</TCell>
@@ -112,7 +117,7 @@ const LeadAdditionalPage = () => {
                 </THead>
                 <TBody>
                   {table.list.length === 0 ? (
-                    <EmptyState colSpan={9} message={LABEL_NO_DATA} />
+                    <EmptyState colSpan={10} message={LABEL_NO_DATA} />
                   ) : (
                     table.list.map((item, idx) => (
                       <AdditionalFieldRow
@@ -138,6 +143,7 @@ const LeadAdditionalPage = () => {
               onPageChange={table.setPageNumber}
               onRowsPerPageChange={actions.handleRowsPerPageChange}
               prevNextOnly
+              alwaysShowNav
             />
           </div>
         </div>

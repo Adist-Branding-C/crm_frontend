@@ -1,10 +1,11 @@
+import { formatAddedBy } from '../../../../shared/utils/addedBy.util';
 import type { LeadSourceItem, LeadSourceApiItem, LeadSourceFormData } from '../types/interface';
 
 export function mapApiToUI(item: LeadSourceApiItem): LeadSourceItem {
   return {
     id: item.sourceId,
     source: item.source,
-    addedBy: item.createdBy,
+    addedBy: formatAddedBy(item.createdByName, item.createdByType),
   };
 }
 

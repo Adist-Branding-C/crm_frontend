@@ -43,6 +43,7 @@ export interface AdminPaginationProps {
   onRowsPerPageChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   showRowsSelector?: boolean;
   prevNextOnly?: boolean;
+  alwaysShowNav?: boolean;
 }
 
 export interface AdminDeleteModalProps {

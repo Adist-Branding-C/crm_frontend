@@ -4,6 +4,7 @@ import type { LeadPurposeRowProps } from '../types/lead-purpose-row.types';
 const LeadPurposeRow = ({ item, index, isMenuOpen, onToggleMenu, onEdit, onDelete }: LeadPurposeRowProps) => (
   <TRow>
     <TCell>{index + 1}</TCell>
+    <TCell>{item.addedBy}</TCell>
     <TCell>{item.title}</TCell>
     <TCell>
       <RowActionsMenu

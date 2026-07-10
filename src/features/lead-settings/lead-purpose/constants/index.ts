@@ -18,6 +18,14 @@ export const EMPTY_LEAD_PURPOSE_FORM_DATA: LeadPurposeFormData = { title: '' };
 export const ADD_LEAD_PURPOSE_LABEL = 'Add Lead Purpose';
 
 /**
+ * "Added By" column header for the lead purposes table.
+ *
+ * Used by:
+ * - LeadPurposePage
+ */
+export const LEAD_PURPOSE_COLUMN_ADDED_BY = 'Added By';
+
+/**
  * "Title" column header for the lead purposes table.
  *
  * Used by:

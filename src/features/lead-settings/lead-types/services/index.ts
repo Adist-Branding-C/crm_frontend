@@ -21,9 +21,10 @@ class LeadTypeService {
     });
   }
 
-  async getLeadTypes(page = 1, limit = 10, search?: string): Promise<LeadTypeListResponse> {
+  async getLeadTypes(page = 1, limit = 10, search?: string, sortOrder?: 'ASC' | 'DESC'): Promise<LeadTypeListResponse> {
     const params: Record<string, string | number> = { pageNumber: page, limit };
     if (search) params.search = search;
+    if (sortOrder) params.sort_order = sortOrder;
     const response = await axiosInstance.get<LeadTypeListResponse>(LEAD_TYPE_API_ENDPOINTS.TYPES, { params });
     return ServiceResponseUtil.normalize({
       status: response.data.status,

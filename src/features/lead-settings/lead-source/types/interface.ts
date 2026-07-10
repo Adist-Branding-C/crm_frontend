@@ -9,6 +9,8 @@ export interface LeadSourceApiItem {
   source: string;
   companyId: string;
   createdBy: string;
+  createdByType: string;
+  createdByName: string | null;
   createdAt: string;
   updatedAt: string;
 }

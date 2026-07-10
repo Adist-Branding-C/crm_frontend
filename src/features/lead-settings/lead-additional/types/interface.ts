@@ -10,12 +10,15 @@ export interface LeadAdditionalApiItem {
   purpose?: string;
   purposeId: string | null;
   values: string[];
+  createdByType: string;
+  createdByName: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface LeadAdditionalItem {
   id: string;
+  addedBy: string;
   field: string;
   fieldKey: string;
   type: string;

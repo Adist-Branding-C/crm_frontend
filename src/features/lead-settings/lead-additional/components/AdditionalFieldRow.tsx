@@ -4,6 +4,7 @@ import type { AdditionalFieldRowProps } from '../types/additional-field-row.type
 const AdditionalFieldRow = ({ item, index, isMenuOpen, onToggleMenu, onEdit, onDelete }: AdditionalFieldRowProps) => (
   <TRow>
     <TCell>{index + 1}</TCell>
+    <TCell>{item.addedBy}</TCell>
     <TCell>{item.field}</TCell>
     <TCell>{item.type}</TCell>
     <TCell>{item.dropdownValues.length > 0 ? item.dropdownValues.join(', ') : '-'}</TCell>

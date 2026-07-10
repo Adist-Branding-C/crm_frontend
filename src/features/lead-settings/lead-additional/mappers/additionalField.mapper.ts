@@ -1,9 +1,11 @@
+import { formatAddedBy } from '../../../../shared/utils/addedBy.util';
 import type { LeadPurposeApiItem } from '../../lead-purpose/types/interface';
 import type { LeadAdditionalItem, LeadAdditionalApiItem, LeadPurposeOption, AdditionalFieldFormData } from '../types/interface';
 
 export function mapApiToUI(item: LeadAdditionalApiItem): LeadAdditionalItem {
   return {
     id: item.fieldId,
+    addedBy: formatAddedBy(item.createdByName, item.createdByType),
     field: item.name,
     fieldKey: item.fieldKey,
     type: item.fieldType,

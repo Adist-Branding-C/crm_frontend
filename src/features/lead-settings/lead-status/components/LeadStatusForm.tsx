@@ -53,10 +53,10 @@ const LeadStatusForm = ({ form, status }: LeadStatusFormProps) => {
                 {showError('color') && errors.color && <small className="field-error-text">{errors.color}</small>}
               </div>
 
-              <div className="form-group">
-                <label className="switch">
+              <div className="form-group switch-field">
+                <label className="toggle-switch">
                   <Field type="checkbox" name="useForConversion" />
-                  <span className="slider round"></span>
+                  <span className="toggle-slider"></span>
                 </label>
                 <label>{LEAD_STATUS_CONVERSION_FIELD_LABEL}</label>
               </div>

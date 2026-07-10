@@ -18,6 +18,14 @@ export const EMPTY_LEAD_STATUS_FORM_DATA: LeadStatusFormData = { status: '', col
 export const ADD_LEAD_STATUS_LABEL = 'Add Status';
 
 /**
+ * "Added By" column header for the lead statuses table.
+ *
+ * Used by:
+ * - LeadStatusPage
+ */
+export const LEAD_STATUS_COLUMN_ADDED_BY = 'Added By';
+
+/**
  * "Status" column header for the lead statuses table.
  *
  * Used by:

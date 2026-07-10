@@ -35,9 +35,10 @@ class LeadAdditionalService {
     });
   }
 
-  async getAll(page = 1, limit = 10, search?: string): Promise<LeadAdditionalListResponse> {
+  async getAll(page = 1, limit = 10, search?: string, sortOrder?: 'ASC' | 'DESC'): Promise<LeadAdditionalListResponse> {
     const params: Record<string, string | number> = { pageNumber: page, limit };
     if (search) params.search = search;
+    if (sortOrder) params.sort_order = sortOrder;
     const response = await axiosInstance.get<LeadAdditionalListResponse>(LEAD_ADDITIONAL_API_ENDPOINTS.ADDITIONAL_FIELDS, { params });
     return ServiceResponseUtil.normalize({
       status: response.data.status,

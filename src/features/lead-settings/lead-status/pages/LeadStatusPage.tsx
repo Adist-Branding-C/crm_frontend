@@ -8,7 +8,7 @@ import { useLeadStatusCrud } from '../hooks/useLeadStatusCrud';
 import { useLeadStatusDeleteConfirm } from '../hooks/useLeadStatusDeleteConfirm';
 import { useLeadStatusFormSubmit } from '../hooks/useLeadStatusFormSubmit';
 import { useLeadStatusTableActions } from '../hooks/useLeadStatusTableActions';
-import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav } from '../../../../shared/components/table';
+import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, SortToggleButton } from '../../../../shared/components/table';
 import AdminPagination from '../../../../shared/components/crud/AdminPagination';
 import DrawerShell from '../../../../shared/components/crud/DrawerShell';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -19,6 +19,7 @@ import './LeadStatusPage.css';
 import {
   EMPTY_LEAD_STATUS_FORM_DATA,
   ADD_LEAD_STATUS_LABEL,
+  LEAD_STATUS_COLUMN_ADDED_BY,
   LEAD_STATUS_COLUMN_STATUS,
   LEAD_STATUS_COLUMN_COLOR,
   LEAD_STATUS_COLUMN_CONVERSION,
@@ -32,8 +33,9 @@ import type { LeadStatusItem, LeadStatusFormData } from '../types/interface';
 
 const LeadStatusPage = () => {
   const table = useTableData<LeadStatusItem>({
+    initialSortOrder: 'DESC',
     fetchFn: async (params) => {
-      const response = await leadStatusService.getLeadStatuses(params.pageNumber, params.limit, params.search);
+      const response = await leadStatusService.getLeadStatuses(params.pageNumber, params.limit, params.search, params.sortOrder);
       return {
         items: (response.data?.items ?? []).map(mapApiToUI),
         total: response.data?.pagination?.total ?? 0,
@@ -66,6 +68,7 @@ const LeadStatusPage = () => {
         <div className="table-container">
           <TableNav searchQuery={search.searchValue} onSearchChange={search.handleSearchChange}
             rowsPerPage={table.limit} onRowsPerPageChange={actions.handleRowsPerPageChange}>
+            <SortToggleButton sortOrder={table.sortOrder} onToggle={table.toggleSortOrder} />
             <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
               <Plus size={16} /> {ADD_LEAD_STATUS_LABEL}
             </button>
@@ -75,6 +78,7 @@ const LeadStatusPage = () => {
             <THead>
               <TRow>
                 <TCell variant="th">{LABEL_SL_NO}</TCell>
+                <TCell variant="th">{LEAD_STATUS_COLUMN_ADDED_BY}</TCell>
                 <TCell variant="th">{LEAD_STATUS_COLUMN_STATUS}</TCell>
                 <TCell variant="th">{LEAD_STATUS_COLUMN_COLOR}</TCell>
                 <TCell variant="th">{LEAD_STATUS_COLUMN_CONVERSION}</TCell>
@@ -83,7 +87,7 @@ const LeadStatusPage = () => {
             </THead>
             <TBody>
               {table.list.length === 0 ? (
-                <EmptyState colSpan={5} message={LABEL_NO_DATA} />
+                <EmptyState colSpan={6} message={LABEL_NO_DATA} />
               ) : (
                 table.list.map((item, idx) => (
                   <LeadStatusRow
@@ -103,7 +107,7 @@ const LeadStatusPage = () => {
           <AdminPagination currentPage={table.pageNumber} totalPages={table.totalPages}
             startIndex={table.startIndex} rowsPerPage={table.limit} totalItems={table.totalCount}
             onPageChange={table.setPageNumber} onRowsPerPageChange={actions.handleRowsPerPageChange}
-            prevNextOnly />
+            prevNextOnly alwaysShowNav />
         </div>
       </div>
       <DrawerShell

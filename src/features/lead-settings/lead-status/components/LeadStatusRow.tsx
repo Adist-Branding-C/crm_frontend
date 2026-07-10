@@ -4,6 +4,7 @@ import type { LeadStatusRowProps } from '../types/lead-status-row.types';
 const LeadStatusRow = ({ item, index, isMenuOpen, onToggleMenu, onEdit, onDelete }: LeadStatusRowProps) => (
   <TRow>
     <TCell>{index + 1}</TCell>
+    <TCell>{item.addedBy}</TCell>
     <TCell>{item.status}</TCell>
     <TCell><span className="color-pill" style={{ background: item.color }} /></TCell>
     <TCell>

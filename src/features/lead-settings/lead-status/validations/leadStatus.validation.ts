@@ -7,8 +7,8 @@ import * as yup from 'yup';
  * - LeadStatusForm (add and edit modes)
  *
  * Notes:
- * - status allows letters, digits, spaces, hyphens, and apostrophes only; uniqueness is
- *   enforced by the backend, not here.
+ * - status allows letters, digits, spaces, hyphens, underscores, and apostrophes only;
+ *   uniqueness is enforced by the backend, not here.
  * - color must be a valid hex color string; the input is a browser color picker so this
  *   mainly guards against a manually-crafted value.
  */
@@ -19,7 +19,7 @@ export const leadStatusValidationSchema = yup.object({
     .required('Status is required')
     .min(2, 'Status must be at least 2 characters')
     .max(100, 'Status must not exceed 100 characters')
-    .matches(/^[a-zA-Z0-9\s'-]+$/, 'Status contains invalid characters'),
+    .matches(/^[a-zA-Z0-9\s'_-]+$/, 'Status contains invalid characters'),
   color: yup
     .string()
     .trim()
