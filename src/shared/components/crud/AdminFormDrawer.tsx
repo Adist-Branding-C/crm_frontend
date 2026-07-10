@@ -96,11 +96,11 @@ const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields
                           onChange={syncOnChange} />
                       )}
                       {field.type === 'switch' && (
-                        <label className="switch">
+                        <label className="toggle-switch">
                           <input type="checkbox" name={field.name}
                             checked={Boolean(values[field.name])}
                             onChange={syncOnChange} />
-                          <span className="slider round"></span>
+                          <span className="toggle-slider"></span>
                         </label>
                       )}
                       {field.type === 'select' && (

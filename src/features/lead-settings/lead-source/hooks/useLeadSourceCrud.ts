@@ -1,88 +1,92 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import type { FormikHelpers } from 'formik';
 import { leadSourceService } from '../services';
 import { getErrorMessage } from '../../../../shared/utils/error';
+import { useSubmitErrorHandler } from '../../../../shared/hooks/useSubmitErrorHandler';
 import { ERROR_MESSAGES } from '../../constants/messages';
-import { mapApiToUI } from '../mappers/leadSource.mapper';
-import type { LeadSourceItem, CreateLeadSourcePayload, UpdateLeadSourcePayload } from '../types';
-import type { UseLeadSourceCrudOptions } from '../types/hook.types';
+import { LEAD_SOURCE_FIELD_MAP, LEAD_SOURCE_FIELD_ERROR_FALLBACKS } from '../constants';
+import type { LeadSourceFormData } from '../types/interface';
+import type { UseLeadSourceCrudParams } from '../types/use-lead-source-crud.types';
 
-export function useLeadSourceCrud({
-  onError,
-  onDeleteSuccess,
-  onDropdownClose,
-  refetch,
-}: UseLeadSourceCrudOptions) {
-  const [items, setItems] = useState<LeadSourceItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<LeadSourceItem | null>(null);
+/**
+ * Lead source create/update/delete API orchestration.
+ *
+ * Notes:
+ * - Takes the list/pagination setters it needs to drive (loading, error, refresh, reset-to-page-1)
+ *   as a narrow dependency rather than owning or re-exporting the pagination hook itself -
+ *   LeadSourcePage.tsx owns useTableData directly and reads its full state from there.
+ */
+export function useLeadSourceCrud({ table }: UseLeadSourceCrudParams) {
+  const submitError = useSubmitErrorHandler({
+    fieldMap: LEAD_SOURCE_FIELD_MAP,
+    fieldFallbacks: LEAD_SOURCE_FIELD_ERROR_FALLBACKS,
+    setError: table.setError,
+  });
 
-  const fetchData = useCallback(async (page: number, limit: number, search: string) => {
-    setIsLoading(true);
-    onError(null);
+  const handleCreateLeadSource = useCallback(async (
+    values: LeadSourceFormData,
+    { setSubmitting, resetForm, setFieldError }: FormikHelpers<LeadSourceFormData>,
+  ) => {
+    table.setError('');
+    table.setIsLoading(true);
     try {
-      const response = await leadSourceService.getLeadSources(page, limit, search || undefined);
-      setItems((response.data.items || []).map(mapApiToUI));
-      setTotal(response.data.pagination?.total ?? 0);
-      setTotalPages(response.data.pagination?.total_pages ?? 1);
+      const response = await leadSourceService.createLeadSource({ source: values.source.trim() });
+      if (response.status) {
+        table.setPageNumber(1);
+        table.refresh();
+        resetForm();
+        return true;
+      }
+      submitError.handleErrorResponse(response, setFieldError, ERROR_MESSAGES.CREATE_LEAD_SOURCE);
+      return false;
     } catch (err: unknown) {
-      onError(getErrorMessage(err, ERROR_MESSAGES.FETCH_LEAD_SOURCES));
+      submitError.handleThrownError(err, setFieldError, ERROR_MESSAGES.CREATE_LEAD_SOURCE);
+      return false;
     } finally {
-      setIsLoading(false);
+      table.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, [onError]);
+  }, [table, submitError]);
 
-  const createSource = useCallback(async (payload: CreateLeadSourcePayload) => {
-    const response = await leadSourceService.createLeadSource(payload);
-    return response;
-  }, []);
-
-  const updateSource = useCallback(async (id: string, payload: UpdateLeadSourcePayload) => {
-    const response = await leadSourceService.updateLeadSource(id, payload);
-    return response;
-  }, []);
-
-  const deleteSource = useCallback(async (id: string) => {
-    const response = await leadSourceService.deleteLeadSource(id);
-    return response;
-  }, []);
-
-  const handleDeleteClick = useCallback((item: LeadSourceItem) => {
-    setDeletingItem(item);
-    onDropdownClose();
-  }, [onDropdownClose]);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingItem) return;
-    setIsDeleting(true);
-    onError(null);
+  const handleUpdateLeadSource = useCallback(async (
+    id: string,
+    values: LeadSourceFormData,
+    { setSubmitting, setFieldError }: FormikHelpers<LeadSourceFormData>,
+  ) => {
+    table.setError('');
+    table.setIsLoading(true);
     try {
-      await deleteSource(String(deletingItem.id));
-      setDeletingItem(null);
-      await refetch();
-      onDeleteSuccess('Lead Source deleted successfully.');
+      const response = await leadSourceService.updateLeadSource(id, { source: values.source.trim() });
+      if (response.status) {
+        table.refresh();
+        return true;
+      }
+      submitError.handleErrorResponse(response, setFieldError, ERROR_MESSAGES.UPDATE_LEAD_SOURCE);
+      return false;
     } catch (err: unknown) {
-      onError(getErrorMessage(err, ERROR_MESSAGES.DELETE_LEAD_SOURCE));
-      setDeletingItem(null);
+      submitError.handleThrownError(err, setFieldError, ERROR_MESSAGES.UPDATE_LEAD_SOURCE);
+      return false;
     } finally {
-      setIsDeleting(false);
+      table.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, [deletingItem, deleteSource, onError, onDeleteSuccess, refetch]);
+  }, [table, submitError]);
 
-  return {
-    items,
-    total,
-    totalPages,
-    isLoading,
-    isDeleting,
-    deletingItem,
-    setDeletingItem,
-    fetchData,
-    createSource,
-    updateSource,
-    handleDeleteClick,
-    handleConfirmDelete,
-  };
+  const handleDeleteLeadSource = useCallback(async (id: string) => {
+    table.setError('');
+    try {
+      const response = await leadSourceService.deleteLeadSource(id);
+      if (response.status) {
+        table.refresh();
+        return true;
+      }
+      table.setError(response.message || ERROR_MESSAGES.DELETE_LEAD_SOURCE);
+      return false;
+    } catch (err: unknown) {
+      table.setError(getErrorMessage(err, ERROR_MESSAGES.DELETE_LEAD_SOURCE));
+      return false;
+    }
+  }, [table]);
+
+  return { handleCreateLeadSource, handleUpdateLeadSource, handleDeleteLeadSource };
 }

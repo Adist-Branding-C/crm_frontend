@@ -1,142 +1,133 @@
+import { useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { Plus, Loader2 } from 'lucide-react';
+import { Formik, Form, Field } from 'formik';
 import { FIELD_TYPE_OPTIONS } from '../../../../shared/constants/fieldTypes';
 import DropdownValuesInput from './DropdownValuesInput';
 import ValidationAlert from '../../../../shared/components/ValidationAlert';
-import type { FormData, LeadPurposeOption, LeadAdditionalItem } from '../types';
+import { scrollToFirstError } from '../../../../shared/utils/scrollToError.util';
+import { FIELD_TYPES } from '../constants/fieldTypes';
+import type { AdditionalFieldFormProps } from '../types/additional-field-form.types';
 import './AdditionalFieldForm.css';
 
-interface AdditionalFieldFormProps {
-  formData: FormData;
-  purposes: LeadPurposeOption[];
-  editingItem: LeadAdditionalItem | null;
-  isSaving: boolean;
-  saveDisabled?: boolean;
-  error: string | null;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onDropdownValueChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAddDropdownValue: () => void;
-  onRemoveDropdownValue: (index: number) => void;
-  onClearError?: () => void;
-}
+const AdditionalFieldForm = ({ form, status, purposes }: AdditionalFieldFormProps) => {
+  const { validationSchema, initialValues, onSubmit, isEditing } = form;
+  const { isSaving, error, onClearError } = status;
+  const formBodyRef = useRef<HTMLDivElement>(null);
+  const prevSubmitCountRef = useRef(0);
+  const [currentDropdownValue, setCurrentDropdownValue] = useState('');
 
-const AdditionalFieldForm = ({
-  formData,
-  purposes,
-  editingItem,
-  isSaving,
-  error,
-  onInputChange,
-  onSubmit,
-  onDropdownValueChange,
-  onAddDropdownValue,
-  onRemoveDropdownValue,
-  onClearError,
-  saveDisabled,
-}: AdditionalFieldFormProps) => (
-  <div className="additional-form-panel">
-    <div className="card">
-      <div className="card-header">
-        <h5>{editingItem ? 'Edit Field' : 'Add Field'}</h5>
-      </div>
-      <div className="card-body">
-        <ValidationAlert message={error} onClose={onClearError} />
-        <form onSubmit={onSubmit}>
-          <div className="checkbox-group">
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                name="showInFilter"
-                checked={formData.showInFilter}
-                onChange={onInputChange}
-              />
-              Is Shown in filter
-            </label>
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                name="showInList"
-                checked={formData.showInList}
-                onChange={onInputChange}
-              />
-              Show in list
-            </label>
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                name="isRequired"
-                checked={formData.isRequired}
-                onChange={onInputChange}
-              />
-              Is Required?
-            </label>
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                name="connectWithLeadPurpose"
-                checked={formData.connectWithLeadPurpose}
-                onChange={onInputChange}
-              />
-              Connect with lead purpose?
-            </label>
-          </div>
-          <div className="form-group">
-            <label>Field Name <span className="text-danger">*</span></label>
-            <input
-              type="text"
-              name="name"
-              className="form-control"
-              placeholder="Enter field name"
-              value={formData.name}
-              onChange={onInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Select Type <span className="text-danger">*</span></label>
-            <select
-              name="fieldType"
-              className="form-control"
-              value={formData.fieldType}
-              onChange={onInputChange}
-            >
-              <option value="">Select Type</option>
-              {FIELD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          {formData.connectWithLeadPurpose && (
-            <div className="form-group">
-              <label>Select Purpose <span className="text-danger">*</span></label>
-              <select
-                name="purposeId"
-                className="form-control"
-                value={formData.purposeId}
-                onChange={onInputChange}
-              >
-                <option value="">Select Purpose</option>
-                {purposes.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
-              </select>
-            </div>
-          )}
-          {(formData.fieldType === 'Dropdown') && (
-            <DropdownValuesInput
-              currentValue={formData.currentDropdownValue}
-              values={formData.dropdownValues}
-              onChange={onDropdownValueChange}
-              onAdd={onAddDropdownValue}
-              onRemove={onRemoveDropdownValue}
-            />
-          )}
-          <button type="submit" className="btn btn-primary" disabled={isSaving || saveDisabled}>
-            {isSaving ? (
-              <><Loader2 size={16} className="spin" /> Saving...</>
-            ) : (
-              <><Plus size={16} /> {editingItem ? 'Update' : 'Add Field'}</>
-            )}
-          </button>
-        </form>
+  return (
+    <div className="additional-form-panel">
+      <div className="card">
+        <div className="card-header">
+          <h5>{isEditing ? 'Edit Field' : 'Add Field'}</h5>
+        </div>
+        <div className="card-body">
+          <Formik
+            enableReinitialize
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={onSubmit}
+          >
+            {({ values, errors, touched, submitCount, isSubmitting, setFieldValue }) => {
+              if (submitCount > prevSubmitCountRef.current) {
+                prevSubmitCountRef.current = submitCount;
+                if (Object.keys(errors).length > 0) {
+                  requestAnimationFrame(() => scrollToFirstError(formBodyRef.current));
+                }
+              }
+
+              const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
+              const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+
+              const handleAddDropdownValue = () => {
+                const trimmed = currentDropdownValue.trim();
+                if (!trimmed) return;
+                if (values.dropdownValues.some((v) => v.toLowerCase() === trimmed.toLowerCase())) return;
+                setFieldValue('dropdownValues', [...values.dropdownValues, trimmed]);
+                setCurrentDropdownValue('');
+              };
+
+              const handleRemoveDropdownValue = (index: number) => {
+                setFieldValue('dropdownValues', values.dropdownValues.filter((_, i) => i !== index));
+              };
+
+              return (
+                <div ref={formBodyRef}>
+                  <ValidationAlert message={error} onClose={onClearError} />
+                  <Form>
+                    <div className="checkbox-group">
+                      <label className="checkbox-item">
+                        <Field type="checkbox" name="showInFilter" />
+                        Is Shown in filter
+                      </label>
+                      <label className="checkbox-item">
+                        <Field type="checkbox" name="showInList" />
+                        Show in list
+                      </label>
+                      <label className="checkbox-item">
+                        <Field type="checkbox" name="isRequired" />
+                        Is Required?
+                      </label>
+                      <label className="checkbox-item">
+                        <Field type="checkbox" name="connectWithLeadPurpose" />
+                        Connect with lead purpose?
+                      </label>
+                    </div>
+                    <div className="form-group">
+                      <label>Field Name <span className="text-danger">*</span></label>
+                      <Field type="text" name="name" className={fieldClass('name')} placeholder="Enter field name" />
+                      {showError('name') && errors.name && <small className="field-error-text">{errors.name}</small>}
+                    </div>
+                    <div className="form-group">
+                      <label>Select Type <span className="text-danger">*</span></label>
+                      <Field as="select" name="fieldType" className={fieldClass('fieldType')}>
+                        <option value="">Select Type</option>
+                        {FIELD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </Field>
+                      {showError('fieldType') && errors.fieldType && <small className="field-error-text">{errors.fieldType}</small>}
+                    </div>
+                    {values.connectWithLeadPurpose && (
+                      <div className="form-group">
+                        <label>Select Purpose <span className="text-danger">*</span></label>
+                        <Field as="select" name="purposeId" className={fieldClass('purposeId')}>
+                          <option value="">Select Purpose</option>
+                          {purposes.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+                        </Field>
+                        {showError('purposeId') && errors.purposeId && <small className="field-error-text">{errors.purposeId}</small>}
+                      </div>
+                    )}
+                    {(values.fieldType === FIELD_TYPES.DROPDOWN || values.fieldType === FIELD_TYPES.CHECKBOX) && (
+                      <>
+                        <DropdownValuesInput
+                          currentValue={currentDropdownValue}
+                          values={values.dropdownValues}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => setCurrentDropdownValue(e.target.value)}
+                          onAdd={handleAddDropdownValue}
+                          onRemove={handleRemoveDropdownValue}
+                        />
+                        {showError('dropdownValues') && errors.dropdownValues && (
+                          <small className="field-error-text">{String(errors.dropdownValues)}</small>
+                        )}
+                      </>
+                    )}
+                    <button type="submit" className="btn btn-primary" disabled={isSaving || isSubmitting}>
+                      {isSaving || isSubmitting ? (
+                        <><Loader2 size={16} className="spin" /> Saving...</>
+                      ) : (
+                        <><Plus size={16} /> {isEditing ? 'Update' : 'Add Field'}</>
+                      )}
+                    </button>
+                  </Form>
+                </div>
+              );
+            }}
+          </Formik>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default AdditionalFieldForm;

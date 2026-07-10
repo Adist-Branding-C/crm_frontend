@@ -1,33 +1,30 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
-export function useDebouncedSearch(
-  externalSearchQuery: string,
-  onSearchChange: (value: string) => void,
-  debounceMs = 2000,
-) {
-  const [searchValue, setSearchValue] = useState(externalSearchQuery);
+/**
+ * Generic debounced search-input state: tracks the raw value the user is typing and only
+ * calls `onSearchChange` after the value has settled for `delay` ms.
+ *
+ * Notes:
+ * - Reusable across any search box that drives a server-side fetch (pass the fetch hook's own
+ *   search setter, e.g. useTableData's `handleSearchChange`, as `onSearchChange`).
+ */
+export function useDebouncedSearch(onSearchChange: (value: string) => void, delay = 400) {
+  const [searchValue, setSearchValue] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const onSearchChangeRef = useRef(onSearchChange);
+  onSearchChangeRef.current = onSearchChange;
 
-  useEffect(() => {
-    if (searchValue !== externalSearchQuery) {
-      setSearchValue(externalSearchQuery);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalSearchQuery]);
-
-  const handleSearchInput = useCallback((value: string) => {
+  const handleSearchChange = useCallback((value: string) => {
     setSearchValue(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      onSearchChange(value);
-    }, debounceMs);
-  }, [onSearchChange, debounceMs]);
+      onSearchChangeRef.current(value);
+    }, delay);
+  }, [delay]);
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
   }, []);
 
-  return { searchValue, handleSearchInput };
+  return { searchValue, handleSearchChange };
 }

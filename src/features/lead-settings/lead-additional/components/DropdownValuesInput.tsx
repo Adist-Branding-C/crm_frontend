@@ -1,13 +1,6 @@
 import { Plus, X } from 'lucide-react';
 import './DropdownValuesInput.css';
-
-interface DropdownValuesInputProps {
-  currentValue: string;
-  values: string[];
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAdd: () => void;
-  onRemove: (index: number) => void;
-}
+import type { DropdownValuesInputProps } from '../types/dropdown-values-input.types';
 
 const DropdownValuesInput = ({ currentValue, values, onChange, onAdd, onRemove }: DropdownValuesInputProps) => (
   <div className="form-group">
