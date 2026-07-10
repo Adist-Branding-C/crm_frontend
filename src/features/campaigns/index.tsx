@@ -1,1 +1,1 @@
-export { default } from './pages/CampaignPage';
+export { default } from './page/CampaignsPage';

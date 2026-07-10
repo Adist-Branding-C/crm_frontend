@@ -19,6 +19,7 @@ const DataTable = <T extends { id: number | string }>({
   onPageChange,
   onRowsPerPageChange,
   emptyMessage,
+  onExport,
 }: DataTableProps<T>) => {
   const startIndex = (currentPage - 1) * rowsPerPage;
 
@@ -31,6 +32,7 @@ const DataTable = <T extends { id: number | string }>({
         onRowsPerPageChange={onRowsPerPageChange}
         {...(onAdd ? { onAdd } : {})}
         {...(addLabel ? { addLabel } : {})}
+        {...(onExport ? { onExport } : {})}
       />
       <div className="table-scroll">
         <table className="data-table">
