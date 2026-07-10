@@ -19,12 +19,10 @@ export const INITIAL_FILTERS = {
   enquiryPurpose: '',
   leadStatus: '',
   followupAdded: '',
-  createdBy: '',
   assignedTo: '',
   leadType: '',
   location: '',
   remarks: '',
-  date: '',
   additionalFields: {},
 };
 

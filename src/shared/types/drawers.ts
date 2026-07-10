@@ -91,6 +91,7 @@ export interface AddLeadDrawerProps {
 export interface AddLeadFormValues {
   name: string;
   phone: string;
+  countryCode: string;
   email: string;
   agentId: string;
   purposeId: string;

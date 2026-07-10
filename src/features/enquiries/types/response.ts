@@ -5,6 +5,7 @@ export interface LeadApiItem {
   leadId: string;
   name: string;
   phone: string;
+  countryCode: string | null;
   email: string | null;
   location: string | null;
   address: string | null;

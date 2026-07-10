@@ -109,10 +109,6 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
     onShowToast(ERROR_MESSAGES.EXPORT_NOT_AVAILABLE, 'error');
   }, [onShowToast]);
 
-  const handleSendFollowUp = useCallback(() => {
-    onShowToast(ERROR_MESSAGES.FOLLOW_UP_NOT_AVAILABLE, 'error');
-  }, [onShowToast]);
-
   const handleDuplicateLeadAction = useCallback(() => {
     onShowToast(ERROR_MESSAGES.DUPLICATE_NOT_AVAILABLE, 'error');
   }, [onShowToast]);
@@ -132,7 +128,6 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
     handleDeleteSelectedClick,
     handleConfirmDeleteSelected,
     handleExportSelected,
-    handleSendFollowUp,
     handleDuplicateLeadAction,
   };
 }

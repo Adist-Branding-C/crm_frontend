@@ -97,13 +97,6 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
             <option value="no">No</option>
           </select>
         </div>
-        <div className="filter-group">
-          <label>Created By</label>
-          <select value={filters.createdBy} onChange={(e) => onFilterChange({ ...filters, createdBy: e.target.value })} disabled={isLoading}>
-            <option value="">Select</option>
-            {staffOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-        </div>
       </div>
       <div className="filter-row">
         <div className="filter-group">
@@ -123,10 +116,6 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
         <div className="filter-group">
           <label>Location</label>
           <input type="text" placeholder="Enter location" value={filters.location} onChange={(e) => onFilterChange({ ...filters, location: e.target.value })} />
-        </div>
-        <div className="filter-group">
-          <label>Date</label>
-          <input type="date" value={filters.date} onChange={(e) => onFilterChange({ ...filters, date: e.target.value })} />
         </div>
       </div>
       {additionalFieldRows}

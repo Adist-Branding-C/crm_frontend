@@ -3,6 +3,17 @@ import { INITIAL_FILTERS } from '../constants';
 import type { Filters } from '../types';
 import type { UseLeadFiltersReturn } from '../types/hook.types';
 
+/**
+ * Maps the "Filter by Date" dropdown's values (shared with other features via
+ * DATE_FILTER_OPTIONS) to the date field names the leads API's dateFilterBy
+ * enum actually accepts.
+ */
+const DATE_FILTER_BY_API_MAP: Record<string, string> = {
+  created: 'createdAt',
+  updated: 'updatedAt',
+  followup: 'nextFollowUpDate',
+};
+
 export function useLeadFilters(
   onFetch: (page: number, limit: number, search: string, extraParams: Record<string, string | number>) => void,
   searchQueryRef: React.MutableRefObject<string>,
@@ -24,7 +35,8 @@ export function useLeadFilters(
       params.startDate = filters.dateRange.start;
       params.endDate = filters.dateRange.end;
     }
-    if (filters.filterByDate) params.dateFilterBy = filters.filterByDate;
+    if (filters.filterByDate) params.dateFilterBy = DATE_FILTER_BY_API_MAP[filters.filterByDate] ?? filters.filterByDate;
+    if (filters.followupAdded) params.followUpAdded = filters.followupAdded;
     const additionalFieldFilters = Object.entries(filters.additionalFields)
       .filter(([, value]) => value)
       .map(([fieldId, value]) => ({ fieldId, value }));

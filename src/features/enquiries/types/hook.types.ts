@@ -1,16 +1,8 @@
-import type { Dispatch, SetStateAction, RefObject } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import type { Lead, AdditionalFieldDef } from './index';
 import type { Filters } from './index';
 import type { SortConfig } from '../../../shared/types/sort';
 import type { LabelValuePair } from '../../../shared/types/common';
-
-export interface LeadDropdownState {
-  isOpen: boolean;
-  isClosing: boolean;
-  ref: RefObject<HTMLDivElement | null>;
-  close: () => void;
-  setIsOpen: (v: boolean) => void;
-}
 
 export interface UseLeadBulkActionsOptions {
   selectedIds: string[];
@@ -63,13 +55,6 @@ export interface UseLeadFiltersReturn {
   handleApplyFilters: () => void;
 }
 
-export interface UseLeadToolbarDropdownsReturn {
-  sortDropdown: LeadDropdownState;
-  actionsDropdown: LeadDropdownState;
-  toggleSort: () => void;
-  toggleActions: () => void;
-}
-
 export interface UseLeadActionMenuReturn {
   openId: string | null;
   buttonRect: DOMRect | null;
@@ -107,6 +92,5 @@ export interface UseLeadBulkActionsReturn {
   handleDeleteSelectedClick: () => void;
   handleConfirmDeleteSelected: () => Promise<void>;
   handleExportSelected: () => void;
-  handleSendFollowUp: () => void;
   handleDuplicateLeadAction: () => void;
 }

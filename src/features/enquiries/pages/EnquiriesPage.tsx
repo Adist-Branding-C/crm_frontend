@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useMemo } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Filter, Plus } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
@@ -18,7 +18,6 @@ import { useLeadSort } from '../hooks/useLeadSort';
 import { useLeadFilters } from '../hooks/useLeadFilters';
 import { useLeadBulkActions } from '../hooks/useLeadBulkActions';
 import { useLeadDeleteConfirm } from '../hooks/useLeadDeleteConfirm';
-import { useLeadToolbarDropdowns } from '../hooks/useLeadToolbarDropdowns';
 import { useLeadActionMenu } from '../hooks/useLeadActionMenu';
 import { useLeadRowActions } from '../hooks/useLeadRowActions';
 import { useLeadClearFilters } from '../hooks/useLeadClearFilters';
@@ -27,7 +26,8 @@ import { getLeadIds } from '../utils/leadMapper';
 import { LABEL_NO_DATA } from '../../../shared/constants/labels';
 import EnquiriesFilters from '../components/EnquiriesFilters';
 import EnquiriesRow from '../components/EnquiriesRow';
-import EnquiriesToolbarActions from '../components/EnquiriesToolbarActions';
+import LeadSortDropdown from '../components/LeadSortDropdown';
+import LeadActionsDropdown from '../components/LeadActionsDropdown';
 import ChangeStatusModal from '../components/ChangeStatusModal';
 import AssignStaffModal from '../components/AssignStaffModal';
 import type { Lead } from '../../../features/enquiries/types';
@@ -55,8 +55,6 @@ const EnquiriesPage = () => {
   });
 
   const selection = useTableSelection<string>();
-
-  const { sortDropdown, actionsDropdown, toggleSort, toggleActions } = useLeadToolbarDropdowns();
 
   const addDrawer = useDrawer();
   const detailDrawer = useDrawer<Lead>();
@@ -106,27 +104,30 @@ const EnquiriesPage = () => {
           rowsPerPage={pagination.rowsPerPage}
           onRowsPerPageChange={pagination.handleRowsPerPageChange}
         >
-          <EnquiriesToolbarActions
-            showFilters={filtersHook.showFilters}
-            onToggleFilters={() => filtersHook.setShowFilters(!filtersHook.showFilters)}
+          <button className="btn btn-secondary" onClick={() => filtersHook.setShowFilters(!filtersHook.showFilters)}>
+            <Filter size={16} /> Filter <ChevronDown size={14} className={filtersHook.showFilters ? 'rotate' : ''} />
+          </button>
+
+          <LeadSortDropdown
             sortConfig={sortHook.sortConfig}
             onSortDesc={sortHook.handleSortDesc}
             onSortAsc={sortHook.handleSortAsc}
-            sortDropdown={sortDropdown}
-            actionsDropdown={actionsDropdown}
-            onToggleSort={toggleSort}
-            onToggleActions={toggleActions}
+          />
+
+          <LeadActionsDropdown
             selectedCount={selection.selectedIds.length}
             bulkActions={{
               onExportSelected: bulkActions.handleExportSelected,
               onChangeStatus: bulkActions.handleChangeStatusClick,
               onAssignStaff: bulkActions.handleAssignStaffClick,
-              onSendFollowUp: bulkActions.handleSendFollowUp,
               onDuplicateLead: bulkActions.handleDuplicateLeadAction,
               onDeleteSelected: bulkActions.handleDeleteSelectedClick,
             }}
-            onAddLead={addDrawer.open}
           />
+
+          <button className="btn btn-primary" onClick={() => addDrawer.open()}>
+            <Plus size={16} /> Add Lead
+          </button>
         </TableNav>
 
         {filtersHook.showFilters && (

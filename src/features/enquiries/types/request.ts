@@ -1,13 +1,14 @@
 export interface UpdateLeadPayload {
   name?: string;
   phone?: string;
+  countryCode?: string;
   email?: string;
   agentId?: string;
   purposeId?: string;
   typeId?: string;
   statusId?: string;
   sourceId?: string;
-  nextFollowUp?: string;
+  nextFollowUp?: string | null;
   notes?: string;
   location?: string;
   address?: string;
@@ -17,13 +18,14 @@ export interface UpdateLeadPayload {
 export interface CreateLeadPayload {
   name: string;
   phone: string;
-  email: string;
+  countryCode: string;
+  email?: string;
   sourceId: string;
   agentId?: string;
   purposeId?: string;
   typeId?: string;
   statusId?: string;
-  nextFollowUp?: string;
+  nextFollowUp?: string | null;
   notes?: string;
   location?: string;
   address?: string;
@@ -45,6 +47,7 @@ export interface GetLeadsParams {
   startDate?: string;
   endDate?: string;
   dateFilterBy?: string;
+  followUpAdded?: string;
   additionalFieldFilters?: string;
 }
 

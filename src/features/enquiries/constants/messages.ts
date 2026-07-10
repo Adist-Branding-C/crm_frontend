@@ -30,12 +30,13 @@ export const SUCCESS_MESSAGES = {
  *   useLeadActivities, useLeadBulkActions)
  *
  * Notes:
- * - EXPORT_NOT_AVAILABLE/FOLLOW_UP_NOT_AVAILABLE/DUPLICATE_NOT_AVAILABLE are shown
- *   for toolbar actions the backend doesn't implement yet.
+ * - EXPORT_NOT_AVAILABLE/DUPLICATE_NOT_AVAILABLE are shown for toolbar actions
+ *   the backend doesn't implement yet.
  */
 export const ERROR_MESSAGES = {
   FETCH_LEADS: 'Failed to fetch leads',
   DELETE_LEAD: 'Failed to delete lead',
+  UPDATE_LEAD: 'Failed to update lead. Please try again.',
   FETCH_ACTIVITIES: 'Failed to load activities.',
   FETCH_REMARKS: 'Failed to load remarks.',
   ADD_REMARK: 'Failed to add remark.',
@@ -49,7 +50,6 @@ export const ERROR_MESSAGES = {
   CREATE_DEAL: 'Failed to create deal',
   LOAD_FORM_OPTIONS: 'Failed to load form options. Please try again.',
   EXPORT_NOT_AVAILABLE: 'Export API not available',
-  FOLLOW_UP_NOT_AVAILABLE: 'Follow Up API not available',
   DUPLICATE_NOT_AVAILABLE: 'Duplicate Lead API not available',
   SELECT_AT_LEAST_ONE: 'Please select at least one lead',
   PARTIAL_SUCCESS: (successCount: number, failCount: number) => `${successCount} updated, ${failCount} failed`,

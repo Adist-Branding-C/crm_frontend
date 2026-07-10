@@ -4,6 +4,7 @@ import { TRow, TCell } from '../../../shared/components/table';
 import ActionDropdownPortal from '../../../components/ActionDropdownPortal';
 import { formatRelativeDate, formatFollowUpDate } from '../../../shared/utils/dateUtils';
 import { badgeClass } from '../../../shared/utils/badgeUtils';
+import { LABEL_NOT_ASSIGNED } from '../../../shared/constants/labels';
 import type { Lead } from '../types';
 import type { Column } from '../../../shared/types/table';
 
@@ -44,6 +45,9 @@ const getCellContent = (row: Lead, colKey: string, onViewLead: (lead: Lead) => v
   }
   if (colKey === 'nextFollowUp') {
     return { children: formatFollowUpDate((row as unknown as Record<string, string>)[colKey]) };
+  }
+  if (colKey === 'assignedTo') {
+    return { children: row.assignedTo || LABEL_NOT_ASSIGNED };
   }
   if (LEAD_PROPERTY_KEYS.has(colKey)) {
     return { children: (row as unknown as Record<string, string>)[colKey] || '-' };

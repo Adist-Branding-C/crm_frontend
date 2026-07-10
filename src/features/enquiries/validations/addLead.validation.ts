@@ -10,22 +10,24 @@ const BASE_VALIDATION_SHAPE: Record<string, yup.StringSchema> = {
     .string()
     .trim()
     .required('Phone is required'),
+  countryCode: yup
+    .string()
+    .required('Country code is required'),
   email: yup
     .string()
     .trim()
-    .email('Enter a valid email address')
-    .required('Email is required'),
+    .email('Enter a valid email address'),
   sourceId: yup
     .string()
     .required('Source is required'),
-  agentId: yup.string().required('Assigned To is required'),
+  agentId: yup.string(),
   purposeId: yup.string(),
   typeId: yup.string(),
   statusId: yup.string(),
-  nextFollowUp: yup.string().required('Next Follow Up is required'),
+  nextFollowUp: yup.string(),
   notes: yup.string().trim(),
-  location: yup.string().trim().required('Location is required'),
-  address: yup.string().trim().required('Address is required'),
+  location: yup.string().trim(),
+  address: yup.string().trim(),
 };
 
 function getAdditionalFieldsValidationShape(fields: LeadAdditionalApiItem[]): Record<string, yup.Schema> {

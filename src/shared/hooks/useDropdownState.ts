@@ -1,6 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-export function useLeadDropdownState() {
+/**
+ * Generic toggle-panel dropdown state: open/close with a brief closing
+ * animation window, auto-close on outside click or Escape.
+ *
+ * Used by:
+ * - LeadSortDropdown, LeadActionsDropdown (each owns its own instance, so
+ *   opening one naturally closes the other via outside-click - no shared
+ *   coordinator needed)
+ */
+export function useDropdownState() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -18,6 +27,14 @@ export function useLeadDropdownState() {
       setIsClosing(false);
     }, 150);
   }, []);
+
+  const toggle = useCallback(() => {
+    if (isOpenRef.current) {
+      close();
+    } else {
+      setIsOpen(true);
+    }
+  }, [close]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,5 +57,5 @@ export function useLeadDropdownState() {
     };
   }, [close]);
 
-  return { isOpen, isClosing, ref, close, setIsOpen };
+  return { isOpen, isClosing, ref, close, toggle, setIsOpen };
 }

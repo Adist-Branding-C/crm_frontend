@@ -10,6 +10,7 @@ export function mapApiToUI(item: LeadApiItem): Lead {
     leadId: item.leadId,
     name: item.name,
     phone: item.phone,
+    countryCode: item.countryCode ?? '',
     email: item.email ?? '',
     location: item.location ?? '',
     address: item.address ?? '',

@@ -11,6 +11,7 @@ export interface Lead {
   leadId: string;
   name: string;
   phone: string;
+  countryCode: string;
   email: string;
   location: string;
   address: string;
@@ -32,12 +33,10 @@ export interface Filters {
   enquiryPurpose: string;
   leadStatus: string;
   followupAdded: string;
-  createdBy: string;
   assignedTo: string;
   leadType: string;
   location: string;
   remarks: string;
-  date: string;
   additionalFields: Record<string, string>;
 }
 
