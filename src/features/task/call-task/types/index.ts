@@ -66,12 +66,19 @@ export interface CallTaskTableProps {
   onEdit: (item: CallTaskItem) => void;
   onDelete: (item: CallTaskItem) => void;
   onAdd?: () => void;
-  staffOptions: StaffOption[];
-  leadOptions: LeadOption[];
 }
 
 export interface CallTaskActionsProps {
   item: CallTaskItem;
+  dropdownOpen: number | null;
+  onToggleDropdown: (id: number | null) => void;
+  onEdit: (item: CallTaskItem) => void;
+  onDelete: (item: CallTaskItem) => void;
+}
+
+export interface CallTaskRowProps {
+  item: CallTaskItem;
+  index: number;
   dropdownOpen: number | null;
   onToggleDropdown: (id: number | null) => void;
   onEdit: (item: CallTaskItem) => void;

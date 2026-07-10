@@ -65,8 +65,6 @@ export interface DealTaskTableProps {
   onEdit: (item: DealTaskItem) => void;
   onDelete: (item: DealTaskItem) => void;
   onAdd?: () => void;
-  staffOptions: StaffOption[];
-  leadOptions: LeadOption[];
 }
 
 export interface DealTaskActionsProps {

@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useCampaignApi } from './useCampaignApi';
-import { useDrawerScroll } from '../../task-settings/hooks/useDrawerScroll';
-import { parseApiError } from '../../task-settings/call-reason/utils/parseApiError';
-import { applyFieldErrors } from '../../task-settings/call-reason/utils/applyFieldErrors';
+import { useDrawerScroll } from '../../../shared/hooks/useDrawerScroll';
+import { parseApiError } from '../utils/parseApiError';
+import { applyFieldErrors } from '../utils/applyFieldErrors';
 import { CampaignMapper } from '../mappers/campaign.mapper';
 import type { CampaignFormData, SubmitHandlerConfig, FetchHandlers, ToastHandlers } from '../types';
 import type { CreateCampaignPayload, UpdateCampaignPayload } from '../types';

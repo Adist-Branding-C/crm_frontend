@@ -7,7 +7,7 @@ import EditDealTaskDrawer from '../components/EditDealTaskDrawer';
 import DeleteDealTaskDialog from '../components/DeleteDealTaskDialog';
 import ToastNotification from '../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../../../shared/components/SettingsTabs';
+import SettingsTabs from '../../../task-settings/components/SettingsTabs/SettingsTabs';
 import { taskTabs } from '../../shared/taskTabs';
 import './DealTaskPage.css';
 
@@ -20,7 +20,7 @@ const DealTaskPage = () => {
   return (
     <div className="task-settings-page">
       <PageHeader title="Deal Task" description="Manage your deal tasks" />
-      <SettingsTabs items={taskTabs} />
+      <SettingsTabs tabs={taskTabs} />
       <div className="account-content">
         <div className="deal-task-table-wrapper">
           <DealTaskTable
@@ -38,8 +38,6 @@ const DealTaskPage = () => {
             onEdit={editDrawer.openEditDrawer}
             onDelete={deleteDialog.handleDeleteClick}
             onAdd={addDrawer.openAddDrawer}
-            staffOptions={staff.staffOptions}
-            leadOptions={leads.leadOptions}
           />
         </div>
         <AddDealTaskDrawer

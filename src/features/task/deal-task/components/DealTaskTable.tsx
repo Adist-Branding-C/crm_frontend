@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
-import { DataTable } from '../../../../shared/components/table';
+import { Plus } from 'lucide-react';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
 import DealTaskActions from './DealTaskActions';
 import type { DealTaskItem, DealTaskTableProps } from '../types/index';
-import type { Column } from '../../../../shared/components/table';
 
 const DealTaskTable = ({
   data,
@@ -13,65 +12,69 @@ const DealTaskTable = ({
   totalRecords,
   rowsPerPage,
   onPageChange,
-  onRowsPerPageChange,
   dropdownOpen,
   onToggleDropdown,
   onEdit,
   onDelete,
   onAdd,
-  staffOptions,
-  leadOptions,
 }: DealTaskTableProps) => {
-  const columns: Column<DealTaskItem>[] = useMemo(() => [
-    { header: 'Sl No' },
-    { header: 'Title', accessor: 'title' },
-    { header: 'Scheduled Date', accessor: 'scheduledDate' },
-    
-    {
-      header: 'Assigned To',
-      render: (row) => row.assignedTo?.name ?? '-',
-    },
-    {
-      header: 'Priority',
-      render: (row) => <span className={`status-badge status-${(row.priority || '').toLowerCase()}`}>{row.priority || '-'}</span>,
-    },
-    {
-      header: 'Status',
-      render: (row) => <span className={`status-badge status-${(row.status || '').toLowerCase()}`}>{row.status}</span>,
-    },
-    {
-      header: 'Lead',
-      render: (row) => row.lead?.name ?? '-',
-    },
-    {
-      header: 'Actions',
-      render: (row) => (
-        <DealTaskActions
-          item={row}
-          dropdownOpen={dropdownOpen}
-          onToggleDropdown={onToggleDropdown}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ),
-    },
-  ], [dropdownOpen, onToggleDropdown, onEdit, onDelete]);
+  const startIndex = (currentPage - 1) * rowsPerPage;
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      searchQuery={searchQuery}
-      onSearchChange={onSearchChange}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      totalRecords={totalRecords}
-      rowsPerPage={rowsPerPage}
-      onPageChange={onPageChange}
-      onRowsPerPageChange={onRowsPerPageChange}
-      {...(onAdd ? { onAdd } : {})}
-      addLabel="Add Deal Task"
-    />
+    <>
+      <TableNav searchQuery={searchQuery} onSearchChange={onSearchChange} searchPlaceholder="Search deal tasks...">
+        <button className="btn btn-primary" onClick={onAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Plus size={16} /> Add Deal Task
+        </button>
+      </TableNav>
+      <Table wrapperClassName="table-scroll" className="data-table">
+        <THead>
+          <TRow>
+            <TCell variant="th">Sl No</TCell>
+            <TCell variant="th">Title</TCell>
+            <TCell variant="th">Scheduled Date</TCell>
+            <TCell variant="th">Assigned To</TCell>
+            <TCell variant="th">Priority</TCell>
+            <TCell variant="th">Status</TCell>
+            <TCell variant="th">Lead</TCell>
+            <TCell variant="th">Actions</TCell>
+          </TRow>
+        </THead>
+        <TBody>
+          {data.length === 0 ? (
+            <EmptyState colSpan={8} />
+          ) : (
+            data.map((item, idx) => (
+              <TRow key={item.id}>
+                <TCell>{startIndex + idx + 1}</TCell>
+                <TCell>{item.title}</TCell>
+                <TCell>{item.scheduledDate}</TCell>
+                <TCell>{item.assignedTo?.name ?? '-'}</TCell>
+                <TCell><span className={`status-badge status-${(item.priority || '').toLowerCase()}`}>{item.priority || '-'}</span></TCell>
+                <TCell><span className={`status-badge status-${(item.status || '').toLowerCase()}`}>{item.status}</span></TCell>
+                <TCell>{item.lead?.name ?? '-'}</TCell>
+                <TCell>
+                  <DealTaskActions
+                    item={item}
+                    dropdownOpen={dropdownOpen}
+                    onToggleDropdown={onToggleDropdown}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                  />
+                </TCell>
+              </TRow>
+            ))
+          )}
+        </TBody>
+      </Table>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalRecords}
+        rowsPerPage={rowsPerPage}
+        onPageChange={onPageChange}
+      />
+    </>
   );
 };
 

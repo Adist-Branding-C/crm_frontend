@@ -6,7 +6,7 @@ import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useFetchCampaigns } from '../hooks/useFetchCampaigns';
 import { useCampaignSubmitHandlers } from '../hooks/useCampaignSubmitHandlers';
 import { useCampaignExport } from '../hooks/useCampaignExport';
-import { useToast } from '../../task-settings/hooks/useToast';
+import { useToast } from '../../../shared/hooks/useToast';
 import { CampaignMapper } from '../mappers/campaign.mapper';
 import { campaignValidationSchema } from '../validations/index';
 import { ADD_CAMPAIGN_INITIAL_VALUES } from '../constants/index';
@@ -14,7 +14,7 @@ import { LABEL_NO_DATA } from '../../../shared/constants/labels';
 import CampaignForm from '../components/CampaignForm';
 import CampaignRow from '../components/CampaignRow';
 import DeleteCampaignDialog from '../components/DeleteCampaignDialog';
-import ToastNotification from '../../task-settings/components/ToastNotification';
+import ToastNotification from '../../../shared/components/ToastNotification';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Drawer from '../../../shared/components/Drawer';
@@ -152,10 +152,10 @@ const CampaignsPage = () => {
       </Modal>
 
       <ToastNotification
-        message={toast.toastMessage}
+        isVisible={toast.showToast}
         type={toast.toastType}
-        visible={toast.showToast}
-        onClose={() => toast.setShowToast(false)}
+        message={toast.toastMessage}
+        onDismiss={() => toast.setShowToast(false)}
       />
     </PageContainer>
   );

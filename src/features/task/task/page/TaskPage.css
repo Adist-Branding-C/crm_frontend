@@ -1,24 +1,27 @@
 @import '../../../../shared/styles/tables.css';
 @import '../../../../shared/styles/buttons.css';
 @import '../../../../shared/styles/badges.css';
-@import '../../../../shared/styles/dropdowns.css';
-@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/pagination.css';
 @import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/drawers.css';
 @import '../../../../shared/styles/modals.css';
-@import '../../../../shared/styles/tabs.css';
-@import '../../../../shared/styles/toolbars.css';
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/sidebar-layout.css';
 
-.task-settings-page .table-container,
-.task-settings-page .table-scroll {
+.task-settings-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.task-table-wrapper .table-container,
+.task-table-wrapper .table-scroll {
   overflow: visible;
 }
 
-.task-settings-page .dropdown-menu {
-  z-index: 9999;
-}
-
-.task-table-wrapper {
-  width: 100%;
+.task-table-wrapper .dropdown-container {
+  position: relative;
 }
 
 .form-row {

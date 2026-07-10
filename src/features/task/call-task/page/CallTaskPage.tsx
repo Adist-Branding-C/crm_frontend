@@ -5,9 +5,9 @@ import CallTaskTable from '../components/CallTaskTable';
 import AddCallTaskDrawer from '../components/AddCallTaskDrawer';
 import EditCallTaskDrawer from '../components/EditCallTaskDrawer';
 import DeleteCallTaskDialog from '../components/DeleteCallTaskDialog';
-import ToastNotification from '../../shared/components/ToastNotification';
+import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../../../shared/components/SettingsTabs';
+import SettingsTabs from '../../../task-settings/components/SettingsTabs/SettingsTabs';
 import { taskTabs } from '../../shared/taskTabs';
 import './CallTaskPage.css';
 
@@ -20,7 +20,7 @@ const CallTaskPage = () => {
   return (
     <div className="task-settings-page">
       <PageHeader title="Call Task" description="Manage your call tasks" />
-      <SettingsTabs items={taskTabs} />
+      <SettingsTabs tabs={taskTabs} />
       <div className="account-content">
         <div className="call-task-table-wrapper">
           <CallTaskTable
@@ -38,8 +38,6 @@ const CallTaskPage = () => {
             onEdit={editDrawer.openEditDrawer}
             onDelete={deleteDialog.handleDeleteClick}
             onAdd={addDrawer.openAddDrawer}
-            staffOptions={staff.staffOptions}
-            leadOptions={leads.leadOptions}
           />
         </div>
         <AddCallTaskDrawer
@@ -76,7 +74,7 @@ const CallTaskPage = () => {
           onClose={deleteDialog.closeDeleteDialog}
         />
       </div>
-      <ToastNotification message={toast.toastMessage} type={toast.toastType} visible={toast.showToast} onClose={() => toast.setShowToast(false)} />
+      <ToastNotification isVisible={toast.showToast} type={toast.toastType} message={toast.toastMessage} onDismiss={() => toast.setShowToast(false)} />
     </div>
   );
 };

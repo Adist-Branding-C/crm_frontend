@@ -1,15 +1,14 @@
 import { useTableData } from '../../../../shared/hooks/useTableData';
+import { ResponseMapper } from '../../../../shared/mappers/response.mapper';
 import { callReasonApiService } from '../services';
 import type { CallReason } from '../types/index';
 
 export function useFetchCallReasons() {
   const pagination = useTableData<CallReason>({
     fetchFn: async (params) => {
-      const response = await callReasonApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
+      const response = await callReasonApiService.fetchAll(params);
       if (response.status) {
-        const data = response.data as { items: CallReason[]; pagination?: { total: number } } | undefined;
-        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
-        return { items: Array.isArray(items) ? items : [], total: data?.pagination?.total ?? (Array.isArray(items) ? items.length : 0) };
+        return ResponseMapper.toPagedList<CallReason>(response.data);
       }
       throw new Error(response.message || 'Failed to fetch call reasons');
     },
@@ -23,6 +22,8 @@ export function useFetchCallReasons() {
     setPageNumber: pagination.setPageNumber,
     limit: pagination.limit,
     totalCount: pagination.totalCount,
+    startIndex: pagination.startIndex,
+    totalPages: pagination.totalPages,
     searchQuery: pagination.searchQuery,
     handleSearchChange: pagination.handleSearchChange,
     handleRowsPerPageChange: pagination.handleRowsPerPageChange,

@@ -4,12 +4,12 @@ import { useTaskSubmitHandlers } from './useTaskSubmitHandlers';
 import { useAddTaskDrawer } from './useAddTaskDrawer';
 import { useEditTaskDrawer } from './useEditTaskDrawer';
 import { useDeleteTaskDialog } from './useDeleteTaskDialog';
-import { useRowDropdown } from '../../shared/hooks/useRowDropdown';
+import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
 import { useCategoryOptions } from '../../shared/hooks/useCategoryOptions';
 import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
-import { useTaskSettingsSearch } from '../../../task-settings/hooks/useTaskSettingsSearch';
-import { useToast } from '../../hooks/useToast';
+import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
+import { useToast } from '../../../../shared/hooks/useToast';
 
 export function useTaskPage() {
   const fetch = useFetchTasks();
@@ -24,7 +24,7 @@ export function useTaskPage() {
   const addDrawer = useAddTaskDrawer(loadAddLookups);
   const editDrawer = useEditTaskDrawer(loadAddLookups);
   const deleteDialog = useDeleteTaskDialog();
-  const dropdown = useRowDropdown();
+  const dropdown = useDropdownMenu<number>();
   const toast = useToast();
   const handlers = useTaskSubmitHandlers(
     {
@@ -38,7 +38,7 @@ export function useTaskPage() {
     toast,
   );
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
 

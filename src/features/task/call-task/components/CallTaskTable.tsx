@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
-import { DataTable } from '../../../../shared/components/table';
-import CallTaskActions from './CallTaskActions';
-import type { CallTaskItem, CallTaskTableProps } from '../types/index';
-import type { Column } from '../../../../shared/components/table';
+import { Plus } from 'lucide-react';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
+import CallTaskRow from './CallTaskRow';
+import type { CallTaskTableProps } from '../types/index';
 
 const CallTaskTable = ({
   data,
@@ -13,65 +12,60 @@ const CallTaskTable = ({
   totalRecords,
   rowsPerPage,
   onPageChange,
-  onRowsPerPageChange,
   dropdownOpen,
   onToggleDropdown,
   onEdit,
   onDelete,
   onAdd,
-  staffOptions,
-  leadOptions,
 }: CallTaskTableProps) => {
-  const columns: Column<CallTaskItem>[] = useMemo(() => [
-    { header: 'Sl No' },
-    { header: 'Title', accessor: 'title' },
-    { header: 'Scheduled Date', accessor: 'scheduledDate' },
-   
-    {
-      header: 'Assigned To',
-      render: (row) => row.assignedTo?.name ?? '-',
-    },
-    {
-      header: 'Priority',
-      render: (row) => <span className={`status-badge status-${(row.priority || '').toLowerCase()}`}>{row.priority || '-'}</span>,
-    },
-    {
-      header: 'Status',
-      render: (row) => <span className={`status-badge status-${(row.status || '').toLowerCase()}`}>{row.status}</span>,
-    },
-    {
-      header: 'Lead',
-      render: (row) => row.lead?.name ?? '-',
-    },
-    {
-      header: 'Actions',
-      render: (row) => (
-        <CallTaskActions
-          item={row}
-          dropdownOpen={dropdownOpen}
-          onToggleDropdown={onToggleDropdown}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ),
-    },
-  ], [dropdownOpen, onToggleDropdown, onEdit, onDelete]);
+  const startIndex = (currentPage - 1) * rowsPerPage;
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      searchQuery={searchQuery}
-      onSearchChange={onSearchChange}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      totalRecords={totalRecords}
-      rowsPerPage={rowsPerPage}
-      onPageChange={onPageChange}
-      onRowsPerPageChange={onRowsPerPageChange}
-      {...(onAdd ? { onAdd } : {})}
-      addLabel="Add Call Task"
-    />
+    <>
+      <TableNav searchQuery={searchQuery} onSearchChange={onSearchChange} searchPlaceholder="Search call tasks...">
+        <button className="btn btn-primary" onClick={onAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Plus size={16} /> Add Call Task
+        </button>
+      </TableNav>
+      <Table wrapperClassName="table-scroll" className="data-table">
+        <THead>
+          <TRow>
+            <TCell variant="th">Sl No</TCell>
+            <TCell variant="th">Title</TCell>
+            <TCell variant="th">Scheduled Date</TCell>
+            <TCell variant="th">Assigned To</TCell>
+            <TCell variant="th">Priority</TCell>
+            <TCell variant="th">Status</TCell>
+            <TCell variant="th">Lead</TCell>
+            <TCell variant="th">Actions</TCell>
+          </TRow>
+        </THead>
+        <TBody>
+          {data.length === 0 ? (
+            <EmptyState colSpan={8} />
+          ) : (
+            data.map((item, idx) => (
+              <CallTaskRow
+                key={item.id}
+                item={item}
+                index={startIndex + idx}
+                dropdownOpen={dropdownOpen}
+                onToggleDropdown={onToggleDropdown}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))
+          )}
+        </TBody>
+      </Table>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalRecords}
+        rowsPerPage={rowsPerPage}
+        onPageChange={onPageChange}
+      />
+    </>
   );
 };
 

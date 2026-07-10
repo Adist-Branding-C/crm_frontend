@@ -65,12 +65,19 @@ export interface CampaignTaskTableProps {
   onEdit: (item: CampaignTaskItem) => void;
   onDelete: (item: CampaignTaskItem) => void;
   onAdd?: () => void;
-  staffOptions: StaffOption[];
-  leadOptions: LeadOption[];
 }
 
 export interface CampaignTaskActionsProps {
   item: CampaignTaskItem;
+  dropdownOpen: number | null;
+  onToggleDropdown: (id: number | null) => void;
+  onEdit: (item: CampaignTaskItem) => void;
+  onDelete: (item: CampaignTaskItem) => void;
+}
+
+export interface CampaignTaskRowProps {
+  item: CampaignTaskItem;
+  index: number;
   dropdownOpen: number | null;
   onToggleDropdown: (id: number | null) => void;
   onEdit: (item: CampaignTaskItem) => void;

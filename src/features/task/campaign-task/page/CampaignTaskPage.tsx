@@ -5,9 +5,9 @@ import CampaignTaskTable from '../components/CampaignTaskTable';
 import AddCampaignTaskDrawer from '../components/AddCampaignTaskDrawer';
 import EditCampaignTaskDrawer from '../components/EditCampaignTaskDrawer';
 import DeleteCampaignTaskDialog from '../components/DeleteCampaignTaskDialog';
-import ToastNotification from '../../shared/components/ToastNotification';
+import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../../../shared/components/SettingsTabs';
+import SettingsTabs from '../../../task-settings/components/SettingsTabs/SettingsTabs';
 import { taskTabs } from '../../shared/taskTabs';
 import './CampaignTaskPage.css';
 
@@ -20,7 +20,7 @@ const CampaignTaskPage = () => {
   return (
     <div className="task-settings-page">
       <PageHeader title="Campaign Task" description="Manage your campaign tasks" />
-      <SettingsTabs items={taskTabs} />
+      <SettingsTabs tabs={taskTabs} />
       <div className="account-content">
         <div className="campaign-task-table-wrapper">
           <CampaignTaskTable
@@ -38,8 +38,6 @@ const CampaignTaskPage = () => {
             onEdit={editDrawer.openEditDrawer}
             onDelete={deleteDialog.handleDeleteClick}
             onAdd={addDrawer.openAddDrawer}
-            staffOptions={staff.staffOptions}
-            leadOptions={leads.leadOptions}
           />
         </div>
         <AddCampaignTaskDrawer
@@ -76,7 +74,7 @@ const CampaignTaskPage = () => {
           onClose={deleteDialog.closeDeleteDialog}
         />
       </div>
-      <ToastNotification message={toast.toastMessage} type={toast.toastType} visible={toast.showToast} onClose={() => toast.setShowToast(false)} />
+      <ToastNotification isVisible={toast.showToast} type={toast.toastType} message={toast.toastMessage} onDismiss={() => toast.setShowToast(false)} />
     </div>
   );
 };

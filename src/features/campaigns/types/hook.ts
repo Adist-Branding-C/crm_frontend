@@ -20,3 +20,9 @@ export interface FetchHandlers {
 export interface ToastHandlers {
   showToastMessage: (msg: string, type: 'success' | 'error') => void;
 }
+
+export interface ParsedApiError {
+  message: string;
+  errors?: Record<string, string[]>;
+  field?: string;
+}

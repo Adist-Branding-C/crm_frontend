@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
-import { DataTable } from '../../../../shared/components/table';
-import TaskActions from './TaskActions';
-import type { TaskItem, TaskTableProps } from '../types/index';
-import type { Column } from '../../../../shared/components/table';
+import { Plus } from 'lucide-react';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
+import TaskRow from './TaskRow';
+import type { TaskTableProps } from '../types/index';
 
 const TaskTable = ({
   data,
@@ -13,69 +12,61 @@ const TaskTable = ({
   totalRecords,
   rowsPerPage,
   onPageChange,
-  onRowsPerPageChange,
   dropdownOpen,
   onToggleDropdown,
   onEdit,
   onDelete,
   onAdd,
-  categoryOptions,
-  staffOptions,
-  leadOptions,
 }: TaskTableProps) => {
-  const columns: Column<TaskItem>[] = useMemo(() => [
-    { header: 'Sl No' },
-    { header: 'Title', accessor: 'title' },
-    {
-      header: 'Category',
-      render: (row) => row.category?.name ?? '-',
-    },
-    { header: 'Scheduled Date', accessor: 'scheduledDate' },
-    {
-      header: 'Assigned To',
-      render: (row) => row.assignedTo?.name ?? '-',
-    },
-    {
-      header: 'Priority',
-      render: (row) => <span className={`status-badge status-${(row.priority || '').toLowerCase()}`}>{row.priority || '-'}</span>,
-    },
-    {
-      header: 'Status',
-      render: (row) => <span className={`status-badge status-${(row.status || '').toLowerCase()}`}>{row.status}</span>,
-    },
-    {
-      header: 'Lead',
-      render: (row) => row.lead?.name ?? '-',
-    },
-    {
-      header: 'Actions',
-      render: (row) => (
-        <TaskActions
-          item={row}
-          dropdownOpen={dropdownOpen}
-          onToggleDropdown={onToggleDropdown}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ),
-    },
-  ], [dropdownOpen, onToggleDropdown, onEdit, onDelete]);
+  const startIndex = (currentPage - 1) * rowsPerPage;
 
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      searchQuery={searchQuery}
-      onSearchChange={onSearchChange}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      totalRecords={totalRecords}
-      rowsPerPage={rowsPerPage}
-      onPageChange={onPageChange}
-      onRowsPerPageChange={onRowsPerPageChange}
-      {...(onAdd ? { onAdd } : {})}
-      addLabel="Add Task"
-    />
+    <>
+      <TableNav searchQuery={searchQuery} onSearchChange={onSearchChange} searchPlaceholder="Search tasks...">
+        <button className="btn btn-primary" onClick={onAdd} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Plus size={16} /> Add Task
+        </button>
+      </TableNav>
+      <Table wrapperClassName="table-scroll" className="data-table">
+        <THead>
+          <TRow>
+            <TCell variant="th">Sl No</TCell>
+            <TCell variant="th">Title</TCell>
+            <TCell variant="th">Category</TCell>
+            <TCell variant="th">Scheduled Date</TCell>
+            <TCell variant="th">Assigned To</TCell>
+            <TCell variant="th">Priority</TCell>
+            <TCell variant="th">Status</TCell>
+            <TCell variant="th">Lead</TCell>
+            <TCell variant="th">Actions</TCell>
+          </TRow>
+        </THead>
+        <TBody>
+          {data.length === 0 ? (
+            <EmptyState colSpan={9} />
+          ) : (
+            data.map((item, idx) => (
+              <TaskRow
+                key={item.id}
+                item={item}
+                index={startIndex + idx}
+                dropdownOpen={dropdownOpen}
+                onToggleDropdown={onToggleDropdown}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))
+          )}
+        </TBody>
+      </Table>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalRecords}
+        rowsPerPage={rowsPerPage}
+        onPageChange={onPageChange}
+      />
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
-import ActionMenuPortal from '../../shared/components/ActionMenuPortal';
+import ActionMenuPortal from '../../../task-settings/components/ActionMenuPortal';
 import type { CallTaskActionsProps } from '../types/index';
 
 const CallTaskActions = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDelete }: CallTaskActionsProps) => {

@@ -75,14 +75,20 @@ export interface TaskTableProps {
   onEdit: (item: TaskItem) => void;
   onDelete: (item: TaskItem) => void;
   onAdd?: () => void;
-  categoryOptions: CategoryOption[];
-  staffOptions: StaffOption[];
-  leadOptions: LeadOption[];
 }
 
 // ---- Action Menu Types ----
 export interface TaskActionsProps {
   item: TaskItem;
+  dropdownOpen: number | null;
+  onToggleDropdown: (id: number | null) => void;
+  onEdit: (item: TaskItem) => void;
+  onDelete: (item: TaskItem) => void;
+}
+
+export interface TaskRowProps {
+  item: TaskItem;
+  index: number;
   dropdownOpen: number | null;
   onToggleDropdown: (id: number | null) => void;
   onEdit: (item: TaskItem) => void;
