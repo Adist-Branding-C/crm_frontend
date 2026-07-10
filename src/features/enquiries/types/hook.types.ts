@@ -1,48 +1,41 @@
 import type { Dispatch, SetStateAction } from 'react';
-import type { Lead } from './index';
+import type { Lead, AdditionalFieldDef } from './index';
 import type { Filters } from './index';
 import type { SortConfig } from '../../../shared/types/sort';
+import type { LabelValuePair } from '../../../shared/types/common';
 
 export interface UseLeadBulkActionsOptions {
-  selectedIds: number[];
+  selectedIds: string[];
   onRefresh: () => void;
   onShowToast: (message: string, type: 'success' | 'error') => void;
-  onClearSelection: Dispatch<SetStateAction<number[]>>;
+  onClearSelection: Dispatch<SetStateAction<string[]>>;
 }
 
-export interface UseLeadToastReturn {
-  toastMessage: string;
-  toastType: 'success' | 'error';
-  showToast: boolean;
-  showToastMessage: (message: string, type: 'success' | 'error') => void;
-  setShowToast: (v: boolean) => void;
-  clearToast: () => void;
-}
-
-export interface UseLeadCrudReturn {
+export interface UseLeadListDataReturn {
   leads: Lead[];
   total: number;
   totalPages: number;
   isLoading: boolean;
-  deleteTargetLead: Lead | null;
-  isDeleting: boolean;
   fetchLeads: (page: number, limit: number, search: string, extraParams?: Record<string, string | number>) => Promise<void>;
-  handleDeleteClick: (lead: Lead) => void;
-  handleConfirmDelete: () => Promise<void>;
-  handleCloseDelete: () => void;
   refreshCurrentPage: () => void;
+  deleteLead: (leadId: string) => Promise<boolean>;
+  handleLeadSaved: (action: 'created' | 'updated') => void;
 }
 
 export interface UseLeadPaginationReturn {
-  searchQuery: string;
   currentPage: number;
   rowsPerPage: number;
   startIndex: number;
   totalItems: number;
-  setSearchQuery: (v: string) => void;
   handleSetCurrentPage: (page: number | ((prev: number) => number)) => void;
-  handleRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleRowsPerPageChange: (value: number) => void;
   resetPage: () => void;
+}
+
+export interface UseLeadSearchReturn {
+  searchQuery: string;
+  setSearchQuery: (v: string) => void;
+  resetSearch: () => void;
 }
 
 export interface UseLeadSortReturn {
@@ -60,7 +53,28 @@ export interface UseLeadFiltersReturn {
   setFilters: (filters: Filters) => void;
   setShowFilters: (v: boolean) => void;
   handleApplyFilters: () => void;
-  clearFilters: () => void;
+}
+
+export interface UseLeadActionMenuReturn {
+  openId: string | null;
+  buttonRect: DOMRect | null;
+  open: (id: string, rect: DOMRect) => void;
+  close: () => void;
+}
+
+export interface UseLeadRowActionsReturn {
+  handleDeleteFromRow: (lead: Lead) => void;
+  handleDeleteFromDrawer: (lead: Lead) => void;
+}
+
+export interface UseLeadFilterOptionsReturn {
+  typeOptions: LabelValuePair[];
+  sourceOptions: LabelValuePair[];
+  purposeOptions: LabelValuePair[];
+  staffOptions: LabelValuePair[];
+  statusOptions: LabelValuePair[];
+  additionalFields: AdditionalFieldDef[];
+  isLoading: boolean;
 }
 
 export interface UseLeadBulkActionsReturn {
@@ -78,6 +92,5 @@ export interface UseLeadBulkActionsReturn {
   handleDeleteSelectedClick: () => void;
   handleConfirmDeleteSelected: () => Promise<void>;
   handleExportSelected: () => void;
-  handleSendFollowUp: () => void;
   handleDuplicateLeadAction: () => void;
 }

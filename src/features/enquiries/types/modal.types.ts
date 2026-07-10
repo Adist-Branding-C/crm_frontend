@@ -13,11 +13,3 @@ export interface AssignStaffModalProps {
   onConfirm: (staffId: string) => void;
   onClose: () => void;
 }
-
-export interface DeleteSelectedModalProps {
-  isOpen: boolean;
-  selectedCount: number;
-  isProcessing: boolean;
-  onConfirm: () => void;
-  onClose: () => void;
-}

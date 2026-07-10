@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { activityService } from '../services/activityService';
-
-interface ActivityItem {
-  id: string;
-  type: string;
-  description: string;
-  createdAt: string;
-  performedBy: string;
-  [key: string]: unknown;
-}
+import { ERROR_MESSAGES } from '../constants/messages';
+import type { ActivityItem } from '../types';
 
 export function useLeadActivities(leadId: number | undefined, isOpen: boolean) {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
@@ -42,7 +35,7 @@ export function useLeadActivities(leadId: number | undefined, isOpen: boolean) {
         }
       } catch {
         if (!cancelled) {
-          setError('Failed to load activities.');
+          setError(ERROR_MESSAGES.FETCH_ACTIVITIES);
         }
       } finally {
         if (!cancelled) {
