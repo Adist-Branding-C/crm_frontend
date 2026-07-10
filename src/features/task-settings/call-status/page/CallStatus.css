@@ -15,7 +15,10 @@
   overflow: hidden;
 }
 
-.call-status-table-wrapper .table-container,
+.call-status-table-wrapper.table-container {
+  overflow: visible;
+}
+
 .call-status-table-wrapper .table-scroll {
   overflow: visible;
 }

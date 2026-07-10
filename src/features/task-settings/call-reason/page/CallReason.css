@@ -15,7 +15,10 @@
   overflow: hidden;
 }
 
-.call-reason-table-wrapper .table-container,
+.call-reason-table-wrapper.table-container {
+  overflow: visible;
+}
+
 .call-reason-table-wrapper .table-scroll {
   overflow: visible;
 }
