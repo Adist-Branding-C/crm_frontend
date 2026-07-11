@@ -264,7 +264,6 @@
   cursor: grabbing;
 }
 
-/* Card being dragged — ghost stays in DOM so we fade it */
 .deal-card--dragging {
   opacity: 0.45;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -272,7 +271,6 @@
   cursor: grabbing;
 }
 
-/* Floating preview card that follows the pointer (dnd-kit DragOverlay) */
 .deal-card--overlay {
   cursor: grabbing;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
@@ -280,7 +278,6 @@
   width: 280px;
 }
 
-/* Column highlighted when a dragged card hovers over it */
 .pipeline-column--drop-target {
   border-color: var(--primary);
   background: rgba(241, 65, 79, 0.06);
@@ -288,7 +285,6 @@
   transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Empty state drop zone highlight */
 .pipeline-column-empty--active {
   color: var(--primary);
 }
