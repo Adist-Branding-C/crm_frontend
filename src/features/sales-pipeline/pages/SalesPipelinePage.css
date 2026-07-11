@@ -495,8 +495,6 @@
   padding: 0 0.5rem;
 }
 
-/* Toast notification (shared component/hook pattern also used by
-   account-settings/agent, account-settings/branch, and the task pages) */
 .toast-notification {
   position: fixed;
   bottom: 2rem;
@@ -529,6 +527,7 @@
     opacity: 0;
     transform: translateY(1rem);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
