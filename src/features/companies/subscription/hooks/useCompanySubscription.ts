@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { subscriptionDataService } from '../services/subscriptionDataService';
-import { mapSubscriptionApiToUI, mapHistoryApiToUI } from '../mappers/subscriptionMapper';
+import { mapSubscriptionApiToUI } from '../mappers/subscriptionMapper';
 import { getErrorMessage } from '../../../../shared/utils/error';
-import type { SubscriptionDetail, SubscriptionHistoryEntry } from '../types';
+import type { SubscriptionDetail } from '../types';
 import type { CreateSubscriptionPayload, UpdateStaffCountPayload, UpdateSubscriptionStatusPayload } from '../types/request';
 
 function isNotFound(err: unknown): boolean {
@@ -10,9 +10,11 @@ function isNotFound(err: unknown): boolean {
 }
 
 /**
- * Owns the current subscription + its history for one company, and the mutation
- * actions (create/update staff count/update status) - refetches both after each
- * successful mutation so the overview and history stay in sync.
+ * Owns the current subscription for one company and its CRUD (create/update staff
+ * count/update status) - a single entity's fetch + mutations, nothing else. The subscription's
+ * history is a separate read-only concern owned by useSubscriptionHistory; this hook doesn't
+ * fetch or return it. The page composes both and refetches history itself after a mutation here
+ * succeeds, rather than this hook reaching into history's refetch on its own.
  *
  * Used by:
  * - CompanySubscriptionPage
@@ -23,27 +25,10 @@ export function useCompanySubscription(companyId: string | undefined) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [history, setHistory] = useState<SubscriptionHistoryEntry[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(true);
-
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
 
-  const fetchHistory = useCallback(async () => {
-    if (!companyId) return;
-    setHistoryLoading(true);
-    try {
-      const res = await subscriptionDataService.getHistoryByCompanyId(companyId);
-      const items = res.data ?? [];
-      setHistory(items.map(mapHistoryApiToUI));
-    } catch {
-      setHistory([]);
-    } finally {
-      setHistoryLoading(false);
-    }
-  }, [companyId]);
-
-  const fetchSubscription = useCallback(async () => {
+  const refetchSubscription = useCallback(async () => {
     if (!companyId) return;
     setIsLoading(true);
     setError('');
@@ -69,17 +54,15 @@ export function useCompanySubscription(companyId: string | undefined) {
   }, [companyId]);
 
   useEffect(() => {
-    fetchSubscription();
-    fetchHistory();
-  }, [fetchSubscription, fetchHistory]);
+    refetchSubscription();
+  }, [refetchSubscription]);
 
   const createSubscription = useCallback(async (payload: CreateSubscriptionPayload): Promise<boolean> => {
     setIsSaving(true);
     setSaveError('');
     try {
       await subscriptionDataService.createSubscription(payload);
-      await fetchSubscription();
-      await fetchHistory();
+      await refetchSubscription();
       return true;
     } catch (err: unknown) {
       setSaveError(getErrorMessage(err, 'Failed to create subscription'));
@@ -87,7 +70,7 @@ export function useCompanySubscription(companyId: string | undefined) {
     } finally {
       setIsSaving(false);
     }
-  }, [fetchSubscription, fetchHistory]);
+  }, [refetchSubscription]);
 
   const updateStaffCount = useCallback(async (payload: UpdateStaffCountPayload): Promise<boolean> => {
     if (!subscription) return false;
@@ -95,8 +78,7 @@ export function useCompanySubscription(companyId: string | undefined) {
     setSaveError('');
     try {
       await subscriptionDataService.updateStaffCount(subscription.id, payload);
-      await fetchSubscription();
-      await fetchHistory();
+      await refetchSubscription();
       return true;
     } catch (err: unknown) {
       setSaveError(getErrorMessage(err, 'Failed to update staff count'));
@@ -104,7 +86,7 @@ export function useCompanySubscription(companyId: string | undefined) {
     } finally {
       setIsSaving(false);
     }
-  }, [subscription, fetchSubscription, fetchHistory]);
+  }, [subscription, refetchSubscription]);
 
   const updateStatus = useCallback(async (payload: UpdateSubscriptionStatusPayload): Promise<boolean> => {
     if (!subscription) return false;
@@ -112,8 +94,7 @@ export function useCompanySubscription(companyId: string | undefined) {
     setSaveError('');
     try {
       await subscriptionDataService.updateStatus(subscription.id, payload);
-      await fetchSubscription();
-      await fetchHistory();
+      await refetchSubscription();
       return true;
     } catch (err: unknown) {
       setSaveError(getErrorMessage(err, 'Failed to update status'));
@@ -121,25 +102,19 @@ export function useCompanySubscription(companyId: string | undefined) {
     } finally {
       setIsSaving(false);
     }
-  }, [subscription, fetchSubscription, fetchHistory]);
-
-  const refetch = useCallback(async () => {
-    await Promise.all([fetchSubscription(), fetchHistory()]);
-  }, [fetchSubscription, fetchHistory]);
+  }, [subscription, refetchSubscription]);
 
   return {
     subscription,
     notFound,
     isLoading,
     error,
-    history,
-    historyLoading,
     isSaving,
     saveError,
     setSaveError,
     createSubscription,
     updateStaffCount,
     updateStatus,
-    refetch,
+    refetchSubscription,
   };
 }

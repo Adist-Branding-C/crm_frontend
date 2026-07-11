@@ -6,12 +6,14 @@ import PageContainer from '../../../../shared/components/layout/PageContainer';
 import { companyDataService } from '../../services/companyDataService';
 import { mapApiToUI } from '../../mappers/companyMapper';
 import { useCompanySubscription } from '../hooks/useCompanySubscription';
+import { useSubscriptionHistory } from '../hooks/useSubscriptionHistory';
 import { useRenewalQueue } from '../hooks/useRenewalQueue';
 import SubscriptionOverviewCard from '../components/SubscriptionOverviewCard';
 import AssignSubscriptionForm from '../components/AssignSubscriptionForm';
 import RenewalQueueSection from '../components/RenewalQueueSection';
 import SubscriptionHistoryTable from '../components/SubscriptionHistoryTable';
 import type { Company } from '../../types';
+import type { CreateSubscriptionPayload, UpdateStaffCountPayload, UpdateSubscriptionStatusPayload } from '../types/request';
 import './CompanySubscriptionPage.css';
 
 const CompanySubscriptionPage = () => {
@@ -20,6 +22,7 @@ const CompanySubscriptionPage = () => {
   const [companyError, setCompanyError] = useState('');
 
   const subscriptionState = useCompanySubscription(companyId);
+  const historyState = useSubscriptionHistory(companyId);
   const queueState = useRenewalQueue(companyId);
 
   useEffect(() => {
@@ -36,6 +39,26 @@ const CompanySubscriptionPage = () => {
   }, [companyId]);
 
   if (!companyId) return null;
+
+  // Every subscription mutation appends a new history row server-side - refetch history
+  // alongside the subscription itself rather than baking that coordination into either hook.
+  const createSubscription = async (payload: CreateSubscriptionPayload) => {
+    const success = await subscriptionState.createSubscription(payload);
+    if (success) await historyState.refetch();
+    return success;
+  };
+
+  const updateStaffCount = async (payload: UpdateStaffCountPayload) => {
+    const success = await subscriptionState.updateStaffCount(payload);
+    if (success) await historyState.refetch();
+    return success;
+  };
+
+  const updateStatus = async (payload: UpdateSubscriptionStatusPayload) => {
+    const success = await subscriptionState.updateStatus(payload);
+    if (success) await historyState.refetch();
+    return success;
+  };
 
   return (
     <PageContainer>
@@ -58,7 +81,7 @@ const CompanySubscriptionPage = () => {
           isSaving={subscriptionState.isSaving}
           error={subscriptionState.saveError}
           onClearError={() => subscriptionState.setSaveError('')}
-          onSubmit={subscriptionState.createSubscription}
+          onSubmit={createSubscription}
         />
       ) : subscriptionState.subscription ? (
         <>
@@ -67,8 +90,8 @@ const CompanySubscriptionPage = () => {
             isSaving={subscriptionState.isSaving}
             error={subscriptionState.saveError}
             onClearError={() => subscriptionState.setSaveError('')}
-            onUpdateStaffCount={subscriptionState.updateStaffCount}
-            onUpdateStatus={subscriptionState.updateStatus}
+            onUpdateStaffCount={updateStaffCount}
+            onUpdateStatus={updateStatus}
           />
 
           <RenewalQueueSection
@@ -80,21 +103,27 @@ const CompanySubscriptionPage = () => {
             onClearError={() => queueState.setSaveError('')}
             onCreate={async (payload) => {
               // An immediate=true queue creation renews the subscription right away on the
-              // backend - refetch it too, not just the queue, so the overview/history stay in sync.
+              // backend - refetch subscription + history too, not just the queue.
               const success = await queueState.createQueue(payload);
-              if (success && payload.immediate) await subscriptionState.refetch();
+              if (success && payload.immediate) {
+                await subscriptionState.refetchSubscription();
+                await historyState.refetch();
+              }
               return success;
             }}
             onUpdate={queueState.updateQueue}
             onDelete={queueState.deleteQueue}
             onApplyNow={async () => {
               const success = await queueState.applyNow();
-              if (success) await subscriptionState.refetch();
+              if (success) {
+                await subscriptionState.refetchSubscription();
+                await historyState.refetch();
+              }
               return success;
             }}
           />
 
-          <SubscriptionHistoryTable history={subscriptionState.history} isLoading={subscriptionState.historyLoading} />
+          <SubscriptionHistoryTable history={historyState.history} isLoading={historyState.isLoading} />
         </>
       ) : null}
     </PageContainer>

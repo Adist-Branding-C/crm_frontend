@@ -1,6 +1,8 @@
 import { Plus, Loader2 } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
 import ValidationAlert from '../../../../shared/components/ValidationAlert';
+import StaffPricingFields from './StaffPricingFields';
+import SubscriptionTotalPreview from './SubscriptionTotalPreview';
 import { assignSubscriptionValidationSchema } from '../validations/subscription.validation';
 import type { CreateSubscriptionPayload } from '../types/request';
 
@@ -76,25 +78,12 @@ const AssignSubscriptionForm = ({ companyId, isSaving, error, onClearError, onSu
                     {touched.durationInDays && errors.durationInDays && <small className="field-error-text">{errors.durationInDays}</small>}
                   </div>
                 </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Staff Count <span className="text-danger">*</span></label>
-                    <Field type="number" name="staffCount" className="form-control" placeholder="Number of seats" />
-                    {touched.staffCount && errors.staffCount && <small className="field-error-text">{errors.staffCount}</small>}
-                  </div>
-                  <div className="form-group">
-                    <label>Per-Staff Price <span className="text-danger">*</span></label>
-                    <Field type="number" name="perStaffPrice" className="form-control" placeholder="Price per seat" />
-                    {touched.perStaffPrice && errors.perStaffPrice && <small className="field-error-text">{errors.perStaffPrice}</small>}
-                  </div>
-                </div>
+                <StaffPricingFields errors={errors} touched={touched} />
                 <div className="form-group">
                   <label>Remark</label>
                   <Field as="textarea" name="remark" className="form-control" rows={2} placeholder="Optional note" />
                 </div>
-                <div className="subscription-total-preview">
-                  Total: <strong>₹{((Number(values.staffCount) || 0) * (Number(values.perStaffPrice) || 0)).toLocaleString()}</strong>
-                </div>
+                <SubscriptionTotalPreview staffCount={values.staffCount} perStaffPrice={values.perStaffPrice} label="Total" />
                 <button type="button" className="btn btn-primary" onClick={submitForm} disabled={isSaving || isSubmitting}>
                   {isSaving || isSubmitting ? <><Loader2 size={16} className="spin" /> Assigning...</> : <><Plus size={16} /> Assign Subscription</>}
                 </button>
