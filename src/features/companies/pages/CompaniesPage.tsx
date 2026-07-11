@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Toast from '../../../shared/components/Toast';
@@ -23,6 +24,7 @@ import './CompaniesPage.css';
 const ROWS_PER_PAGE = 10;
 
 const CompaniesPage = () => {
+  const navigate = useNavigate();
   const toast = useToast();
   const crud = useCompaniesList(toast.showToastMessage);
   const { stats, refreshStatistics } = useCompanyStatistics();
@@ -86,6 +88,10 @@ const CompaniesPage = () => {
     refreshStatistics();
   };
 
+  const handleManageSubscription = (company: Company) => {
+    navigate(`/companies/${company.companyId}/subscription`);
+  };
+
   return (
     <PageContainer>
       <PageHeader title="Company Management" description="Manage CRM tenants and their subscriptions" />
@@ -120,6 +126,7 @@ const CompaniesPage = () => {
           const company = crud.companies.find(c => c.companyId === companyId);
           if (company) deleteConfirm.handleDeleteClick(company);
         }}
+        onManageSubscription={handleManageSubscription}
       />
 
       <CompaniesPagination

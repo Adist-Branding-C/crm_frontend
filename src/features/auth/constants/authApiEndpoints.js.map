@@ -1,1 +1,0 @@
-{"version":3,"file":"authApiEndpoints.js","sourceRoot":"","sources":["authApiEndpoints.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,MAAM,kBAAkB,GAAG;IAChC,KAAK,EAAE,aAAa;IACpB,eAAe,EAAE,uBAAuB;IACxC,cAAc,EAAE,sBAAsB;IACtC,OAAO,EAAE,eAAe;IACxB,MAAM,EAAE,cAAc;CACvB,CAAC"}

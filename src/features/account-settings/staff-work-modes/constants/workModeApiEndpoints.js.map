@@ -1,1 +1,0 @@
-{"version":3,"file":"workModeApiEndpoints.js","sourceRoot":"","sources":["workModeApiEndpoints.ts"],"names":[],"mappings":"AAAA,iGAAiG;AACjG,MAAM,CAAC,MAAM,uBAAuB,GAAG;IACrC,OAAO,EAAE,YAAY;IACrB,MAAM,EAAE,YAAY;IACpB,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,cAAc,EAAE,EAAE;IAC1C,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,cAAc,EAAE,EAAE;CAC3C,CAAC"}

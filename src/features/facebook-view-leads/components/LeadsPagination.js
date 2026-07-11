@@ -1,8 +1,0 @@
-import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
-import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { LABEL_SHOWING, LABEL_TO, LABEL_OF, LABEL_ENTRIES, LABEL_PREVIOUS, LABEL_NEXT } from '../../../shared/constants/labels';
-const LeadsPagination = React.memo(({ currentPage, totalPages, totalItems, rowsPerPage, onPageChange }) => (_jsxs("div", { className: "pagination-bar", children: [_jsxs("span", { className: "showing-text", children: [LABEL_SHOWING, " ", (currentPage - 1) * rowsPerPage + 1, " ", LABEL_TO, " ", Math.min(currentPage * rowsPerPage, totalItems), " ", LABEL_OF, " ", totalItems, " ", LABEL_ENTRIES] }), _jsxs("div", { className: "pagination-controls", children: [_jsxs("button", { className: "pagination-btn", onClick: () => onPageChange(Math.max(1, currentPage - 1)), disabled: currentPage === 1, children: [_jsx(ChevronLeft, { size: 14 }), " ", LABEL_PREVIOUS] }), Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (_jsx("button", { className: `pagination-number ${currentPage === page ? 'active' : ''}`, onClick: () => onPageChange(page), children: page }, page))), _jsxs("button", { className: "pagination-btn", onClick: () => onPageChange(Math.min(totalPages, currentPage + 1)), disabled: currentPage === totalPages, children: [LABEL_NEXT, " ", _jsx(ChevronRight, { size: 14 })] })] })] })));
-LeadsPagination.displayName = 'LeadsPagination';
-export default LeadsPagination;
-//# sourceMappingURL=LeadsPagination.js.map

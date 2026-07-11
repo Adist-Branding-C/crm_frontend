@@ -54,6 +54,7 @@ export interface CompaniesTableProps {
   onView: (company: Company) => void;
   onEdit: (company: Company) => void;
   onDelete: (companyId: string) => void;
+  onManageSubscription: (company: Company) => void;
 }
 
 export interface CompaniesToolbarProps {

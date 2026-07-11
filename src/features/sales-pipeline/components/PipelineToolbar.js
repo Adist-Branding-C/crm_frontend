@@ -1,7 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import { Search } from 'lucide-react';
-const PipelineToolbar = ({ searchQuery, setSearchQuery, activeView, loading, error, fetchLeads, fetchDeals, fetchTasks, }) => {
-    return (_jsxs(_Fragment, { children: [_jsxs("div", { className: "pipeline-search", children: [_jsx(Search, { size: 18, className: "search-icon" }), _jsx("input", { type: "text", placeholder: "Search deals...", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), className: "search-input" })] }), _jsx("button", { className: `btn-filter ${activeView === 'leads' ? 'active' : ''}`, onClick: fetchLeads, disabled: loading, children: "Lead" }), _jsx("button", { className: `btn-filter ${activeView === 'deals' ? 'active' : ''}`, onClick: fetchDeals, disabled: loading, children: "Deal" }), _jsx("button", { className: `btn-filter ${activeView === 'tasks' ? 'active' : ''}`, onClick: fetchTasks, disabled: loading, children: "Task" }), loading && _jsx("span", { className: "pipeline-loading", children: "Loading..." }), error && _jsx("span", { className: "pipeline-error", children: error })] }));
-};
-export default PipelineToolbar;
-//# sourceMappingURL=PipelineToolbar.js.map

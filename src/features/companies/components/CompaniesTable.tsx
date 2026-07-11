@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Edit2, Trash2, Building, User, Mail, Phone, Users } from 'lucide-react';
+import { Eye, Edit2, Trash2, Building, User, Mail, Phone, Users, CreditCard } from 'lucide-react';
 import type { CompaniesTableProps } from '../types';
 import { CompanyStatus } from '../../../shared/constants/enums/companyStatus';
 
@@ -7,7 +7,7 @@ const getStatusBadge = (status: string) => (
   <span className={`status-badge ${status}`}>{status === CompanyStatus.ACTIVE ? 'Active' : 'Inactive'}</span>
 );
 
-const CompaniesTable: React.FC<CompaniesTableProps> = ({ data, selectedRows, onSelectAll, onSelectRow, onView, onEdit, onDelete }) => (
+const CompaniesTable: React.FC<CompaniesTableProps> = ({ data, selectedRows, onSelectAll, onSelectRow, onView, onEdit, onDelete, onManageSubscription }) => (
   <div className="table-container">
     <table className="enquiries-table">
       <thead>
@@ -50,6 +50,7 @@ const CompaniesTable: React.FC<CompaniesTableProps> = ({ data, selectedRows, onS
               <div className="action-buttons">
                 <button className="action-btn" title="View" onClick={() => onView(company)}><Eye size={14} /></button>
                 <button className="action-btn" title="Edit" onClick={() => onEdit(company)}><Edit2 size={14} /></button>
+                <button className="action-btn" title="Subscription" onClick={() => onManageSubscription(company)}><CreditCard size={14} /></button>
                 <button className="action-btn delete" title="Delete" onClick={() => onDelete(company.companyId)}><Trash2 size={14} /></button>
               </div>
             </td>

@@ -1,5 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import { ACTION_CANCEL } from '../../../shared/constants/actionLabels';
-const DeleteCampaignDialog = ({ itemName, onConfirm, onCancel }) => (_jsxs(_Fragment, { children: [_jsx("div", { className: "modal-body", children: _jsxs("p", { className: "delete-warning", children: ["Are you sure you want to delete ", _jsx("strong", { children: itemName }), "? This action cannot be undone."] }) }), _jsxs("div", { className: "modal-footer", children: [_jsx("button", { className: "btn btn-danger", onClick: onConfirm, children: "Delete" }), _jsx("button", { className: "btn btn-secondary", onClick: onCancel, children: ACTION_CANCEL })] })] }));
-export default DeleteCampaignDialog;
-//# sourceMappingURL=DeleteCampaignDialog.js.map

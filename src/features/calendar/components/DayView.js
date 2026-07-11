@@ -1,6 +1,0 @@
-import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
-import { Calendar } from 'lucide-react';
-import { MONTH_NAMES } from '../constants';
-const DayView = ({ currentDate, tasks }) => (_jsxs("div", { className: "day-view", children: [_jsx("div", { className: "day-view-header", children: _jsxs("h3", { children: [MONTH_NAMES[currentDate.getMonth()], " ", currentDate.getDate(), ", ", currentDate.getFullYear()] }) }), _jsx("div", { className: "day-view-body", children: tasks.length === 0 ? (_jsxs("div", { className: "no-tasks-message", children: [_jsx(Calendar, { size: 48 }), _jsx("p", { children: "No tasks scheduled for this day" })] })) : (tasks.map(task => (_jsxs("div", { className: `day-task-card ${task.status}`, children: [_jsx("div", { className: "task-time", children: task.dueTime }), _jsxs("div", { className: "task-info", children: [_jsx("h4", { children: task.title }), _jsxs("p", { children: [task.category, " - ", task.contactName] })] }), _jsx("span", { className: `task-status-badge ${task.status}`, children: task.status })] }, task.id)))) })] }));
-export default DayView;
-//# sourceMappingURL=DayView.js.map

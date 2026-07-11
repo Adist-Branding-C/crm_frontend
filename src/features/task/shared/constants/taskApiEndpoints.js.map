@@ -1,1 +1,0 @@
-{"version":3,"file":"taskApiEndpoints.js","sourceRoot":"","sources":["taskApiEndpoints.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,MAAM,QAAQ,GAAG;IACtB,IAAI,EAAE,QAAQ;IACd,IAAI,EAAE,aAAa;IACnB,IAAI,EAAE,aAAa;IACnB,QAAQ,EAAE,iBAAiB;IAC3B,QAAQ,EAAE,gBAAgB;IAC1B,KAAK,EAAE,QAAQ;IACf,IAAI,EAAE,QAAQ;CACf,CAAC"}

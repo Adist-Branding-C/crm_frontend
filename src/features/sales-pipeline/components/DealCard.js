@@ -1,7 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { MoreHorizontal, DollarSign, Calendar } from 'lucide-react';
-const DealCard = ({ deal, onDragStart, getAvatarColor }) => {
-    return (_jsxs("div", { className: "deal-card", draggable: true, onDragStart: (e) => onDragStart(e, deal), children: [deal.company && (_jsxs("div", { className: "deal-header", children: [_jsx("span", { className: "deal-company", children: deal.company }), _jsx(MoreHorizontal, { size: 16, className: "deal-menu" })] })), _jsx("div", { className: "deal-title", children: deal.dealName }), _jsxs("div", { className: "deal-value", children: [_jsx(DollarSign, { size: 14 }), deal.amount.toLocaleString()] }), _jsxs("div", { className: "deal-footer", children: [_jsxs("div", { className: "deal-contact", children: [_jsx("div", { className: "contact-avatar", style: { background: getAvatarColor(deal.agent) }, children: deal.agent.charAt(0) }), _jsx("span", { children: deal.agent })] }), typeof deal.probability === 'number' && (_jsxs("div", { className: "deal-probability", style: { color: deal.probability === 100 ? '#10b981' : deal.probability === 0 ? '#ef4444' : '#6b7280' }, children: [deal.probability, "%"] }))] }), _jsxs("div", { className: "deal-due", children: [_jsx(Calendar, { size: 12 }), _jsx("span", { children: deal.endDate })] })] }));
-};
-export default DealCard;
-//# sourceMappingURL=DealCard.js.map
