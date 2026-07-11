@@ -1,0 +1,45 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { NavLink, Routes, Route, Navigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
+import PageHeader from '../../../shared/components/layout/PageHeader';
+import LeadReportsLanding from '../sub-pages/LeadReportsLanding';
+import LeadDailyActivityReport from '../sub-pages/LeadDailyActivityReport';
+import LeadGLAPIHistoryReport from '../sub-pages/LeadGLAPIHistoryReport';
+import LeadDeletedLeadsReport from '../sub-pages/LeadDeletedLeadsReport';
+import LeadStatusWise from '../sub-pages/LeadStatusWise';
+import LeadStatusChange from '../sub-pages/LeadStatusChange';
+import LeadSourceWise from '../sub-pages/LeadSourceWise';
+import LeadCheckoutSummary from '../sub-pages/LeadCheckoutSummary';
+import LeadExport from '../sub-pages/LeadExport';
+import LeadExportHistory from '../sub-pages/LeadExportHistory';
+import LeadImportHistory from '../sub-pages/LeadImportHistory';
+import ImportHistoryDetail from '../sub-pages/ImportHistoryDetail';
+import DealReportsLanding from '../sub-pages/DealReportsLanding';
+import DealStageReport from '../sub-pages/DealStageReport';
+import LeadConversionReport from '../sub-pages/LeadConversionReport';
+import DealExportReport from '../sub-pages/DealExportReport';
+import DealExportHistoryReport from '../sub-pages/DealExportHistoryReport';
+import DealDeletedReport from '../sub-pages/DealDeletedReport';
+import TaskReportsLanding from '../sub-pages/TaskReportsLanding';
+import TaskWiseReport from '../sub-pages/TaskWiseReport';
+import LeadChangeReport from '../sub-pages/LeadChangeReport';
+import TaskWorkReport from '../sub-pages/TaskWorkReport';
+import GLDialerCallReport from '../sub-pages/GLDialerCallReport';
+import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
+import CheckinReport from '../sub-pages/CheckinReport';
+import AttendanceReport from '../sub-pages/AttendanceReport';
+import AttendanceProfile from '../sub-pages/AttendanceProfile';
+import { reportCategories, callReportOptions } from '../constants';
+import './ReportsPage.css';
+const ReportsPage = () => {
+    return (_jsx("div", { className: "account-page", children: _jsxs("div", { className: "account-content", style: { width: '100%', maxWidth: '100%' }, children: [_jsx(PageHeader, { title: "Reports", breadcrumb: false }), _jsx("div", { className: "report-tabs", children: reportCategories.map((item) => {
+                        const Icon = item.icon;
+                        return (_jsxs(NavLink, { to: item.path, className: ({ isActive }) => isActive ? 'report-tab active' : 'report-tab', end: item.path === '/reports', children: [_jsx(Icon, { size: 16 }), " ", item.title] }, item.id));
+                    }) }), _jsxs(Routes, { children: [_jsx(Route, { path: "lead/*", element: _jsx(LeadReportsRouter, {}) }), _jsx(Route, { path: "deal/*", element: _jsx(DealReportsRouter, {}) }), _jsx(Route, { path: "task/*", element: _jsx(TaskReportsRouter, {}) }), _jsx(Route, { path: "call/*", element: _jsx(CallReportsRouter, {}) }), _jsx(Route, { path: "checkin", element: _jsx(CheckinReport, {}) }), _jsx(Route, { path: "attendance", element: _jsx(AttendanceReport, {}) }), _jsx(Route, { path: "attendance/profile/:staffId", element: _jsx(AttendanceProfile, {}) }), _jsx(Route, { path: "", element: _jsx(Navigate, { to: "/reports/lead", replace: true }) }), _jsx(Route, { path: "*", element: _jsx(Navigate, { to: "/reports/lead", replace: true }) })] })] }) }));
+};
+const LeadReportsRouter = () => (_jsxs(Routes, { children: [_jsx(Route, { path: "", element: _jsx(LeadReportsLanding, {}) }), _jsx(Route, { path: "daily", element: _jsx(LeadDailyActivityReport, {}) }), _jsx(Route, { path: "status-wise", element: _jsx(LeadStatusWise, {}) }), _jsx(Route, { path: "status-change", element: _jsx(LeadStatusChange, {}) }), _jsx(Route, { path: "source-wise", element: _jsx(LeadSourceWise, {}) }), _jsx(Route, { path: "checkout", element: _jsx(LeadCheckoutSummary, {}) }), _jsx(Route, { path: "export", element: _jsx(LeadExport, {}) }), _jsx(Route, { path: "export-history", element: _jsx(LeadExportHistory, {}) }), _jsx(Route, { path: "import-history", element: _jsx(LeadImportHistory, {}) }), _jsx(Route, { path: "import-history/:id", element: _jsx(ImportHistoryDetail, {}) }), _jsx(Route, { path: "gl-api", element: _jsx(LeadGLAPIHistoryReport, {}) }), _jsx(Route, { path: "deleted", element: _jsx(LeadDeletedLeadsReport, {}) }), _jsx(Route, { path: "*", element: _jsx(Navigate, { to: "/reports/lead", replace: true }) })] }));
+const DealReportsRouter = () => (_jsxs(Routes, { children: [_jsx(Route, { path: "", element: _jsx(DealReportsLanding, {}) }), _jsx(Route, { path: "stage", element: _jsx(DealStageReport, {}) }), _jsx(Route, { path: "conversion", element: _jsx(LeadConversionReport, {}) }), _jsx(Route, { path: "visit", element: _jsx("div", { className: "report-content-wrapper with-sidebar" }) }), _jsx(Route, { path: "export", element: _jsx(DealExportReport, {}) }), _jsx(Route, { path: "export-history", element: _jsx(DealExportHistoryReport, {}) }), _jsx(Route, { path: "deleted", element: _jsx(DealDeletedReport, {}) }), _jsx(Route, { path: "*", element: _jsx(Navigate, { to: "/reports/deal", replace: true }) })] }));
+const TaskReportsRouter = () => (_jsxs(Routes, { children: [_jsx(Route, { path: "", element: _jsx(TaskReportsLanding, {}) }), _jsx(Route, { path: "task-wise", element: _jsx(TaskWiseReport, {}) }), _jsx(Route, { path: "lead-change", element: _jsx(LeadChangeReport, {}) }), _jsx(Route, { path: "work", element: _jsx(TaskWorkReport, {}) }), _jsx(Route, { path: "*", element: _jsx(Navigate, { to: "/reports/task", replace: true }) })] }));
+const CallReportsRouter = () => (_jsxs(Routes, { children: [_jsx(Route, { path: "ivr", element: _jsx("div", { className: "report-content-wrapper with-sidebar", children: _jsx("div", { className: "lead-reports-list", children: callReportOptions.map((report) => (_jsxs(NavLink, { to: report.path, className: "lead-report-card", children: [_jsxs("div", { className: "lead-report-card-content", children: [_jsx("span", { className: "lead-report-title", children: report.title }), report.description && _jsx("span", { className: "lead-report-desc", children: report.description })] }), _jsx(ChevronRight, { size: 18, className: "report-card-arrow" })] }, report.id))) }) }) }), _jsx(Route, { path: "dialer", element: _jsx(GLDialerCallReport, {}) }), _jsx(Route, { path: "feedback", element: _jsx(CallFeedbackReport, {}) }), _jsx(Route, { path: "", element: _jsx(Navigate, { to: "/reports/call/ivr", replace: true }) }), _jsx(Route, { path: "*", element: _jsx(Navigate, { to: "/reports/call", replace: true }) })] }));
+export default ReportsPage;
+//# sourceMappingURL=ReportsPage.js.map

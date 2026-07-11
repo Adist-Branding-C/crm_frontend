@@ -1,0 +1,1 @@
+{"version":3,"file":"whatsappTemplateApiEndpoints.js","sourceRoot":"","sources":["whatsappTemplateApiEndpoints.ts"],"names":[],"mappings":"AAAA,kHAAkH;AAClH,MAAM,CAAC,MAAM,+BAA+B,GAAG;IAC7C,OAAO,EAAE,oBAAoB;IAC7B,MAAM,EAAE,oBAAoB;IAC5B,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,sBAAsB,EAAE,EAAE;IAClD,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,sBAAsB,EAAE,EAAE;CACnD,CAAC"}

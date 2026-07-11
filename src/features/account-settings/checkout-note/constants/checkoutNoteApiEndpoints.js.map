@@ -1,0 +1,1 @@
+{"version":3,"file":"checkoutNoteApiEndpoints.js","sourceRoot":"","sources":["checkoutNoteApiEndpoints.ts"],"names":[],"mappings":"AAAA,sGAAsG;AACtG,MAAM,CAAC,MAAM,2BAA2B,GAAG;IACzC,OAAO,EAAE,gBAAgB;IACzB,MAAM,EAAE,gBAAgB;IACxB,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,kBAAkB,EAAE,EAAE;IAC9C,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,kBAAkB,EAAE,EAAE;CAC/C,CAAC"}

@@ -1,0 +1,5 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { X } from 'lucide-react';
+const DeleteDealAdditionalFieldModal = ({ deletingItem, onConfirm, onClose, }) => (_jsx("div", { className: "modal-overlay", onClick: onClose, children: _jsxs("div", { className: "modal-content", onClick: (e) => e.stopPropagation(), children: [_jsxs("div", { className: "modal-header", children: [_jsx("h5", { children: "Confirm Delete" }), _jsx("button", { className: "modal-close", onClick: onClose, children: _jsx(X, { size: 20 }) })] }), _jsx("div", { className: "modal-body", children: _jsxs("p", { children: ["Are you sure you want to delete ", _jsx("strong", { children: deletingItem.field }), "?"] }) }), _jsxs("div", { className: "modal-footer", children: [_jsx("button", { className: "btn btn-danger", onClick: onConfirm, children: "Confirm" }), _jsx("button", { className: "btn btn-secondary", onClick: onClose, children: "Cancel" })] })] }) }));
+export default DeleteDealAdditionalFieldModal;
+//# sourceMappingURL=DeleteDealAdditionalFieldModal.js.map

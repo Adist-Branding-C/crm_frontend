@@ -1,7 +1,15 @@
-import React from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
-import { useCompaniesData } from '../hooks/useCompaniesData';
+import Toast from '../../../shared/components/Toast';
+import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useDrawer } from '../../../shared/hooks/useDrawer';
+import { useTableSelection } from '../../../shared/hooks/useTableSelection';
+import { useDeleteConfirmation } from '../../../shared/hooks/useDeleteConfirmation';
+import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
+import { useCompaniesList } from '../hooks/useCompaniesList';
+import { useCompanyStatistics } from '../hooks/useCompanyStatistics';
 import CompaniesStatsGrid from '../components/CompaniesStatsGrid';
 import CompaniesToolbar from '../components/CompaniesToolbar';
 import CompaniesFilters from '../components/CompaniesFilters';
@@ -9,76 +17,146 @@ import CompaniesTable from '../components/CompaniesTable';
 import CompaniesPagination from '../components/CompaniesPagination';
 import AddCompanyModal from '../components/AddCompanyModal';
 import CompanyViewDrawer from '../components/CompanyViewDrawer';
-import type { SortConfig } from '../../../shared/hooks/useTableSorting';
+import type { Company, CompanyFilters } from '../types';
 import './CompaniesPage.css';
 
+const ROWS_PER_PAGE = 10;
+
 const CompaniesPage = () => {
-  const d = useCompaniesData();
+  const toast = useToast();
+  const crud = useCompaniesList(toast.showToastMessage);
+  const { stats, refreshStatistics } = useCompanyStatistics();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<CompanyFilters>({ status: '' });
+  const appliedStatusRef = useRef('');
+
+  const formDrawer = useDrawer<Company | null>();
+  const viewDrawer = useDrawer<Company>();
+  const selection = useTableSelection<string>();
+
+  const handleDeleteCompany = useCallback((company: Company) => crud.deleteCompany(company.companyId), [crud]);
+  const deleteConfirm = useDeleteConfirmation<Company>(handleDeleteCompany);
+
+  const { searchValue, handleSearchChange } = useDebouncedSearch((value) => {
+    setCurrentPage(1);
+    crud.fetchCompanies(1, ROWS_PER_PAGE, value, appliedStatusRef.current);
+  });
+
+  const initialFetchDone = useRef(false);
+  useEffect(() => {
+    if (initialFetchDone.current) return;
+    initialFetchDone.current = true;
+    crud.fetchCompanies(1, ROWS_PER_PAGE, '', '');
+  }, []);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    crud.fetchCompanies(page, ROWS_PER_PAGE, searchValue, appliedStatusRef.current);
+  };
+
+  const handleApplyFilters = () => {
+    appliedStatusRef.current = filters.status;
+    setShowFilters(false);
+    setCurrentPage(1);
+    crud.fetchCompanies(1, ROWS_PER_PAGE, searchValue, filters.status);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({ status: '' });
+    appliedStatusRef.current = '';
+    setShowFilters(false);
+    setCurrentPage(1);
+    crud.fetchCompanies(1, ROWS_PER_PAGE, searchValue, '');
+  };
+
+  const handleSelectAll = () => {
+    const allIds = crud.companies.map(c => c.companyId);
+    selection.handleSelectAll(allIds, selection.selectedIds.length !== allIds.length);
+  };
+
+  const handleSaved = (action: 'created' | 'updated') => {
+    crud.handleCompanySaved(action);
+    refreshStatistics();
+  };
+
+  const handleDeleted = async () => {
+    await deleteConfirm.handleConfirmDelete();
+    refreshStatistics();
+  };
 
   return (
     <PageContainer>
       <PageHeader title="Company Management" description="Manage CRM tenants and their subscriptions" />
 
-      <CompaniesStatsGrid stats={d.stats} />
+      <CompaniesStatsGrid stats={stats} />
 
       <CompaniesToolbar
-        searchQuery={d.searchQuery}
-        onSearchChange={d.setSearchQuery}
-        showFilters={d.showFilters}
-        onToggleFilters={() => d.setShowFilters(!d.showFilters)}
-        onAddCompany={d.handleAddCompany}
+        searchQuery={searchValue}
+        onSearchChange={handleSearchChange}
+        showFilters={showFilters}
+        onToggleFilters={() => setShowFilters(!showFilters)}
+        onAddCompany={() => formDrawer.open(null)}
       />
 
-      {d.showFilters && (
+      {showFilters && (
         <CompaniesFilters
-          filters={d.filters}
-          onFilterChange={d.setFilters}
-          onClearFilters={() => { d.setFilters({ plan: '', status: '' }); d.setShowFilters(false); }}
-          onClose={() => d.setShowFilters(false)}
+          filters={filters}
+          onFilterChange={setFilters}
+          onClearFilters={handleClearFilters}
+          onClose={handleApplyFilters}
         />
       )}
 
       <CompaniesTable
-        data={d.paginatedCompanies}
-        sortConfig={d.sortConfig as SortConfig}
-        onSort={d.handleSort}
-        selectedRows={d.selectedRows}
-        onSelectAll={d.handleSelectAll}
-        onSelectRow={d.handleSelectRow}
-        onView={d.handleView}
-        onEdit={d.handleEdit}
-        onDelete={d.handleDelete}
+        data={crud.companies}
+        selectedRows={selection.selectedIds}
+        onSelectAll={handleSelectAll}
+        onSelectRow={selection.handleSelectRow}
+        onView={(company) => viewDrawer.open(company)}
+        onEdit={(company) => formDrawer.open(company)}
+        onDelete={(companyId) => {
+          const company = crud.companies.find(c => c.companyId === companyId);
+          if (company) deleteConfirm.handleDeleteClick(company);
+        }}
       />
 
       <CompaniesPagination
-        currentPage={d.currentPage}
-        totalPages={d.totalPages}
-        startIndex={d.startIndex}
-        rowsPerPage={d.rowsPerPage}
-        totalItems={d.filteredCompanies.length}
-        onPageChange={d.setCurrentPage}
+        currentPage={currentPage}
+        totalPages={crud.totalPages}
+        startIndex={(currentPage - 1) * ROWS_PER_PAGE}
+        rowsPerPage={ROWS_PER_PAGE}
+        totalItems={crud.total}
+        onPageChange={handlePageChange}
       />
 
       <AddCompanyModal
-        isOpen={d.showAddModal}
-        editingCompany={d.editingCompany}
-        newCompany={d.newCompany}
-        onNewCompanyChange={d.setNewCompany}
-        onSave={d.handleSaveCompany}
-        onClose={() => d.setShowAddModal(false)}
+        isOpen={formDrawer.isOpen}
+        editingCompany={formDrawer.item}
+        onSaved={handleSaved}
+        onClose={formDrawer.close}
       />
 
       <CompanyViewDrawer
-        isOpen={d.isViewDrawerOpen}
-        viewingCompany={d.viewingCompany}
-        activeTab={d.activeTab}
-        onTabChange={d.setActiveTab}
-        showRenewalModal={d.showRenewalModal}
-        renewalData={d.renewalData}
-        onRenewalDataChange={d.setRenewalData}
-        onOpenRenewal={() => d.setShowRenewalModal(true)}
-        onCloseRenewal={() => d.setShowRenewalModal(false)}
-        onClose={() => d.setIsViewDrawerOpen(false)}
+        isOpen={viewDrawer.isOpen}
+        viewingCompany={viewDrawer.item}
+        onClose={viewDrawer.close}
+      />
+
+      <AdminDeleteModal
+        isOpen={!!deleteConfirm.deletingItem}
+        itemName={deleteConfirm.deletingItem?.name}
+        itemType="company"
+        onConfirm={handleDeleted}
+        onClose={deleteConfirm.closeDeleteModal}
+      />
+
+      <Toast
+        message={toast.toastMessage}
+        type={toast.toastType}
+        isVisible={toast.showToast}
+        onClose={() => toast.setShowToast(false)}
       />
     </PageContainer>
   );

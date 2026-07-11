@@ -1,0 +1,15 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Check, X } from 'lucide-react';
+import { useEmailTemplatePage } from '../hooks';
+import AddEmailTemplateDrawer from '../components/AddEmailTemplateDrawer';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
+import PageHeader from '../../../../shared/components/layout/PageHeader';
+import SettingsTabs from '../../../../shared/components/SettingsTabs';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { EMAIL_TEMPLATE_TABLE_COLUMNS } from '../constants/emailTemplateTableColumns';
+const EmailTemplatePage = () => {
+    const { emailTemplate, searchQuery, handleSearchChange, rowsPerPage, handleRowsPerPageChange, pageNumber, setPageNumber, totalCount, startIndex, totalPages, showDrawer, dropdownOpen, onToggleDropdown, editingItem, deletingItem, filteredData, drawerInitialValues, handleAddClick, handleCloseDrawer, handleEditClick, handleDeleteClick, handleConfirmDelete, handleCloseDeleteModal, handleSubmit, handleEditSubmit, } = useEmailTemplatePage();
+    return (_jsxs("div", { className: "account-page", children: [_jsx(PageHeader, { title: "Account Settings", description: "Manage your login credentials, settings, and preferences" }), _jsx(SettingsTabs, {}), _jsxs("div", { className: "account-content", style: { width: '100%', maxWidth: '100%' }, children: [_jsx(SettingsTableLayout, { searchQuery: searchQuery, onSearchChange: handleSearchChange, onAdd: handleAddClick, addLabel: "Add Template", data: filteredData, columns: EMAIL_TEMPLATE_TABLE_COLUMNS, startIndex: startIndex, dropdownOpen: dropdownOpen, onToggleDropdown: onToggleDropdown, onEdit: handleEditClick, onDelete: handleDeleteClick, currentPage: pageNumber, totalPages: totalPages, rowsPerPage: rowsPerPage, totalItems: totalCount, onPageChange: setPageNumber, onRowsPerPageChange: handleRowsPerPageChange }), _jsx(AddEmailTemplateDrawer, { isOpen: showDrawer, onClose: handleCloseDrawer, validationSchema: editingItem ? emailTemplate.editValidationSchema : emailTemplate.validationSchema, initialValues: drawerInitialValues, onSubmit: editingItem ? handleEditSubmit : handleSubmit, isLoading: emailTemplate.isLoading, error: emailTemplate.error, isEditing: !!editingItem }), _jsx(AdminDeleteModal, { isOpen: !!deletingItem, itemName: deletingItem?.templateName || deletingItem?.title || '', onConfirm: handleConfirmDelete, onClose: handleCloseDeleteModal }), emailTemplate.showToast && (_jsxs("div", { className: `toast-notification toast-${emailTemplate.toastType}`, onClick: () => emailTemplate.setShowToast(false), children: [emailTemplate.toastType === 'success' ? _jsx(Check, { size: 18 }) : _jsx(X, { size: 18 }), _jsx("span", { children: emailTemplate.toastMessage })] }))] })] }));
+};
+export default EmailTemplatePage;
+//# sourceMappingURL=EmailTemplatePage.js.map

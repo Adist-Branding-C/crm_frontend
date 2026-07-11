@@ -1,0 +1,15 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Search, Filter, RotateCcw, ChevronDown } from 'lucide-react';
+import './ActivityFilters.css';
+const ActivityFilters = ({ filters, showStaffDropdown, localSearchQuery, selectedStaffName, staffList, onFilterChange, onApply, onReset, onShowStaffDropdownChange, onLocalSearchQueryChange, }) => {
+    return (_jsxs("div", { className: "activity-filters-section", children: [_jsxs("div", { className: "filter-group", children: [_jsx("label", { htmlFor: "activity-date-filter", children: "Date" }), _jsx("input", { id: "activity-date-filter", type: "date", value: filters.date, onChange: (e) => onFilterChange('date', e.target.value), className: "filter-input" })] }), _jsxs("div", { className: "filter-group", children: [_jsx("label", { htmlFor: "activity-start-time-filter", children: "Start Time" }), _jsx("input", { id: "activity-start-time-filter", type: "time", value: filters.startTime, onChange: (e) => onFilterChange('startTime', e.target.value), className: "filter-input" })] }), _jsxs("div", { className: "filter-group", children: [_jsx("label", { htmlFor: "activity-end-time-filter", children: "End Time" }), _jsx("input", { id: "activity-end-time-filter", type: "time", value: filters.endTime, onChange: (e) => onFilterChange('endTime', e.target.value), className: "filter-input" })] }), _jsxs("div", { className: "filter-group dropdown-group", children: [_jsx("label", { children: "Staff" }), _jsxs("button", { type: "button", id: "activity-staff-filter", className: "filter-select-trigger", onClick: () => onShowStaffDropdownChange(!showStaffDropdown), children: [_jsx("span", { children: selectedStaffName }), _jsx(ChevronDown, { size: 16 })] }), showStaffDropdown && (_jsxs("div", { className: "filter-dropdown", children: [_jsxs("div", { className: "dropdown-search", children: [_jsx(Search, { size: 14 }), _jsx("input", { type: "text", placeholder: "Search...", value: localSearchQuery, onChange: (e) => onLocalSearchQueryChange(e.target.value) })] }), _jsx("div", { className: "dropdown-list", children: staffList
+                                    .filter(staff => staff.name
+                                    .toLowerCase()
+                                    .includes(localSearchQuery.toLowerCase()))
+                                    .map(staff => (_jsx("div", { className: `dropdown-item ${filters.staff === staff.id ? 'selected' : ''}`, onClick: () => {
+                                        onFilterChange('staff', staff.id);
+                                        onShowStaffDropdownChange(false);
+                                    }, children: staff.name }, staff.id))) })] }))] }), _jsxs("div", { className: "filter-buttons", children: [_jsxs("button", { className: "apply-btn", onClick: onApply, children: [_jsx(Filter, { size: 16 }), "Apply Filter"] }), _jsxs("button", { className: "reset-btn", onClick: onReset, children: [_jsx(RotateCcw, { size: 16 }), "Reset"] })] })] }));
+};
+export default ActivityFilters;
+//# sourceMappingURL=ActivityFilters.js.map

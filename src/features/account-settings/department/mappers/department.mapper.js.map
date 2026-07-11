@@ -1,0 +1,1 @@
+{"version":3,"file":"department.mapper.js","sourceRoot":"","sources":["department.mapper.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,gBAAgB,EAAE,MAAM,2CAA2C,CAAC;AAG7E,MAAM,OAAO,gBAAgB;IAC3B,MAAM,CAAC,aAAa,CAAC,MAA6B;QAChD,OAAO,gBAAgB,CAAC,MAAM,CAAC,CAAC;IAClC,CAAC;CACF"}

@@ -1,28 +1,22 @@
-export interface PlanHistory {
-  plan: string;
-  startDate: string;
-  endDate: string;
-  price: number;
-}
-
 export interface Company {
-  id: number;
+  companyId: string;
   name: string;
+  contactPersonName: string;
   email: string;
   phone: string;
-  plan: string;
-  staffCount: number;
-  leads: number;
-  deals: number;
-  revenue: number;
+  address: string;
+  gstNumber: string;
+  dateOfRegistration: string;
   status: string;
+  leads: number;
+  /** Placeholder - no per-company staff API exists yet. */
+  staffCount: string;
+  /** Mock value - no per-company deals API exists yet. */
+  deals: number;
   createdAt: string;
-  expiryDate: string;
-  plansHistory: PlanHistory[];
 }
 
 export interface CompanyFilters {
-  plan: string;
   status: string;
 }
 
@@ -34,17 +28,14 @@ export interface CompanyStats {
   totalRevenue: number;
 }
 
-export interface RenewalData {
-  staffCount: string;
-  perStaffPrice: string;
-  plan: string;
-}
-
 export interface NewCompany {
   name: string;
+  contactPersonName: string;
   email: string;
-  phone: string;
-  plan: string;
+  phoneNumber: string;
+  address: string;
+  gstNumber: string;
+  dateOfRegistration: string;
   status: string;
 }
 
@@ -55,18 +46,14 @@ export interface CompaniesFiltersProps {
   onClose: () => void;
 }
 
-import type { SortConfig } from '../../../shared/types/sort';
-
 export interface CompaniesTableProps {
   data: Company[];
-  sortConfig: SortConfig;
-  onSort: (key: string) => void;
-  selectedRows: number[];
+  selectedRows: string[];
   onSelectAll: () => void;
-  onSelectRow: (id: number) => void;
+  onSelectRow: (companyId: string) => void;
   onView: (company: Company) => void;
   onEdit: (company: Company) => void;
-  onDelete: (id: number) => void;
+  onDelete: (companyId: string) => void;
 }
 
 export interface CompaniesToolbarProps {

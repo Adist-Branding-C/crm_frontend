@@ -1,0 +1,15 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Check, X } from 'lucide-react';
+import { useCheckoutNotePage } from '../hooks';
+import AddCheckoutNoteDrawer from '../components/AddCheckoutNoteDrawer';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
+import PageHeader from '../../../../shared/components/layout/PageHeader';
+import SettingsTabs from '../../../../shared/components/SettingsTabs';
+import { SettingsTableLayout } from '../../../../shared/components/settings';
+import { CHECKOUT_NOTE_TABLE_COLUMNS } from '../constants/checkoutNoteTableColumns';
+const CheckoutNotePage = () => {
+    const { checkoutNote, searchQuery, handleSearchChange, rowsPerPage, handleRowsPerPageChange, pageNumber, setPageNumber, totalCount, startIndex, totalPages, showDrawer, dropdownOpen, onToggleDropdown, editingItem, deletingItem, filteredData, drawerInitialValues, handleAddClick, handleCloseDrawer, handleEditClick, handleDeleteClick, handleConfirmDelete, handleCloseDeleteModal, handleSubmit, handleEditSubmit, } = useCheckoutNotePage();
+    return (_jsxs("div", { className: "account-page", children: [_jsx(PageHeader, { title: "Account Settings", description: "Manage your login credentials, settings, and preferences" }), _jsx(SettingsTabs, {}), _jsxs("div", { className: "account-content", style: { width: '100%', maxWidth: '100%' }, children: [_jsx(SettingsTableLayout, { searchQuery: searchQuery, onSearchChange: handleSearchChange, onAdd: handleAddClick, addLabel: "Add Note", data: filteredData, columns: CHECKOUT_NOTE_TABLE_COLUMNS, startIndex: startIndex, dropdownOpen: dropdownOpen, onToggleDropdown: onToggleDropdown, onEdit: handleEditClick, onDelete: handleDeleteClick, currentPage: pageNumber, totalPages: totalPages, rowsPerPage: rowsPerPage, totalItems: totalCount, onPageChange: setPageNumber, onRowsPerPageChange: handleRowsPerPageChange }), _jsx(AddCheckoutNoteDrawer, { isOpen: showDrawer, onClose: handleCloseDrawer, validationSchema: editingItem ? checkoutNote.editValidationSchema : checkoutNote.validationSchema, initialValues: drawerInitialValues, onSubmit: editingItem ? handleEditSubmit : handleSubmit, isLoading: checkoutNote.isLoading, error: checkoutNote.error, isEditing: !!editingItem }), _jsx(AdminDeleteModal, { isOpen: !!deletingItem, itemName: deletingItem?.title || deletingItem?.note || '', onConfirm: handleConfirmDelete, onClose: handleCloseDeleteModal }), checkoutNote.showToast && (_jsxs("div", { className: `toast-notification toast-${checkoutNote.toastType}`, onClick: () => checkoutNote.setShowToast(false), children: [checkoutNote.toastType === 'success' ? _jsx(Check, { size: 18 }) : _jsx(X, { size: 18 }), _jsx("span", { children: checkoutNote.toastMessage })] }))] })] }));
+};
+export default CheckoutNotePage;
+//# sourceMappingURL=CheckoutNotePage.js.map

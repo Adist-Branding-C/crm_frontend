@@ -1,0 +1,27 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import React from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { Formik, Form, Field } from 'formik';
+import { Phone, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import { useLoginData } from '../hooks/useLoginData';
+import { useAuth } from '../hooks/useAuth';
+import ErrorMessage from '../../../shared/components/ErrorMessage';
+import './Login.css';
+import { AUTH_CONTENT_SLIDES, AUTH_ROUTES } from '../constants/auth.constants';
+const LoginPage = () => {
+    const navigate = useNavigate();
+    const loginData = useLoginData();
+    const { isAuthenticated, isLoading } = useAuth();
+    if (isLoading)
+        return null;
+    if (isAuthenticated) {
+        return _jsx(Navigate, { to: "/dashboard", replace: true });
+    }
+    const CurrentIcon = loginData.currentContent?.icon;
+    return (_jsxs("div", { className: "auth-page", children: [_jsxs("div", { className: "auth-slider", ref: loginData.sliderRef, onTouchStart: loginData.onTouchStart, onTouchMove: loginData.onTouchMove, onTouchEnd: loginData.onTouchEnd, children: [_jsxs("div", { className: "auth-slide auth-visual-panel", children: [_jsxs("div", { className: "visual-content", children: [_jsxs("div", { className: "visual-logo", children: [_jsx("div", { className: "logo-mark", children: "CRM" }), _jsx("span", { className: "logo-text", children: "Dashboard" })] }), _jsxs("div", { className: "content-display", children: [_jsx("div", { className: "content-icon", children: CurrentIcon && React.createElement(CurrentIcon, { size: 40 }) }), _jsx("h2", { children: loginData.currentContent?.title }), _jsx("p", { children: loginData.currentContent?.description })] }), _jsx("div", { className: "content-dots", children: AUTH_CONTENT_SLIDES.map((_, index) => (_jsx("button", { className: `content-dot ${loginData.contentSlide === index ? 'active' : ''}`, onClick: () => loginData.setContentSlide(index), "aria-label": `Go to slide ${index + 1}` }, index))) })] }), _jsx("div", { className: "visual-pattern" })] }), _jsx("div", { className: "auth-slide auth-form-panel", children: _jsxs("div", { className: "auth-card", children: [_jsxs("div", { className: "auth-header", children: [_jsx("h1", { children: "Sign In" }), _jsx("p", { children: "Enter your credentials to access your account" })] }), _jsx(Formik, { initialValues: loginData.initialValues, validationSchema: loginData.validationSchema, onSubmit: loginData.handleSubmit, children: ({ errors, touched, submitCount }) => {
+                                        const formError = loginData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
+                                        return (_jsxs(Form, { className: "auth-form", children: [formError && _jsx(ErrorMessage, { message: formError }), _jsxs("div", { className: "auth-form-group", children: [_jsx("label", { htmlFor: "phone", children: "Phone Number" }), _jsxs("div", { className: "input-wrapper-with-icon", children: [_jsx("span", { className: "input-icon-left", children: _jsx(Phone, { size: 18 }) }), _jsx(Field, { id: "phone", name: "phone", type: "tel", placeholder: "Enter your phone number", className: "form-input" })] })] }), _jsxs("div", { className: "auth-form-group", children: [_jsx("label", { htmlFor: "password", children: "Password" }), _jsxs("div", { className: "input-wrapper-with-icon", children: [_jsx("span", { className: "input-icon-left", children: _jsx(Lock, { size: 18 }) }), _jsx(Field, { id: "password", name: "password", type: loginData.showPassword ? 'text' : 'password', placeholder: "Enter your password", className: "form-input" }), _jsx("button", { type: "button", className: "input-icon-right", onClick: () => loginData.setShowPassword(!loginData.showPassword), "aria-label": loginData.showPassword ? 'Hide password' : 'Show password', children: loginData.showPassword ? _jsx(EyeOff, { size: 18 }) : _jsx(Eye, { size: 18 }) })] })] }), _jsxs("div", { className: "form-options", children: [_jsxs("label", { className: "remember-me", children: [_jsx("input", { type: "checkbox", checked: loginData.rememberMe, onChange: (e) => loginData.setRememberMe(e.target.checked) }), _jsx("span", { children: "Remember me" })] }), _jsx("button", { type: "button", className: "forgot-link", onClick: () => navigate(AUTH_ROUTES.FORGOT_PASSWORD), children: "Forgot password?" })] }), _jsx("button", { type: "submit", className: "auth-btn", disabled: loginData.isLoading, children: loginData.isLoading ? (_jsx(Loader2, { size: 18, className: "spin" })) : (_jsxs(_Fragment, { children: [_jsx("span", { children: "Sign In" }), _jsx(ArrowRight, { size: 18 })] })) })] }));
+                                    } })] }) })] }), _jsxs("div", { className: "pagination-dots", children: [_jsx("button", { className: `dot ${loginData.currentSlide === 0 ? 'active' : ''}`, onClick: () => loginData.goToSlide(0), "aria-label": "Go to form" }), _jsx("button", { className: `dot ${loginData.currentSlide === 1 ? 'active' : ''}`, onClick: () => loginData.goToSlide(1), "aria-label": "Go to content" })] })] }));
+};
+export default LoginPage;
+//# sourceMappingURL=LoginPage.js.map

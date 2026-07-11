@@ -1,0 +1,1 @@
+{"version":3,"file":"branchApiEndpoints.js","sourceRoot":"","sources":["branchApiEndpoints.ts"],"names":[],"mappings":"AAAA,2FAA2F;AAC3F,MAAM,CAAC,MAAM,oBAAoB,GAAG;IAClC,OAAO,EAAE,SAAS;IAClB,MAAM,EAAE,SAAS;IACjB,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,WAAW,EAAE,EAAE;IACvC,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,WAAW,EAAE,EAAE;CACxC,CAAC"}

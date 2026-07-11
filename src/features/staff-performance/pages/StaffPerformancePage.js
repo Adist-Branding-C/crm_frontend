@@ -1,0 +1,17 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import PageContainer from '../../../shared/components/layout/PageContainer';
+import { useStaffPerformanceData } from '../hooks/useStaffPerformanceData';
+import StaffDetailView from '../components/StaffDetailView';
+import StaffListHeader from '../components/StaffListHeader';
+import './StaffPerformancePage.css';
+const StaffPerformancePage = () => {
+    const { id, staff, searchQuery, setSearchQuery, dateFrom, setDateFrom, dateTo, setDateTo, showFilters, setShowFilters, filterRef, filteredStaff, clearFilters, } = useStaffPerformanceData();
+    if (id && staff) {
+        return _jsx(StaffDetailView, { staff: staff });
+    }
+    return (_jsxs(PageContainer, { className: "sp-page", children: [_jsx(StaffListHeader, {}), _jsx("div", { className: "toolbar", children: _jsxs("div", { className: "toolbar-left", children: [_jsxs("div", { className: "search-box", children: [_jsx(Search, { size: 18, className: "search-icon" }), _jsx("input", { type: "text", placeholder: "Search staff...", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), className: "search-input" })] }), _jsxs("div", { className: "filter-wrapper", ref: filterRef, children: [_jsx("button", { className: `filter-btn ${showFilters ? 'active' : ''}`, onClick: () => setShowFilters(!showFilters), children: "Date Filter" }), showFilters && (_jsxs("div", { className: "filter-dropdown", children: [_jsxs("div", { className: "filter-header", children: [_jsx("span", { children: "Filter by Date" }), _jsx("button", { className: "clear-btn", onClick: clearFilters, children: "Clear" })] }), _jsxs("div", { className: "filter-inputs", children: [_jsxs("div", { className: "input-group", children: [_jsx("label", { children: "From" }), _jsx("input", { type: "date", value: dateFrom, onChange: (e) => setDateFrom(e.target.value), className: "date-input" })] }), _jsxs("div", { className: "input-group", children: [_jsx("label", { children: "To" }), _jsx("input", { type: "date", value: dateTo, onChange: (e) => setDateTo(e.target.value), className: "date-input" })] })] })] }))] })] }) }), _jsx("div", { className: "staff-grid", children: filteredStaff.map(s => (_jsxs(Link, { to: `/staff-performance/${s.id}`, className: "staff-card", children: [_jsx("div", { className: "staff-card-avatar", children: s.name.charAt(0) }), _jsxs("div", { className: "staff-card-info", children: [_jsx("div", { className: "staff-card-name", children: s.name }), _jsx("div", { className: "staff-card-role", children: s.role })] }), _jsxs("div", { className: "staff-card-stats", children: [_jsxs("div", { className: "staff-stat", children: [_jsx("span", { children: s.totalLeads }), _jsx("label", { children: "Leads" })] }), _jsxs("div", { className: "staff-stat", children: [_jsx("span", { children: s.converted }), _jsx("label", { children: "Converted" })] }), _jsxs("div", { className: "staff-stat", children: [_jsx("span", { children: s.rating }), _jsx("label", { children: "Rating" })] })] })] }, s.id))) })] }));
+};
+export default StaffPerformancePage;
+//# sourceMappingURL=StaffPerformancePage.js.map

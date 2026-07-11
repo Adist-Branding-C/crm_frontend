@@ -1,0 +1,1 @@
+{"version":3,"file":"dealStatusApiEndpoints.js","sourceRoot":"","sources":["dealStatusApiEndpoints.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,MAAM,yBAAyB,GAAG;IACvC,OAAO,EAAE,cAAc;IACvB,MAAM,EAAE,cAAc;IACtB,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,gBAAgB,EAAE,EAAE;IAC5C,MAAM,EAAE,CAAC,EAAU,EAAE,EAAE,CAAC,gBAAgB,EAAE,EAAE;CAC7C,CAAC"}
