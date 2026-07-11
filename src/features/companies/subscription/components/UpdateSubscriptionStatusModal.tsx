@@ -4,20 +4,10 @@ import Modal from '../../../../shared/components/Modal';
 import ValidationAlert from '../../../../shared/components/ValidationAlert';
 import { updateSubscriptionStatusValidationSchema } from '../validations/subscription.validation';
 import { SUBSCRIPTION_STATUS_OPTIONS } from '../constants/subscriptionStatusOptions';
-import type { SubscriptionDetail } from '../types';
 import type { UpdateSubscriptionStatusPayload } from '../types/request';
+import type { UpdateSubscriptionStatusModalProps } from '../types/component.types';
 
-interface Props {
-  isOpen: boolean;
-  subscription: SubscriptionDetail;
-  isSaving: boolean;
-  error: string;
-  onClearError: () => void;
-  onSubmit: (values: UpdateSubscriptionStatusPayload) => Promise<boolean>;
-  onClose: () => void;
-}
-
-const UpdateSubscriptionStatusModal = ({ isOpen, subscription, isSaving, error, onClearError, onSubmit, onClose }: Props) => {
+const UpdateSubscriptionStatusModal = ({ isOpen, subscription, isSaving, error, onClearError, onSubmit, onClose }: UpdateSubscriptionStatusModalProps) => {
   const initialValues: UpdateSubscriptionStatusPayload = {
     status: subscription.status,
     remark: subscription.remark,

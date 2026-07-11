@@ -3,59 +3,17 @@ import { CalendarPlus, Edit2, XCircle, Zap } from 'lucide-react';
 import AdminConfirmationModal from '../../../../shared/components/crud/AdminConfirmationModal';
 import { formatFollowUpDate } from '../../../../shared/utils/dateUtils';
 import RenewalQueueFormModal from './RenewalQueueFormModal';
-import type { RenewalQueueFormValues } from './RenewalQueueFormModal';
-import type { RenewalQueueEntry } from '../types';
-import type { CreateRenewalQueuePayload, UpdateRenewalQueuePayload } from '../types/request';
+import { mapRenewalQueueFormToCreatePayload, mapRenewalQueueFormToUpdatePayload } from '../mappers/subscriptionFormMapper';
+import type { RenewalQueueFormValues, RenewalQueueSectionProps } from '../types/component.types';
 
-interface Props {
-  companyId: string;
-  queue: RenewalQueueEntry | null;
-  isLoading: boolean;
-  isSaving: boolean;
-  error: string;
-  onClearError: () => void;
-  onCreate: (payload: CreateRenewalQueuePayload) => Promise<boolean>;
-  onUpdate: (payload: UpdateRenewalQueuePayload) => Promise<boolean>;
-  onDelete: () => Promise<boolean>;
-  onApplyNow: () => Promise<boolean>;
-}
-
-function addDays(dateStr: string, days: number): string {
-  const date = new Date(dateStr);
-  date.setDate(date.getDate() + days);
-  return date.toISOString();
-}
-
-const RenewalQueueSection = ({ companyId, queue, isLoading, isSaving, error, onClearError, onCreate, onUpdate, onDelete, onApplyNow }: Props) => {
+const RenewalQueueSection = ({ companyId, queue, isLoading, isSaving, error, onClearError, onCreate, onUpdate, onDelete, onApplyNow }: RenewalQueueSectionProps) => {
   const [showForm, setShowForm] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'delete' | 'apply' | null>(null);
 
   const handleFormSubmit = async (values: RenewalQueueFormValues): Promise<boolean> => {
-    const durationInDays = Number(values.durationInDays);
-    const staffCount = Number(values.staffCount);
-    const perStaffPrice = Number(values.perStaffPrice);
-    const validUpto = addDays(values.validFrom, durationInDays);
-
     const success = queue
-      ? await onUpdate({
-          renewalDate: new Date(values.renewalDate).toISOString(),
-          validFrom: new Date(values.validFrom).toISOString(),
-          validUpto,
-          durationInDays,
-          staffCount,
-          perStaffPrice,
-          immediate: values.immediate,
-        })
-      : await onCreate({
-          companyId,
-          renewalDate: new Date(values.renewalDate).toISOString(),
-          validFrom: new Date(values.validFrom).toISOString(),
-          validUpto,
-          durationInDays,
-          staffCount,
-          perStaffPrice,
-          immediate: values.immediate,
-        });
+      ? await onUpdate(mapRenewalQueueFormToUpdatePayload(values))
+      : await onCreate(mapRenewalQueueFormToCreatePayload(companyId, values));
 
     if (success) setShowForm(false);
     return success;

@@ -4,26 +4,10 @@ import { renderBadge } from '../../../../shared/utils/badgeUtils';
 import { formatFollowUpDate } from '../../../../shared/utils/dateUtils';
 import EditStaffCountModal from './EditStaffCountModal';
 import UpdateSubscriptionStatusModal from './UpdateSubscriptionStatusModal';
-import type { SubscriptionDetail } from '../types';
-import type { UpdateStaffCountPayload, UpdateSubscriptionStatusPayload } from '../types/request';
+import { getDaysRemainingLabel } from '../utils/subscriptionDate.util';
+import type { SubscriptionOverviewCardProps } from '../types/component.types';
 
-interface Props {
-  subscription: SubscriptionDetail;
-  isSaving: boolean;
-  error: string;
-  onClearError: () => void;
-  onUpdateStaffCount: (payload: UpdateStaffCountPayload) => Promise<boolean>;
-  onUpdateStatus: (payload: UpdateSubscriptionStatusPayload) => Promise<boolean>;
-}
-
-function getDaysRemainingLabel(validUpto: string): string {
-  const diffDays = Math.ceil((new Date(validUpto).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (diffDays > 0) return `${diffDays} day${diffDays === 1 ? '' : 's'} remaining`;
-  if (diffDays === 0) return 'Expires today';
-  return `Expired ${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'} ago`;
-}
-
-const SubscriptionOverviewCard = ({ subscription, isSaving, error, onClearError, onUpdateStaffCount, onUpdateStatus }: Props) => {
+const SubscriptionOverviewCard = ({ subscription, isSaving, error, onClearError, onUpdateStaffCount, onUpdateStatus }: SubscriptionOverviewCardProps) => {
   const [showStaffCountModal, setShowStaffCountModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
 

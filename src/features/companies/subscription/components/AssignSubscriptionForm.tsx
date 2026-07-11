@@ -4,23 +4,8 @@ import ValidationAlert from '../../../../shared/components/ValidationAlert';
 import StaffPricingFields from './StaffPricingFields';
 import SubscriptionTotalPreview from './SubscriptionTotalPreview';
 import { assignSubscriptionValidationSchema } from '../validations/subscription.validation';
-import type { CreateSubscriptionPayload } from '../types/request';
-
-interface AssignSubscriptionFormValues {
-  validFrom: string;
-  durationInDays: number | '';
-  staffCount: number | '';
-  perStaffPrice: number | '';
-  remark: string;
-}
-
-interface Props {
-  companyId: string;
-  isSaving: boolean;
-  error: string;
-  onClearError: () => void;
-  onSubmit: (payload: CreateSubscriptionPayload) => Promise<boolean>;
-}
+import { mapAssignFormToPayload } from '../mappers/subscriptionFormMapper';
+import type { AssignSubscriptionFormValues, AssignSubscriptionFormProps } from '../types/component.types';
 
 const INITIAL_VALUES: AssignSubscriptionFormValues = {
   validFrom: new Date().toISOString().slice(0, 10),
@@ -30,29 +15,8 @@ const INITIAL_VALUES: AssignSubscriptionFormValues = {
   remark: '',
 };
 
-function addDays(dateStr: string, days: number): string {
-  const date = new Date(dateStr);
-  date.setDate(date.getDate() + days);
-  return date.toISOString();
-}
-
-const AssignSubscriptionForm = ({ companyId, isSaving, error, onClearError, onSubmit }: Props) => {
-  const handleSubmit = (values: AssignSubscriptionFormValues) => {
-    const durationInDays = Number(values.durationInDays);
-    const staffCount = Number(values.staffCount);
-    const perStaffPrice = Number(values.perStaffPrice);
-    const payload: CreateSubscriptionPayload = {
-      companyId,
-      validFrom: new Date(values.validFrom).toISOString(),
-      validUpto: addDays(values.validFrom, durationInDays),
-      durationInDays,
-      staffCount,
-      perStaffPrice,
-      totalPrice: staffCount * perStaffPrice,
-    };
-    if (values.remark.trim()) payload.remark = values.remark.trim();
-    return onSubmit(payload);
-  };
+const AssignSubscriptionForm = ({ companyId, isSaving, error, onClearError, onSubmit }: AssignSubscriptionFormProps) => {
+  const handleSubmit = (values: AssignSubscriptionFormValues) => onSubmit(mapAssignFormToPayload(companyId, values));
 
   return (
     <div className="card subscription-empty-state">

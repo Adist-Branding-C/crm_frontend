@@ -5,20 +5,10 @@ import ValidationAlert from '../../../../shared/components/ValidationAlert';
 import StaffPricingFields from './StaffPricingFields';
 import SubscriptionTotalPreview from './SubscriptionTotalPreview';
 import { editStaffCountValidationSchema } from '../validations/subscription.validation';
-import type { SubscriptionDetail } from '../types';
 import type { UpdateStaffCountPayload } from '../types/request';
+import type { EditStaffCountModalProps } from '../types/component.types';
 
-interface Props {
-  isOpen: boolean;
-  subscription: SubscriptionDetail;
-  isSaving: boolean;
-  error: string;
-  onClearError: () => void;
-  onSubmit: (values: UpdateStaffCountPayload) => Promise<boolean>;
-  onClose: () => void;
-}
-
-const EditStaffCountModal = ({ isOpen, subscription, isSaving, error, onClearError, onSubmit, onClose }: Props) => {
+const EditStaffCountModal = ({ isOpen, subscription, isSaving, error, onClearError, onSubmit, onClose }: EditStaffCountModalProps) => {
   const initialValues: UpdateStaffCountPayload = {
     staffCount: subscription.staffCount,
     perStaffPrice: subscription.perStaffPrice,

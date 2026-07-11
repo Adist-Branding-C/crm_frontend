@@ -5,30 +5,11 @@ import ValidationAlert from '../../../../shared/components/ValidationAlert';
 import StaffPricingFields from './StaffPricingFields';
 import SubscriptionTotalPreview from './SubscriptionTotalPreview';
 import { renewalQueueValidationSchema } from '../validations/subscription.validation';
-import type { RenewalQueueEntry } from '../types';
-
-export interface RenewalQueueFormValues {
-  renewalDate: string;
-  validFrom: string;
-  durationInDays: number | '';
-  staffCount: number | '';
-  perStaffPrice: number | '';
-  immediate: boolean;
-}
-
-interface Props {
-  isOpen: boolean;
-  editingQueue: RenewalQueueEntry | null;
-  isSaving: boolean;
-  error: string;
-  onClearError: () => void;
-  onSubmit: (values: RenewalQueueFormValues) => Promise<boolean>;
-  onClose: () => void;
-}
+import type { RenewalQueueFormValues, RenewalQueueFormModalProps } from '../types/component.types';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-const RenewalQueueFormModal = ({ isOpen, editingQueue, isSaving, error, onClearError, onSubmit, onClose }: Props) => {
+const RenewalQueueFormModal = ({ isOpen, editingQueue, isSaving, error, onClearError, onSubmit, onClose }: RenewalQueueFormModalProps) => {
   const isEditing = !!editingQueue;
   const initialValues: RenewalQueueFormValues = editingQueue
     ? {

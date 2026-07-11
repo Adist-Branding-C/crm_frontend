@@ -1,16 +1,10 @@
 import { Table, THead, TBody, TRow, TCell, EmptyState } from '../../../../shared/components/table';
-import { formatDateTime } from '../../../../shared/utils/dateUtils';
-import { renderBadge } from '../../../../shared/utils/badgeUtils';
-import type { SubscriptionHistoryEntry } from '../types';
-
-interface Props {
-  history: SubscriptionHistoryEntry[];
-  isLoading: boolean;
-}
+import SubscriptionHistoryRow from './SubscriptionHistoryRow';
+import type { SubscriptionHistoryTableProps } from '../types/component.types';
 
 const COLUMN_COUNT = 8;
 
-const SubscriptionHistoryTable = ({ history, isLoading }: Props) => (
+const SubscriptionHistoryTable = ({ history, isLoading }: SubscriptionHistoryTableProps) => (
   <div className="card subscription-history-card">
     <div className="card-header">
       <h5>Subscription History</h5>
@@ -36,18 +30,7 @@ const SubscriptionHistoryTable = ({ history, isLoading }: Props) => (
             ) : history.length === 0 ? (
               <EmptyState colSpan={COLUMN_COUNT} message="No history yet" />
             ) : (
-              history.map((entry) => (
-                <TRow key={entry.id}>
-                  <TCell>{entry.action}</TCell>
-                  <TCell>{entry.previousStatus ? <span className={renderBadge(entry.previousStatus)}>{entry.previousStatus}</span> : '—'}</TCell>
-                  <TCell><span className={renderBadge(entry.newStatus)}>{entry.newStatus}</span></TCell>
-                  <TCell>{formatDateTime(entry.validFrom)}</TCell>
-                  <TCell>{formatDateTime(entry.validUpto)}</TCell>
-                  <TCell>{entry.staffCount}</TCell>
-                  <TCell>₹{entry.totalPrice.toLocaleString()}</TCell>
-                  <TCell>{formatDateTime(entry.createdAt)}</TCell>
-                </TRow>
-              ))
+              history.map((entry) => <SubscriptionHistoryRow key={entry.id} entry={entry} />)
             )}
           </TBody>
         </Table>
