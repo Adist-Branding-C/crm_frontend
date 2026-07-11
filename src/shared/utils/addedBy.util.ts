@@ -1,5 +1,9 @@
 export function formatAddedBy(name: string | null | undefined, type: string | null | undefined): string {
-  if (!type) return name || '-';
-  const label = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-  return type.toLowerCase() === 'staff' && name ? `Staff ${name}` : label;
+  const trimmedName = name?.trim();
+  const label = type ? type.charAt(0).toUpperCase() + type.slice(1).toLowerCase() : '';
+
+  if (trimmedName && label) return `${trimmedName} ${label}`;
+  if (trimmedName) return trimmedName;
+  if (label) return label;
+  return '-';
 }

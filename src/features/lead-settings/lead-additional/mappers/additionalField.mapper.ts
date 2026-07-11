@@ -26,7 +26,7 @@ export function mapPurposeApiToUI(item: LeadPurposeApiItem): LeadPurposeOption {
 export function mapItemToFormData(item: LeadAdditionalItem): AdditionalFieldFormData {
   return {
     name: item.field,
-    fieldType: item.type.toLowerCase(),
+    fieldType: item.type,
     showInFilter: item.inFilter,
     showInList: item.inList,
     isRequired: item.required,

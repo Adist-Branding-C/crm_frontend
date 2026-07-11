@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Pencil, X } from 'lucide-react';
 import { Formik, Form, Field } from 'formik';
 import { FIELD_TYPE_OPTIONS } from '../../../../shared/constants/fieldTypes';
 import DropdownValuesInput from './DropdownValuesInput';
@@ -11,7 +11,7 @@ import type { AdditionalFieldFormProps } from '../types/additional-field-form.ty
 import './AdditionalFieldForm.css';
 
 const AdditionalFieldForm = ({ form, status, purposes }: AdditionalFieldFormProps) => {
-  const { validationSchema, initialValues, onSubmit, isEditing } = form;
+  const { validationSchema, initialValues, onSubmit, isEditing, editingFieldName, onCancelEdit } = form;
   const { isSaving, error, onClearError } = status;
   const formBodyRef = useRef<HTMLDivElement>(null);
   const prevSubmitCountRef = useRef(0);
@@ -19,10 +19,21 @@ const AdditionalFieldForm = ({ form, status, purposes }: AdditionalFieldFormProp
 
   return (
     <div className="additional-form-panel">
-      <div className="card">
+      <div className={`card${isEditing ? ' card--editing' : ''}`}>
         <div className="card-header">
-          <h5>{isEditing ? 'Edit Field' : 'Add Field'}</h5>
+          <div className="card-header-title">
+            {isEditing && <Pencil size={16} className="card-header-icon" />}
+            <h5>{isEditing ? 'Edit Field' : 'Add Field'}</h5>
+          </div>
+          {isEditing && onCancelEdit && (
+            <button type="button" className="cancel-edit-btn" onClick={onCancelEdit}>
+              <X size={14} /> Cancel
+            </button>
+          )}
         </div>
+        {isEditing && editingFieldName && (
+          <p className="editing-subtitle">Editing: "{editingFieldName}"</p>
+        )}
         <div className="card-body">
           <Formik
             enableReinitialize

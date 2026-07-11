@@ -20,9 +20,10 @@ export function useLeadAdditionalTableActions({ table, drawer, dropdown, deleteC
   }, [drawer, dropdown]);
 
   const handleDeleteClick = useCallback((item: LeadAdditionalItem) => {
+    crud.setDeleteError(null);
     deleteConfirm.handleDeleteClick(item);
     dropdown.closeDropdown();
-  }, [deleteConfirm, dropdown]);
+  }, [deleteConfirm, dropdown, crud]);
 
   const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
     table.handleRowsPerPageChange(Number(e.target.value));
