@@ -1,5 +1,6 @@
 export interface Lead {
   id: number;
+  leadId: string | null;
   name: string;
   phone: string;
   email: string;
@@ -15,10 +16,11 @@ export interface Task {
   description: string;
   referenceId: string;
   leadId: string;
-  scheduledDate: string;
+  scheduledDate: string | null;
   scheduledTime: string;
   assignedBy: string;
   assignedTo: string;
+  assignedToName: string | null;
   priority: string;
   status: string;
   type: string;
@@ -29,24 +31,22 @@ export interface Task {
   deletedAt: string | null;
 }
 
-// Backend deal item returned within status groups
 export interface PipelineDeal {
   id: number;
   dealName: string;
   amount: number;
   status: string;
   statusId: number;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   companyId: number;
   agent: string;
-  // UI display fields (not yet provided by backend)
+  createdAt?: string;
   company?: string;
   probability?: number;
   contact?: string;
 }
 
-// Backend status group wrapping deals for Kanban column
 export interface PipelineStatusGroup {
   statusId: number;
   status: string;
@@ -54,7 +54,6 @@ export interface PipelineStatusGroup {
   deals: PipelineDeal[];
 }
 
-// Wrapper for the grouped response data
 export interface PipelineDealsResponseData {
   items: PipelineStatusGroup[];
 }
@@ -78,15 +77,14 @@ export interface StatusDealsResponse {
   data: StatusDealsResponseData;
 }
 
-// Backend status group wrapping leads for Kanban column
 export interface LeadStatusGroup {
-  statusId: number;
+  statusId: string;
   status: string;
+  color: string;
   count: number;
   leads: Lead[];
 }
 
-// Wrapper for the grouped lead response data
 export interface PipelineLeadsResponseData {
   items: LeadStatusGroup[];
 }
@@ -98,7 +96,7 @@ export interface LeadsGroupedResponse {
 }
 
 export interface StatusLeadsResponseData {
-  statusId: number;
+  statusId: string;
   status: string;
   count: number;
   items: Lead[];
@@ -110,14 +108,12 @@ export interface StatusLeadsResponse {
   data: StatusLeadsResponseData;
 }
 
-// Backend status group wrapping tasks for Kanban column
 export interface TaskStatusGroup {
   status: string;
   count: number;
   items: Task[];
 }
 
-// Wrapper for the grouped task response data
 export interface TasksResponseData {
   items: TaskStatusGroup[];
 }
@@ -147,23 +143,19 @@ export interface TaskCardProps {
 }
 
 export interface Agent {
-  id: number;
-  name: string;
-}
-
-export interface DealType {
-  id: number;
+  id: string;
   name: string;
 }
 
 export interface DealCardProps {
   deal: PipelineDeal;
-  onDragStart: (e: React.DragEvent, deal: PipelineDeal) => void;
+  statusId: number;
   getAvatarColor: (name: string) => string;
 }
 
 export interface LeadCardProps {
   lead: Lead;
+  fromStatusId: string;
   getAvatarColor: (name: string) => string;
 }
 
@@ -174,7 +166,6 @@ export interface PipelineToolbarProps {
   setSearchQuery: (query: string) => void;
   activeView: ActiveView;
   loading: boolean;
-  error: string | null;
   fetchLeads: () => void;
   fetchDeals: () => void;
   fetchTasks: () => void;
@@ -187,10 +178,9 @@ export interface PipelineFiltersProps {
   setDateFrom: (date: string) => void;
   dateTo: string;
   setDateTo: (date: string) => void;
-  selectedAgent: number;
-  setSelectedAgent: (agent: number) => void;
-  selectedType: number;
-  setSelectedType: (type: number) => void;
+  selectedAgent: string;
+  setSelectedAgent: (agent: string) => void;
+  staffOptions: Agent[];
   filterRef: React.RefObject<HTMLDivElement | null>;
   clearFilters: () => void;
 }
@@ -199,16 +189,13 @@ export interface DealPipelineBoardProps {
   filteredStatusGroups: PipelineStatusGroup[];
   loadingStatusId: number | null;
   loadMoreDeals: (statusId: number) => void;
-  handleDragStart: (e: React.DragEvent, deal: PipelineDeal) => void;
-  handleDragOver: (e: React.DragEvent) => void;
-  handleDrop: (e: React.DragEvent, statusId: number) => void;
   getAvatarColor: (name: string) => string;
 }
 
 export interface LeadPipelineBoardProps {
   filteredLeadGroups: LeadStatusGroup[];
-  loadingLeadStatusId: number | null;
-  loadMoreLeads: (statusId: number) => void;
+  loadingLeadStatusId: string | null;
+  loadMoreLeads: (statusId: string) => void;
   getAvatarColor: (name: string) => string;
 }
 
@@ -217,4 +204,11 @@ export interface TaskPipelineBoardProps {
   loadingTaskStatus: string | null;
   loadMoreTasks: (status: string) => void;
   getAvatarColor: (name: string) => string;
+}
+
+export interface DroppableColumnProps {
+  id: string;
+  data?: Record<string, unknown>;
+  className?: string;
+  children: React.ReactNode;
 }

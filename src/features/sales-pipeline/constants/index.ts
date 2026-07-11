@@ -1,47 +1,24 @@
-import type { Agent, DealType } from '../types/pipeline.types';
-
-// TODO: salesAgents should be fetched from backend instead of hardcoded.
-// Backend returns agent as a string field on each deal.
-export const salesAgents: Agent[] = [
-  { id: 1, name: 'All Agents' },
-  { id: 2, name: 'John Doe' },
-  { id: 3, name: 'Jane Smith' },
-  { id: 4, name: 'Mike Johnson' },
-  { id: 5, name: 'Emily Brown' },
-];
-
-// TODO: dealTypes has no backend equivalent. Disabled filter. Awaiting backend field.
-export const dealTypes: DealType[] = [
-  { id: 1, name: 'All Types' },
-  { id: 2, name: 'New Business' },
-  { id: 3, name: 'Renewal' },
-  { id: 4, name: 'Expansion' },
-  { id: 5, name: 'Upsell' },
-];
-
-// Column header colors keyed by statusId from backend
-export const DEAL_STAGE_COLORS: Record<number, string> = {
-  1: '#6366f1',
-  2: '#8b5cf6',
-  3: '#06b6d4',
-  4: '#f59e0b',
-  5: '#f97316',
-  6: '#10b981',
-  7: '#ef4444',
-};
-
 export const PIPELINE_PAGINATION_LIMIT = 15;
 
-export function stageColor(id: number): string {
-  return DEAL_STAGE_COLORS[id] ?? '#6b7280';
+const STAGE_COLOR_PALETTE = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#ec4899'];
+
+function hashColor(value: string): string {
+  if (!value) return '#6b7280';
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = value.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return STAGE_COLOR_PALETTE[Math.abs(hash) % STAGE_COLOR_PALETTE.length] ?? '#6b7280';
+}
+
+export function stageColor(status: string): string {
+  return hashColor(status);
 }
 
 const TASK_STAGE_COLORS: Record<string, string> = {
   Pending: '#f59e0b',
-  'In Progress': '#3b82f6',
   Completed: '#10b981',
-  'On Hold': '#f97316',
-  Cancelled: '#ef4444',
+  Overdue: '#ef4444',
 };
 
 export function taskStageColor(status: string): string {

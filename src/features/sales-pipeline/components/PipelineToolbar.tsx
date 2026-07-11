@@ -4,7 +4,7 @@ import type { PipelineToolbarProps } from '../types/pipeline.types';
 
 const PipelineToolbar: React.FC<PipelineToolbarProps> = ({
   searchQuery, setSearchQuery,
-  activeView, loading, error,
+  activeView, loading,
   fetchLeads, fetchDeals, fetchTasks,
 }) => {
   return (
@@ -41,7 +41,6 @@ const PipelineToolbar: React.FC<PipelineToolbarProps> = ({
         Task
       </button>
       {loading && <span className="pipeline-loading">Loading...</span>}
-      {error && <span className="pipeline-error">{error}</span>}
     </>
   );
 };

@@ -1,15 +1,22 @@
 import React from 'react';
+import { useDraggable } from '@dnd-kit/core';
 import { MoreHorizontal, DollarSign, Calendar } from 'lucide-react';
+import { formatDate } from '../../../shared/utils/dateUtils';
 import type { DealCardProps } from '../types/pipeline.types';
 
-const DealCard: React.FC<DealCardProps> = ({ deal, onDragStart, getAvatarColor }) => {
+const DealCard: React.FC<DealCardProps> = ({ deal, statusId, getAvatarColor }) => {
+  const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
+    id: `deal-${deal.id}`,
+    data: { type: 'deal', deal, statusId },
+  });
+
   return (
     <div
-      className="deal-card"
-      draggable
-      onDragStart={(e) => onDragStart(e, deal)}
+      ref={setNodeRef}
+      className={`deal-card${isDragging ? ' deal-card--dragging' : ''}`}
+      {...attributes}
+      {...listeners}
     >
-      {/* TODO: waiting for backend companyName field */}
       {deal.company && (
         <div className="deal-header">
           <span className="deal-company">{deal.company}</span>
@@ -28,7 +35,6 @@ const DealCard: React.FC<DealCardProps> = ({ deal, onDragStart, getAvatarColor }
           </div>
           <span>{deal.agent}</span>
         </div>
-        {/* TODO: waiting for backend probability field */}
         {typeof deal.probability === 'number' && (
           <div className="deal-probability" style={{ color: deal.probability === 100 ? '#10b981' : deal.probability === 0 ? '#ef4444' : '#6b7280' }}>
             {deal.probability}%
@@ -37,7 +43,11 @@ const DealCard: React.FC<DealCardProps> = ({ deal, onDragStart, getAvatarColor }
       </div>
       <div className="deal-due">
         <Calendar size={12} />
-        <span>{deal.endDate}</span>
+        <span>
+          {deal.endDate
+            ? formatDate(deal.endDate)
+            : 'No due date'}
+        </span>
       </div>
     </div>
   );

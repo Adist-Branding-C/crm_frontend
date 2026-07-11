@@ -39,4 +39,11 @@ export const taskService = {
       { params: { pageNumber: 1, limit: 100 } }
     ).then(r => r.data);
   },
+
+  updateTask(taskId: string, data: { status: string }): Promise<ApiResponse<unknown>> {
+    return axiosInstance.patch<ApiResponse<unknown>>(
+      `${TASK_API.BASE}/${taskId}`,
+      data,
+    ).then(r => r.data);
+  },
 };

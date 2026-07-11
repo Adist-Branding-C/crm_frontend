@@ -1,26 +1,38 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { salesAgents, PIPELINE_PAGINATION_LIMIT } from '../constants';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { PIPELINE_PAGINATION_LIMIT } from '../constants';
 import { pipelineService } from '../services/PipelineService';
+import { staffService } from '../../deal/services/staff.service';
 import { useAvatarColor } from './useAvatarColor';
 import { usePipelineDragDrop } from './usePipelineDragDrop';
-import type { PipelineStatusGroup, LeadStatusGroup, TaskStatusGroup, ActiveView } from '../types/pipeline.types';
+import { useToast } from '../../../shared/hooks/useToast';
+import type { PipelineStatusGroup, LeadStatusGroup, TaskStatusGroup, ActiveView, Agent } from '../types/pipeline.types';
+
+function extractErrorMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === 'object' && 'response' in err) {
+    const axiosErr = err as { response?: { data?: { message?: string } } };
+    return axiosErr.response?.data?.message || fallback;
+  }
+  if (err && typeof err === 'object' && 'message' in err) {
+    return (err as { message: string }).message;
+  }
+  return 'Network error. Please try again.';
+}
 
 export function useSalesPipelineData() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [selectedAgent, setSelectedAgent] = useState(1);
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedAgent, setSelectedAgent] = useState('');
+  const [staffOptions, setStaffOptions] = useState<Agent[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeView, setActiveView] = useState<ActiveView>('deals');
   const [statusGroups, setStatusGroups] = useState<PipelineStatusGroup[]>([]);
   const [leadGroups, setLeadGroups] = useState<LeadStatusGroup[]>([]);
   const [taskGroups, setTaskGroups] = useState<TaskStatusGroup[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [loadingStatusId, setLoadingStatusId] = useState<number | null>(null);
-  const [loadingLeadStatusId, setLoadingLeadStatusId] = useState<number | null>(null);
+  const [loadingLeadStatusId, setLoadingLeadStatusId] = useState<string | null>(null);
   const [loadingTaskStatus, setLoadingTaskStatus] = useState<string | null>(null);
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const debouncedSearchQueryRef = useRef(debouncedSearchQuery);
@@ -34,9 +46,19 @@ export function useSalesPipelineData() {
   const fetchTasksRef = useRef<() => void>(null!);
 
   const { getAvatarColor } = useAvatarColor();
-  const { handleDragStart, handleDragOver, handleDrop } = usePipelineDragDrop(setStatusGroups);
+  const toast = useToast();
+  const reportError = useCallback((message: string) => {
+    toast.showToastMessage(message, 'error');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const {
+    sensors,
+    activeItem,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
+  } = usePipelineDragDrop(setStatusGroups, setLeadGroups, setTaskGroups, reportError);
 
-  // Auto-fetch deals on mount
   useEffect(() => {
     fetchDeals();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,109 +74,82 @@ export function useSalesPipelineData() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounce search query (500ms) before triggering API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const filterParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (debouncedSearchQueryRef.current) params.search = debouncedSearchQueryRef.current;
+    if (dateFrom) params.fromDate = dateFrom;
+    if (dateTo) params.toDate = dateTo;
+    if (selectedAgent) params.agent = selectedAgent;
+    return params;
+  }, [debouncedSearchQuery, dateFrom, dateTo, selectedAgent]);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
-    setError(null);
     setActiveView('leads');
     try {
-      const params: Record<string, string> = {};
-      if (debouncedSearchQueryRef.current) params.search = debouncedSearchQueryRef.current;
-      const response = await pipelineService.getLeads(params);
+      const response = await pipelineService.getLeads(filterParams);
       if (response.status) {
         setLeadGroups(response.data.items);
       }
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch leads');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
+      reportError(extractErrorMessage(err, 'Failed to fetch leads'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filterParams, reportError]);
 
   const fetchDeals = useCallback(async () => {
     setLoading(true);
-    setError(null);
     setActiveView('deals');
     try {
-      const params: Record<string, string> = {};
-      if (dateFrom) params.fromDate = dateFrom;
-      if (dateTo) params.toDate = dateTo;
-      if (debouncedSearchQueryRef.current) params.search = debouncedSearchQueryRef.current;
-      const response = await pipelineService.getDeals(params);
+      const response = await pipelineService.getDeals(filterParams);
       if (response.status) {
         setStatusGroups(response.data.items);
       }
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch deals');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
+      reportError(extractErrorMessage(err, 'Failed to fetch deals'));
     } finally {
       setLoading(false);
     }
-  }, [dateFrom, dateTo]);
-
-  // Refetch deals when date filters change (skip initial mount)
-  useEffect(() => {
-    if (initialRenderRef.current) {
-      initialRenderRef.current = false;
-      return;
-    }
-    if (activeViewRef.current === 'deals') {
-      fetchDeals();
-    }
-  }, [dateFrom, dateTo, fetchDeals]);
+  }, [filterParams, reportError]);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
-    setError(null);
     setActiveView('tasks');
     try {
-      const params: Record<string, string> = {};
-      if (debouncedSearchQueryRef.current) params.search = debouncedSearchQueryRef.current;
-      const response = await pipelineService.getTasks(params);
+      const response = await pipelineService.getTasks(filterParams);
       if (response.status) {
         setTaskGroups(response.data.items);
       }
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch tasks');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
+      reportError(extractErrorMessage(err, 'Failed to fetch tasks'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filterParams, reportError]);
 
-  // Sync fetch refs so search-change effect can call them without deps
   fetchDealsRef.current = fetchDeals;
   fetchLeadsRef.current = fetchLeads;
   fetchTasksRef.current = fetchTasks;
 
-  // Refetch when debounced search query changes
+  const isInitialMountDateAgent = useRef(true);
   useEffect(() => {
+    if (isInitialMountDateAgent.current) {
+      isInitialMountDateAgent.current = false;
+      return;
+    }
+    const view = activeViewRef.current;
+    if (view === 'deals') fetchDealsRef.current();
+    else if (view === 'leads') fetchLeadsRef.current();
+    else if (view === 'tasks') fetchTasksRef.current();
+  }, [dateFrom, dateTo, selectedAgent]);
+
+  const isInitialMountSearch = useRef(true);
+  useEffect(() => {
+    if (isInitialMountSearch.current) {
+      isInitialMountSearch.current = false;
+      return;
+    }
     const view = activeViewRef.current;
     if (view === 'deals') fetchDealsRef.current();
     else if (view === 'leads') fetchLeadsRef.current();
@@ -165,60 +160,18 @@ export function useSalesPipelineData() {
   const clearFilters = useCallback(() => {
     setDateFrom('');
     setDateTo('');
-    setSelectedAgent(1);
-    setSelectedType(1);
+    setSelectedAgent('');
   }, []);
 
-  // Filter deals within each status group by agent
-  const filteredStatusGroups = useMemo(() =>
-    statusGroups.map(group => {
-      let filteredDeals = group.deals;
-
-      if (selectedAgent !== 1) {
-        const agentName = salesAgents.find(a => a.id === selectedAgent)?.name;
-        if (agentName) {
-          filteredDeals = filteredDeals.filter(deal => deal.agent === agentName);
-        }
-      }
-
-      return {
-        ...group,
-        deals: filteredDeals,
-        count: filteredDeals.length,
-      };
-    }),
-    [statusGroups, selectedAgent]
-  );
-
-  // Filter leads within each status group
-  const filteredLeadGroups = useMemo(() =>
-    leadGroups.map(group => ({
-      ...group,
-      leads: group.leads,
-      count: group.leads.length,
-    })),
-    [leadGroups]
-  );
-
-  // Filter tasks within each status group
-  const filteredTaskGroups = useMemo(() =>
-    taskGroups.map(group => ({
-      ...group,
-      items: group.items,
-      count: group.items.length,
-    })),
-    [taskGroups]
-  );
-
-  // Sum amounts for all deals in a given status group
   const getStageTotal = useCallback((statusId: number) => {
-    const group = filteredStatusGroups.find(g => g.statusId === statusId);
+    const group = statusGroups.find(g => g.statusId === statusId);
     return group?.deals.reduce((sum, deal) => sum + deal.amount, 0) ?? 0;
-  }, [filteredStatusGroups]);
+  }, [statusGroups]);
 
   const handleSaveDeal = useCallback(() => {
-    // Deal saved via drawer; integration with pipeline state can be added later
-  }, []);
+    setIsDrawerOpen(false);
+    fetchDeals();
+  }, [fetchDeals]);
 
   const loadMoreDeals = useCallback(async (statusId: number) => {
     setLoadingStatusId(statusId);
@@ -229,20 +182,13 @@ export function useSalesPipelineData() {
       const skip = statusGroup.deals.length;
       const response = await pipelineService.getStatusDeals(statusId, skip, PIPELINE_PAGINATION_LIMIT);
 
-
       if (response.status && response.data) {
         setStatusGroups(prevGroups =>
           prevGroups.map(group => {
             if (group.statusId !== statusId) return group;
 
-
             const existingIds = new Set(group.deals.map(d => d.id));
-
-
-
             const newDeals = response.data.items.filter(d => !existingIds.has(d.id));
-
-
 
             return {
               ...group,
@@ -253,20 +199,13 @@ export function useSalesPipelineData() {
         );
       }
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to load more deals');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
+      reportError(extractErrorMessage(err, 'Failed to load more deals'));
     } finally {
       setLoadingStatusId(null);
     }
-  }, [statusGroups]);
+  }, [statusGroups, reportError]);
 
-  const loadMoreLeads = useCallback(async (statusId: number) => {
+  const loadMoreLeads = useCallback(async (statusId: string) => {
     setLoadingLeadStatusId(statusId);
     try {
       const statusGroup = leadGroups.find(g => g.statusId === statusId);
@@ -292,18 +231,11 @@ export function useSalesPipelineData() {
         );
       }
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to load more leads');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
+      reportError(extractErrorMessage(err, 'Failed to load more leads'));
     } finally {
       setLoadingLeadStatusId(null);
     }
-  }, [leadGroups]);
+  }, [leadGroups, reportError]);
 
   const loadMoreTasks = useCallback(async (status: string) => {
     setLoadingTaskStatus(status);
@@ -331,18 +263,11 @@ export function useSalesPipelineData() {
         );
       }
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to load more tasks');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
+      reportError(extractErrorMessage(err, 'Failed to load more tasks'));
     } finally {
       setLoadingTaskStatus(null);
     }
-  }, [taskGroups]);
+  }, [taskGroups, reportError]);
 
   return {
     searchQuery, setSearchQuery,
@@ -350,12 +275,12 @@ export function useSalesPipelineData() {
     dateFrom, setDateFrom,
     dateTo, setDateTo,
     selectedAgent, setSelectedAgent,
-    selectedType, setSelectedType,
+    staffOptions,
     isDrawerOpen, setIsDrawerOpen,
     activeView,
     statusGroups,
     leadGroups,
-    taskGroups, loading, error,
+    taskGroups, loading,
     loadingStatusId,
     loadingLeadStatusId,
     loadingTaskStatus,
@@ -364,8 +289,17 @@ export function useSalesPipelineData() {
     loadMoreLeads,
     loadMoreTasks,
     filterRef,
-    clearFilters, filteredStatusGroups, filteredLeadGroups, filteredTaskGroups, getStageTotal,
-    handleDragStart, handleDragOver, handleDrop,
+    clearFilters,
+    filteredStatusGroups: statusGroups,
+    filteredLeadGroups: leadGroups,
+    filteredTaskGroups: taskGroups,
+    getStageTotal,
+    sensors,
+    activeItem,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
     handleSaveDeal, getAvatarColor,
+    toast,
   };
 }

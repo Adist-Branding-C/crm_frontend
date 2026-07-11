@@ -47,7 +47,7 @@ class PipelineService {
     };
   }
 
-  async getStatusLeads(statusId: number, skip: number, limit: number): Promise<StatusLeadsResponse> {
+  async getStatusLeads(statusId: string, skip: number, limit: number): Promise<StatusLeadsResponse> {
     const response = await axiosInstance.get<StatusLeadsResponse>(PIPELINE_API_ENDPOINTS.STATUS_LEADS, {
       params: { statusId, skip, limit },
     });

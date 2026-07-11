@@ -29,6 +29,7 @@ export interface DealFormData {
   mobile: string;
   amount: string;
   status: string;
+  statusId?: number;
   type: string;
   stage: string;
   priority: string;

@@ -1,10 +1,22 @@
 import React from 'react';
+import { useDraggable } from '@dnd-kit/core';
 import { Phone, Calendar } from 'lucide-react';
+import { formatDate } from '../../../shared/utils/dateUtils';
 import type { LeadCardProps } from '../types/pipeline.types';
 
-const LeadCard: React.FC<LeadCardProps> = ({ lead, getAvatarColor }) => {
+const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId, getAvatarColor }) => {
+  const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
+    id: `lead-${lead.id}`,
+    data: { type: 'lead', lead, fromStatusId },
+  });
+
   return (
-    <div className="deal-card">
+    <div
+      ref={setNodeRef}
+      className={`deal-card${isDragging ? ' deal-card--dragging' : ''}`}
+      {...attributes}
+      {...listeners}
+    >
       <div className="deal-title">{lead.name}</div>
       <div className="deal-value">
         <Phone size={14} />
@@ -23,7 +35,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, getAvatarColor }) => {
       </div>
       <div className="deal-due">
         <Calendar size={12} />
-        <span>{lead.createdAt}</span>
+        <span>Added {formatDate(lead.createdAt)}</span>
       </div>
     </div>
   );
