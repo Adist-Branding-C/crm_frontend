@@ -1,4 +1,8 @@
-import type { CustomPipelineItem, CustomPipelineApiItem, CustomPipelineFormData } from '../types/interface';
+import type {
+  CustomPipelineItem,
+  CustomPipelineApiItem,
+  CustomPipelineFormData,
+} from '../types/interface';
 
 export function mapApiToUI(item: CustomPipelineApiItem): CustomPipelineItem {
   return {
@@ -10,7 +14,9 @@ export function mapApiToUI(item: CustomPipelineApiItem): CustomPipelineItem {
   };
 }
 
-export function mapItemToFormData(item: CustomPipelineItem): CustomPipelineFormData {
+export function mapItemToFormData(
+  item: CustomPipelineItem,
+): CustomPipelineFormData {
   return {
     name: item.name,
     entityType: item.entityType,

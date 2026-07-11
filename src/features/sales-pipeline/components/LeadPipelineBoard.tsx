@@ -1,22 +1,26 @@
 import React from 'react';
-import { Inbox } from 'lucide-react';
 import LeadCard from './LeadCard';
 import DroppableColumn from './DroppableColumn';
-import type { LeadPipelineBoardProps } from '../types/pipeline.types';
+import PipelineColumnEmptyState from './PipelineColumnEmptyState';
+import type { LeadPipelineBoardProps } from '../types';
 
 const LeadPipelineBoard: React.FC<LeadPipelineBoardProps> = ({
-  filteredLeadGroups, loadingLeadStatusId,
-  loadMoreLeads, getAvatarColor,
+  filteredLeadGroups,
+  loadingLeadStatusId,
+  loadMoreLeads,
 }) => {
   return (
     <div className="pipeline-board">
-      {filteredLeadGroups.map(group => (
+      {filteredLeadGroups.map((group) => (
         <DroppableColumn
           key={group.statusId}
           id={`lead-col-${group.statusId}`}
           data={{ statusId: group.statusId }}
         >
-          <div className="column-header" style={{ borderTopColor: group.color }}>
+          <div
+            className="column-header"
+            style={{ borderTopColor: group.color }}
+          >
             <div className="column-title">
               <span className="column-name">{group.status}</span>
               <span className="column-count">{group.count}</span>
@@ -24,19 +28,15 @@ const LeadPipelineBoard: React.FC<LeadPipelineBoardProps> = ({
           </div>
           <div className="column-cards">
             {group.leads.length === 0 ? (
-              <div className="pipeline-column-empty">
-                <Inbox size={32} />
-                <p>No leads in this stage</p>
-              </div>
+              <PipelineColumnEmptyState message="No leads in this stage" />
             ) : (
-              group.leads.map(lead =>
+              group.leads.map((lead) => (
                 <LeadCard
                   key={lead.id}
                   lead={lead}
                   fromStatusId={group.statusId}
-                  getAvatarColor={getAvatarColor}
                 />
-              )
+              ))
             )}
           </div>
           {group.leads.length < group.count && (
@@ -45,7 +45,9 @@ const LeadPipelineBoard: React.FC<LeadPipelineBoardProps> = ({
               onClick={() => loadMoreLeads(group.statusId)}
               disabled={loadingLeadStatusId === group.statusId}
             >
-              {loadingLeadStatusId === group.statusId ? 'Loading...' : 'See More'}
+              {loadingLeadStatusId === group.statusId
+                ? 'Loading...'
+                : 'See More'}
             </button>
           )}
         </DroppableColumn>

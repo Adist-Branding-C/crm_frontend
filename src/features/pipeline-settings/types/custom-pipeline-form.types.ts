@@ -5,7 +5,10 @@ import type { CustomPipelineFormData } from './interface';
 export interface CustomPipelineFormConfig {
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CustomPipelineFormData;
-  onSubmit: (values: CustomPipelineFormData, helpers: FormikHelpers<CustomPipelineFormData>) => void | Promise<void>;
+  onSubmit: (
+    values: CustomPipelineFormData,
+    helpers: FormikHelpers<CustomPipelineFormData>,
+  ) => void | Promise<void>;
   onCancel: () => void;
   isEditing: boolean;
 }

@@ -2,9 +2,10 @@ import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { MoreHorizontal, DollarSign, Calendar } from 'lucide-react';
 import { formatDate } from '../../../shared/utils/dateUtils';
-import type { DealCardProps } from '../types/pipeline.types';
+import { hashStringToColor } from '../utils/pipelineColor.util';
+import type { DealCardProps } from '../types';
 
-const DealCard: React.FC<DealCardProps> = ({ deal, statusId, getAvatarColor }) => {
+const DealCard: React.FC<DealCardProps> = ({ deal, statusId }) => {
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id: `deal-${deal.id}`,
     data: { type: 'deal', deal, statusId },
@@ -30,24 +31,33 @@ const DealCard: React.FC<DealCardProps> = ({ deal, statusId, getAvatarColor }) =
       </div>
       <div className="deal-footer">
         <div className="deal-contact">
-          <div className="contact-avatar" style={{ background: getAvatarColor(deal.agent) }}>
+          <div
+            className="contact-avatar"
+            style={{ background: hashStringToColor(deal.agent) }}
+          >
             {deal.agent.charAt(0)}
           </div>
           <span>{deal.agent}</span>
         </div>
         {typeof deal.probability === 'number' && (
-          <div className="deal-probability" style={{ color: deal.probability === 100 ? '#10b981' : deal.probability === 0 ? '#ef4444' : '#6b7280' }}>
+          <div
+            className="deal-probability"
+            style={{
+              color:
+                deal.probability === 100
+                  ? '#10b981'
+                  : deal.probability === 0
+                    ? '#ef4444'
+                    : '#6b7280',
+            }}
+          >
             {deal.probability}%
           </div>
         )}
       </div>
       <div className="deal-due">
         <Calendar size={12} />
-        <span>
-          {deal.endDate
-            ? formatDate(deal.endDate)
-            : 'No due date'}
-        </span>
+        <span>{deal.endDate ? formatDate(deal.endDate) : 'No due date'}</span>
       </div>
     </div>
   );

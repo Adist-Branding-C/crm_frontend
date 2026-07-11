@@ -1,8 +1,13 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import type { DroppableColumnProps } from '../types/pipeline.types';
+import type { DroppableColumnProps } from '../types';
 
-const DroppableColumn: React.FC<DroppableColumnProps> = ({ id, data = {}, className = '', children }) => {
+const DroppableColumn: React.FC<DroppableColumnProps> = ({
+  id,
+  data = {},
+  className = '',
+  children,
+}) => {
   const { setNodeRef, isOver } = useDroppable({ id, data });
 
   return (

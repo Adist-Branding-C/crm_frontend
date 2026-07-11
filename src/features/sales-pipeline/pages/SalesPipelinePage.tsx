@@ -16,25 +16,41 @@ import './SalesPipelinePage.css';
 
 const SalesPipelinePage: React.FC = () => {
   const {
-    searchQuery, setSearchQuery,
-    showDateFilter, setShowDateFilter,
-    dateFrom, setDateFrom,
-    dateTo, setDateTo,
-    selectedAgent, setSelectedAgent,
+    searchQuery,
+    setSearchQuery,
+    showDateFilter,
+    setShowDateFilter,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
+    selectedAgent,
+    setSelectedAgent,
     staffOptions,
-    isDrawerOpen, setIsDrawerOpen,
-    activeView, loading,
+    isDrawerOpen,
+    setIsDrawerOpen,
+    activeView,
+    loading,
     loadingStatusId,
     loadingLeadStatusId,
     loadingTaskStatus,
-    fetchLeads, fetchDeals, fetchTasks,
+    onViewLeads,
+    onViewDeals,
+    onViewTasks,
     loadMoreDeals,
     loadMoreLeads,
     loadMoreTasks,
     filterRef,
-    clearFilters, filteredStatusGroups, filteredLeadGroups, filteredTaskGroups,
-    sensors, activeItem, handleDragStart, handleDragEnd, handleDragCancel,
-    handleSaveDeal, getAvatarColor,
+    onClearFilters,
+    filteredStatusGroups,
+    filteredLeadGroups,
+    filteredTaskGroups,
+    sensors,
+    activeItem,
+    handleDragStart,
+    handleDragEnd,
+    handleDragCancel,
+    handleSaveDeal,
     toast,
   } = useSalesPipelineData();
 
@@ -52,9 +68,9 @@ const SalesPipelinePage: React.FC = () => {
             setSearchQuery={setSearchQuery}
             activeView={activeView}
             loading={loading}
-            fetchLeads={fetchLeads}
-            fetchDeals={fetchDeals}
-            fetchTasks={fetchTasks}
+            onViewLeads={onViewLeads}
+            onViewDeals={onViewDeals}
+            onViewTasks={onViewTasks}
           />
           <PipelineFilters
             showDateFilter={showDateFilter}
@@ -67,12 +83,15 @@ const SalesPipelinePage: React.FC = () => {
             setSelectedAgent={setSelectedAgent}
             staffOptions={staffOptions}
             filterRef={filterRef}
-            clearFilters={clearFilters}
+            onClearFilters={onClearFilters}
           />
         </div>
         {activeView === 'deals' && (
           <div className="pipeline-actions">
-            <button className="btn btn-primary" onClick={() => setIsDrawerOpen(true)}>
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsDrawerOpen(true)}
+            >
               <Plus size={16} />
               Add Deal
             </button>
@@ -91,7 +110,6 @@ const SalesPipelinePage: React.FC = () => {
             filteredStatusGroups={filteredStatusGroups}
             loadingStatusId={loadingStatusId}
             loadMoreDeals={loadMoreDeals}
-            getAvatarColor={getAvatarColor}
           />
         )}
 
@@ -100,7 +118,6 @@ const SalesPipelinePage: React.FC = () => {
             filteredLeadGroups={filteredLeadGroups}
             loadingLeadStatusId={loadingLeadStatusId}
             loadMoreLeads={loadMoreLeads}
-            getAvatarColor={getAvatarColor}
           />
         )}
 
@@ -109,7 +126,6 @@ const SalesPipelinePage: React.FC = () => {
             filteredTaskGroups={filteredTaskGroups}
             loadingTaskStatus={loadingTaskStatus}
             loadMoreTasks={loadMoreTasks}
-            getAvatarColor={getAvatarColor}
           />
         )}
 
@@ -160,7 +176,11 @@ const SalesPipelinePage: React.FC = () => {
         </DragOverlay>
       </DndContext>
 
-      <AddDealDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} onSave={handleSaveDeal} />
+      <AddDealDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSave={handleSaveDeal}
+      />
 
       <ToastNotification
         isVisible={toast.showToast}

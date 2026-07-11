@@ -1,19 +1,10 @@
 import * as yup from 'yup';
 import { GROUP_BY_FIELD_OPTIONS } from '../constants';
 
-/**
- * Validation schema for adding or editing a custom pipeline.
- *
- * Used by:
- * - CustomPipelineForm (add and edit modes)
- *
- * Notes:
- * - groupByField is restricted to the same allow-list the backend validates against
- *   (@IsIn in custom-pipeline.dto.ts) so an invalid value never reaches the API.
- * - entityType has no edit-mode UI (the backend's UpdateCustomPipelineDto doesn't
- *   accept it either — a pipeline's target entity is fixed at creation).
- */
-const ALLOWED_GROUP_BY_FIELD_VALUES = GROUP_BY_FIELD_OPTIONS.map((o) => o.value);
+
+const ALLOWED_GROUP_BY_FIELD_VALUES = GROUP_BY_FIELD_OPTIONS.map(
+  (o) => o.value,
+);
 
 export const customPipelineValidationSchema = yup.object({
   name: yup

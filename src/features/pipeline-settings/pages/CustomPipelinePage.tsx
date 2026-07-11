@@ -7,13 +7,29 @@ import { useCustomPipelineCrud } from '../hooks/useCustomPipelineCrud';
 import { useCustomPipelineDeleteConfirm } from '../hooks/useCustomPipelineDeleteConfirm';
 import { useCustomPipelineFormSubmit } from '../hooks/useCustomPipelineFormSubmit';
 import { useCustomPipelineTableActions } from '../hooks/useCustomPipelineTableActions';
-import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, SortToggleButton } from '../../../shared/components/table';
+import {
+  Table,
+  THead,
+  TBody,
+  TRow,
+  TCell,
+  EmptyState,
+  TableNav,
+  SortToggleButton,
+} from '../../../shared/components/table';
 import AdminPagination from '../../../shared/components/crud/AdminPagination';
 import DrawerShell from '../../../shared/components/crud/DrawerShell';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import PageHeader from '../../../shared/components/layout/PageHeader';
-import { LABEL_SL_NO, LABEL_ACTIONS, LABEL_NO_DATA } from '../../../shared/constants/labels';
-import { ACTION_EDIT, ACTION_ADD } from '../../../shared/constants/actionLabels';
+import {
+  LABEL_SL_NO,
+  LABEL_ACTIONS,
+  LABEL_NO_DATA,
+} from '../../../shared/constants/labels';
+import {
+  ACTION_EDIT,
+  ACTION_ADD,
+} from '../../../shared/constants/actionLabels';
 import './CustomPipelinePage.css';
 import {
   EMPTY_CUSTOM_PIPELINE_FORM_DATA,
@@ -24,16 +40,26 @@ import {
   CUSTOM_PIPELINE_COLUMN_STATUS,
 } from '../constants';
 import { customPipelineService } from '../services';
-import { mapApiToUI, mapItemToFormData } from '../mappers/customPipeline.mapper';
+import {
+  mapApiToUI,
+  mapItemToFormData,
+} from '../mappers/customPipeline.mapper';
 import { customPipelineValidationSchema } from '../validations/customPipeline.validation';
 import CustomPipelineForm from '../components/CustomPipelineForm';
 import CustomPipelineRow from '../components/CustomPipelineRow';
-import type { CustomPipelineItem, CustomPipelineFormData } from '../types/interface';
+import type {
+  CustomPipelineItem,
+  CustomPipelineFormData,
+} from '../types/interface';
 
 const CustomPipelinePage = () => {
   const table = useTableData<CustomPipelineItem>({
     fetchFn: async (params) => {
-      const response = await customPipelineService.getCustomPipelines(params.pageNumber, params.limit, params.search);
+      const response = await customPipelineService.getCustomPipelines(
+        params.pageNumber,
+        params.limit,
+        params.search,
+      );
       return {
         items: (response.data?.items ?? []).map(mapApiToUI),
         total: response.data?.pagination?.total ?? 0,
@@ -49,23 +75,40 @@ const CustomPipelinePage = () => {
     onOpen: () => table.setError(''),
   });
   const crud = useCustomPipelineCrud({ table });
-  const deleteConfirm = useCustomPipelineDeleteConfirm({ handleDeleteCustomPipeline: crud.handleDeleteCustomPipeline });
+  const deleteConfirm = useCustomPipelineDeleteConfirm({
+    handleDeleteCustomPipeline: crud.handleDeleteCustomPipeline,
+  });
   const formSubmit = useCustomPipelineFormSubmit({
     editingItem: drawer.editingItem,
     closeDrawer: drawer.closeDrawer,
     handleCreateCustomPipeline: crud.handleCreateCustomPipeline,
     handleUpdateCustomPipeline: crud.handleUpdateCustomPipeline,
   });
-  const actions = useCustomPipelineTableActions({ table, drawer, dropdown, deleteConfirm });
+  const actions = useCustomPipelineTableActions({
+    table,
+    drawer,
+    dropdown,
+    deleteConfirm,
+  });
 
   return (
     <div className="pipeline-settings-page">
-      <PageHeader title="Custom Pipeline" description="Configure custom pipeline structures for leads, deals, and tasks" />
+      <PageHeader
+        title="Custom Pipeline"
+        description="Configure custom pipeline structures for leads, deals, and tasks"
+      />
       <div className="settings-content">
         <div className="table-container">
-          <TableNav searchQuery={search.searchValue} onSearchChange={search.handleSearchChange}
-            rowsPerPage={table.limit} onRowsPerPageChange={actions.handleRowsPerPageChange}>
-            <SortToggleButton sortOrder={table.sortOrder} onToggle={table.toggleSortOrder} />
+          <TableNav
+            searchQuery={search.searchValue}
+            onSearchChange={search.handleSearchChange}
+            rowsPerPage={table.limit}
+            onRowsPerPageChange={actions.handleRowsPerPageChange}
+          >
+            <SortToggleButton
+              sortOrder={table.sortOrder}
+              onToggle={table.toggleSortOrder}
+            />
             <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
               <Plus size={16} /> {ADD_CUSTOM_PIPELINE_LABEL}
             </button>
@@ -92,7 +135,9 @@ const CustomPipelinePage = () => {
                     item={item}
                     index={table.startIndex + idx}
                     isMenuOpen={dropdown.dropdownOpen === item.id}
-                    onToggleMenu={(open) => dropdown.toggleDropdown(open ? item.id : null)}
+                    onToggleMenu={(open) =>
+                      dropdown.toggleDropdown(open ? item.id : null)
+                    }
                     onEdit={actions.handleEditClick}
                     onDelete={actions.handleDeleteClick}
                   />
@@ -101,22 +146,35 @@ const CustomPipelinePage = () => {
             </TBody>
           </Table>
 
-          <AdminPagination currentPage={table.pageNumber} totalPages={table.totalPages}
-            startIndex={table.startIndex} rowsPerPage={table.limit} totalItems={table.totalCount}
-            onPageChange={table.setPageNumber} onRowsPerPageChange={actions.handleRowsPerPageChange}
-            prevNextOnly alwaysShowNav />
+          <AdminPagination
+            currentPage={table.pageNumber}
+            totalPages={table.totalPages}
+            startIndex={table.startIndex}
+            rowsPerPage={table.limit}
+            totalItems={table.totalCount}
+            onPageChange={table.setPageNumber}
+            onRowsPerPageChange={actions.handleRowsPerPageChange}
+            prevNextOnly
+            alwaysShowNav
+          />
         </div>
       </div>
       <DrawerShell
         isOpen={drawer.showDrawer}
-        title={drawer.editingItem ? `${ACTION_EDIT} Custom Pipeline` : `${ACTION_ADD} Custom Pipeline`}
+        title={
+          drawer.editingItem
+            ? `${ACTION_EDIT} Custom Pipeline`
+            : `${ACTION_ADD} Custom Pipeline`
+        }
         onClose={drawer.closeDrawer}
       >
         <CustomPipelineForm
           form={{
             validationSchema: customPipelineValidationSchema,
             initialValues: drawer.drawerInitialValues,
-            onSubmit: drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit,
+            onSubmit: drawer.editingItem
+              ? formSubmit.handleEditSubmit
+              : formSubmit.handleSubmit,
             onCancel: drawer.closeDrawer,
             isEditing: !!drawer.editingItem,
           }}
@@ -127,8 +185,14 @@ const CustomPipelinePage = () => {
           }}
         />
       </DrawerShell>
-      <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.name} itemType="pipeline"
-        error={table.error} onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
+      <AdminDeleteModal
+        isOpen={!!deleteConfirm.deletingItem}
+        itemName={deleteConfirm.deletingItem?.name}
+        itemType="pipeline"
+        error={table.error}
+        onConfirm={deleteConfirm.handleConfirmDelete}
+        onClose={deleteConfirm.closeDeleteModal}
+      />
     </div>
   );
 };

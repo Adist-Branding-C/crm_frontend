@@ -1,23 +1,27 @@
 import React from 'react';
-import { Inbox } from 'lucide-react';
-import { taskStageColor } from '../constants';
+import { taskStatusColor } from '../utils/pipelineColor.util';
 import TaskCard from './TaskCard';
 import DroppableColumn from './DroppableColumn';
-import type { TaskPipelineBoardProps } from '../types/pipeline.types';
+import PipelineColumnEmptyState from './PipelineColumnEmptyState';
+import type { TaskPipelineBoardProps } from '../types';
 
 const TaskPipelineBoard: React.FC<TaskPipelineBoardProps> = ({
-  filteredTaskGroups, loadingTaskStatus,
-  loadMoreTasks, getAvatarColor,
+  filteredTaskGroups,
+  loadingTaskStatus,
+  loadMoreTasks,
 }) => {
   return (
     <div className="pipeline-board">
-      {filteredTaskGroups.map(group => (
+      {filteredTaskGroups.map((group) => (
         <DroppableColumn
           key={group.status}
           id={`task-col-${group.status}`}
           data={{ status: group.status }}
         >
-          <div className="column-header" style={{ borderTopColor: taskStageColor(group.status) }}>
+          <div
+            className="column-header"
+            style={{ borderTopColor: taskStatusColor(group.status) }}
+          >
             <div className="column-title">
               <span className="column-name">{group.status}</span>
               <span className="column-count">{group.count}</span>
@@ -25,18 +29,9 @@ const TaskPipelineBoard: React.FC<TaskPipelineBoardProps> = ({
           </div>
           <div className="column-cards">
             {group.items.length === 0 ? (
-              <div className="pipeline-column-empty">
-                <Inbox size={32} />
-                <p>No tasks in this stage</p>
-              </div>
+              <PipelineColumnEmptyState message="No tasks in this stage" />
             ) : (
-              group.items.map(task =>
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  getAvatarColor={getAvatarColor}
-                />
-              )
+              group.items.map((task) => <TaskCard key={task.id} task={task} />)
             )}
           </div>
           {group.items.length < group.count && (

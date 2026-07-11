@@ -17,8 +17,8 @@ import type {
   LeadStatusGroup,
   Task,
   TaskStatusGroup,
-} from '../types/pipeline.types';
-
+  DragPayload,
+} from '../types';
 
 function moveDeal(
   groups: PipelineStatusGroup[],
@@ -27,11 +27,11 @@ function moveDeal(
   toStatusId: number,
 ): PipelineStatusGroup[] {
   const updatedDeal = { ...deal, statusId: toStatusId };
-  return groups.map(group => {
+  return groups.map((group) => {
     if (group.statusId === fromStatusId) {
       return {
         ...group,
-        deals: group.deals.filter(d => d.id !== deal.id),
+        deals: group.deals.filter((d) => d.id !== deal.id),
         count: group.count - 1,
       };
     }
@@ -46,18 +46,17 @@ function moveDeal(
   });
 }
 
-
 function moveLead(
   groups: LeadStatusGroup[],
   lead: Lead,
   fromStatusId: string,
   toStatusId: string,
 ): LeadStatusGroup[] {
-  return groups.map(group => {
+  return groups.map((group) => {
     if (group.statusId === fromStatusId) {
       return {
         ...group,
-        leads: group.leads.filter(l => l.id !== lead.id),
+        leads: group.leads.filter((l) => l.id !== lead.id),
         count: group.count - 1,
       };
     }
@@ -72,7 +71,6 @@ function moveLead(
   });
 }
 
-
 function moveTask(
   groups: TaskStatusGroup[],
   task: Task,
@@ -80,11 +78,11 @@ function moveTask(
   toStatus: string,
 ): TaskStatusGroup[] {
   const updatedTask = { ...task, status: toStatus };
-  return groups.map(group => {
+  return groups.map((group) => {
     if (group.status === fromStatus) {
       return {
         ...group,
-        items: group.items.filter(t => t.id !== task.id),
+        items: group.items.filter((t) => t.id !== task.id),
         count: group.count - 1,
       };
     }
@@ -98,13 +96,6 @@ function moveTask(
     return group;
   });
 }
-
-
-export type DragPayload =
-  | { type: 'deal'; deal: PipelineDeal }
-  | { type: 'lead'; lead: Lead; fromStatusId: string }
-  | { type: 'task'; task: Task };
-
 
 
 export function usePipelineDragDrop(
@@ -129,65 +120,94 @@ export function usePipelineDragDrop(
     setActiveItem(null);
   }, []);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    const payload = active.data.current as DragPayload | undefined;
-    setActiveItem(null);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      const payload = active.data.current as DragPayload | undefined;
+      setActiveItem(null);
 
-    if (!over || !payload) return;
+      if (!over || !payload) return;
 
-    if (payload.type === 'deal') {
-      const { deal } = payload;
-      const targetStatusId = over.data.current?.statusId as number;
-      const sourceStatusId = deal.statusId;
-      if (targetStatusId === undefined || sourceStatusId === targetStatusId) return;
+      if (payload.type === 'deal') {
+        const { deal } = payload;
+        const targetStatusId = over.data.current?.statusId as number;
+        const sourceStatusId = deal.statusId;
+        if (targetStatusId === undefined || sourceStatusId === targetStatusId)
+          return;
 
-      setStatusGroups(prev => moveDeal(prev, deal, sourceStatusId, targetStatusId));
-
-      dealService.updateDeal(String(deal.id), { statusId: targetStatusId }).catch(() => {
-        setStatusGroups(prev =>
-          moveDeal(prev, { ...deal, statusId: targetStatusId }, targetStatusId, sourceStatusId),
+        setStatusGroups((prev) =>
+          moveDeal(prev, deal, sourceStatusId, targetStatusId),
         );
-        onError?.('Failed to move deal. Please try again.');
-      });
-      return;
-    }
 
-    if (payload.type === 'lead') {
-      const { lead, fromStatusId } = payload;
-      const targetStatusId = over.data.current?.statusId as string;
-      if (!targetStatusId || fromStatusId === targetStatusId) return;
-
-      setLeadGroups(prev => moveLead(prev, lead, fromStatusId, targetStatusId));
-
-
-      if (!lead.leadId) {
-        setLeadGroups(prev => moveLead(prev, lead, targetStatusId, fromStatusId));
-        onError?.('This lead is missing an identifier and cannot be moved.');
+        dealService
+          .updateDeal(String(deal.id), { statusId: targetStatusId })
+          .catch(() => {
+            setStatusGroups((prev) =>
+              moveDeal(
+                prev,
+                { ...deal, statusId: targetStatusId },
+                targetStatusId,
+                sourceStatusId,
+              ),
+            );
+            onError?.('Failed to move deal. Please try again.');
+          });
         return;
       }
 
-      leadService.updateLead(lead.leadId, { statusId: targetStatusId }).catch(() => {
-        setLeadGroups(prev => moveLead(prev, lead, targetStatusId, fromStatusId));
-        onError?.('Failed to move lead. Please try again.');
-      });
-      return;
-    }
+      if (payload.type === 'lead') {
+        const { lead, fromStatusId } = payload;
+        const targetStatusId = over.data.current?.statusId as string;
+        if (!targetStatusId || fromStatusId === targetStatusId) return;
 
-    if (payload.type === 'task') {
-      const { task } = payload;
-      const targetStatus = over.data.current?.status as string;
-      const fromStatus = task.status;
-      if (!targetStatus || fromStatus === targetStatus) return;
+        setLeadGroups((prev) =>
+          moveLead(prev, lead, fromStatusId, targetStatusId),
+        );
 
-      setTaskGroups(prev => moveTask(prev, task, fromStatus, targetStatus));
+        if (!lead.leadId) {
+          setLeadGroups((prev) =>
+            moveLead(prev, lead, targetStatusId, fromStatusId),
+          );
+          onError?.('This lead is missing an identifier and cannot be moved.');
+          return;
+        }
 
-      taskService.updateTask(String(task.id), { status: targetStatus }).catch(() => {
-        setTaskGroups(prev => moveTask(prev, { ...task, status: targetStatus }, targetStatus, fromStatus));
-        onError?.('Failed to move task. Please try again.');
-      });
-    }
-  }, [setStatusGroups, setLeadGroups, setTaskGroups, onError]);
+        leadService
+          .updateLead(lead.leadId, { statusId: targetStatusId })
+          .catch(() => {
+            setLeadGroups((prev) =>
+              moveLead(prev, lead, targetStatusId, fromStatusId),
+            );
+            onError?.('Failed to move lead. Please try again.');
+          });
+        return;
+      }
+
+      if (payload.type === 'task') {
+        const { task } = payload;
+        const targetStatus = over.data.current?.status as string;
+        const fromStatus = task.status;
+        if (!targetStatus || fromStatus === targetStatus) return;
+
+        setTaskGroups((prev) => moveTask(prev, task, fromStatus, targetStatus));
+
+        taskService
+          .updateTask(String(task.id), { status: targetStatus })
+          .catch(() => {
+            setTaskGroups((prev) =>
+              moveTask(
+                prev,
+                { ...task, status: targetStatus },
+                targetStatus,
+                fromStatus,
+              ),
+            );
+            onError?.('Failed to move task. Please try again.');
+          });
+      }
+    },
+    [setStatusGroups, setLeadGroups, setTaskGroups, onError],
+  );
 
   return {
     sensors,

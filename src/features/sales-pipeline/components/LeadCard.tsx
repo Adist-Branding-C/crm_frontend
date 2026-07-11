@@ -2,9 +2,10 @@ import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { Phone, Calendar } from 'lucide-react';
 import { formatDate } from '../../../shared/utils/dateUtils';
-import type { LeadCardProps } from '../types/pipeline.types';
+import { hashStringToColor } from '../utils/pipelineColor.util';
+import type { LeadCardProps } from '../types';
 
-const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId, getAvatarColor }) => {
+const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId }) => {
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id: `lead-${lead.id}`,
     data: { type: 'lead', lead, fromStatusId },
@@ -24,7 +25,10 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId, getAvatarColor 
       </div>
       <div className="deal-footer">
         <div className="deal-contact">
-          <div className="contact-avatar" style={{ background: getAvatarColor(lead.name) }}>
+          <div
+            className="contact-avatar"
+            style={{ background: hashStringToColor(lead.name) }}
+          >
             {lead.name.charAt(0)}
           </div>
           <span>{lead.email}</span>
