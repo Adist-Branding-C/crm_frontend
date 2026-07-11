@@ -1,8 +1,9 @@
-import type { DealAdditionalField, DealAdditionalFieldFormData } from './deal-additional-field.types';
+import type { FormikHelpers } from 'formik';
+import type { DealAdditionalField } from './interface';
+import type { DealAdditionalFieldFormData } from './request';
 
 export interface AddDealAdditionalFieldFormPanelProps {
-  formData: DealAdditionalFieldFormData;
+  initialValues: DealAdditionalFieldFormData;
   editingItem: DealAdditionalField | null;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (values: DealAdditionalFieldFormData, helpers: FormikHelpers<DealAdditionalFieldFormData>) => void | Promise<void>;
 }

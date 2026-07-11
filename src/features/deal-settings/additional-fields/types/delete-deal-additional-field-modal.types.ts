@@ -1,4 +1,4 @@
-import type { DealAdditionalField } from './deal-additional-field.types';
+import type { DealAdditionalField } from './interface';
 
 export interface DeleteDealAdditionalFieldModalProps {
   deletingItem: DealAdditionalField;

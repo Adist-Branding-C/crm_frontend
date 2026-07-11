@@ -1,4 +1,5 @@
 import type { ReactNode, ChangeEvent, Ref } from 'react';
+import type { ObjectSchema } from 'yup';
 
 export interface Column<T> {
   key: string;
@@ -78,9 +79,7 @@ export interface AdminConfirmationModalProps {
   onCancel: () => void;
 }
 
-export interface AdminFormDrawerProps {
-  isOpen: boolean;
-  title: string;
+export interface AdminFormProps {
   fields: FormField[];
   formData: Record<string, unknown>;
   onChange: (data: any) => void;
@@ -91,4 +90,11 @@ export interface AdminFormDrawerProps {
   onClearError?: () => void;
   isSaving?: boolean;
   saveDisabled?: boolean;
+  /** Overrides the schema AdminForm would otherwise auto-build from `fields[].required`. */
+  validationSchema?: ObjectSchema<any>;
+}
+
+export interface AdminFormDrawerProps extends AdminFormProps {
+  isOpen: boolean;
+  title: string;
 }

@@ -1,44 +1,117 @@
+import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
+import PageContainer from '../../../../shared/components/layout/PageContainer';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import { dealSettingsTabs } from '../../shared/dealSettingsTabs';
-import { useDealAdditionalFieldPage } from '../hooks';
-import DealAdditionalFieldTable from '../components/DealAdditionalFieldTable';
+import { useTableData } from '../../../../shared/hooks/useTableData';
+import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
+import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirmation';
+import { useRowActions } from '../../../../shared/hooks/useRowActions';
+import { useDealAdditionalFieldDrawer, useDealAdditionalFieldCrud } from '../hooks';
+import { dealAdditionalFieldService } from '../services/dealAdditionalField.service';
+import { DealAdditionalFieldMapper } from '../mappers/dealAdditionalField.mapper';
+import { exportDealAdditionalFieldsToCsv } from '../helpers/exportDealAdditionalFields.helper';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
 import DealAdditionalFieldFormPanel from '../components/DealAdditionalFieldFormPanel';
 import DeleteDealAdditionalFieldModal from '../components/DeleteDealAdditionalFieldModal';
+import DealAdditionalFieldRow from '../components/DealAdditionalFieldRow';
+import type { DealAdditionalField } from '../types/interface';
 import './DealAdditionalFieldPage.css';
 
 const DealAdditionalFieldPage = () => {
-  const d = useDealAdditionalFieldPage();
+  const pagination = useTableData<DealAdditionalField>({
+    fetchFn: async (params) => {
+      const response = await dealAdditionalFieldService.getAllDealAdditionalFields(params);
+      if (!response.status) throw new Error(response.message || 'Failed to fetch deal additional fields');
+      return DealAdditionalFieldMapper.toListResult(response);
+    },
+  });
+  const drawer = useDealAdditionalFieldDrawer();
+  const dropdown = useDropdownMenu<string>();
+  const crud = useDealAdditionalFieldCrud({
+    editingItem: drawer.editingItem,
+    closeDrawer: drawer.closeDrawer,
+    setError: pagination.setError,
+    refresh: pagination.refresh,
+  });
+  const deleteConfirm = useDeleteConfirmation<DealAdditionalField>(crud.handleDelete);
+  const { handleEditClick, handleDeleteClick } = useRowActions<DealAdditionalField>({
+    onEdit: drawer.openEditDrawer,
+    onDelete: deleteConfirm.handleDeleteClick,
+    closeDropdown: dropdown.closeDropdown,
+  });
 
   return (
-    <div className="deal-settings-page">
-      <PageHeader title="Deal Settings" description="Configure deal types, stages and custom fields" />
+    <PageContainer>
+      <PageHeader title="Deal Settings" description="Manage deal types, stages and custom fields" />
       <SettingsTabs items={dealSettingsTabs} />
 
       <div className="additional-fields-layout">
         <div className="additional-form-panel">
-          <DealAdditionalFieldFormPanel formData={d.formData} editingItem={d.editingItem}
-            onInputChange={d.handleInputChange} onSubmit={d.handleSubmit} />
+          <DealAdditionalFieldFormPanel initialValues={drawer.drawerInitialValues} editingItem={drawer.editingItem}
+            onSubmit={crud.handleSubmit} />
         </div>
 
         <div className="additional-table-panel">
-          <DealAdditionalFieldTable data={d.filteredData} searchQuery={d.searchQuery}
-            onSearchChange={d.handleSearchChange} onAdd={d.handleAddClick} addLabel="Add Field"
-            rowsPerPage={d.limit} onRowsPerPageChange={d.handleLimitChange}
-            startIndex={d.startIndex}
-            dropdownOpen={d.dropdownOpen} dropdownDirection={d.dropdownDirection}
-            setDropdownOpen={d.setDropdownOpen} setDropdownDirection={d.setDropdownDirection}
-            handleEditClick={d.handleEditClick} handleDeleteClick={d.handleDeleteClick}
-            page={d.page} totalPages={d.meta.totalPages} total={d.meta.total}
-            onPageChange={d.handlePageChange} />
+          <div className="table-container">
+            <TableNav
+              searchQuery={pagination.searchQuery}
+              onSearchChange={pagination.handleSearchChange}
+              rowsPerPage={pagination.limit}
+              onRowsPerPageChange={pagination.handleRowsPerPageChange}
+            >
+              <button className="btn btn-secondary" onClick={() => exportDealAdditionalFieldsToCsv(pagination.list)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Download size={16} /> Export
+              </button>
+            </TableNav>
+
+            <Table wrapperClassName="table-scroll" className="data-table">
+              <THead>
+                <TRow>
+                  <TCell variant="th">Sl.No</TCell>
+                  <TCell variant="th">Field</TCell>
+                  <TCell variant="th">Type</TCell>
+                  <TCell variant="th">in filter</TCell>
+                  <TCell variant="th">in list</TCell>
+                  <TCell variant="th">Required</TCell>
+                  <TCell variant="th">Actions</TCell>
+                </TRow>
+              </THead>
+              <TBody>
+                {pagination.list.length === 0 ? (
+                  <EmptyState colSpan={7} />
+                ) : (
+                  pagination.list.map((item, idx) => (
+                    <DealAdditionalFieldRow
+                      key={item.id}
+                      item={item}
+                      index={idx}
+                      dropdownOpen={dropdown.dropdownOpen}
+                      onToggleDropdown={dropdown.toggleDropdown}
+                      onEdit={handleEditClick}
+                      onDelete={handleDeleteClick}
+                    />
+                  ))
+                )}
+              </TBody>
+            </Table>
+
+            <Pagination
+              currentPage={pagination.pageNumber}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalCount}
+              rowsPerPage={pagination.limit}
+              onPageChange={pagination.setPageNumber}
+            />
+          </div>
         </div>
       </div>
 
-      {d.deletingItem && (
-        <DeleteDealAdditionalFieldModal deletingItem={d.deletingItem}
-          onConfirm={d.handleConfirmDelete} onClose={() => d.setDeletingItem(null)} />
+      {deleteConfirm.deletingItem && (
+        <DeleteDealAdditionalFieldModal deletingItem={deleteConfirm.deletingItem}
+          onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
       )}
-    </div>
+    </PageContainer>
   );
 };
 
