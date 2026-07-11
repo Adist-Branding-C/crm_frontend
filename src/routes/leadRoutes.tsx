@@ -5,6 +5,7 @@ import CampaignsPage from '../features/campaigns/page/CampaignsPage';
 import FollowupRequiredPage from '../features/followup-required/pages/FollowupRequiredPage';
 import SalesPipelinePage from '../features/sales-pipeline/pages/SalesPipelinePage';
 import CompaniesPage from '../features/companies/pages/CompaniesPage';
+import CompanySubscriptionPage from '../features/companies/subscription/pages/CompanySubscriptionPage';
 import FacebookWorkflows from '../pages/FacebookWorkflows';
 import FacebookViewLeadsPage from '../features/facebook-view-leads/pages/FacebookViewLeadsPage';
 
@@ -16,6 +17,7 @@ export default (
     <Route path="followup-required" element={<FollowupRequiredPage />} />
     <Route path="sales-pipeline" element={<SalesPipelinePage />} />
     <Route path="companies" element={<CompaniesPage />} />
+    <Route path="companies/:companyId/subscription" element={<CompanySubscriptionPage />} />
     <Route path="facebook/workflows/*" element={<FacebookWorkflows />} />
     <Route path="facebook/view-leads" element={<FacebookViewLeadsPage />} />
   </>
