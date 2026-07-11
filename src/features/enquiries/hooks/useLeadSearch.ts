@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import type { UseLeadSearchReturn } from '../types/hook.types';
 
@@ -8,21 +8,16 @@ export function useLeadSearch(
   rowsPerPageRef: React.MutableRefObject<number>,
   resetPage: () => void,
 ): UseLeadSearchReturn {
-  const [committedSearch, setCommittedSearch] = useState('');
-
-  const handleSearchChange = useCallback((value: string) => {
-    setCommittedSearch(value);
+  const handleCommittedSearch = useCallback((value: string) => {
     resetPage();
     onFetch(1, rowsPerPageRef.current, value, activeFiltersRef.current);
   }, [onFetch, activeFiltersRef, rowsPerPageRef, resetPage]);
 
-  const { searchValue, handleSearchInput } = useDebouncedSearch(committedSearch, handleSearchChange, 2000);
-
-  const resetSearch = useCallback(() => setCommittedSearch(''), []);
+  const { searchValue, handleSearchChange, resetSearch } = useDebouncedSearch(handleCommittedSearch, 2000);
 
   return {
     searchQuery: searchValue,
-    setSearchQuery: handleSearchInput,
+    setSearchQuery: handleSearchChange,
     resetSearch,
   };
 }

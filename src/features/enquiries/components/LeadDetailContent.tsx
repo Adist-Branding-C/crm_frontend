@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Phone, MessageSquare, Trash2, Plus, Briefcase, User, Mail as MailIcon, Check, Clock, ArrowLeft, Edit2, Calendar, FileText, Loader2 } from 'lucide-react';
 import AddLeadTaskDrawer from '../../../components/AddLeadTaskDrawer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
@@ -10,7 +10,7 @@ import { useLeadRemarks } from '../hooks/useLeadRemarks';
 import { useLeadTasks } from '../hooks/useLeadTasks';
 import { useLeadTaskDropdowns } from '../hooks/useLeadTaskDropdowns';
 import { useLeadFormOptions } from '../hooks/useLeadFormOptions';
-import { dealService } from '../../deal/services/deal.service';
+import { useLeadDeals } from '../hooks/useLeadDeals';
 import { leadDataService } from '../services/leadDataService';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../../../shared/utils/dateUtils';
 import { badgeClass } from '../../../shared/utils/badgeUtils';
@@ -56,11 +56,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
   const [deleteTaskTarget, setDeleteTaskTarget] = useState<LeadTaskItem | null>(null);
   const [showDeleteTaskModal, setShowDeleteTaskModal] = useState(false);
   const [isDeletingTask, setIsDeletingTask] = useState(false);
-  const [leadDeals, setLeadDeals] = useState<DealItem[]>([]);
-  const [dealsLoading, setDealsLoading] = useState(false);
-  const [dealsError, setDealsError] = useState('');
   const [showAddDealDrawer, setShowAddDealDrawer] = useState(false);
-  const [isAddingDeal, setIsAddingDeal] = useState(false);
 
   const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError } = useLeadActivities(lead.id, true);
   const {
@@ -102,6 +98,14 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     additionalFieldDefs,
   } = useLeadFormOptions(true);
 
+  const {
+    deals: leadDeals,
+    isLoading: dealsLoading,
+    error: dealsError,
+    isAdding: isAddingDeal,
+    addDeal,
+  } = useLeadDeals(lead.leadId, true);
+
   const toSelectOptions = (options: LabelValuePair[]): EditableDetailFieldOption[] =>
     options.map((o) => ({ value: o.value, label: o.label }));
 
@@ -133,51 +137,15 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     }
   };
 
-  const refreshDeals = useCallback(async () => {
-    if (!lead.leadId) return;
-    setDealsLoading(true);
-    setDealsError('');
-    try {
-      const res = await dealService.getAllDeals({ pageNumber: 1, limit: 100 });
-      if (res.status) {
-        const data = res.data as { items?: DealItem[] };
-        const items = data?.items ?? [];
-        const filtered = items.filter(
-          (d) => String(d.leadId) === String(lead.leadId)
-        );
-        setLeadDeals(filtered);
-      } else {
-        setDealsError(res.message || ERROR_MESSAGES.FETCH_DEALS);
-      }
-    } catch {
-      setDealsError(ERROR_MESSAGES.FETCH_DEALS);
-      setLeadDeals([]);
-    } finally {
-      setDealsLoading(false);
+  const handleDealSave = async (formData: DealFormData) => {
+    const success = await addDeal(formData);
+    if (success) {
+      showToastMessage(SUCCESS_MESSAGES.DEAL_CREATED, 'success');
+      setShowAddDealDrawer(false);
+    } else {
+      showToastMessage(dealsError || ERROR_MESSAGES.CREATE_DEAL, 'error');
     }
-  }, [lead.leadId]);
-
-  useEffect(() => {
-    if (!lead.id) return;
-    refreshDeals();
-  }, [lead.id, refreshDeals]);
-
-  const handleDealSave = async (formData: any) => {
-    setIsAddingDeal(true);
-    try {
-      const res = await dealService.createDeal(formData);
-      if (res.status) {
-        showToastMessage(SUCCESS_MESSAGES.DEAL_CREATED, 'success');
-        setShowAddDealDrawer(false);
-        await refreshDeals();
-      } else {
-        showToastMessage(res.message || ERROR_MESSAGES.CREATE_DEAL, 'error');
-      }
-    } catch {
-      showToastMessage(ERROR_MESSAGES.CREATE_DEAL, 'error');
-    } finally {
-      setIsAddingDeal(false);
-    }
+    return success;
   };
 
   const handlePhoneClick = () => {

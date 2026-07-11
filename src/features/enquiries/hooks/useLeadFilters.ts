@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { INITIAL_FILTERS } from '../constants';
+import { useLeadFilterOptions } from './useLeadFilterOptions';
 import type { Filters } from '../types';
 import type { UseLeadFiltersReturn } from '../types/hook.types';
 
@@ -22,6 +23,7 @@ export function useLeadFilters(
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
   const activeFiltersRef = useRef<Record<string, string | number>>({});
+  const { additionalFields } = useLeadFilterOptions();
 
   const handleApplyFilters = useCallback(() => {
     const params: Record<string, string | number> = {};
@@ -39,14 +41,18 @@ export function useLeadFilters(
     if (filters.followupAdded) params.followUpAdded = filters.followupAdded;
     const additionalFieldFilters = Object.entries(filters.additionalFields)
       .filter(([, value]) => value)
-      .map(([fieldId, value]) => ({ fieldId, value }));
+      .map(([fieldId, value]) => ({
+        fieldId,
+        value,
+        isDropdown: additionalFields.find((f) => f.fieldId === fieldId)?.fieldType.toLowerCase() === 'dropdown',
+      }));
     if (additionalFieldFilters.length > 0) {
       params.additionalFieldFilters = JSON.stringify(additionalFieldFilters);
     }
     activeFiltersRef.current = params;
     setShowFilters(false);
     onFetch(1, rowsPerPageRef.current, searchQueryRef.current, params);
-  }, [filters, onFetch, searchQueryRef, rowsPerPageRef]);
+  }, [filters, onFetch, searchQueryRef, rowsPerPageRef, additionalFields]);
 
   return {
     filters,

@@ -28,8 +28,8 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
     if (visibleAdditionalFields.length === 0) return null;
 
     const rows: React.ReactNode[] = [];
-    for (let i = 0; i < visibleAdditionalFields.length; i += 4) {
-      const chunk = visibleAdditionalFields.slice(i, i + 4);
+    for (let i = 0; i < visibleAdditionalFields.length; i += 3) {
+      const chunk = visibleAdditionalFields.slice(i, i + 3);
       rows.push(
         <div className="filter-row" key={`af-row-${i}`}>
           {chunk.map((field) => (

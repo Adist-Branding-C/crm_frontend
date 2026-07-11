@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react';
+import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import type { Lead, AdditionalFieldDef } from './index';
 import type { Filters } from './index';
 import type { SortConfig } from '../../../shared/types/sort';
@@ -28,7 +28,7 @@ export interface UseLeadPaginationReturn {
   startIndex: number;
   totalItems: number;
   handleSetCurrentPage: (page: number | ((prev: number) => number)) => void;
-  handleRowsPerPageChange: (value: number) => void;
+  handleRowsPerPageChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   resetPage: () => void;
 }
 

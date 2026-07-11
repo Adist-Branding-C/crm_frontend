@@ -7,6 +7,6 @@
  * - additionalFieldValidationSchema (requires at least one value for these two types)
  */
 export const FIELD_TYPES = {
-  DROPDOWN: 'dropdown',
-  CHECKBOX: 'checkbox',
+  DROPDOWN: 'Dropdown',
+  CHECKBOX: 'Checkbox',
 } as const;
