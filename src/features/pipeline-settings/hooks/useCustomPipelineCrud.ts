@@ -43,7 +43,7 @@ export function useCustomPipelineCrud({ table }: UseCustomPipelineCrudParams) {
         });
         if (response.status) {
           table.setPageNumber(1);
-          table.refresh();
+          table.refresh(1);
           resetForm();
           return true;
         }

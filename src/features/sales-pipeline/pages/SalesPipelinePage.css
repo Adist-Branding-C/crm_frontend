@@ -508,7 +508,7 @@
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
-  animation: toastSlideIn 0.3s ease;
+  animation: toast-slide-in 0.3s ease;
   z-index: 9999;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -524,7 +524,7 @@
   color: #fff;
 }
 
-@keyframes toastSlideIn {
+@keyframes toast-slide-in {
   from {
     opacity: 0;
     transform: translateY(1rem);
