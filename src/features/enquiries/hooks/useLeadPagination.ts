@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { DEFAULT_ROWS_PER_PAGE } from '../constants';
 import type { UseLeadPaginationReturn } from '../types/hook.types';
 
@@ -27,7 +28,8 @@ export function useLeadPagination(
     onFetch(next, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
   }, [onFetch, activeFiltersRef, searchQueryRef]);
 
-  const handleRowsPerPageChange = useCallback((value: number) => {
+  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    const value = Number(e.target.value);
     setRowsPerPage(value);
     setCurrentPage(1);
     onFetch(1, value, searchQueryRef.current, activeFiltersRef.current);

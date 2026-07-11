@@ -15,5 +15,6 @@ export interface UseLeadAdditionalTableActionsParams {
   };
   crud: {
     setError: (message: string | null) => void;
+    setDeleteError: (message: string | null) => void;
   };
 }

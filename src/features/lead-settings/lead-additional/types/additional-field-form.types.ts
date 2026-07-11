@@ -7,6 +7,8 @@ export interface AdditionalFieldFormConfig {
   initialValues: AdditionalFieldFormData;
   onSubmit: (values: AdditionalFieldFormData, helpers: FormikHelpers<AdditionalFieldFormData>) => void | Promise<void>;
   isEditing: boolean;
+  editingFieldName?: string | undefined;
+  onCancelEdit?: (() => void) | undefined;
 }
 
 export interface AdditionalFieldFormStatus {

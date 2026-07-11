@@ -332,10 +332,19 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
                 </div>
                 <div className="form-group">
                   <label>Purpose</label>
-                  <Field as="select" name="purposeId" className={errors.purposeId && touched.purposeId ? 'error' : ''}>
+                  <select
+                    name="purposeId"
+                    value={values.purposeId}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setActivePurposeId(e.target.value);
+                    }}
+                    onBlur={handleBlur}
+                    className={errors.purposeId && touched.purposeId ? 'error' : ''}
+                  >
                     <option value="">Select</option>
                     {purposeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </Field>
+                  </select>
                   <FormikError name="purposeId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">

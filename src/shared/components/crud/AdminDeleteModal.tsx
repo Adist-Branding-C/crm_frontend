@@ -13,7 +13,7 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h5>{LABEL_CONFIRM_DELETE}</h5>
-          <button className="modal-close" onClick={onClose}><X size={20} /></button>
+          <button type="button" className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
         <div className="modal-body">
           <ValidationAlert message={error || null} />
@@ -26,8 +26,8 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
           </p>
         </div>
         <div className="modal-footer">
-          <button className="btn btn-danger" onClick={onConfirm}>{ACTION_CONFIRM}</button>
-          <button className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
+          <button type="button" className="btn btn-danger" onClick={onConfirm}>{ACTION_CONFIRM}</button>
+          <button type="button" className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
         </div>
       </div>
     </div>

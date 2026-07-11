@@ -80,6 +80,8 @@ const LeadAdditionalPage = () => {
               initialValues: drawer.drawerInitialValues,
               onSubmit: drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit,
               isEditing: !!drawer.editingItem,
+              editingFieldName: drawer.editingItem?.field,
+              onCancelEdit: drawer.closeDrawer,
             }}
             status={{
               isSaving: crud.isSaving,
@@ -153,7 +155,7 @@ const LeadAdditionalPage = () => {
         isOpen={!!deleteConfirm.deletingItem}
         itemName={deleteConfirm.deletingItem?.field}
         itemType="additional field"
-        error={table.error}
+        error={crud.deleteError}
         onConfirm={deleteConfirm.handleConfirmDelete}
         onClose={deleteConfirm.closeDeleteModal}
       />

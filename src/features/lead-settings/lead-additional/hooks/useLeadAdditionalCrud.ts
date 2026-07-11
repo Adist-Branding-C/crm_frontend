@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { leadAdditionalService } from '../services/leadAdditionalService';
 import { useSubmitErrorHandler } from '../../../../shared/hooks/useSubmitErrorHandler';
+import { getErrorMessage } from '../../../../shared/utils/error';
 import { ERROR_MESSAGES } from '../../constants/messages';
 import { LEAD_ADDITIONAL_FIELD_MAP, LEAD_ADDITIONAL_FIELD_ERROR_FALLBACKS } from '../constants';
 import { FIELD_TYPES } from '../constants/fieldTypes';
@@ -13,8 +14,11 @@ import type { UseLeadAdditionalCrudParams } from '../types/use-lead-additional-c
  *
  * Notes:
  * - Owns its own isSaving/error state rather than sharing the table's fetch-loading/error state -
- *   this error is form-panel-scoped (create/update/delete failures), separate from the table's
- *   own fetch errors, and isSaving drives the form's submit-button spinner.
+ *   this error is form-panel-scoped (create/update failures), separate from the table's own fetch
+ *   errors, and isSaving drives the form's submit-button spinner.
+ * - deleteError is kept separate from error: the former renders inside the delete confirmation
+ *   modal, the latter inside the Add/Edit form panel - sharing one state was leaking delete
+ *   failures into the unrelated Add/Edit form's error banner.
  * - Uses the shared useSubmitErrorHandler with a custom containerSelector ('.additional-form-panel')
  *   since this page has no drawer - the form is an always-visible panel, not inside '.drawer-body'.
  * - Takes only the narrow pagination setters it needs (reset-to-page-1, refresh) rather than
@@ -24,6 +28,7 @@ import type { UseLeadAdditionalCrudParams } from '../types/use-lead-additional-c
 export function useLeadAdditionalCrud({ table }: UseLeadAdditionalCrudParams) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const submitError = useSubmitErrorHandler({
     fieldMap: LEAD_ADDITIONAL_FIELD_MAP,
@@ -102,20 +107,29 @@ export function useLeadAdditionalCrud({ table }: UseLeadAdditionalCrudParams) {
   }, [table, submitError]);
 
   const handleDeleteAdditionalField = useCallback(async (id: string) => {
-    setError(null);
+    setDeleteError(null);
     try {
       const response = await leadAdditionalService.delete(id);
       if (response.status) {
         table.refresh();
         return true;
       }
-      setError(response.message || ERROR_MESSAGES.DELETE_ADDITIONAL_FIELD);
+      setDeleteError(response.message || ERROR_MESSAGES.DELETE_ADDITIONAL_FIELD);
       return false;
-    } catch {
-      setError(ERROR_MESSAGES.DELETE_ADDITIONAL_FIELD);
+    } catch (err: unknown) {
+      setDeleteError(getErrorMessage(err, ERROR_MESSAGES.DELETE_ADDITIONAL_FIELD));
       return false;
     }
   }, [table]);
 
-  return { isSaving, error, setError, handleCreateAdditionalField, handleUpdateAdditionalField, handleDeleteAdditionalField };
+  return {
+    isSaving,
+    error,
+    setError,
+    deleteError,
+    setDeleteError,
+    handleCreateAdditionalField,
+    handleUpdateAdditionalField,
+    handleDeleteAdditionalField,
+  };
 }
