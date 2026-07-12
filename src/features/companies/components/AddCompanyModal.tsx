@@ -1,6 +1,7 @@
 import React from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
+import Modal from '../../../shared/components/Modal';
 import { companyDataService } from '../services/companyDataService';
 import { addCompanyValidationSchema } from '../validations/addCompany.validation';
 import { COMPANY_STATUS_OPTIONS } from '../constants';
@@ -28,8 +29,6 @@ const BASE_INITIAL_VALUES: NewCompany = {
 };
 
 const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onClose }) => {
-  if (!isOpen) return null;
-
   const isEditing = !!editingCompany;
   const initialValues: NewCompany = editingCompany
     ? {
@@ -70,124 +69,118 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{isEditing ? 'Edit Company' : 'Add New Company'}</h2>
-          <button className="modal-close" onClick={onClose}><X size={20} /></button>
-        </div>
-        <Formik initialValues={initialValues} validationSchema={addCompanyValidationSchema} onSubmit={handleSubmit}>
-          {({ errors, touched, isSubmitting, values, handleChange, handleBlur, submitForm, status }) => (
-            <>
-              <div className="modal-body">
-                {status && <div className="alert alert-danger">{status}</div>}
-                <Form>
+    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'Edit Company' : 'Add New Company'}>
+      <Formik initialValues={initialValues} validationSchema={addCompanyValidationSchema} onSubmit={handleSubmit}>
+        {({ errors, touched, isSubmitting, values, handleChange, handleBlur, submitForm, status }) => (
+          <>
+            <div className="modal-body">
+              {status && <div className="alert alert-danger">{status}</div>}
+              <Form>
+                <div className="form-group">
+                  <label>Company Name <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter company name"
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={errors.name && touched.name ? 'error' : ''}
+                  />
+                  {errors.name && touched.name && <div className="error-text">{errors.name}</div>}
+                </div>
+                <div className="form-group">
+                  <label>Contact Person Name <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    name="contactPersonName"
+                    placeholder="Enter contact person name"
+                    value={values.contactPersonName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={errors.contactPersonName && touched.contactPersonName ? 'error' : ''}
+                  />
+                  {errors.contactPersonName && touched.contactPersonName && <div className="error-text">{errors.contactPersonName}</div>}
+                </div>
+                <div className="form-group">
+                  <label>Email <span className="required">*</span></label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter email"
+                    value={values.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={errors.email && touched.email ? 'error' : ''}
+                  />
+                  {errors.email && touched.email && <div className="error-text">{errors.email}</div>}
+                </div>
+                <div className="form-group">
+                  <label>Phone <span className="required">*</span></label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="Enter phone number"
+                    value={values.phoneNumber}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={errors.phoneNumber && touched.phoneNumber ? 'error' : ''}
+                  />
+                  {errors.phoneNumber && touched.phoneNumber && <div className="error-text">{errors.phoneNumber}</div>}
+                </div>
+                <div className="form-group">
+                  <label>Address</label>
+                  <input
+                    type="text"
+                    name="address"
+                    placeholder="Enter address"
+                    value={values.address}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                </div>
+                <div className="form-row">
                   <div className="form-group">
-                    <label>Company Name <span className="required">*</span></label>
+                    <label>GST Number</label>
                     <input
                       type="text"
-                      name="name"
-                      placeholder="Enter company name"
-                      value={values.name}
+                      name="gstNumber"
+                      placeholder="Enter GST number"
+                      value={values.gstNumber}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className={errors.name && touched.name ? 'error' : ''}
                     />
-                    {errors.name && touched.name && <div className="error-text">{errors.name}</div>}
                   </div>
                   <div className="form-group">
-                    <label>Contact Person Name <span className="required">*</span></label>
+                    <label>Date of Registration</label>
                     <input
-                      type="text"
-                      name="contactPersonName"
-                      placeholder="Enter contact person name"
-                      value={values.contactPersonName}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={errors.contactPersonName && touched.contactPersonName ? 'error' : ''}
-                    />
-                    {errors.contactPersonName && touched.contactPersonName && <div className="error-text">{errors.contactPersonName}</div>}
-                  </div>
-                  <div className="form-group">
-                    <label>Email <span className="required">*</span></label>
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Enter email"
-                      value={values.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={errors.email && touched.email ? 'error' : ''}
-                    />
-                    {errors.email && touched.email && <div className="error-text">{errors.email}</div>}
-                  </div>
-                  <div className="form-group">
-                    <label>Phone <span className="required">*</span></label>
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      placeholder="Enter phone number"
-                      value={values.phoneNumber}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={errors.phoneNumber && touched.phoneNumber ? 'error' : ''}
-                    />
-                    {errors.phoneNumber && touched.phoneNumber && <div className="error-text">{errors.phoneNumber}</div>}
-                  </div>
-                  <div className="form-group">
-                    <label>Address</label>
-                    <input
-                      type="text"
-                      name="address"
-                      placeholder="Enter address"
-                      value={values.address}
+                      type="date"
+                      name="dateOfRegistration"
+                      value={values.dateOfRegistration}
                       onChange={handleChange}
                       onBlur={handleBlur}
                     />
                   </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>GST Number</label>
-                      <input
-                        type="text"
-                        name="gstNumber"
-                        placeholder="Enter GST number"
-                        value={values.gstNumber}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Date of Registration</label>
-                      <input
-                        type="date"
-                        name="dateOfRegistration"
-                        value={values.dateOfRegistration}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Status</label>
-                    <Field as="select" name="status">
-                      {COMPANY_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </Field>
-                    <FormikError name="status" component="div" className="error-text" />
-                  </div>
-                </Form>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
-                <button className="btn btn-primary" type="button" onClick={submitForm} disabled={isSubmitting}>
-                  {isSubmitting ? <><Loader2 size={16} className="spin" /> {isEditing ? 'Saving...' : 'Adding...'}</> : isEditing ? 'Save Changes' : 'Add Company'}
-                </button>
-              </div>
-            </>
-          )}
-        </Formik>
-      </div>
-    </div>
+                </div>
+                <div className="form-group">
+                  <label>Status</label>
+                  <Field as="select" name="status">
+                    {COMPANY_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </Field>
+                  <FormikError name="status" component="div" className="error-text" />
+                </div>
+              </Form>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" type="button" onClick={submitForm} disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 size={16} className="spin" /> {isEditing ? 'Saving...' : 'Adding...'}</> : isEditing ? 'Save Changes' : 'Add Company'}
+              </button>
+            </div>
+          </>
+        )}
+      </Formik>
+    </Modal>
   );
 };
 

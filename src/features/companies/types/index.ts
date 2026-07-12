@@ -46,33 +46,19 @@ export interface CompaniesFiltersProps {
   onClose: () => void;
 }
 
-export interface CompaniesTableProps {
-  data: Company[];
-  selectedRows: string[];
-  onSelectAll: () => void;
-  onSelectRow: (companyId: string) => void;
-  onView: (company: Company) => void;
-  onEdit: (company: Company) => void;
-  onDelete: (companyId: string) => void;
-}
-
-export interface CompaniesToolbarProps {
-  searchQuery: string;
-  onSearchChange: (v: string) => void;
-  showFilters: boolean;
-  onToggleFilters: () => void;
-  onAddCompany: () => void;
-}
-
 export interface CompaniesStatsGridProps {
   stats: CompanyStats;
 }
 
-export interface CompaniesPaginationProps {
-  currentPage: number;
-  totalPages: number;
-  startIndex: number;
-  rowsPerPage: number;
-  totalItems: number;
-  onPageChange: (page: number) => void;
+export interface CompanyStatusBadgeProps {
+  status: string;
+}
+
+export interface CompanyRowProps {
+  company: Company;
+  isSelected: boolean;
+  onSelectRow: (companyId: string) => void;
+  onView: (company: Company) => void;
+  onEdit: (company: Company) => void;
+  onDelete: (companyId: string) => void;
 }

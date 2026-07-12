@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import type { ChangeEvent } from 'react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Toast from '../../../shared/components/Toast';
@@ -8,19 +9,22 @@ import { useDrawer } from '../../../shared/hooks/useDrawer';
 import { useTableSelection } from '../../../shared/hooks/useTableSelection';
 import { useDeleteConfirmation } from '../../../shared/hooks/useDeleteConfirmation';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
+import { Filter, ChevronDown, Plus } from 'lucide-react';
 import { useCompaniesList } from '../hooks/useCompaniesList';
 import { useCompanyStatistics } from '../hooks/useCompanyStatistics';
+import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } from '../../../shared/components/table';
 import CompaniesStatsGrid from '../components/CompaniesStatsGrid';
-import CompaniesToolbar from '../components/CompaniesToolbar';
 import CompaniesFilters from '../components/CompaniesFilters';
-import CompaniesTable from '../components/CompaniesTable';
-import CompaniesPagination from '../components/CompaniesPagination';
+import CompanyRow from '../components/CompanyRow';
 import AddCompanyModal from '../components/AddCompanyModal';
 import CompanyViewDrawer from '../components/CompanyViewDrawer';
+import { LABEL_NO_DATA } from '../../../shared/constants/labels';
 import type { Company, CompanyFilters } from '../types';
 import './CompaniesPage.css';
 
-const ROWS_PER_PAGE = 10;
+const COMPANY_TABLE_COLUMN_COUNT = 8;
+
+const DEFAULT_ROWS_PER_PAGE = 10;
 
 const CompaniesPage = () => {
   const toast = useToast();
@@ -28,6 +32,7 @@ const CompaniesPage = () => {
   const { stats, refreshStatistics } = useCompanyStatistics();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<CompanyFilters>({ status: '' });
   const appliedStatusRef = useRef('');
@@ -41,26 +46,33 @@ const CompaniesPage = () => {
 
   const { searchValue, handleSearchChange } = useDebouncedSearch((value) => {
     setCurrentPage(1);
-    crud.fetchCompanies(1, ROWS_PER_PAGE, value, appliedStatusRef.current);
+    crud.fetchCompanies(1, rowsPerPage, value, appliedStatusRef.current);
   });
 
   const initialFetchDone = useRef(false);
   useEffect(() => {
     if (initialFetchDone.current) return;
     initialFetchDone.current = true;
-    crud.fetchCompanies(1, ROWS_PER_PAGE, '', '');
+    crud.fetchCompanies(1, rowsPerPage, '', '');
   }, []);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    crud.fetchCompanies(page, ROWS_PER_PAGE, searchValue, appliedStatusRef.current);
+    crud.fetchCompanies(page, rowsPerPage, searchValue, appliedStatusRef.current);
+  };
+
+  const handleRowsPerPageChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const newRowsPerPage = Number(e.target.value);
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+    crud.fetchCompanies(1, newRowsPerPage, searchValue, appliedStatusRef.current);
   };
 
   const handleApplyFilters = () => {
     appliedStatusRef.current = filters.status;
     setShowFilters(false);
     setCurrentPage(1);
-    crud.fetchCompanies(1, ROWS_PER_PAGE, searchValue, filters.status);
+    crud.fetchCompanies(1, rowsPerPage, searchValue, filters.status);
   };
 
   const handleClearFilters = () => {
@@ -68,7 +80,7 @@ const CompaniesPage = () => {
     appliedStatusRef.current = '';
     setShowFilters(false);
     setCurrentPage(1);
-    crud.fetchCompanies(1, ROWS_PER_PAGE, searchValue, '');
+    crud.fetchCompanies(1, rowsPerPage, searchValue, '');
   };
 
   const handleSelectAll = () => {
@@ -92,13 +104,20 @@ const CompaniesPage = () => {
 
       <CompaniesStatsGrid stats={stats} />
 
-      <CompaniesToolbar
+      <TableNav
         searchQuery={searchValue}
         onSearchChange={handleSearchChange}
-        showFilters={showFilters}
-        onToggleFilters={() => setShowFilters(!showFilters)}
-        onAddCompany={() => formDrawer.open(null)}
-      />
+        searchPlaceholder="Search companies..."
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      >
+        <button className={`btn btn-secondary ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
+          <Filter size={16} /> Filter <ChevronDown size={14} className={showFilters ? 'rotate' : ''} />
+        </button>
+        <button className="btn btn-primary" onClick={() => formDrawer.open(null)}>
+          <Plus size={16} /> Add Company
+        </button>
+      </TableNav>
 
       {showFilters && (
         <CompaniesFilters
@@ -109,25 +128,48 @@ const CompaniesPage = () => {
         />
       )}
 
-      <CompaniesTable
-        data={crud.companies}
-        selectedRows={selection.selectedIds}
-        onSelectAll={handleSelectAll}
-        onSelectRow={selection.handleSelectRow}
-        onView={(company) => viewDrawer.open(company)}
-        onEdit={(company) => formDrawer.open(company)}
-        onDelete={(companyId) => {
-          const company = crud.companies.find(c => c.companyId === companyId);
-          if (company) deleteConfirm.handleDeleteClick(company);
-        }}
-      />
+      <Table wrapperClassName="table-container" className="enquiries-table">
+        <THead>
+          <TRow>
+            <TCell variant="th">
+              <input type="checkbox" checked={selection.selectedIds.length === crud.companies.length && crud.companies.length > 0} onChange={handleSelectAll} />
+            </TCell>
+            <TCell variant="th">Company</TCell>
+            <TCell variant="th">Contact</TCell>
+            <TCell variant="th">Staff</TCell>
+            <TCell variant="th">Leads</TCell>
+            <TCell variant="th">Deals</TCell>
+            <TCell variant="th">Status</TCell>
+            <TCell variant="th">Actions</TCell>
+          </TRow>
+        </THead>
+        <TBody>
+          {crud.companies.length === 0 ? (
+            <EmptyState colSpan={COMPANY_TABLE_COLUMN_COUNT} message={LABEL_NO_DATA} />
+          ) : (
+            crud.companies.map((company) => (
+              <CompanyRow
+                key={company.companyId}
+                company={company}
+                isSelected={selection.selectedIds.includes(company.companyId)}
+                onSelectRow={selection.handleSelectRow}
+                onView={(c) => viewDrawer.open(c)}
+                onEdit={(c) => formDrawer.open(c)}
+                onDelete={(companyId) => {
+                  const company = crud.companies.find(c => c.companyId === companyId);
+                  if (company) deleteConfirm.handleDeleteClick(company);
+                }}
+              />
+            ))
+          )}
+        </TBody>
+      </Table>
 
-      <CompaniesPagination
+      <Pagination
         currentPage={currentPage}
         totalPages={crud.totalPages}
-        startIndex={(currentPage - 1) * ROWS_PER_PAGE}
-        rowsPerPage={ROWS_PER_PAGE}
         totalItems={crud.total}
+        rowsPerPage={rowsPerPage}
         onPageChange={handlePageChange}
       />
 
