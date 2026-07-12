@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { ACTION_EDIT, ACTION_ADD, ACTION_UPDATE, ACTION_SAVE, ACTION_CANCEL } from '../../constants/actionLabels';
@@ -10,7 +10,7 @@ function buildValidationSchema(fields: FormField[]) {
   const shape: Record<string, Yup.StringSchema<string | undefined>> = {};
   for (const field of fields) {
     if (field.required) {
-      let validator = Yup.string().required(`${field.label} is required`);
+      let validator = Yup.string().trim().required(`${field.label} is required`);
       if (field.type === 'email') {
         validator = validator.email('Invalid email address');
       }
@@ -20,7 +20,7 @@ function buildValidationSchema(fields: FormField[]) {
   return Object.keys(shape).length > 0 ? Yup.object().shape(shape) : undefined;
 }
 
-const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields, formData, onChange, onSave, onClose, isEditing, error, onClearError }) => {
+const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields, formData, onChange, onSave, onClose,   isEditing, error, onClearError, isSaving, saveDisabled }) => {
   if (!isOpen) return null;
 
   const validationSchema = React.useMemo(() => buildValidationSchema(fields), [fields]);
@@ -96,11 +96,11 @@ const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields
                           onChange={syncOnChange} />
                       )}
                       {field.type === 'switch' && (
-                        <label className="switch">
+                        <label className="toggle-switch">
                           <input type="checkbox" name={field.name}
                             checked={Boolean(values[field.name])}
                             onChange={syncOnChange} />
-                          <span className="slider round"></span>
+                          <span className="toggle-slider"></span>
                         </label>
                       )}
                       {field.type === 'select' && (
@@ -127,7 +127,9 @@ const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields
                     </div>
                   ))}
                   <div className="form-actions">
-                    <button type="submit" className="btn btn-primary">{isEditing ? ACTION_UPDATE : ACTION_SAVE}</button>
+                    <button type="submit" className="btn btn-primary" disabled={isSaving || saveDisabled}>
+                      {isSaving ? <><Loader2 size={16} className="spin" /> Saving...</> : (isEditing ? ACTION_UPDATE : ACTION_SAVE)}
+                    </button>
                     <button type="button" className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
                   </div>
                 </Form>

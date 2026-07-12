@@ -4,6 +4,7 @@ export interface DealItem {
   id: number;
   dealId?: string;
   dealName?: string;
+  title?: string;
   lead?: string;
   leadId?: string | number;
   mobile?: string;

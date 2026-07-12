@@ -7,13 +7,18 @@ const categoryValidation = yup
   .min(2, 'Category must be at least 2 characters')
   .max(100, 'Category must not exceed 100 characters');
 
-const actionValidation = yup
-  .string()
-  .trim()
-  .required('Action is required')
-  .min(2, 'Action must be at least 2 characters')
-  .max(100, 'Action must not exceed 100 characters');
+const actionValidation = yup.string().required('Please select an action');
 
+/**
+ * Validation schema for creating and editing a task category.
+ *
+ * Used by:
+ * - TaskCategoryForm (task-category add/edit drawer)
+ *
+ * Notes:
+ * - The same schema is reused for both add and edit modes; no field differs between them.
+ * - Checks format and required-ness only; the backend re-validates on submit.
+ */
 const taskCategoryValidationSchema = yup.object({
   category: categoryValidation,
   action: actionValidation,

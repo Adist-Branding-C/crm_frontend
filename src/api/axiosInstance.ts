@@ -2,96 +2,100 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
 import { AUTH_STORAGE_KEYS, AUTH_ROUTES } from '../features/auth/constants/auth.constants';
 import { AUTH_API_ENDPOINTS } from '../features/auth/constants/authApiEndpoints';
-import { refreshTokenApi } from './refreshTokenApi'; // adjust path to wherever refreshTokenApi lives
+import { setAuthTokens, clearAuthTokens } from '../features/auth/utils/tokenStorage';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+const MAX_REFRESH_ATTEMPTS = 3;
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 interface RetryableRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
+  _retryCount?: number;
 }
 
 let isRefreshing = false;
-let pendingQueue: Array<{
-  resolve: (value: unknown) => void;
-  reject: (reason: unknown) => void;
-  config: RetryableRequestConfig;
+let pendingRequests: Array<{
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
 }> = [];
 
-const processPendingQueue = (token: string | null, error: unknown = null) => {
-  pendingQueue.forEach(({ config, resolve, reject }) => {
-    if (token && !error) {
-      config.headers.Authorization = `Bearer ${token}`;
-      resolve(axiosInstance(config));
-    } else {
-      reject(error);
-    }
+function flushPendingRequests(error: unknown, token?: string) {
+  pendingRequests.forEach(({ resolve, reject }) => {
+    if (token) resolve(token);
+    else reject(error);
   });
-  pendingQueue = [];
-};
+  pendingRequests = [];
+}
 
-const isRefreshEndpoint = (url: string | undefined): boolean => {
-  if (!url) return false;
-  return url.includes(AUTH_API_ENDPOINTS.REFRESH);
-};
-
-const isAuthLifecycleEndpoint = (url: string | undefined): boolean => {
-  if (!url) return false;
-  return url.includes(AUTH_API_ENDPOINTS.REFRESH) || url.includes(AUTH_API_ENDPOINTS.LOGIN);
-};
-
-let isRedirecting = false;
-
-const forceLogout = () => {
-  if (isRedirecting) return;
-  isRedirecting = true;
-
-  Cookies.remove(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
-  Cookies.remove(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
-
+function forceLogout() {
+  clearAuthTokens();
   if (window.location.pathname !== AUTH_ROUTES.LOGIN) {
     window.location.href = AUTH_ROUTES.LOGIN;
   }
-};
+}
 
-// ---- Request interceptor: attach access token ----
+async function refreshAccessToken(refreshToken: string): Promise<string> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_REFRESH_ATTEMPTS; attempt++) {
+    try {
+      const { data } = await axios.post(`${BASE_URL}${AUTH_API_ENDPOINTS.REFRESH}`, { refreshToken });
+      const { accessToken, refreshToken: newRefreshToken } = data.data;
+      setAuthTokens(accessToken, newRefreshToken);
+      return accessToken;
+    } catch (err) {
+      lastError = err;
+      const status = (err as AxiosError)?.response?.status;
+      if (status === 401 || status === 400) break;
+    }
+  }
+
+  throw lastError;
+}
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const accessToken = Cookies.get(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    console.error("requestInterceptor: Error", error);
+    return Promise.reject(error);
+  },
 );
 
-// ---- Response interceptor: single refresh-token flow ----
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
+    const status = error.response?.status;
 
-    if (!originalRequest || error.response?.status !== 401) {
+    const isAuthLifecycleCall =
+      originalRequest?.url?.includes(AUTH_API_ENDPOINTS.REFRESH) ||
+      originalRequest?.url?.includes(AUTH_API_ENDPOINTS.LOGIN);
+
+    if (status !== 401 || !originalRequest || isAuthLifecycleCall) {
       return Promise.reject(error);
     }
 
-    if (isAuthLifecycleEndpoint(originalRequest.url)) {
+    originalRequest._retryCount = originalRequest._retryCount ?? 0;
+
+    if (originalRequest._retryCount >= MAX_REFRESH_ATTEMPTS) {
       forceLogout();
       return Promise.reject(error);
     }
-
-    if (originalRequest._retry) {
-      forceLogout();
-      return Promise.reject(error);
-    }
+    originalRequest._retryCount += 1;
 
     const refreshToken = Cookies.get(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
     if (!refreshToken) {
@@ -99,35 +103,32 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    originalRequest._retry = true;
-
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
-        pendingQueue.push({ config: originalRequest, resolve, reject });
+        pendingRequests.push({
+          resolve: (token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(axiosInstance(originalRequest));
+          },
+          reject,
+        });
       });
     }
 
     isRefreshing = true;
-
     try {
-      const data = await refreshTokenApi(refreshToken);
-      const { accessToken, refreshToken: newRefreshToken } = data.data;
-
-      Cookies.set(AUTH_STORAGE_KEYS.ACCESS_TOKEN, accessToken);
-      Cookies.set(AUTH_STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
-
-      processPendingQueue(accessToken);
-
-      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      const newAccessToken = await refreshAccessToken(refreshToken);
+      flushPendingRequests(null, newAccessToken);
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       return axiosInstance(originalRequest);
     } catch (refreshError) {
-      processPendingQueue(null, refreshError);
+      flushPendingRequests(refreshError);
       forceLogout();
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
     }
-  },
+  }
 );
 
 export default axiosInstance;

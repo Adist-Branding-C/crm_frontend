@@ -1,35 +1,56 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { ApiResponse } from '../../../../shared/types/common';
+import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
+import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { MEETING_OUTCOME_API_ENDPOINTS } from '../constants/index';
-import type { MeetingOutcomeItem } from '../types/index';
+import type { ApiResponse } from '../../../../shared/types/common';
+import type { MeetingOutcomeItem } from '../types/interface';
+import type { MeetingOutcomeFormData, FetchMeetingOutcomesParams } from '../types/request';
+import type { MeetingOutcomeListResponse } from '../types/response';
 
+/**
+ * HTTP client for the Meeting Outcome API - communicates with the backend only.
+ *
+ * Used by:
+ * - meetingOutcomeApiService singleton (services/index.ts), consumed by
+ *   useFetchMeetingOutcomes (list) and useMeetingOutcomeCrud (create/update/delete).
+ */
 export class MeetingOutcomeApiService {
-  async fetchAll(params: Record<string, string | number | undefined> = {}): Promise<ApiResponse<MeetingOutcomeItem[]>> {
-    const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value));
-      }
+  async fetchAll(params: FetchMeetingOutcomesParams): Promise<ApiResponse<MeetingOutcomeListResponse>> {
+    const response = await axiosInstance.get<ApiResponse<MeetingOutcomeListResponse>>(
+      MEETING_OUTCOME_API_ENDPOINTS.GET_ALL,
+      { params: QueryMapper.toQuery(params) },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
     });
-    const url = queryParams.toString()
-      ? `${MEETING_OUTCOME_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
-      : MEETING_OUTCOME_API_ENDPOINTS.GET_ALL;
-    const response = await axiosInstance.get<ApiResponse<MeetingOutcomeItem[]>>(url);
-    return response.data;
   }
 
-  async create(data: { name: string; status: string }): Promise<ApiResponse<MeetingOutcomeItem>> {
+  async create(data: MeetingOutcomeFormData): Promise<ApiResponse<MeetingOutcomeItem>> {
     const response = await axiosInstance.post<ApiResponse<MeetingOutcomeItem>>(MEETING_OUTCOME_API_ENDPOINTS.CREATE, data);
-    return response.data;
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
   }
 
-  async update(id: number, data: { name: string; status: string }): Promise<ApiResponse<MeetingOutcomeItem>> {
+  async update(id: number, data: MeetingOutcomeFormData): Promise<ApiResponse<MeetingOutcomeItem>> {
     const response = await axiosInstance.patch<ApiResponse<MeetingOutcomeItem>>(MEETING_OUTCOME_API_ENDPOINTS.UPDATE(id), data);
-    return response.data;
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
   }
 
   async delete(id: number): Promise<ApiResponse<null>> {
     const response = await axiosInstance.delete<ApiResponse<null>>(MEETING_OUTCOME_API_ENDPOINTS.DELETE(id));
-    return response.data;
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
   }
 }

@@ -1,5 +1,6 @@
 import type { ApiResponse } from '../types/common';
-import type { ServiceResponseInput } from '../types/response';
+import type { ServiceResponseInput as SuccessResponseInput } from '../types/response';
+import type { ServiceResponseShape, ServiceResponseInput } from '../types/serviceResponse.types';
 
 /**
  * Builds the standard { status, message, data } envelope every service method returns.
@@ -14,7 +15,17 @@ import type { ServiceResponseInput } from '../types/response';
  *   from the backend response into the app.
  */
 export class ServiceResponseUtil {
-  static successResponse<T>({ status, message, data }: ServiceResponseInput<T>): ApiResponse<T> {
+  static successResponse<T>({ status, message, data }: SuccessResponseInput<T>): ApiResponse<T> {
     return { status, message, data };
+  }
+
+  // Kept alongside successResponse for callers (account-settings and lead-settings services)
+  // that still need errors/field passed through for per-field form validation messages.
+  static normalize<T>(payload: ServiceResponseInput<T>): ServiceResponseShape<T> {
+    const result: ServiceResponseShape<T> = { status: payload.status, message: payload.message };
+    if (payload.data !== undefined) result.data = payload.data;
+    if (payload.errors !== undefined) result.errors = payload.errors;
+    if (payload.field !== undefined) result.field = payload.field;
+    return result;
   }
 }

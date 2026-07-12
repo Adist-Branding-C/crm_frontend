@@ -24,8 +24,9 @@ function AdminTableInner<T extends { id: number | string }>(props: AdminTablePro
     const DROPDOWN_HEIGHT = 200;
     const openUp = spaceBelow < DROPDOWN_HEIGHT && spaceAbove > spaceBelow;
     setDropdownStyle({
-      top: openUp ? undefined : rect.bottom + 8,
-      bottom: openUp ? window.innerHeight - rect.top + 8 : undefined,
+      ...(openUp
+        ? { bottom: window.innerHeight - rect.top + 8 }
+        : { top: rect.bottom + 8 }),
       right: window.innerWidth - rect.right,
       openUp,
     });

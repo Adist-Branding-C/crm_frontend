@@ -1,15 +1,14 @@
 import { useTableData } from '../../../../shared/hooks/useTableData';
+import { ResponseMapper } from '../../../../shared/mappers/response.mapper';
 import { callStatusApiService } from '../services';
 import type { CallStatusItem } from '../types/index';
 
 export function useFetchCallStatus() {
   const pagination = useTableData<CallStatusItem>({
     fetchFn: async (params) => {
-      const response = await callStatusApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
+      const response = await callStatusApiService.fetchAll(params);
       if (response.status) {
-        const data = response.data as { items: CallStatusItem[]; pagination?: { total: number } } | undefined;
-        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
-        return { items: Array.isArray(items) ? items : [], total: data?.pagination?.total ?? (Array.isArray(items) ? items.length : 0) };
+        return ResponseMapper.toPagedList<CallStatusItem>(response.data);
       }
       throw new Error(response.message || 'Failed to fetch call statuses');
     },
@@ -23,6 +22,8 @@ export function useFetchCallStatus() {
     setPageNumber: pagination.setPageNumber,
     limit: pagination.limit,
     totalCount: pagination.totalCount,
+    startIndex: pagination.startIndex,
+    totalPages: pagination.totalPages,
     searchQuery: pagination.searchQuery,
     handleSearchChange: pagination.handleSearchChange,
     handleRowsPerPageChange: pagination.handleRowsPerPageChange,
