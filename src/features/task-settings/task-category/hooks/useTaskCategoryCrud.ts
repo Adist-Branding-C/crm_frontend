@@ -64,6 +64,7 @@ export function useTaskCategoryCrud({ pagination, showToastMessage }: UseTaskCat
 
       if (response.status) {
         pagination.refresh();
+        showToastMessage('Task category updated successfully', 'success');
         return true;
       }
 
@@ -76,7 +77,7 @@ export function useTaskCategoryCrud({ pagination, showToastMessage }: UseTaskCat
       pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [submitError, pagination]);
+  }, [submitError, showToastMessage, pagination]);
 
   const handleDeleteTaskCategory = useCallback(async (id: number) => {
     pagination.setError('');

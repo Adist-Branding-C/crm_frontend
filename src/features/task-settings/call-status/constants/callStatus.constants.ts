@@ -56,6 +56,6 @@ export const CALL_STATUS_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
  * - CallStatusPage (Export button)
  */
 export const CALL_STATUS_CSV_COLUMNS: CsvColumn<CallStatusItem>[] = [
-  { header: 'Name', value: (item) => `"${item.name}"` },
+  { header: 'Name', value: (item) => item.name },
   { header: 'Status', value: (item) => item.status ?? '' },
 ];

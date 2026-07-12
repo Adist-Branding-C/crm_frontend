@@ -57,6 +57,6 @@ export const TASK_CATEGORY_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
  * - TaskCategoryPage (Export button)
  */
 export const TASK_CATEGORY_CSV_COLUMNS: CsvColumn<TaskCategoryItem>[] = [
-  { header: 'Category', value: (item) => `"${item.category}"` },
-  { header: 'Action', value: (item) => `"${item.action}"` },
+  { header: 'Category', value: (item) => item.category },
+  { header: 'Action', value: (item) => item.action },
 ];
