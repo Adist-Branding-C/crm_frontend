@@ -84,13 +84,14 @@ const CampaignsPage = () => {
               <TCell variant="th">Completed Tasks</TCell>
               <TCell variant="th">Completed %</TCell>
               <TCell variant="th">Created By</TCell>
+              <TCell variant="th">Pool Agents</TCell>
               <TCell variant="th">Created At</TCell>
               <TCell variant="th">Actions</TCell>
             </TRow>
           </THead>
           <TBody>
             {fetch.campaignList.length === 0 ? (
-              <EmptyState colSpan={9} message={LABEL_NO_DATA} />
+              <EmptyState colSpan={10} message={LABEL_NO_DATA} />
             ) : (
               fetch.campaignList.map((campaign) => (
                 <CampaignRow

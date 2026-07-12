@@ -1,4 +1,4 @@
-import { getCreatedByLabel } from '../utils/campaign.utils';
+import { getCreatedByLabel, getPoolAgentsLabel } from '../utils/campaign.utils';
 import type { CampaignFormData, Campaign } from '../types';
 import type { CsvColumn } from '../../../shared/types/csv';
 
@@ -75,5 +75,6 @@ export const CAMPAIGN_CSV_COLUMNS: CsvColumn<Campaign>[] = [
   { header: 'Completed Tasks', value: (c) => c.completedTasks },
   { header: 'Completed %', value: (c) => `${c.completedPercent}%` },
   { header: 'Created By', value: (c) => getCreatedByLabel(c.createdBy) },
+  { header: 'Pool Agents', value: (c) => getPoolAgentsLabel(c.poolAgents) },
   { header: 'Created At', value: (c) => c.createdAt },
 ];
