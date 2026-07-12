@@ -15,7 +15,10 @@
   overflow: hidden;
 }
 
-.task-category-table-wrapper .table-container,
+.task-category-table-wrapper.table-container {
+  overflow: visible;
+}
+
 .task-category-table-wrapper .table-scroll {
   overflow: visible;
 }

@@ -3,3 +3,8 @@ export interface ServiceResponseInput<T> {
   message: string;
   data?: T | undefined;
 }
+
+export interface PagedListResult<T> {
+  items: T[];
+  total: number;
+}

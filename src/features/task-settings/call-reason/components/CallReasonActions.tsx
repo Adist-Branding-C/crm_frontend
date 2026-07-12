@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
 import ActionMenuPortal from '../../components/ActionMenuPortal';
 import type { CallReasonActionsProps } from '../types/index';
@@ -23,4 +23,4 @@ const CallReasonActions = ({ item, dropdownOpen, onToggleDropdown, onEdit, onDel
   );
 };
 
-export default CallReasonActions;
+export default memo(CallReasonActions);

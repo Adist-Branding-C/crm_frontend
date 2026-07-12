@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
 import ActionMenuPortal from '../../components/ActionMenuPortal';
 import type { MeetingOutcomeActionsProps } from '../types/index';
@@ -23,4 +23,4 @@ const MeetingOutcomeActions = ({ item, dropdownOpen, onToggleDropdown, onEdit, o
   );
 };
 
-export default MeetingOutcomeActions;
+export default memo(MeetingOutcomeActions);
