@@ -1,15 +1,15 @@
-import * as yup from 'yup';
+import { taskItemValidationSchema } from '../../shared/validations/taskItemValidation';
 
-const callTaskValidationSchema = yup.object({
-  title: yup.string().trim().required('Title is required'),
-  description: yup.string().trim().notRequired(),
-  scheduledDate: yup.string().required('Scheduled date is required'),
-  scheduledTime: yup.string().required('Scheduled time is required'),
-  assignedTo: yup.string().required('Assigned to is required'),
-  leadId: yup.string().notRequired(),
-  priority: yup.string().required('Priority is required'),
-  status: yup.string().required('Status is required'),
-});
-
-export const addCallTaskValidationSchema = callTaskValidationSchema;
-export const editCallTaskValidationSchema = callTaskValidationSchema;
+/**
+ * Validation schemas for the Call Task add/edit drawer.
+ *
+ * Used by:
+ * - CallTaskPage's add/edit drawer (Drawer + GenericTaskForm)
+ *
+ * Notes:
+ * - Aliases the shared task-item schema (see task/shared/validations/taskItemValidation) -
+ *   Call Task has no category field, so it doesn't need its own field set.
+ * - Frontend validates required-ness/format only; the backend re-validates on submit.
+ */
+export const addCallTaskValidationSchema = taskItemValidationSchema;
+export const editCallTaskValidationSchema = taskItemValidationSchema;

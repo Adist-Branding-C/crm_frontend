@@ -1,5 +1,17 @@
 import * as yup from 'yup';
 
+/**
+ * Validation schema for the Task add/edit drawer.
+ *
+ * Used by:
+ * - TaskPage's add/edit drawer (Drawer + GenericTaskForm)
+ *
+ * Notes:
+ * - Add and edit use the same schema - there's no edit-only relaxation of any rule.
+ * - Unlike Call/Campaign/Deal Task, Task carries a required `categoryId`, so it keeps
+ *   its own schema rather than aliasing the shared task-item schema.
+ * - Frontend validates required-ness/format only; the backend re-validates on submit.
+ */
 const taskValidationSchema = yup.object({
   title: yup.string().trim().required('Title is required'),
   description: yup.string().trim().notRequired(),

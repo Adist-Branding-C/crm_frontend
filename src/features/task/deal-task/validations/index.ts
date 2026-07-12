@@ -1,15 +1,15 @@
-import * as yup from 'yup';
+import { taskItemValidationSchema } from '../../shared/validations/taskItemValidation';
 
-const dealTaskValidationSchema = yup.object({
-  title: yup.string().trim().required('Title is required'),
-  description: yup.string().trim().notRequired(),
-  scheduledDate: yup.string().required('Scheduled date is required'),
-  scheduledTime: yup.string().required('Scheduled time is required'),
-  assignedTo: yup.string().required('Assigned to is required'),
-  leadId: yup.string().notRequired(),
-  priority: yup.string().required('Priority is required'),
-  status: yup.string().required('Status is required'),
-});
-
-export const addDealTaskValidationSchema = dealTaskValidationSchema;
-export const editDealTaskValidationSchema = dealTaskValidationSchema;
+/**
+ * Validation schemas for the Deal Task add/edit drawer.
+ *
+ * Used by:
+ * - DealTaskPage's add/edit drawer (Drawer + GenericTaskForm)
+ *
+ * Notes:
+ * - Aliases the shared task-item schema (see task/shared/validations/taskItemValidation) -
+ *   Deal Task has no category field, so it doesn't need its own field set.
+ * - Frontend validates required-ness/format only; the backend re-validates on submit.
+ */
+export const addDealTaskValidationSchema = taskItemValidationSchema;
+export const editDealTaskValidationSchema = taskItemValidationSchema;
