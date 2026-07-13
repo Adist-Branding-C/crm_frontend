@@ -4,6 +4,8 @@ export interface DealAdditionalFieldFormData {
   inFilter: boolean;
   inList: boolean;
   required: boolean;
+  dropdownValues: string[];
+  currentDropdownValue: string;
 }
 
 export interface DealAdditionalFieldPayload {
@@ -12,6 +14,7 @@ export interface DealAdditionalFieldPayload {
   isRequired: boolean;
   showInList: boolean;
   showInFilter: boolean;
+  values?: string[];
 }
 
 export interface DealAdditionalFieldQueryParams {

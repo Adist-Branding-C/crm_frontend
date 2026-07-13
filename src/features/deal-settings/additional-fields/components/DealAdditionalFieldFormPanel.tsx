@@ -1,25 +1,32 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
-import { Formik, Form, Field } from 'formik';
+import { Plus, Loader2 } from 'lucide-react';
+import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import { FIELD_TYPE_OPTIONS } from '../../../../shared/constants/fieldTypes';
+import DropdownValuesField from './DropdownValuesField';
+import ValidationAlert from '../../../../shared/components/ValidationAlert';
 import { dealAdditionalFieldValidationSchema } from '../validations/deal-additional-field.validation';
 import type { AddDealAdditionalFieldFormPanelProps } from '../types/add-deal-additional-field-form-panel.types';
 
-const DealAdditionalFieldFormPanel: React.FC<AddDealAdditionalFieldFormPanelProps> = ({
-  initialValues, editingItem, onSubmit,
-}) => (
+const DealAdditionalFieldFormPanel = ({
+  editingItem,
+  initialValues,
+  onSubmit,
+  isSaving,
+  error,
+  onClearError,
+}: AddDealAdditionalFieldFormPanelProps) => (
   <div className="card">
     <div className="card-header">
-      <h5>Add Field</h5>
+      <h5>{editingItem ? 'Edit Field' : 'Add Field'}</h5>
     </div>
     <div className="card-body">
+      <ValidationAlert message={error} onClose={onClearError} />
       <Formik
         enableReinitialize
         initialValues={initialValues}
         validationSchema={dealAdditionalFieldValidationSchema}
         onSubmit={onSubmit}
       >
-        {({ errors, touched, isSubmitting }) => (
+        {({ values, isSubmitting }) => (
           <Form>
             <div className="checkbox-group">
               <label className="checkbox-item">
@@ -38,7 +45,7 @@ const DealAdditionalFieldFormPanel: React.FC<AddDealAdditionalFieldFormPanelProp
             <div className="form-group">
               <label>Field Name <span className="text-danger">*</span></label>
               <Field type="text" name="fieldName" className="form-control" placeholder="Enter field name" />
-              {touched.fieldName && errors.fieldName && <small className="field-error-text">{errors.fieldName}</small>}
+              <FormikError name="fieldName" component="small" className="field-error-text" />
             </div>
             <div className="form-group">
               <label>Select Type <span className="text-danger">*</span></label>
@@ -46,10 +53,15 @@ const DealAdditionalFieldFormPanel: React.FC<AddDealAdditionalFieldFormPanelProp
                 <option value="">Select Type</option>
                 {FIELD_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </Field>
-              {touched.fieldType && errors.fieldType && <small className="field-error-text">{errors.fieldType}</small>}
+              <FormikError name="fieldType" component="small" className="field-error-text" />
             </div>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-              <Plus size={16} /> {editingItem ? 'Update' : 'Add Field'}
+            {values.fieldType === 'Dropdown' && <DropdownValuesField />}
+            <button type="submit" className="btn btn-primary" disabled={isSaving || isSubmitting}>
+              {isSaving || isSubmitting ? (
+                <><Loader2 size={16} className="spin" /> Saving...</>
+              ) : (
+                <><Plus size={16} /> {editingItem ? 'Update' : 'Add Field'}</>
+              )}
             </button>
           </Form>
         )}

@@ -5,6 +5,7 @@ export interface DealAdditionalField {
   inFilter: boolean;
   inList: boolean;
   required: boolean;
+  dropdownValues: string[];
 }
 
 export interface ApiDealAdditionalField {
@@ -14,4 +15,5 @@ export interface ApiDealAdditionalField {
   isRequired: boolean;
   showInList: boolean;
   showInFilter: boolean;
+  values: string[];
 }

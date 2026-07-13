@@ -3,16 +3,7 @@ import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
 import { TRow, TCell } from '../../../../shared/components/table';
 import ActionMenuPortal from '../../../task-settings/components/ActionMenuPortal';
 import { ACTION_EDIT, ACTION_DELETE } from '../../../../shared/constants/actionLabels';
-import type { DealAdditionalField } from '../types/interface';
-
-interface DealAdditionalFieldRowProps {
-  item: DealAdditionalField;
-  index: number;
-  dropdownOpen: string | null;
-  onToggleDropdown: (id: string | null) => void;
-  onEdit: (item: DealAdditionalField) => void;
-  onDelete: (item: DealAdditionalField) => void;
-}
+import type { DealAdditionalFieldRowProps } from '../types/deal-additional-field-row.types';
 
 const DealAdditionalFieldRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, onDelete }: DealAdditionalFieldRowProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -23,6 +14,9 @@ const DealAdditionalFieldRow = ({ item, index, dropdownOpen, onToggleDropdown, o
       <TCell>{index + 1}</TCell>
       <TCell>{item.field}</TCell>
       <TCell>{item.type}</TCell>
+      <TCell>
+        <span>{item.dropdownValues.length > 0 ? item.dropdownValues.join(', ') : '-'}</span>
+      </TCell>
       <TCell>
         <span className={`badge ${item.inFilter ? 'badge-success' : 'badge-secondary'}`}>
           {item.inFilter ? 'YES' : 'NO'}
@@ -52,10 +46,10 @@ const DealAdditionalFieldRow = ({ item, index, dropdownOpen, onToggleDropdown, o
             triggerRef={buttonRef}
             onClose={() => onToggleDropdown(null)}
           >
-            <button onClick={() => { onEdit(item); onToggleDropdown(null); }}>
+            <button onClick={() => onEdit(item)}>
               <Edit2 size={14} />{ACTION_EDIT}
             </button>
-            <button className="delete" onClick={() => { onDelete(item); onToggleDropdown(null); }}>
+            <button className="delete" onClick={() => onDelete(item)}>
               <Trash2 size={14} />{ACTION_DELETE}
             </button>
           </ActionMenuPortal>

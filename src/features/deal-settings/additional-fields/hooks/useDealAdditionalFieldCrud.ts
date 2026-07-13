@@ -1,49 +1,76 @@
-import { useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { FormikHelpers } from 'formik';
 import { dealAdditionalFieldService } from '../services/dealAdditionalField.service';
 import { DealAdditionalFieldMapper } from '../mappers/dealAdditionalField.mapper';
+import { getErrorMessage } from '../../../../shared/utils/error';
 import type { DealAdditionalField } from '../types/interface';
 import type { DealAdditionalFieldFormData } from '../types/request';
 import type { UseDealAdditionalFieldCrudParams } from '../types/use-deal-additional-field-crud.types';
 
+interface PendingSave {
+  values: DealAdditionalFieldFormData;
+  helpers: FormikHelpers<DealAdditionalFieldFormData>;
+}
+
 /**
- * Deal additional-field create/update/delete API orchestration.
+ * Create/update/delete orchestration for one DealAdditionalField, including the confirm-before-save
+ * modal gating create/update.
  *
  * Notes:
- * - Takes the narrow form/pagination pieces it needs (editingItem, closeDrawer, refresh)
- *   rather than owning or re-exporting the form or pagination hooks themselves -
- *   DealAdditionalFieldPage.tsx owns those hooks directly and reads their full state from there.
- * - Uses FormikHelpers to surface field-level API errors and control form reset,
- *   matching the submit-handler pattern used by the Campaign module.
- * - Try/catch on every API call prevents unhandled network errors from crashing the UI.
+ * - The confirm-modal state (showSaveConfirm/saveConfirmMode) is deliberately kept in this same hook
+ *   rather than split into its own hook: it exists only to gate the pending Formik values for this one
+ *   create/update call, so the pending payload and the submission it confirms must stay in lockstep.
+ *   Splitting them would just require threading the pending values through an extra hook for no
+ *   separation-of-concerns benefit.
  */
 export function useDealAdditionalFieldCrud({ editingItem, closeDrawer, refresh, setError }: UseDealAdditionalFieldCrudParams) {
-  const handleSubmit = useCallback(async (
-    values: DealAdditionalFieldFormData,
-    helpers: FormikHelpers<DealAdditionalFieldFormData>,
-  ) => {
-    const payload = DealAdditionalFieldMapper.toRequest(values);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [saveConfirmMode, setSaveConfirmMode] = useState<'create' | 'update'>('create');
+  const [isSaving, setIsSaving] = useState(false);
+  const pendingRef = useRef<PendingSave | null>(null);
+
+  const requestSave = useCallback((values: DealAdditionalFieldFormData, helpers: FormikHelpers<DealAdditionalFieldFormData>) => {
+    pendingRef.current = { values, helpers };
+    setSaveConfirmMode(editingItem ? 'update' : 'create');
+    setShowSaveConfirm(true);
+  }, [editingItem]);
+
+  const cancelSave = useCallback(() => {
+    pendingRef.current?.helpers.setSubmitting(false);
+    pendingRef.current = null;
+    setShowSaveConfirm(false);
+  }, []);
+
+  const confirmSave = useCallback(async () => {
+    const pending = pendingRef.current;
+    if (!pending) return;
+
+    setShowSaveConfirm(false);
+    setIsSaving(true);
+    setError('');
+
     try {
-      if (editingItem) {
-        const response = await dealAdditionalFieldService.updateDealAdditionalField(editingItem.id, payload);
-        if (!response.status) {
-          helpers.setFieldError('fieldName', response.message || 'Failed to update field');
-          return;
-        }
-      } else {
-        const response = await dealAdditionalFieldService.createDealAdditionalField(payload);
-        if (!response.status) {
-          helpers.setFieldError('fieldName', response.message || 'Failed to add field');
-          return;
-        }
+      const payload = DealAdditionalFieldMapper.toRequest(pending.values);
+      const response = editingItem
+        ? await dealAdditionalFieldService.updateDealAdditionalField(editingItem.id, payload)
+        : await dealAdditionalFieldService.createDealAdditionalField(payload);
+
+      if (!response.status) {
+        setError(response.message || (editingItem ? 'Failed to update field' : 'Failed to add field'));
+        return;
       }
-      helpers.resetForm();
+
       closeDrawer();
       refresh();
-    } catch {
-      helpers.setFieldError('fieldName', 'Network error. Please try again.');
+      pending.helpers.resetForm();
+    } catch (err) {
+      setError(getErrorMessage(err, 'Network error. Please try again.'));
+    } finally {
+      pending.helpers.setSubmitting(false);
+      setIsSaving(false);
+      pendingRef.current = null;
     }
-  }, [editingItem, closeDrawer, refresh]);
+  }, [editingItem, closeDrawer, refresh, setError]);
 
   const handleDelete = useCallback(async (item: DealAdditionalField) => {
     try {
@@ -54,11 +81,11 @@ export function useDealAdditionalFieldCrud({ editingItem, closeDrawer, refresh, 
       }
       refresh();
       return true;
-    } catch {
-      setError('Network error. Failed to delete field.');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Network error. Failed to delete field.'));
       return false;
     }
   }, [refresh, setError]);
 
-  return { handleSubmit, handleDelete };
+  return { showSaveConfirm, saveConfirmMode, isSaving, requestSave, confirmSave, cancelSave, handleDelete };
 }
