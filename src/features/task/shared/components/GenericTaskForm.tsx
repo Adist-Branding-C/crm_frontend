@@ -5,6 +5,7 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import { PRIORITY_OPTIONS } from '../constants/priorityOptions';
 import { STATUS_OPTIONS } from '../constants/statusOptions';
 import { scrollToFirstError } from '../utils/scrollToFirstError';
+import { getFieldClassName } from '../utils/fieldClassName';
 import type { GenericTaskFormProps } from '../types/genericTaskForm.types';
 
 const GenericTaskForm = ({
@@ -47,13 +48,15 @@ const GenericTaskForm = ({
             }
           }
 
-          const fieldClass = (name: string) =>
-            `form-control${(touched as Record<string, boolean | undefined>)[name] && (errors as Record<string, string | undefined>)[name] ? ' input-error' : ''}`;
+          const fieldClass = (name: string) => getFieldClassName(
+            name,
+            touched as Record<string, boolean | undefined>,
+            errors as Record<string, string | undefined>,
+          );
 
-          const formError = error;
           return (
             <Form>
-              {formError && <ErrorMessage message={formError} />}
+              {error && <ErrorMessage message={error} />}
 
               <div className="form-group">
                 <label>Title <span className="text-danger">*</span></label>
