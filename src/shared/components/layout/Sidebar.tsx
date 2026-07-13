@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, MessageCircle, Home, LayoutDashboard, Flame, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building } from 'lucide-react';
+import { CheckCircle, MessageCircle, Home, LayoutDashboard, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 
@@ -9,7 +9,6 @@ const Sidebar = () => {
     { icon: MessageCircle, label: 'Leads', path: '/leads' },
     // { icon: UserCircle, label: 'Enquiries', path: '/enquiries' },
     { icon: Bell, label: 'Followup Required', path: '/followup-required' },
-    { icon: Flame, label: 'Spotlight', path: '/spotlight' },
     { icon: DollarSign, label: 'Deals', path: '/user/deals' },
     { icon: Kanban, label: 'Sales Pipeline', path: '/sales-pipeline' },
     { icon: ListChecks, label: 'Tasks', path: '/user/tasks' },

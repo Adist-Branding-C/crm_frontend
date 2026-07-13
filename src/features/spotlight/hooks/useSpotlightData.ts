@@ -1,175 +1,191 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTableSelection } from '../../../shared/hooks/useTableSelection';
-import { spotlightService } from '../services/SpotlightService';
-import { INITIAL_FILTERS } from '../constants';
-import { mapApiLeadToDisplay } from '../constants/leadMappers';
-import { buildFilterOptions } from '../utils/buildFilterOptions';
-import type { SpotlightLead, SpotlightLeadApi, SpotlightFilters, SpotlightRequestParams } from '../types';
-import { SortDirection } from '../../../shared/constants/enums/sortDirection';
+import { useDropdownMenu } from '../../../shared/hooks/useDropdownMenu';
+import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
+import { useLeadFilterOptions } from '../../enquiries/hooks/useLeadFilterOptions';
+import { useSpotlightFilters } from './useSpotlightFilters';
+import { useSpotlightSort } from './useSpotlightSort';
+import { useSpotlightPagination } from './useSpotlightPagination';
+import { useSpotlightLeadsFetch } from './useSpotlightLeadsFetch';
+import { useSpotlightExport } from './useSpotlightExport';
+import { SpotlightRequestMapper } from '../mappers/spotlightRequest.mapper';
+import type { SpotlightLead, SpotlightFilters } from '../types';
+import type { SortDirection } from '../../../shared/constants/enums/sortDirection';
+
+const SEARCH_DEBOUNCE_MS = 500;
 
 export function useSpotlightData() {
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: SortDirection }>({ key: null, direction: SortDirection.ASC });
-  const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const [selectedLead, setSelectedLead] = useState<SpotlightLead | null>(null);
-  const [filters, setFilters] = useState<SpotlightFilters>(INITIAL_FILTERS);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [data, setData] = useState<SpotlightLead[]>([]);
-  const [rawItems, setRawItems] = useState<SpotlightLeadApi[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [committedSearch, setCommittedSearch] = useState('');
 
-  const initialRender = useRef(true);
-  const latestRequestId = useRef(0);
+  const search = useDebouncedSearch(setCommittedSearch, SEARCH_DEBOUNCE_MS);
+  const filtersHook = useSpotlightFilters();
+  const sort = useSpotlightSort();
+  const pagination = useSpotlightPagination();
+  const fetch = useSpotlightLeadsFetch();
+  const exportHook = useSpotlightExport(fetch.setError);
+  const dropdown = useDropdownMenu<number>();
+  const { selectedIds, handleSelectAll, handleSelectRow } =
+    useTableSelection<number>();
+  const {
+    typeOptions,
+    sourceOptions,
+    purposeOptions,
+    staffOptions,
+    statusOptions,
+    isLoading: filterOptionsLoading,
+  } = useLeadFilterOptions();
 
-  // Debounce search query before sending to API
+  const filterOptions = useMemo(
+    () => ({
+      leadTypes: typeOptions,
+      sources: sourceOptions,
+      purposes: purposeOptions,
+      statuses: statusOptions,
+      agents: staffOptions,
+    }),
+    [typeOptions, sourceOptions, purposeOptions, statusOptions, staffOptions],
+  );
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(timer);
+    pagination.resetPage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [committedSearch]);
 
-  const fetchLeads = useCallback(async (params: SpotlightRequestParams) => {
-    const requestId = ++latestRequestId.current;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await spotlightService.getLeads(params);
-      if (requestId !== latestRequestId.current) return;
-      if (response.status && response.data) {
-        const items = response.data.items || [];
-        setRawItems(items);
-        setData(items.map(mapApiLeadToDisplay));
-        setTotalRecords(response.data.total || 0);
-        setTotalPages(response.data.total_pages || 1);
-      } else {
-        setRawItems([]);
-        setData([]);
-        setTotalRecords(0);
-        setTotalPages(1);
-        setError(response.message || 'Failed to fetch leads');
-      }
-    } catch (err: unknown) {
-      if (requestId !== latestRequestId.current) return;
-      setRawItems([]);
-      setData([]);
-      setTotalRecords(0);
-      setTotalPages(1);
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to fetch leads');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
-    } finally {
-      if (requestId !== latestRequestId.current) return;
-      setLoading(false);
-    }
-  }, []);
+  const requestParams = useMemo(
+    () =>
+      SpotlightRequestMapper.toParams(
+        pagination.currentPage,
+        pagination.rowsPerPage,
+        committedSearch,
+        sort.sortConfig,
+        filtersHook.filters,
+      ),
+    [
+      pagination.currentPage,
+      pagination.rowsPerPage,
+      committedSearch,
+      sort.sortConfig,
+      filtersHook.filters,
+    ],
+  );
 
-  // Build request params from current state
-  const requestParams = useMemo<SpotlightRequestParams>(() => {
-    const params: SpotlightRequestParams = {
-      pageNumber: currentPage,
-      limit: rowsPerPage,
-    };
-
-    if (debouncedSearch) params.search = debouncedSearch;
-
-    if (sortConfig.key) {
-      params.sort_by = sortConfig.key;
-      params.sort_order = sortConfig.direction.toUpperCase();
-    }
-
-    if (filters.leadTypeId) params.leadTypeId = filters.leadTypeId;
-    if (filters.enquirySource) params.enquirySource = filters.enquirySource;
-    if (filters.enquiryPurpose) params.enquiryPurpose = filters.enquiryPurpose;
-    if (filters.leadStatusId) params.leadStatusId = filters.leadStatusId;
-    if (filters.assignedTo) params.assignedTo = filters.assignedTo;
-    if (filters.location) params.location = filters.location;
-    if (filters.dateRange.start) params.startDate = filters.dateRange.start;
-    if (filters.dateRange.end) params.endDate = filters.dateRange.end;
-    if (filters.filterByDate) params.dateFilterBy = filters.filterByDate;
-
-    return params;
-  }, [currentPage, rowsPerPage, debouncedSearch, sortConfig, filters]);
-
-  // Fetch when request params change
   useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false;
-    }
-    fetchLeads(requestParams);
+    fetch.fetchLeads(requestParams);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestParams]);
 
-  const filterOptions = useMemo(() => buildFilterOptions(rawItems), [rawItems]);
+  // Exposed so the lead detail drawer can trigger a refresh after a remark/action
+  // updates a lead (e.g. a handled lead should drop off the Spotlight list without
+  // requiring the agent to manually change a filter or reload the page).
+  const refetch = useCallback(() => {
+    fetch.fetchLeads(requestParams);
+  }, [fetch.fetchLeads, requestParams]);
 
-  const paginatedIds = useMemo(
-    () => data.map(item => item.id),
-    [data]
+  const handleSort = useCallback(
+    (key: string) => {
+      sort.handleSort(key);
+      pagination.resetPage();
+    },
+    [sort.handleSort, pagination.resetPage],
   );
 
-  const { selectedIds, handleSelectAll, handleSelectRow } = useTableSelection();
+  const selectSort = useCallback(
+    (key: string, direction: SortDirection) => {
+      sort.selectSort(key, direction);
+      pagination.resetPage();
+    },
+    [sort.selectSort, pagination.resetPage],
+  );
 
-  const handleSort = useCallback((key: string) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === SortDirection.ASC ? SortDirection.DESC : SortDirection.ASC
-    }));
-    setCurrentPage(1);
-  }, []);
+  const handleFilterChange = useCallback(
+    (newFilters: SpotlightFilters) => {
+      filtersHook.setFilters(newFilters);
+      pagination.resetPage();
+    },
+    [filtersHook.setFilters, pagination.resetPage],
+  );
 
-  const handleSortDirection = useCallback((key: string, direction: SortDirection) => {
-    setSortConfig({ key, direction });
-    setCurrentPage(1);
-  }, []);
+  const handleClearFilters = useCallback(() => {
+    filtersHook.clearFilters();
+    filtersHook.closeFilters();
+    pagination.resetPage();
+  }, [filtersHook, pagination.resetPage]);
 
-  const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-  }, []);
+  const onToggleMenu = useCallback(
+    (id: number, open: boolean) => {
+      dropdown.toggleDropdown(open ? id : null);
+    },
+    [dropdown.toggleDropdown],
+  );
 
-  const handleFilterChange = useCallback((newFilters: SpotlightFilters) => {
-    setFilters(newFilters);
-    setCurrentPage(1);
-  }, []);
+  const handleViewLead = useCallback(
+    (lead: SpotlightLead) => {
+      dropdown.closeDropdown();
+      setSelectedLead(lead);
+    },
+    [dropdown.closeDropdown],
+  );
 
-  const clearFilters = useCallback(() => {
-    setFilters({ ...INITIAL_FILTERS });
-    setCurrentPage(1);
-    setShowFilters(false);
-  }, []);
+  const closeLeadDetail = useCallback(() => setSelectedLead(null), []);
 
-  const startIndex = (currentPage - 1) * rowsPerPage;
+  const exportParams = useMemo(
+    () =>
+      SpotlightRequestMapper.toExportParams(
+        committedSearch,
+        sort.sortConfig,
+        filtersHook.filters,
+      ),
+    [committedSearch, sort.sortConfig, filtersHook.filters],
+  );
+
+  const handleExport = useCallback(
+    () => exportHook.handleExport(exportParams),
+    [exportHook.handleExport, exportParams],
+  );
+
+  const paginatedIds = useMemo(
+    () => fetch.data.map((item) => item.id),
+    [fetch.data],
+  );
 
   return {
-    searchQuery, setSearchQuery,
-    showFilters, setShowFilters,
-    filters, setFilters: handleFilterChange, clearFilters,
-    sortConfig, handleSort, handleSortDirection,
-    setSortConfig,
-    currentPage, setCurrentPage,
-    rowsPerPage, handleRowsPerPageChange, totalPages, startIndex,
-    selectedIds, handleSelectAll, handleSelectRow,
-    actionMenuOpen, setActionMenuOpen,
-    showSortDropdown, setShowSortDropdown,
-    showActionsDropdown, setShowActionsDropdown,
-    selectedLead, setSelectedLead,
-    paginatedData: data, paginatedIds,
-    loading, error, totalRecords,
+    searchQuery: search.searchValue,
+    setSearchQuery: search.handleSearchChange,
+    showFilters: filtersHook.showFilters,
+    toggleFilters: filtersHook.toggleFilters,
+    closeFilters: filtersHook.closeFilters,
+    filters: filtersHook.filters,
+    setFilters: handleFilterChange,
+    clearFilters: handleClearFilters,
     filterOptions,
+    filterOptionsLoading,
+    sortConfig: sort.sortConfig,
+    showSortDropdown: sort.showSortDropdown,
+    toggleSortDropdown: sort.toggleSortDropdown,
+    handleSort,
+    selectSort,
+    currentPage: pagination.currentPage,
+    setCurrentPage: pagination.setCurrentPage,
+    rowsPerPage: pagination.rowsPerPage,
+    handleRowsPerPageChange: pagination.handleRowsPerPageChange,
+    startIndex: pagination.startIndex,
+    totalPages: fetch.totalPages,
+    totalRecords: fetch.totalRecords,
+    selectedIds,
+    handleSelectAll,
+    handleSelectRow,
+    actionMenuOpen: dropdown.dropdownOpen,
+    onToggleMenu,
+    selectedLead,
+    closeLeadDetail,
+    handleViewLead,
+    paginatedData: fetch.data,
+    paginatedIds,
+    loading: fetch.loading,
+    error: fetch.error,
+    refetch,
+    handleExport,
+    isExporting: exportHook.isExporting,
   };
 }

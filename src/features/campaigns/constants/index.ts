@@ -69,7 +69,7 @@ export const ADD_CAMPAIGN_INITIAL_VALUES: CampaignFormData = {
  */
 export const CAMPAIGN_CSV_COLUMNS: CsvColumn<Campaign>[] = [
   { header: 'Sl No', value: (c) => c.slNo },
-  { header: 'Name', value: (c) => `"${c.name}"` },
+  { header: 'Name', value: (c) => c.name },
   { header: 'Type', value: (c) => c.type },
   { header: 'Total Tasks', value: (c) => c.totalTasks },
   { header: 'Completed Tasks', value: (c) => c.completedTasks },
