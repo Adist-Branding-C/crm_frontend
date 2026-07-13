@@ -4,17 +4,6 @@ import { SpotlightLeadMapper } from '../mappers/spotlightLead.mapper';
 import { getErrorMessage } from '../../../shared/utils/error';
 import type { SpotlightLead, SpotlightRequestParams } from '../types';
 
-/**
- * Fetches a page of Spotlight leads for the given request params, and holds
- * the resulting leads/pagination/error state.
- *
- * Used by:
- * - useSpotlightData.
- *
- * Notes:
- * - latestRequestId discards responses for requests that are no longer the
- *   most recent in-flight one (e.g. a fast filter change superseding a slow one).
- */
 export function useSpotlightLeadsFetch() {
   const [data, setData] = useState<SpotlightLead[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);

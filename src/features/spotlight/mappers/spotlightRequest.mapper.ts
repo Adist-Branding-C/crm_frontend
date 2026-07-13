@@ -2,13 +2,6 @@ import { QueryMapper } from '../../../shared/mappers/query.mapper';
 import type { SortConfig } from '../../../shared/types/sort';
 import type { SpotlightFilters, SpotlightRequestParams } from '../types';
 
-/**
- * Explicit request-shape transformation for the Spotlight feature.
- *
- * Used by:
- * - useSpotlightLeadsFetch, useSpotlightExport (combine page/limit/search/sort/filters
- *   into one named params object).
- */
 export class SpotlightRequestMapper {
   static toParams(
     page: number,

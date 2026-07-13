@@ -1,12 +1,5 @@
 import type { SpotlightLeadApi, SpotlightLead } from '../types';
 
-/**
- * Explicit shape transformation from the Spotlight API lead item to the
- * table's display shape.
- *
- * Used by:
- * - useSpotlightLeadsFetch (API response items -> display rows).
- */
 export class SpotlightLeadMapper {
   static toDisplay(api: SpotlightLeadApi): SpotlightLead {
     return {

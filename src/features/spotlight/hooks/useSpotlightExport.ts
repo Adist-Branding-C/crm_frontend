@@ -5,12 +5,6 @@ import { getErrorMessage } from '../../../shared/utils/error';
 import { SPOTLIGHT_CSV_COLUMNS } from '../constants';
 import type { SpotlightRequestParams } from '../types';
 
-/**
- * Exports the current (unpaginated) Spotlight lead set to CSV.
- *
- * Used by:
- * - useSpotlightData.
- */
 export function useSpotlightExport(onError: (message: string) => void) {
   const [isExporting, setIsExporting] = useState(false);
 

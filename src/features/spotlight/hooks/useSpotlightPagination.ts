@@ -1,13 +1,5 @@
 import { useState, useCallback } from 'react';
 
-/**
- * Owns the Spotlight table's server-side pagination controls (current page,
- * rows per page). totalPages/totalRecords are fetch results, not controls, so
- * they live in useSpotlightLeadsFetch instead.
- *
- * Used by:
- * - useSpotlightData.
- */
 export function useSpotlightPagination(initialRowsPerPage = 10) {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);

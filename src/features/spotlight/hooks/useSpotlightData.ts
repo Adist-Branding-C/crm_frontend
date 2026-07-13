@@ -75,9 +75,6 @@ export function useSpotlightData() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestParams]);
 
-  // Exposed so the lead detail drawer can trigger a refresh after a remark/action
-  // updates a lead (e.g. a handled lead should drop off the Spotlight list without
-  // requiring the agent to manually change a filter or reload the page).
   const refetch = useCallback(() => {
     fetch.fetchLeads(requestParams);
   }, [fetch.fetchLeads, requestParams]);
