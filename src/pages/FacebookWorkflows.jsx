@@ -5,7 +5,7 @@ import PageHeader from '../components/PageHeader';
 import './FacebookWorkflows.css';
 
 const facebookPages = [
-  { id: 1, name: 'GetLead Official' },
+  { id: 1, name: 'Leadist Official' },
   { id: 2, name: 'CRM Solutions' },
   { id: 3, name: 'Sales Tools' },
 ];
@@ -63,8 +63,8 @@ const crmFields = [
 ];
 
 let workflowsStore = [
-  { id: 1, name: 'Demo Request Flow', pageName: 'GetLead Official', formName: 'Contact Form - Demo Request', status: 'active', createdAt: '2026-04-20' },
-  { id: 2, name: 'Product Inquiry Handler', pageName: 'GetLead Official', formName: 'Product Inquiry Form', status: 'active', createdAt: '2026-04-18' },
+  { id: 1, name: 'Demo Request Flow', pageName: 'Leadist Official', formName: 'Contact Form - Demo Request', status: 'active', createdAt: '2026-04-20' },
+  { id: 2, name: 'Product Inquiry Handler', pageName: 'Leadist Official', formName: 'Product Inquiry Form', status: 'active', createdAt: '2026-04-18' },
   { id: 3, name: 'Support Ticket Flow', pageName: 'CRM Solutions', formName: 'Support Request Form', status: 'inactive', createdAt: '2026-04-15' },
 ];
 
@@ -122,7 +122,7 @@ const FacebookWorkflowsPage = () => {
         title="Facebook Integration" 
         description="Manage Facebook lead form workflows and routing"
         breadcrumb={[
-          { label: 'GL Connect', link: '/user/gl-connect' },
+          { label: 'Connect', link: '/user/connect' },
           { label: 'Facebook Integration' }
         ]}
       />
@@ -379,7 +379,7 @@ const CreateWorkflowPage = () => {
             title="Create Workflow" 
             description="Create a new Facebook lead workflow"
             breadcrumb={[
-              { label: 'GL Connect', link: '/user/gl-connect' },
+              { label: 'Connect', link: '/user/connect' },
               { label: 'Facebook Integration', link: '/facebook/workflows' },
               { label: 'Create Workflow' }
             ]}
@@ -588,7 +588,7 @@ const EditWorkflowPage = () => {
             title="Edit Workflow" 
             description="Edit the Facebook lead workflow"
             breadcrumb={[
-              { label: 'GL Connect', link: '/user/gl-connect' },
+              { label: 'Connect', link: '/user/connect' },
               { label: 'Facebook Integration', link: '/facebook/workflows' },
               { label: 'Edit Workflow' }
             ]}

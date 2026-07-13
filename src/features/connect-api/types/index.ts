@@ -9,3 +9,7 @@ export interface Tab {
   id: string;
   label: string;
 }
+
+export interface ApiTokenData {
+  apiToken: string;
+}
