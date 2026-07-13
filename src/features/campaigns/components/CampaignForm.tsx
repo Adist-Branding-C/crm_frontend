@@ -78,19 +78,19 @@ const CampaignForm = ({ editingItem, validationSchema, initialValues, onSubmit, 
                   </div>
 
                   <div className="form-group">
-                    <label>Start Date</label>
+                    <label>Start Date <span className="text-danger">*</span></label>
                     <Field type="date" name="startDate" className={fieldClass('startDate')} />
                     <FormikError name="startDate" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
-                    <label>End Date</label>
+                    <label>End Date <span className="text-danger">*</span></label>
                     <Field type="date" name="endDate" className={fieldClass('endDate')} />
                     <FormikError name="endDate" component="small" className="field-error-text" />
                   </div>
 
                   <div className="form-group">
-                    <label>Description</label>
+                    <label>Description <span className="text-danger">*</span></label>
                     <Field as="textarea" name="description" className={fieldClass('description')} placeholder="Enter description" rows={3} />
                     <FormikError name="description" component="small" className="field-error-text" />
                   </div>
