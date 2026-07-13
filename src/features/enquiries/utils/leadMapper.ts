@@ -23,5 +23,7 @@ export function mapApiToUI(item: LeadApiItem): Lead {
     updatedAt: item.updatedAt ?? '',
     nextFollowUp: item.nextFollowUpDate ?? '',
     additionalFields: item.additionalFields ?? [],
+    deletedAt: item.deletedAt ?? '',
+    deletedBy: item.deletedByName ?? '',
   };
 }
