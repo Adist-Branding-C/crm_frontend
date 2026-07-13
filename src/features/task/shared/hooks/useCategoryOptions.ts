@@ -1,25 +1,18 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
+import { useLookupOptions } from '../../../../shared/hooks/useLookupOptions';
 import { taskService } from '../services/taskService';
-import type { CategoryOption } from '../types/genericTaskForm.types';
+import type { CategoryOption } from '../types/options';
 
 export function useCategoryOptions() {
-  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
-  const catLoaded = useRef(false);
-
-  const loadCategories = useCallback(async () => {
-    if (catLoaded.current) return;
-    catLoaded.current = true;
-    try {
-      const catRes = await taskService.getTaskCategories();
-      if (catRes.status && catRes.data?.items) {
-        setCategoryOptions(
-          catRes.data.items.map((c) => ({ value: c.id, label: c.taskCategory }))
-        );
-      }
-    } catch {
-      catLoaded.current = false;
+  const fetchCategories = useCallback(async (): Promise<CategoryOption[]> => {
+    const catRes = await taskService.getTaskCategories();
+    if (catRes.status && catRes.data?.items) {
+      return catRes.data.items.map((c) => ({ value: c.id, label: c.taskCategory }));
     }
+    return [];
   }, []);
+
+  const { options: categoryOptions, load: loadCategories } = useLookupOptions(fetchCategories);
 
   return { categoryOptions, loadCategories };
 }

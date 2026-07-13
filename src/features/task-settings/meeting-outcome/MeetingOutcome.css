@@ -15,7 +15,10 @@
   overflow: hidden;
 }
 
-.meeting-outcome-table-wrapper .table-container,
+.meeting-outcome-table-wrapper.table-container {
+  overflow: visible;
+}
+
 .meeting-outcome-table-wrapper .table-scroll {
   overflow: visible;
 }

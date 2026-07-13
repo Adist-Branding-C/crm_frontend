@@ -1,19 +1,70 @@
 import LeadSettingsSidebar from '../../components/LeadSettingsSidebar';
-import { Loader2 } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
-import AdminToolbar from '../../../../shared/components/crud/AdminToolbar';
-import AdminTable from '../../../../shared/components/crud/AdminTable';
+import { useTableData } from '../../../../shared/hooks/useTableData';
+import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
+import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
+import { useAsyncOptions } from '../../../../shared/hooks/useAsyncOptions';
+import { useEditDrawer } from '../../../../shared/hooks/useEditDrawer';
+import { useLeadAdditionalCrud } from '../hooks/useLeadAdditionalCrud';
+import { useLeadAdditionalDeleteConfirm } from '../hooks/useLeadAdditionalDeleteConfirm';
+import { useLeadAdditionalFormSubmit } from '../hooks/useLeadAdditionalFormSubmit';
+import { useLeadAdditionalTableActions } from '../hooks/useLeadAdditionalTableActions';
+import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, SortToggleButton } from '../../../../shared/components/table';
 import AdminPagination from '../../../../shared/components/crud/AdminPagination';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
-import AdminConfirmationModal from '../../../../shared/components/crud/AdminConfirmationModal';
-import Toast from '../../../../shared/components/Toast';
 import AdditionalFieldForm from '../components/AdditionalFieldForm';
-import { useLeadAdditionalData } from '../hooks/useLeadAdditionalData';
-import { columns } from '../constants';
+import AdditionalFieldRow from '../components/AdditionalFieldRow';
+import { leadAdditionalService } from '../services/leadAdditionalService';
+import { leadPurposeService } from '../../lead-purpose/services';
+import { mapApiToUI, mapPurposeApiToUI, mapItemToFormData } from '../mappers/additionalField.mapper';
+import { additionalFieldValidationSchema } from '../validations/additionalField.validation';
+import { EMPTY_ADDITIONAL_FIELD_FORM_DATA } from '../constants/form.constants';
+import { LABEL_SL_NO, LABEL_ACTIONS, LABEL_NO_DATA } from '../../../../shared/constants/labels';
+import {
+  LEAD_ADDITIONAL_COLUMN_ADDED_BY,
+  LEAD_ADDITIONAL_COLUMN_FIELD,
+  LEAD_ADDITIONAL_COLUMN_TYPE,
+  LEAD_ADDITIONAL_COLUMN_VALUES,
+  LEAD_ADDITIONAL_COLUMN_IN_FILTER,
+  LEAD_ADDITIONAL_COLUMN_IN_LIST,
+  LEAD_ADDITIONAL_COLUMN_REQUIRED,
+  LEAD_ADDITIONAL_COLUMN_PURPOSE,
+} from '../constants';
 import './LeadAdditionalPage.css';
+import type { LeadAdditionalItem, AdditionalFieldFormData } from '../types/interface';
 
 const LeadAdditionalPage = () => {
-  const d = useLeadAdditionalData();
+  const table = useTableData<LeadAdditionalItem>({
+    initialSortOrder: 'DESC',
+    fetchFn: async (params) => {
+      const response = await leadAdditionalService.getAll(params.pageNumber, params.limit, params.search, params.sortOrder);
+      return {
+        items: (response.data?.items ?? []).map(mapApiToUI),
+        total: response.data?.pagination?.total ?? 0,
+      };
+    },
+  });
+
+  const search = useDebouncedSearch(table.handleSearchChange);
+  const dropdown = useDropdownMenu<string>();
+  const purposeOptions = useAsyncOptions(
+    () => leadPurposeService.getLeadPurposes(1, 100).then((r) => r.data?.items ?? []),
+    mapPurposeApiToUI,
+  );
+  const drawer = useEditDrawer<LeadAdditionalItem, AdditionalFieldFormData>({
+    mapItemToFormData,
+    emptyFormData: EMPTY_ADDITIONAL_FIELD_FORM_DATA,
+    onOpen: () => table.setError(''),
+  });
+  const crud = useLeadAdditionalCrud({ table });
+  const deleteConfirm = useLeadAdditionalDeleteConfirm({ handleDeleteAdditionalField: crud.handleDeleteAdditionalField });
+  const formSubmit = useLeadAdditionalFormSubmit({
+    editingItem: drawer.editingItem,
+    closeDrawer: drawer.closeDrawer,
+    handleCreateAdditionalField: crud.handleCreateAdditionalField,
+    handleUpdateAdditionalField: crud.handleUpdateAdditionalField,
+  });
+  const actions = useLeadAdditionalTableActions({ table, drawer, dropdown, deleteConfirm, crud });
 
   return (
     <div className="lead-settings-page">
@@ -24,77 +75,90 @@ const LeadAdditionalPage = () => {
       <div className="settings-content">
         <div className="additional-fields-layout">
           <AdditionalFieldForm
-            formData={d.formData}
-            purposes={d.purposes}
-            editingItem={d.editingItem}
-            isSaving={d.isSaving}
-            saveDisabled={d.editingItem ? !d.hasChanges : false}
-            error={d.error}
-            onClearError={d.clearError}
-            onInputChange={d.handleInputChange}
-            onSubmit={d.handleSubmit}
-            onDropdownValueChange={d.handleDropdownValueChange}
-            onAddDropdownValue={d.handleAddDropdownValue}
-            onRemoveDropdownValue={d.handleRemoveDropdownValue}
+            form={{
+              validationSchema: additionalFieldValidationSchema,
+              initialValues: drawer.drawerInitialValues,
+              onSubmit: drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit,
+              isEditing: !!drawer.editingItem,
+              editingFieldName: drawer.editingItem?.field,
+              onCancelEdit: drawer.closeDrawer,
+            }}
+            status={{
+              isSaving: crud.isSaving,
+              error: crud.error,
+              onClearError: actions.clearError,
+            }}
+            purposes={purposeOptions.options}
           />
 
           <div className="additional-table-panel">
-            <AdminToolbar
-              searchQuery={d.searchQuery}
-              onSearchChange={d.setSearchQuery}
-              onAdd={d.handleAddClick}
-              addLabel="Add Field"
-              showAddButton={false}
+            <TableNav
+              searchQuery={search.searchValue}
+              onSearchChange={search.handleSearchChange}
+              rowsPerPage={table.limit}
+              onRowsPerPageChange={actions.handleRowsPerPageChange}
+            >
+              <SortToggleButton sortOrder={table.sortOrder} onToggle={table.toggleSortOrder} />
+            </TableNav>
 
+            <div className="table-container">
+              <Table wrapperClassName="table-scroll" className="data-table">
+                <THead>
+                  <TRow>
+                    <TCell variant="th">{LABEL_SL_NO}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_ADDED_BY}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_FIELD}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_TYPE}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_VALUES}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_IN_FILTER}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_IN_LIST}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_REQUIRED}</TCell>
+                    <TCell variant="th">{LEAD_ADDITIONAL_COLUMN_PURPOSE}</TCell>
+                    <TCell variant="th">{LABEL_ACTIONS}</TCell>
+                  </TRow>
+                </THead>
+                <TBody>
+                  {table.list.length === 0 ? (
+                    <EmptyState colSpan={10} message={LABEL_NO_DATA} />
+                  ) : (
+                    table.list.map((item, idx) => (
+                      <AdditionalFieldRow
+                        key={item.id}
+                        item={item}
+                        index={table.startIndex + idx}
+                        isMenuOpen={dropdown.dropdownOpen === item.id}
+                        onToggleMenu={(open) => dropdown.toggleDropdown(open ? item.id : null)}
+                        onEdit={actions.handleEditClick}
+                        onDelete={actions.handleDeleteClick}
+                      />
+                    ))
+                  )}
+                </TBody>
+              </Table>
+            </div>
+            <AdminPagination
+              currentPage={table.pageNumber}
+              totalPages={table.totalPages}
+              startIndex={table.startIndex}
+              rowsPerPage={table.limit}
+              totalItems={table.totalCount}
+              onPageChange={table.setPageNumber}
+              onRowsPerPageChange={actions.handleRowsPerPageChange}
+              prevNextOnly
+              alwaysShowNav
             />
-            {d.isLoading ? (
-              <div className="table-loading">
-                <Loader2 size={32} className="spin" />
-                <p>Loading additional fields...</p>
-              </div>
-            ) : (
-              <>
-                <div className="table-container">
-                  <AdminTable
-                    data={d.paginatedData}
-                    columns={columns}
-                    startIndex={d.startIndex}
-                    dropdownOpen={d.dropdownOpen}
-                    onToggleDropdown={d.setDropdownOpen}
-                    onEdit={d.handleEditClick}
-                    onDelete={d.handleDeleteClick}
-                  />
-                </div>
-                <AdminPagination
-                  currentPage={d.currentPage}
-                  totalPages={d.totalPages}
-                  startIndex={d.startIndex}
-                  rowsPerPage={d.rowsPerPage}
-                  totalItems={d.totalItems}
-                  onPageChange={d.setCurrentPage}
-                  onRowsPerPageChange={d.handleRowsPerPageChange}
-                  prevNextOnly
-                  showRowsSelector={true}
-                />
-              </>
-            )}
           </div>
         </div>
       </div>
 
-      <AdminConfirmationModal isOpen={d.showSaveConfirm}
-        title={d.saveConfirmMode === 'create' ? 'Create Additional Field' : 'Update Additional Field'}
-        message={d.saveConfirmMode === 'create' ? 'Are you sure you want to create this Additional Field?' : 'Are you sure you want to update this Additional Field?'}
-        isLoading={d.isSaving}
-        onConfirm={d.executeSave} onCancel={d.cancelSave} />
       <AdminDeleteModal
-        isOpen={!!d.deletingItem}
-        itemName={d.deletingItem?.field}
+        isOpen={!!deleteConfirm.deletingItem}
+        itemName={deleteConfirm.deletingItem?.field}
         itemType="additional field"
-        onConfirm={d.handleConfirmDelete}
-        onClose={() => d.setDeletingItem(null)}
+        error={crud.deleteError}
+        onConfirm={deleteConfirm.handleConfirmDelete}
+        onClose={deleteConfirm.closeDeleteModal}
       />
-      <Toast message={d.toastMessage} type={d.toastType} isVisible={d.showToast} onClose={d.clearToast} />
     </div>
   );
 };

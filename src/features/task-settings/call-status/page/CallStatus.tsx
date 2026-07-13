@@ -1,292 +1,154 @@
-import { useCallback } from 'react';
-import type { FormikHelpers } from 'formik';
+import { useCallback, useRef } from 'react';
+import { Download, Plus } from 'lucide-react';
 import { useFetchCallStatus } from '../hooks/useFetchCallStatus';
-import { useCreateCallStatus } from '../hooks/useCreateCallStatus';
-import { useUpdateCallStatus } from '../hooks/useUpdateCallStatus';
-import { useDeleteCallStatus } from '../hooks/useDeleteCallStatus';
-import { useCallStatusForm } from '../hooks/useCallStatusForm';
+import { useCallStatusCrud } from '../hooks/useCallStatusCrud';
 import { useCallStatusDrawer } from '../hooks/useCallStatusDrawer';
-import { useCallStatusTable } from '../hooks/useCallStatusTable';
-import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
-import { useDrawerScroll } from '../../hooks/useDrawerScroll';
-import { useToast } from '../../hooks/useToast';
-import { applyFieldErrors } from '../../call-reason/utils/applyFieldErrors';
+import { useCallStatusForm } from '../hooks/useCallStatusForm';
+import { useCallStatusDeleteConfirm } from '../hooks/useCallStatusDeleteConfirm';
+import { useCallStatusFormSubmit } from '../hooks/useCallStatusFormSubmit';
+import { useCallStatusRowActions } from '../hooks/useCallStatusRowActions';
+import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
+import { useToast } from '../../../../shared/hooks/useToast';
+import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addCallStatusValidationSchema, editCallStatusValidationSchema } from '../validations/index';
-import { ADD_CALL_STATUS_INITIAL_VALUES } from '../constants/index';
-import CallStatusActions from '../components/CallStatusActions';
-import AddCallStatusDrawer from '../components/AddCallStatusDrawer';
-import EditCallStatusDrawer from '../components/EditCallStatusDrawer';
-import DeleteCallStatusDialog from '../components/DeleteCallStatusDialog';
-import { Table, THead, TBody, TRow, TCell, TableToolbar, TablePagination } from '../../../../shared/components/table';
-import SettingsStatusBadge from '../../../../shared/components/settings/SettingsStatusBadge';
-import ToastNotification from '../../components/ToastNotification';
+import { ADD_CALL_STATUS_INITIAL_VALUES, CALL_STATUS_CSV_COLUMNS } from '../constants/index';
+import { exportToCsv } from '../../../../shared/helpers/csvExport.helper';
+import CallStatusForm from '../components/CallStatusForm';
+import CallStatusRow from '../components/CallStatusRow';
+import Drawer from '../../../../shared/components/Drawer';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
+import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../components/SettingsTabs/SettingsTabs';
-import type { CallStatusFormData, CallStatusApiResponse } from '../types/index';
 import './CallStatus.css';
 
 const CallStatusPage = () => {
   const fetch = useFetchCallStatus();
-  const create = useCreateCallStatus();
-  const update = useUpdateCallStatus();
-  const deletion = useDeleteCallStatus();
+  const toast = useToast();
+  const crud = useCallStatusCrud({ pagination: fetch, showToastMessage: toast.showToastMessage });
   const drawer = useCallStatusDrawer();
-  const table = useCallStatusTable();
   const form = useCallStatusForm(drawer.editingItem);
-  const { scrollAndFocusError, scrollToTop } = useDrawerScroll();
-  const { showToastMessage, toastMessage, toastType, showToast, setShowToast } = useToast();
+  const dropdown = useDropdownMenu<number>();
+  const deleteConfirm = useCallStatusDeleteConfirm(crud.handleDeleteCallStatus);
+  const formSubmit = useCallStatusFormSubmit({
+    editingItem: drawer.editingItem,
+    closeAddDrawer: drawer.closeAddDrawer,
+    closeEditDrawer: drawer.closeEditDrawer,
+    handleAddCallStatus: crud.handleAddCallStatus,
+    handleUpdateCallStatus: crud.handleUpdateCallStatus,
+  });
+  const rowActions = useCallStatusRowActions({
+    openEditDrawer: drawer.openEditDrawer,
+    onDeleteClick: deleteConfirm.handleDeleteClick,
+    closeDropdown: dropdown.closeDropdown,
+  });
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
 
-  const totalPages = Math.ceil(fetch.totalCount / fetch.limit) || 1;
+  const handleExportCSV = useCallback(() => {
+    exportToCsv(fetch.callStatusList, CALL_STATUS_CSV_COLUMNS, 'call-status.csv');
+  }, [fetch.callStatusList]);
 
-  const handleAddSubmit = useCallback(async (
-    values: CallStatusFormData,
-    helpers: FormikHelpers<CallStatusFormData>,
-  ) => {
-    fetch.setError('');
-    fetch.setIsLoading(true);
-
-    try {
-      const { name, status } = values;
-      const response: CallStatusApiResponse | null = await create.create({ name: name.trim(), status });
-
-      if (!response) {
-        fetch.setError('Network error. Please try again.');
-        return false;
-      }
-
-      if (response.status) {
-        fetch.setPageNumber(1);
-        fetch.setSearchQuery('');
-        fetch.refresh();
-        helpers.resetForm();
-        showToastMessage('Call status added successfully', 'success');
-        drawer.closeAddDrawer();
-        return true;
-      }
-
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, helpers.setFieldError);
-      if (errorField) {
-        scrollAndFocusError();
-      } else {
-        fetch.setError(response.message || 'Failed to add call status');
-        scrollToTop();
-      }
-      return false;
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string; field?: string } } };
-        const serverErrors = axiosErr.response?.data?.errors;
-        const serverField = axiosErr.response?.data?.field;
-        const serverMessage = axiosErr.response?.data?.message;
-        if (serverErrors || (serverField && serverMessage)) {
-          const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, helpers.setFieldError);
-          if (errorField) scrollAndFocusError();
-          else { fetch.setError(serverMessage || 'Failed to add call status'); scrollToTop(); }
-        } else {
-          fetch.setError(serverMessage || 'Failed to add call status');
-          scrollToTop();
-        }
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        fetch.setError((err as { message: string }).message);
-        scrollToTop();
-      } else {
-        fetch.setError('Network error. Please try again.');
-        scrollToTop();
-      }
-      return false;
-    } finally {
-      fetch.setIsLoading(false);
-      helpers.setSubmitting(false);
-    }
-  }, [create, fetch, drawer, form, showToastMessage]);
-
-  const handleEditSubmit = useCallback(async (
-    values: CallStatusFormData,
-    helpers: FormikHelpers<CallStatusFormData>,
-  ) => {
-    if (!drawer.editingItem) return;
-    const item = drawer.editingItem;
-    const original: CallStatusFormData = {
-      name: item.name || '',
-      status: item.status || 'Active',
-    };
-    if (JSON.stringify(values) === JSON.stringify(original)) {
-      helpers.setSubmitting(false);
-      return;
-    }
-
-    fetch.setError('');
-    fetch.setIsLoading(true);
-
-    try {
-      const { name, status } = values;
-      const response: CallStatusApiResponse | null = await update.update(drawer.editingItem.id, { name: name.trim(), status });
-
-      if (!response) {
-        fetch.setError('Network error. Please try again.');
-        return false;
-      }
-
-      if (response.status) {
-        fetch.refresh();
-        showToastMessage('Call status updated successfully', 'success');
-        drawer.closeEditDrawer();
-        return true;
-      }
-
-      const errorField = applyFieldErrors(response.errors, response.message, response.field, helpers.setFieldError);
-      if (errorField) {
-        scrollAndFocusError();
-      } else {
-        fetch.setError(response.message || 'Failed to update call status');
-        scrollToTop();
-      }
-      return false;
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string; field?: string } } };
-        const serverErrors = axiosErr.response?.data?.errors;
-        const serverField = axiosErr.response?.data?.field;
-        const serverMessage = axiosErr.response?.data?.message;
-        if (serverErrors || (serverField && serverMessage)) {
-          const errorField = applyFieldErrors(serverErrors, serverMessage, serverField, helpers.setFieldError);
-          if (errorField) scrollAndFocusError();
-          else { fetch.setError(serverMessage || 'Failed to update call status'); scrollToTop(); }
-        } else {
-          fetch.setError(serverMessage || 'Failed to update call status');
-          scrollToTop();
-        }
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        fetch.setError((err as { message: string }).message);
-        scrollToTop();
-      } else {
-        fetch.setError('Network error. Please try again.');
-        scrollToTop();
-      }
-      return false;
-    } finally {
-      fetch.setIsLoading(false);
-      helpers.setSubmitting(false);
-    }
-  }, [drawer.editingItem, update, fetch, drawer, form, showToastMessage]);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!table.deletingItem) return;
-    fetch.setError('');
-
-    try {
-      const response = await deletion.remove(table.deletingItem.id);
-
-      if (response?.status) {
-        fetch.refresh();
-        table.closeDeleteDialog();
-      } else {
-        fetch.setError(response?.message || 'Failed to delete call status');
-      }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        fetch.setError(axiosErr.response?.data?.message || 'Failed to delete call status');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        fetch.setError((err as { message: string }).message);
-      } else {
-        fetch.setError('Network error. Please try again.');
-      }
-    }
-  }, [table.deletingItem, deletion, fetch, table]);
-
-  const startIndex = (fetch.pageNumber - 1) * fetch.limit;
+  const addDrawerBodyRef = useRef<HTMLDivElement>(null);
+  const editDrawerBodyRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="task-settings-page">
       <PageHeader title="Task Settings" description="Manage task configurations and settings" />
       <SettingsTabs tabs={SETTINGS_TABS} />
       <div className="account-content">
-        <div className="call-status-table-wrapper">
-          <TableToolbar
+        <div className="call-status-table-wrapper table-container">
+          <TableNav
             searchQuery={searchValue}
             onSearchChange={handleSearchInput}
             rowsPerPage={fetch.limit}
             onRowsPerPageChange={fetch.handleRowsPerPageChange}
-            onAdd={drawer.openAddDrawer}
-            addLabel="Add Call Status"
-          />
-          <div className="table-scroll">
-            <Table className="data-table">
-              <THead>
-                <TRow>
-                  <TCell variant="th">Sl No</TCell>
-                  <TCell variant="th">Name</TCell>
-                  <TCell variant="th">Status</TCell>
-                  <TCell variant="th">Actions</TCell>
-                </TRow>
-              </THead>
-              <TBody>
-                {fetch.callStatusList.length === 0 ? (
-                  <TRow>
-                    <TCell colSpan={4} className="dataTables_empty">No data available in table</TCell>
-                  </TRow>
-                ) : (
-                  fetch.callStatusList.map((item, index) => (
-                    <TRow key={item.id}>
-                      <TCell>{startIndex + index + 1}</TCell>
-                      <TCell>{item.name || '-'}</TCell>
-                      <TCell>
-                        <SettingsStatusBadge status={item.status} />
-                      </TCell>
-                      <TCell>
-                        <CallStatusActions
-                          item={item}
-                          dropdownOpen={table.dropdownOpen}
-                          onToggleDropdown={table.toggleDropdown}
-                          onEdit={drawer.openEditDrawer}
-                          onDelete={table.handleDeleteClick}
-                        />
-                      </TCell>
-                    </TRow>
-                  ))
-                )}
-              </TBody>
-            </Table>
-          </div>
-          <TablePagination
+          >
+            <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Download size={16} />Export
+            </button>
+            <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Plus size={16} /> Add Call Status
+            </button>
+          </TableNav>
+
+          <Table wrapperClassName="table-scroll" className="data-table">
+            <THead>
+              <TRow>
+                <TCell variant="th">Sl No</TCell>
+                <TCell variant="th">Name</TCell>
+                <TCell variant="th">Status</TCell>
+                <TCell variant="th">Actions</TCell>
+              </TRow>
+            </THead>
+            <TBody>
+              {fetch.callStatusList.length === 0 ? (
+                <EmptyState colSpan={4} />
+              ) : (
+                fetch.callStatusList.map((item, index) => (
+                  <CallStatusRow
+                    key={item.id}
+                    item={item}
+                    index={fetch.startIndex + index}
+                    dropdownOpen={dropdown.dropdownOpen}
+                    onToggleDropdown={dropdown.toggleDropdown}
+                    onEdit={rowActions.handleEditClick}
+                    onDelete={rowActions.handleDeleteClick}
+                  />
+                ))
+              )}
+            </TBody>
+          </Table>
+
+          <Pagination
             currentPage={fetch.pageNumber}
-            totalPages={totalPages}
+            totalPages={fetch.totalPages}
+            totalItems={fetch.totalCount}
             rowsPerPage={fetch.limit}
-            totalRecords={fetch.totalCount}
             onPageChange={fetch.setPageNumber}
           />
         </div>
-        <AddCallStatusDrawer
-          isOpen={drawer.showAddDrawer}
-          onClose={drawer.closeAddDrawer}
-          validationSchema={addCallStatusValidationSchema}
-          initialValues={ADD_CALL_STATUS_INITIAL_VALUES}
-          onSubmit={handleAddSubmit}
-          isLoading={fetch.isLoading}
-          error={fetch.error}
-        />
-        <EditCallStatusDrawer
-          isOpen={drawer.showEditDrawer}
-          onClose={drawer.closeEditDrawer}
-          validationSchema={editCallStatusValidationSchema}
-          initialValues={form.editInitialValues}
-          onSubmit={handleEditSubmit}
-          isLoading={fetch.isLoading}
-          error={fetch.error}
-          editingItem={drawer.editingItem}
-        />
-        <DeleteCallStatusDialog
-          isOpen={!!table.deletingItem}
-          itemName={table.deletingItem?.name || ''}
-          onConfirm={handleConfirmDelete}
-          onClose={table.closeDeleteDialog}
+
+        <Drawer isOpen={drawer.showAddDrawer} onClose={drawer.closeAddDrawer} title="Add Call Status" ref={addDrawerBodyRef}>
+          <CallStatusForm
+            validationSchema={addCallStatusValidationSchema}
+            initialValues={ADD_CALL_STATUS_INITIAL_VALUES}
+            onSubmit={formSubmit.handleSubmit}
+            onCancel={drawer.closeAddDrawer}
+            isLoading={fetch.isLoading}
+            error={fetch.error}
+            bodyRef={addDrawerBodyRef}
+          />
+        </Drawer>
+
+        <Drawer isOpen={drawer.showEditDrawer} onClose={drawer.closeEditDrawer} title="Edit Call Status" ref={editDrawerBodyRef}>
+          <CallStatusForm
+            validationSchema={editCallStatusValidationSchema}
+            initialValues={form.editInitialValues}
+            onSubmit={formSubmit.handleEditSubmit}
+            onCancel={drawer.closeEditDrawer}
+            isLoading={fetch.isLoading}
+            error={fetch.error}
+            isEditing
+            bodyRef={editDrawerBodyRef}
+          />
+        </Drawer>
+
+        <AdminDeleteModal
+          isOpen={!!deleteConfirm.deletingItem}
+          itemName={deleteConfirm.deletingItem?.name || ''}
+          onConfirm={deleteConfirm.handleConfirmDelete}
+          onClose={deleteConfirm.closeDeleteModal}
         />
       </div>
-      <ToastNotification message={toastMessage} type={toastType} visible={showToast} onClose={() => setShowToast(false)} />
+      <ToastNotification
+        isVisible={toast.showToast}
+        type={toast.toastType}
+        message={toast.toastMessage}
+        onDismiss={() => toast.setShowToast(false)}
+      />
     </div>
   );
 };

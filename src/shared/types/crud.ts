@@ -44,12 +44,14 @@ export interface AdminPaginationProps {
   onRowsPerPageChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   showRowsSelector?: boolean;
   prevNextOnly?: boolean;
+  alwaysShowNav?: boolean;
 }
 
 export interface AdminDeleteModalProps {
   isOpen: boolean;
   itemName?: string | undefined;
   itemType?: string;
+  error?: string | null;
   onConfirm: () => void;
   onClose: () => void;
   isDeleting?: boolean;
@@ -65,6 +67,14 @@ export interface AdminTableProps<T extends { id: number | string }> {
   onDelete: (item: T) => void;
   renderActions?: (item: T) => ReactNode;
   emptyMessage?: string;
+}
+
+export interface DrawerShellProps {
+  isOpen: boolean;
+  title: string;
+  onClose: () => void;
+  bodyRef?: Ref<HTMLDivElement>;
+  children: ReactNode;
 }
 
 export interface AdminConfirmationModalProps {

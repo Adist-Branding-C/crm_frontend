@@ -6,7 +6,7 @@ import type { AdminPaginationProps } from '../../types/crud';
 
 const AdminPagination: React.FC<AdminPaginationProps> = React.memo(({
   currentPage, totalPages, startIndex, rowsPerPage, totalItems,
-  onPageChange, onRowsPerPageChange, showRowsSelector, prevNextOnly,
+  onPageChange, onRowsPerPageChange, showRowsSelector, prevNextOnly, alwaysShowNav,
 }) => {
   const safeTotalPages = Math.max(1, Number(totalPages) || 1);
   const safeCurrentPage = Math.max(1, Number(currentPage) || 1);
@@ -28,7 +28,7 @@ const AdminPagination: React.FC<AdminPaginationProps> = React.memo(({
         {LABEL_SHOWING} {Math.min(startIndex + 1, totalItems)} {LABEL_TO} {Math.min(startIndex + rowsPerPage, totalItems)} {LABEL_OF} {totalItems} {LABEL_ENTRIES}
       </div>
       <div className="table-controls">
-        {safeTotalPages > 1 && (
+        {(safeTotalPages > 1 || alwaysShowNav) && (
           <div className="pagination-controls" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
             {!prevNextOnly && (
               <>

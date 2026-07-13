@@ -182,6 +182,22 @@
   border-color: var(--primary);
 }
 
+.phone-field-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.phone-field-group .phone-country-code {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 40%;
+}
+
+.phone-field-group input {
+  flex: 1;
+  min-width: 0;
+}
+
 .dropdown-search-container {
   position: relative;
 }
