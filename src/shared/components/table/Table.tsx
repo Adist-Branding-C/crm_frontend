@@ -7,7 +7,7 @@ interface TableProps extends ComponentPropsWithoutRef<'table'> {
 }
 
 const Table = forwardRef<HTMLTableElement, TableProps>(
-  ({ wrapperClassName, className, children, ...props }, ref) => (
+  ({ wrapperClassName = 'table-scroll', className = 'data-table', children, ...props }, ref) => (
     <div className={wrapperClassName}>
       <table ref={ref} className={className} {...props}>
         {children}

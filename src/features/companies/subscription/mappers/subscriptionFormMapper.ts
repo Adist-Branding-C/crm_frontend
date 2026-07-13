@@ -1,4 +1,5 @@
 import { addDays } from '../utils/subscriptionDate.util';
+import { calculateTotalPrice } from '../utils/subscriptionPricing.util';
 import type { CreateSubscriptionPayload, CreateRenewalQueuePayload, UpdateRenewalQueuePayload } from '../types/request';
 import type { AssignSubscriptionFormValues, RenewalQueueFormValues } from '../types/component.types';
 
@@ -13,7 +14,7 @@ export function mapAssignFormToPayload(companyId: string, values: AssignSubscrip
     durationInDays,
     staffCount,
     perStaffPrice,
-    totalPrice: staffCount * perStaffPrice,
+    totalPrice: calculateTotalPrice(staffCount, perStaffPrice, durationInDays),
   };
   if (values.remark.trim()) payload.remark = values.remark.trim();
   return payload;

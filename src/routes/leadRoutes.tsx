@@ -8,6 +8,7 @@ import CompaniesPage from '../features/companies/pages/CompaniesPage';
 import CompanySubscriptionPage from '../features/companies/subscription/pages/CompanySubscriptionPage';
 import FacebookWorkflows from '../pages/FacebookWorkflows';
 import FacebookViewLeadsPage from '../features/facebook-view-leads/pages/FacebookViewLeadsPage';
+import SuperAdminRoute from './SuperAdminRoute';
 
 export default (
   <>
@@ -16,8 +17,8 @@ export default (
     <Route path="campaigns" element={<CampaignsPage />} />
     <Route path="followup-required" element={<FollowupRequiredPage />} />
     <Route path="sales-pipeline" element={<SalesPipelinePage />} />
-    <Route path="companies" element={<CompaniesPage />} />
-    <Route path="companies/:companyId/subscription" element={<CompanySubscriptionPage />} />
+    <Route path="companies" element={<SuperAdminRoute><CompaniesPage /></SuperAdminRoute>} />
+    <Route path="companies/:companyId/subscription" element={<SuperAdminRoute><CompanySubscriptionPage /></SuperAdminRoute>} />
     <Route path="facebook/workflows/*" element={<FacebookWorkflows />} />
     <Route path="facebook/view-leads" element={<FacebookViewLeadsPage />} />
   </>

@@ -1,0 +1,335 @@
+
+
+1) In CompaniesPage.tsx i can see a variable outside component for 
+const EMPTY_COMPANY_FILTERS: CompanyFilters = {
+  status: '',
+  subscriptionStatus: '',
+  soonExpiring: false,
+  minLicensedSeats: '',
+  maxLicensedSeats: '',
+  minPerStaffPrice: '',
+  maxPerStaffPrice: '',
+};
+
+But as per best coding standerd there should not be any variable inside our outsside compoent all should keep into constant file
+but its inside logical function you can
+
+but also inside a compoentn or outside compoentn functional are also not allowed- either be hook-util-helper and call in such way reusbale
+if it can reuse somewhere else as well then move to shared foldrr
+
+in the same file i can see 
+
+  const handleApplyFilters = () => {
+    appliedFiltersRef.current = filters;
+    setShowFilters(false);
+    table.resetToFirstPage();
+  };
+
+  const handleClearFilters = () => {
+    setFilters(EMPTY_COMPANY_FILTERS);
+    appliedFiltersRef.current = EMPTY_COMPANY_FILTERS;
+    setShowFilters(false);
+    table.resetToFirstPage();
+  };
+
+  const handleManageSubscription = (company: Company) => {
+    navigate(`/companies/${company.companyId}/subscription`);
+  };
+
+  this function inside  CompaniesPage component but as per i said either make it hook and call it here or otherwise util-helper and call
+  But do not create new function inside compoentn or same file outside that very strict
+
+
+  2) In table i can see you were using like this
+   <TBody>
+            {table.list.length === 0 ? (
+              <EmptyState colSpan={8} message="No companies found" />
+            ) : (
+              table.list.map((company) => (
+                <CompanyRow
+                  key={company.companyId}
+                  company={company}
+                  isSelected={selection.isSelected(company.companyId)}
+                  onSelectRow={selection.handleSelectRow}
+                  onView={viewDrawer.open}
+                  onEdit={formDrawer.open}
+                  onManageSubscription={handleManageSubscription}
+                />
+              ))
+            )}
+          </TBody>
+
+          But its supposed to be lilke this but like given above
+          <TBody>
+            {table.list.length === 0 ? (
+              <EmptyState colSpan={8} message="No companies found" />
+            ) : (
+              table.list.map((company) => (
+               <TRow>
+    <TCell><input type="checkbox" checked={isSelected} onChange={() => onSelectRow(company.companyId)} /></TCell>
+    <TCell>
+      <div className="company-name-cell">
+        <Building size={16} className="company-icon" />
+        <div>
+          <div className="company-name">{company.name}</div>
+          <div className="company-date">Since {company.createdAt}</div>
+        </div>
+      </div>
+    </TCell>
+    <TCell>
+      <div className="contact-cell">
+        <div><User size={12} /> {company.contactPersonName}</div>
+        <div><Mail size={12} /> {company.email}</div>
+        <div><Phone size={12} /> {company.phone}</div>
+      </div>
+    </TCell>
+    <TCell><div className="stat-cell"><Users size={14} /> {company.licensedSeats}</div></TCell>
+    <TCell>{company.leads.toLocaleString()}</TCell>
+    <TCell>{company.deals}</TCell>
+    <TCell>{getCompanyStatusBadge(company.status)}</TCell>
+    <TCell>
+      <CompanyRowActions company={company} onView={onView} onEdit={onEdit} onManageSubscription={onManageSubscription} />
+    </TCell>
+  </TRow>
+              ))
+            )}
+          </TBody>
+
+          Also in Tabel releated COmpoennt (Table, Thead, Tbody, TCell etc) all class of css shoudl be inside component not pass as props
+          because if i need to change design overall design i only need to change in global component right
+
+        3) Naming conversiton also very imporant
+
+          I can see some code in  CompaniesPage Component but its wrong naming because the naming should be
+           
+                    Noun (Most common)
+
+                    Used when the component represents a UI element which are sharedbale across entire website.
+
+                    Button.jsx
+                    Modal.jsx
+                    Card.jsx
+                    Avatar.jsx
+                    Sidebar.jsx
+                    Header.jsx
+
+                    2. Modifier + Noun
+
+When there are multiple variations.
+
+PrimaryButton.jsx
+UserCard.jsx
+ProfileAvatar.jsx
+SuccessAlert.jsx
+LoadingSpinner.jsx
+
+
+3. Domain + Noun
+
+For large applications.
+
+LeadCard.jsx
+LeadTable.jsx
+LeadFilters.jsx
+InvoiceList.jsx
+CustomerModal.jsx
+
+4. Verb (Action) + Noun
+
+Use this when the component performs a specific action, typically a dialog, form, or workflow.
+
+CreateLeadModal.jsx
+EditLeadForm.jsx
+DeleteUserDialog.jsx
+UploadFileModal.jsx
+InviteMemberDrawer.jsx
+
+This is much clearer than just ActionFrame.
+
+
+4) Across the module every input must be Yup and Formik and thier component instead of input and random checkign for Error
+
+For example instead of this
+ <div className="filter-group">
+          <label>Licensed Seats</label>
+          <div className="date-range-input">
+            <input type="number" min={0} placeholder="Min" value={filters.minLicensedSeats} onChange={(e) => updateFilter('minLicensedSeats', toNumberOrEmpty(e.target.value))} />
+            <span>to</span>
+            <input type="number" min={0} placeholder="Max" value={filters.maxLicensedSeats} onChange={(e) => updateFilter('maxLicensedSeats', toNumberOrEmpty(e.target.value))} />
+          </div>
+        </div>
+
+        it would be 
+        <div className="filter-group">
+  <label>Licensed Seats</label>
+
+  <div className="date-range-input">
+    <div>
+      <Field
+        name="minLicensedSeats"
+        type="number"
+        placeholder="Min"
+        min={0}
+        component={Input}
+      />
+      <ErrorMessage
+        name="minLicensedSeats"
+        component="div"
+        className="error-message"
+      />
+    </div>
+
+    <span>to</span>
+
+    <div>
+      <Field
+        name="maxLicensedSeats"
+        type="number"
+        placeholder="Max"
+        min={0}
+        component={Input}
+      />
+      <ErrorMessage
+        name="maxLicensedSeats"
+        component="div"
+        className="error-message"
+      />
+    </div>
+  </div>
+</div>
+
+Along with 
+Formik
+  initialValues={{
+    minLicensedSeats: '',
+    maxLicensedSeats: '',
+  }}
+  validationSchema={Yup.object({
+    minLicensedSeats: Yup.number().min(0).nullable(),
+    maxLicensedSeats: Yup.number()
+      .min(0)
+      .nullable()
+      .when('minLicensedSeats', (min, schema) =>
+        min !== undefined && min !== ''
+          ? schema.min(min, 'Max must be greater than or equal to Min')
+          : schema
+      ),
+  })}
+  onSubmit={handleSubmit}
+>
+  <Form>
+    {/* Fields */}
+  </Form>
+</Formik>
+
+
+But initial values should be move into constant file, validation schedme to validation folder 
+
+
+5) If any componetn part repating too many times then reuse the component 
+For example CompaniesStatsGrid compont havign like this
+const CompaniesStatsGrid: React.FC<CompaniesStatsGridProps> = React.memo(({ stats }) => (
+  <div className="company-stats-grid">
+    <div className="company-stat-card">
+      <div className="company-stat-icon" style={{ background: '#3b82f620' }}><Building size={20} color="#3b82f6" /></div>
+      <div className="company-stat-info">
+        <span className="company-stat-value">{stats.totalCompanies}</span>
+        <span className="company-stat-label">Total Companies</span>
+      </div>
+    </div>
+    <div className="company-stat-card">
+      <div className="company-stat-icon" style={{ background: '#ef444420' }}><AlertCircle size={20} color="#ef4444" /></div>
+      <div className="company-stat-info">
+        <span className="company-stat-value">{stats.expiredCustomers}</span>
+        <span className="company-stat-label">Expired</span>
+      </div>
+    </div>
+    <div className="company-stat-card">
+      <div className="company-stat-icon" style={{ background: '#f59e0b20' }}><Clock size={20} color="#f59e0b" /></div>
+      <div className="company-stat-info">
+        <span className="company-stat-value">{stats.soonExpire}</span>
+        <span className="company-stat-label">Soon Expire</span>
+      </div>
+    </div>
+    <div className="company-stat-card">
+      <div className="company-stat-icon" style={{ background: '#8b5cf620' }}><Users size={20} color="#8b5cf6" /></div>
+      <div className="company-stat-info">
+        <span className="company-stat-value">{stats.totalStaff}</span>
+        <span className="company-stat-label">Total Staff</span>
+      </div>
+    </div>
+    <div className="company-stat-card">
+      <div className="company-stat-icon" style={{ background: '#06b6d420' }}><UserCheck size={20} color="#06b6d4" /></div>
+      <div className="company-stat-info">
+        <span className="company-stat-value">{stats.licensedSeats}</span>
+        <span className="company-stat-label">Licensed Seats</span>
+      </div>
+    </div>
+    <div className="company-stat-card">
+      <div className="company-stat-icon" style={{ background: '#10b98120' }}><DollarSign size={20} color="#10b981" /></div>
+      <div className="company-stat-info">
+        <span className="company-stat-value">${stats.totalRevenue.toLocaleString()}</span>
+        <span className="company-stat-label">Total Revenue</span>
+      </div>
+    </div>
+  </div>
+));
+
+CompaniesStatsGrid.displayName = 'CompaniesStatsGrid';
+export default CompaniesStatsGrid;
+ 
+
+ you can do this
+ <div className="company-stats-grid">
+  <StatCard
+    icon={Building}
+    iconColor="#3b82f6"
+    iconBackground="#3b82f620"
+    value={stats.totalCompanies}
+    label="Total Companies"
+  />
+
+  <StatCard
+    icon={AlertCircle}
+    iconColor="#ef4444"
+    iconBackground="#ef444420"
+    value={stats.expiredCustomers}
+    label="Expired"
+  />
+
+  <StatCard
+    icon={Clock}
+    iconColor="#f59e0b"
+    iconBackground="#f59e0b20"
+    value={stats.soonExpire}
+    label="Soon Expire"
+  />
+
+  <StatCard
+    icon={Users}
+    iconColor="#8b5cf6"
+    iconBackground="#8b5cf620"
+    value={stats.totalStaff}
+    label="Total Staff"
+  />
+
+  <StatCard
+    icon={UserCheck}
+    iconColor="#06b6d4"
+    iconBackground="#06b6d420"
+    value={stats.licensedSeats}
+    label="Licensed Seats"
+  />
+
+  <StatCard
+    icon={DollarSign}
+    iconColor="#10b981"
+    iconBackground="#10b98120"
+    value={`$${stats.totalRevenue.toLocaleString()}`}
+    label="Total Revenue"
+  />
+</div>
+
+
+
+

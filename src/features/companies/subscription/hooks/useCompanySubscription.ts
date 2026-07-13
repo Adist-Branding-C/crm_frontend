@@ -3,7 +3,7 @@ import { subscriptionDataService } from '../services/subscriptionDataService';
 import { mapSubscriptionApiToUI } from '../mappers/subscriptionMapper';
 import { getErrorMessage } from '../../../../shared/utils/error';
 import type { SubscriptionDetail } from '../types';
-import type { CreateSubscriptionPayload, UpdateStaffCountPayload, UpdateSubscriptionStatusPayload } from '../types/request';
+import type { CreateSubscriptionPayload, UpdateStaffCountPayload, UpdateSubscriptionStatusPayload, CancelSubscriptionPayload } from '../types/request';
 
 function isNotFound(err: unknown): boolean {
   return (err as { response?: { status?: number } })?.response?.status === 404;
@@ -11,7 +11,7 @@ function isNotFound(err: unknown): boolean {
 
 /**
  * Owns the current subscription for one company and its CRUD (create/update staff
- * count/update status) - a single entity's fetch + mutations, nothing else. The subscription's
+ * count/update status/cancel) - a single entity's fetch + mutations, nothing else. The subscription's
  * history is a separate read-only concern owned by useSubscriptionHistory; this hook doesn't
  * fetch or return it. The page composes both and refetches history itself after a mutation here
  * succeeds, rather than this hook reaching into history's refetch on its own.
@@ -104,6 +104,22 @@ export function useCompanySubscription(companyId: string | undefined) {
     }
   }, [subscription, refetchSubscription]);
 
+  const cancelSubscription = useCallback(async (payload: CancelSubscriptionPayload): Promise<boolean> => {
+    if (!subscription) return false;
+    setIsSaving(true);
+    setSaveError('');
+    try {
+      await subscriptionDataService.cancelSubscription(subscription.id, payload);
+      await refetchSubscription();
+      return true;
+    } catch (err: unknown) {
+      setSaveError(getErrorMessage(err, 'Failed to cancel subscription'));
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }, [subscription, refetchSubscription]);
+
   return {
     subscription,
     notFound,
@@ -115,6 +131,7 @@ export function useCompanySubscription(companyId: string | undefined) {
     createSubscription,
     updateStaffCount,
     updateStatus,
+    cancelSubscription,
     refetchSubscription,
   };
 }

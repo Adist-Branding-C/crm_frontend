@@ -11,7 +11,7 @@ const SubscriptionHistoryTable = ({ history, isLoading }: SubscriptionHistoryTab
     </div>
     <div className="card-body">
       <div className="table-container">
-        <Table wrapperClassName="table-scroll" className="data-table">
+        <Table>
           <THead>
             <TRow>
               <TCell variant="th">Action</TCell>

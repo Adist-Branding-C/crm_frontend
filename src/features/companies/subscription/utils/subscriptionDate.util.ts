@@ -12,11 +12,17 @@ export function addDays(dateStr: string, days: number): string {
 
 /**
  * Renders a subscription's validUpto date as a human "N days remaining" / "Expired N days ago" label.
+ * `status` takes priority over the date math - a subscription marked Expired/Cancelled (e.g. via a
+ * manual status change or a "spot cancel") is never valid regardless of how much of its validUpto
+ * window is technically still in the future.
  *
  * Used by:
  * - SubscriptionOverviewCard
  */
-export function getDaysRemainingLabel(validUpto: string): string {
+export function getDaysRemainingLabel(validUpto: string, status: string): string {
+  if (status === 'Expired') return 'Expired';
+  if (status === 'Cancelled') return 'Cancelled';
+
   const diffDays = Math.ceil((new Date(validUpto).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   if (diffDays > 0) return `${diffDays} day${diffDays === 1 ? '' : 's'} remaining`;
   if (diffDays === 0) return 'Expires today';

@@ -3,6 +3,12 @@ export interface GetCompaniesParams {
   limit: number;
   search?: string;
   status?: string;
+  subscription_status?: string;
+  soon_expiring?: boolean;
+  min_licensed_seats?: number;
+  max_licensed_seats?: number;
+  min_per_staff_price?: number;
+  max_per_staff_price?: number;
   sort_by?: string;
   sort_order?: string;
   dateFrom?: string;

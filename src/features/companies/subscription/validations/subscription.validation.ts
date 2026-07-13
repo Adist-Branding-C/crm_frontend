@@ -9,8 +9,8 @@ import { SUBSCRIPTION_STATUS_OPTIONS } from '../constants/subscriptionStatusOpti
  *
  * Notes:
  * - Frontend validates format/required-ness only; the backend re-validates on submit and is
- *   the source of truth for totalPrice (recomputed server-side from staffCount * perStaffPrice -
- *   this schema never collects totalPrice as user input).
+ *   the source of truth for totalPrice (recomputed server-side as perStaffPrice *
+ *   (durationInDays / 30) * staffCount - this schema never collects totalPrice as user input).
  */
 export const assignSubscriptionValidationSchema = yup.object({
   validFrom: yup.string().required('Start date is required'),
@@ -28,7 +28,8 @@ export const assignSubscriptionValidationSchema = yup.object({
  *
  * Notes:
  * - Frontend validates format/required-ness only; the backend recomputes and is the source of
- *   truth for totalPrice (staffCount * perStaffPrice) - this schema never collects totalPrice.
+ *   truth for totalPrice (perStaffPrice * (durationInDays / 30) * staffCount, using the
+ *   subscription's existing duration) - this schema never collects totalPrice.
  */
 export const editStaffCountValidationSchema = yup.object({
   staffCount: yup.number().typeError('Enter a number').positive('Must be greater than 0').required('Staff count is required'),
@@ -61,7 +62,8 @@ export const updateSubscriptionStatusValidationSchema = yup.object({
  *
  * Notes:
  * - Frontend validates format/required-ness only; the backend recomputes and is the source of
- *   truth for totalPrice (staffCount * perStaffPrice) - this schema never collects totalPrice.
+ *   truth for totalPrice (perStaffPrice * (durationInDays / 30) * staffCount) - this schema
+ *   never collects totalPrice.
  */
 export const renewalQueueValidationSchema = yup.object({
   renewalDate: yup.string().required('Renewal date is required'),

@@ -23,7 +23,7 @@ const EditStaffCountModal = ({ isOpen, subscription, isSaving, error, onClearErr
               <ValidationAlert message={error || null} onClose={onClearError} />
               <Form>
                 <StaffPricingFields errors={errors} touched={touched} />
-                <SubscriptionTotalPreview staffCount={values.staffCount} perStaffPrice={values.perStaffPrice} label="New total" />
+                <SubscriptionTotalPreview staffCount={values.staffCount} perStaffPrice={values.perStaffPrice} durationInDays={subscription.durationInDays} label="New total" />
               </Form>
             </div>
             <div className="modal-footer">

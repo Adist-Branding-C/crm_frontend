@@ -18,41 +18,6 @@
   margin-bottom: 1.5rem;
 }
 
-.company-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-}
-
-.company-stat-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--border-radius-sm);
-}
-
-.company-stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.company-stat-value {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-.company-stat-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
 /* Plans list */
 .plans-list {
   display: flex;

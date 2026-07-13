@@ -47,7 +47,7 @@ const AssignSubscriptionForm = ({ companyId, isSaving, error, onClearError, onSu
                   <label>Remark</label>
                   <Field as="textarea" name="remark" className="form-control" rows={2} placeholder="Optional note" />
                 </div>
-                <SubscriptionTotalPreview staffCount={values.staffCount} perStaffPrice={values.perStaffPrice} label="Total" />
+                <SubscriptionTotalPreview staffCount={values.staffCount} perStaffPrice={values.perStaffPrice} durationInDays={values.durationInDays} label="Total" />
                 <button type="button" className="btn btn-primary" onClick={submitForm} disabled={isSaving || isSubmitting}>
                   {isSaving || isSubmitting ? <><Loader2 size={16} className="spin" /> Assigning...</> : <><Plus size={16} /> Assign Subscription</>}
                 </button>

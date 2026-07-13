@@ -1,96 +1,78 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Filter, ChevronDown, Plus, Building, User, Mail, Phone, Users } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Toast from '../../../shared/components/Toast';
-import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
+import Modal from '../../../shared/components/Modal';
+import Drawer from '../../../shared/components/Drawer';
+import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } from '../../../shared/components/table';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useDrawer } from '../../../shared/hooks/useDrawer';
 import { useTableSelection } from '../../../shared/hooks/useTableSelection';
-import { useDeleteConfirmation } from '../../../shared/hooks/useDeleteConfirmation';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
-import { useCompaniesList } from '../hooks/useCompaniesList';
+import { useTableData } from '../../../shared/hooks/useTableData';
 import { useCompanyStatistics } from '../hooks/useCompanyStatistics';
+import { useCompanyForm } from '../hooks/useCompanyForm';
+import { useCompanyFilters } from '../hooks/useCompanyFilters';
+import { useCompanyNavigation } from '../hooks/useCompanyNavigation';
+import { companyDataService } from '../services/companyDataService';
+import { mapApiToUI } from '../mappers/companyMapper';
+import { getCompanyStatusBadge } from '../utils/companyStatusBadge';
 import CompaniesStatsGrid from '../components/CompaniesStatsGrid';
-import CompaniesToolbar from '../components/CompaniesToolbar';
 import CompaniesFilters from '../components/CompaniesFilters';
-import CompaniesTable from '../components/CompaniesTable';
-import CompaniesPagination from '../components/CompaniesPagination';
-import AddCompanyModal from '../components/AddCompanyModal';
-import CompanyViewDrawer from '../components/CompanyViewDrawer';
-import type { Company, CompanyFilters } from '../types';
+import CompanyForm from '../components/CompanyForm';
+import CompanyDetails from '../components/CompanyDetails';
+import CompanyRowActions from '../components/CompanyRowActions';
+import type { Company } from '../types';
+import type { GetCompaniesParams } from '../types/request';
 import './CompaniesPage.css';
 
-const ROWS_PER_PAGE = 10;
-
 const CompaniesPage = () => {
-  const navigate = useNavigate();
   const toast = useToast();
-  const crud = useCompaniesList(toast.showToastMessage);
   const { stats, refreshStatistics } = useCompanyStatistics();
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<CompanyFilters>({ status: '' });
-  const appliedStatusRef = useRef('');
+  const { goToSubscription } = useCompanyNavigation();
 
   const formDrawer = useDrawer<Company | null>();
   const viewDrawer = useDrawer<Company>();
   const selection = useTableSelection<string>();
 
-  const handleDeleteCompany = useCallback((company: Company) => crud.deleteCompany(company.companyId), [crud]);
-  const deleteConfirm = useDeleteConfirmation<Company>(handleDeleteCompany);
+  const table = useTableData<Company>({
+    fetchFn: async (params) => {
+      const applied = filtersState.appliedFiltersRef.current;
+      const apiParams: GetCompaniesParams = {
+        pageNumber: params.pageNumber,
+        limit: params.limit,
+        sort_by: 'createdAt',
+        sort_order: 'DESC',
+      };
+      if (params.search) apiParams.search = params.search;
+      if (applied.status) apiParams.status = applied.status;
+      if (applied.subscriptionStatus) apiParams.subscription_status = applied.subscriptionStatus;
+      if (applied.soonExpiring) apiParams.soon_expiring = true;
+      if (applied.minLicensedSeats !== '') apiParams.min_licensed_seats = applied.minLicensedSeats;
+      if (applied.maxLicensedSeats !== '') apiParams.max_licensed_seats = applied.maxLicensedSeats;
+      if (applied.minPerStaffPrice !== '') apiParams.min_per_staff_price = applied.minPerStaffPrice;
+      if (applied.maxPerStaffPrice !== '') apiParams.max_per_staff_price = applied.maxPerStaffPrice;
 
-  const { searchValue, handleSearchChange } = useDebouncedSearch((value) => {
-    setCurrentPage(1);
-    crud.fetchCompanies(1, ROWS_PER_PAGE, value, appliedStatusRef.current);
+      const response = await companyDataService.getCompanies(apiParams);
+      return {
+        items: (response.data?.items ?? []).map(mapApiToUI),
+        total: response.data?.pagination?.total ?? 0,
+      };
+    },
   });
 
-  const initialFetchDone = useRef(false);
-  useEffect(() => {
-    if (initialFetchDone.current) return;
-    initialFetchDone.current = true;
-    crud.fetchCompanies(1, ROWS_PER_PAGE, '', '');
-  }, []);
+  const search = useDebouncedSearch(table.handleSearchChange);
+  const filtersState = useCompanyFilters(table.resetToFirstPage);
+  const allIds = useMemo(() => table.list.map((company) => company.companyId), [table.list]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    crud.fetchCompanies(page, ROWS_PER_PAGE, searchValue, appliedStatusRef.current);
-  };
-
-  const handleApplyFilters = () => {
-    appliedStatusRef.current = filters.status;
-    setShowFilters(false);
-    setCurrentPage(1);
-    crud.fetchCompanies(1, ROWS_PER_PAGE, searchValue, filters.status);
-  };
-
-  const handleClearFilters = () => {
-    setFilters({ status: '' });
-    appliedStatusRef.current = '';
-    setShowFilters(false);
-    setCurrentPage(1);
-    crud.fetchCompanies(1, ROWS_PER_PAGE, searchValue, '');
-  };
-
-  const handleSelectAll = () => {
-    const allIds = crud.companies.map(c => c.companyId);
-    selection.handleSelectAll(allIds, selection.selectedIds.length !== allIds.length);
-  };
-
-  const handleSaved = (action: 'created' | 'updated') => {
-    crud.handleCompanySaved(action);
-    refreshStatistics();
-  };
-
-  const handleDeleted = async () => {
-    await deleteConfirm.handleConfirmDelete();
-    refreshStatistics();
-  };
-
-  const handleManageSubscription = (company: Company) => {
-    navigate(`/companies/${company.companyId}/subscription`);
-  };
+  const companyForm = useCompanyForm({
+    editingCompany: formDrawer.item,
+    onRefreshList: table.refresh,
+    onRefreshStats: refreshStatistics,
+    onShowToast: toast.showToastMessage,
+    onClose: formDrawer.close,
+  });
 
   return (
     <PageContainer>
@@ -98,66 +80,101 @@ const CompaniesPage = () => {
 
       <CompaniesStatsGrid stats={stats} />
 
-      <CompaniesToolbar
-        searchQuery={searchValue}
-        onSearchChange={handleSearchChange}
-        showFilters={showFilters}
-        onToggleFilters={() => setShowFilters(!showFilters)}
-        onAddCompany={() => formDrawer.open(null)}
-      />
+      <div className="table-container">
+        <TableNav searchQuery={search.searchValue} onSearchChange={search.handleSearchChange} searchPlaceholder="Search companies...">
+          <button className={`btn btn-secondary ${filtersState.showFilters ? 'active' : ''}`} onClick={filtersState.toggleFilters}>
+            <Filter size={16} /> Filter <ChevronDown size={14} className={filtersState.showFilters ? 'rotate' : ''} />
+          </button>
+          <button className="btn btn-primary" onClick={() => formDrawer.open(null)}>
+            <Plus size={16} /> Add Company
+          </button>
+        </TableNav>
 
-      {showFilters && (
-        <CompaniesFilters
-          filters={filters}
-          onFilterChange={setFilters}
-          onClearFilters={handleClearFilters}
-          onClose={handleApplyFilters}
+        {filtersState.showFilters && (
+          <CompaniesFilters
+            initialValues={filtersState.appliedFiltersRef.current}
+            onApply={filtersState.applyFilters}
+            onClear={filtersState.clearFilters}
+          />
+        )}
+
+        <Table>
+          <THead>
+            <TRow>
+              <TCell variant="th">
+                <input
+                  type="checkbox"
+                  checked={selection.isAllSelected(table.list.length)}
+                  onChange={(e) => selection.handleSelectAll(allIds, e.target.checked)}
+                />
+              </TCell>
+              <TCell variant="th">Company</TCell>
+              <TCell variant="th">Contact</TCell>
+              <TCell variant="th">Licensed Seats</TCell>
+              <TCell variant="th">Leads</TCell>
+              <TCell variant="th">Deals</TCell>
+              <TCell variant="th">Status</TCell>
+              <TCell variant="th">Actions</TCell>
+            </TRow>
+          </THead>
+          <TBody>
+            {table.list.length === 0 ? (
+              <EmptyState colSpan={8} message="No companies found" />
+            ) : (
+              table.list.map((company) => (
+                <TRow key={company.companyId}>
+                  <TCell>
+                    <input
+                      type="checkbox"
+                      checked={selection.isSelected(company.companyId)}
+                      onChange={() => selection.handleSelectRow(company.companyId)}
+                    />
+                  </TCell>
+                  <TCell>
+                    <div className="company-name-cell">
+                      <Building size={16} className="company-icon" />
+                      <div>
+                        <div className="company-name">{company.name}</div>
+                        <div className="company-date">Since {company.createdAt}</div>
+                      </div>
+                    </div>
+                  </TCell>
+                  <TCell>
+                    <div className="contact-cell">
+                      <div><User size={12} /> {company.contactPersonName}</div>
+                      <div><Mail size={12} /> {company.email}</div>
+                      <div><Phone size={12} /> {company.phone}</div>
+                    </div>
+                  </TCell>
+                  <TCell><div className="stat-cell"><Users size={14} /> {company.licensedSeats}</div></TCell>
+                  <TCell>{company.leads.toLocaleString()}</TCell>
+                  <TCell>{company.deals}</TCell>
+                  <TCell>{getCompanyStatusBadge(company.status)}</TCell>
+                  <TCell>
+                    <CompanyRowActions company={company} onView={viewDrawer.open} onEdit={formDrawer.open} onManageSubscription={goToSubscription} />
+                  </TCell>
+                </TRow>
+              ))
+            )}
+          </TBody>
+        </Table>
+
+        <Pagination
+          currentPage={table.pageNumber}
+          totalPages={table.totalPages}
+          totalItems={table.totalCount}
+          rowsPerPage={table.limit}
+          onPageChange={table.setPageNumber}
         />
-      )}
+      </div>
 
-      <CompaniesTable
-        data={crud.companies}
-        selectedRows={selection.selectedIds}
-        onSelectAll={handleSelectAll}
-        onSelectRow={selection.handleSelectRow}
-        onView={(company) => viewDrawer.open(company)}
-        onEdit={(company) => formDrawer.open(company)}
-        onDelete={(companyId) => {
-          const company = crud.companies.find(c => c.companyId === companyId);
-          if (company) deleteConfirm.handleDeleteClick(company);
-        }}
-        onManageSubscription={handleManageSubscription}
-      />
+      <Modal isOpen={formDrawer.isOpen} onClose={formDrawer.close} title={formDrawer.item ? 'Edit Company' : 'Add New Company'}>
+        <CompanyForm editingCompany={formDrawer.item} onSubmit={companyForm.submitCompany} onCancel={formDrawer.close} />
+      </Modal>
 
-      <CompaniesPagination
-        currentPage={currentPage}
-        totalPages={crud.totalPages}
-        startIndex={(currentPage - 1) * ROWS_PER_PAGE}
-        rowsPerPage={ROWS_PER_PAGE}
-        totalItems={crud.total}
-        onPageChange={handlePageChange}
-      />
-
-      <AddCompanyModal
-        isOpen={formDrawer.isOpen}
-        editingCompany={formDrawer.item}
-        onSaved={handleSaved}
-        onClose={formDrawer.close}
-      />
-
-      <CompanyViewDrawer
-        isOpen={viewDrawer.isOpen}
-        viewingCompany={viewDrawer.item}
-        onClose={viewDrawer.close}
-      />
-
-      <AdminDeleteModal
-        isOpen={!!deleteConfirm.deletingItem}
-        itemName={deleteConfirm.deletingItem?.name}
-        itemType="company"
-        onConfirm={handleDeleted}
-        onClose={deleteConfirm.closeDeleteModal}
-      />
+      <Drawer isOpen={viewDrawer.isOpen} onClose={viewDrawer.close} title="Company Details">
+        {viewDrawer.item && <CompanyDetails company={viewDrawer.item} />}
+      </Drawer>
 
       <Toast
         message={toast.toastMessage}

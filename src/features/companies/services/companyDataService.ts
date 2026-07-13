@@ -1,7 +1,8 @@
 import axiosInstance from '../../../api/axiosInstance';
 import { ServiceResponseUtil } from '../../../shared/utils/serviceResponse.util';
 import { QueryMapper } from '../../../shared/mappers/query.mapper';
-import { COMPANIES_API_ENDPOINTS, companyById } from '../constants/companiesApiEndpoints';
+import { companyById } from '../constants/companiesApiEndpoints';
+import { COMPANIES_API_ENDPOINTS } from '../types/enum';
 import type { ApiResponse } from '../../../shared/types/common';
 import type { CompanyListData, CompanyApiItem, CreateCompanyData, CompanyStatisticsData } from '../types/response';
 import type { GetCompaniesParams, CompanyStatisticsParams, CreateCompanyPayload, UpdateCompanyPayload } from '../types/request';
@@ -11,8 +12,8 @@ import type { GetCompaniesParams, CompanyStatisticsParams, CreateCompanyPayload,
  * with the backend only.
  *
  * Used by:
- * - companyDataService singleton, consumed by useCompaniesList (list/refresh),
- *   useCompanyApi (create/update/delete), and CompaniesStatsGrid (statistics).
+ * - companyDataService singleton, consumed by CompaniesPage (list, via useTableData),
+ *   useCompanyForm (create/update), and useCompanyStatistics (statistics).
  */
 class CompanyDataService {
   async getCompanies(params: GetCompaniesParams): Promise<ApiResponse<CompanyListData>> {
@@ -46,15 +47,6 @@ class CompanyDataService {
 
   async updateCompany(companyId: string, payload: UpdateCompanyPayload): Promise<ApiResponse<null>> {
     const response = await axiosInstance.patch<ApiResponse<null>>(companyById(companyId), payload);
-    return ServiceResponseUtil.successResponse({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
-  }
-
-  async deleteCompany(companyId: string): Promise<ApiResponse<null>> {
-    const response = await axiosInstance.delete<ApiResponse<null>>(companyById(companyId));
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,

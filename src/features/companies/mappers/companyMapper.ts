@@ -1,9 +1,5 @@
 import type { CompanyApiItem } from '../types/response';
-import type { Company } from '../types';
-
-/** Not backed by any API yet - deals/subscriptions have no per-company backend data. */
-export const STAFF_COUNT_PLACEHOLDER = '—';
-export const MOCK_DEALS_COUNT = 0;
+import type { Company, NewCompany } from '../types';
 
 export function mapApiToUI(item: CompanyApiItem): Company {
   return {
@@ -17,8 +13,21 @@ export function mapApiToUI(item: CompanyApiItem): Company {
     dateOfRegistration: item.dateOfRegistration ?? '',
     status: item.status ?? '',
     leads: item.leadsCount,
-    staffCount: STAFF_COUNT_PLACEHOLDER,
-    deals: MOCK_DEALS_COUNT,
+    licensedSeats: item.licensedSeats,
+    deals: item.dealsCount,
     createdAt: item.createdAt ?? '',
+  };
+}
+
+export function mapCompanyToFormValues(company: Company): NewCompany {
+  return {
+    name: company.name,
+    contactPersonName: company.contactPersonName,
+    email: company.email,
+    phoneNumber: company.phone,
+    address: company.address,
+    gstNumber: company.gstNumber,
+    dateOfRegistration: company.dateOfRegistration?.slice(0, 10) ?? '',
+    status: company.status,
   };
 }

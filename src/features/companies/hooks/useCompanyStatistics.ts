@@ -7,6 +7,7 @@ const EMPTY_STATS: CompanyStats = {
   expiredCustomers: 0,
   soonExpire: 0,
   totalStaff: 0,
+  licensedSeats: 0,
   totalRevenue: 0,
 };
 
@@ -32,6 +33,7 @@ export function useCompanyStatistics() {
           expiredCustomers: statistics.expired,
           soonExpire: statistics.soonExpired,
           totalStaff: statistics.totalStaff,
+          licensedSeats: statistics.licensedSeats,
           totalRevenue: statistics.totalRevenue,
         });
       } else {

@@ -1,44 +1,16 @@
 import React from 'react';
-import { Building, AlertCircle, Clock, Users, DollarSign } from 'lucide-react';
-import type { CompaniesStatsGridProps } from '../types';
+import { Building, AlertCircle, Clock, Users, UserCheck, DollarSign } from 'lucide-react';
+import StatCard from '../../../shared/components/StatCard';
+import type { CompaniesStatsGridProps } from '../types/component.types';
 
 const CompaniesStatsGrid: React.FC<CompaniesStatsGridProps> = React.memo(({ stats }) => (
   <div className="company-stats-grid">
-    <div className="company-stat-card">
-      <div className="company-stat-icon" style={{ background: '#3b82f620' }}><Building size={20} color="#3b82f6" /></div>
-      <div className="company-stat-info">
-        <span className="company-stat-value">{stats.totalCompanies}</span>
-        <span className="company-stat-label">Total Companies</span>
-      </div>
-    </div>
-    <div className="company-stat-card">
-      <div className="company-stat-icon" style={{ background: '#ef444420' }}><AlertCircle size={20} color="#ef4444" /></div>
-      <div className="company-stat-info">
-        <span className="company-stat-value">{stats.expiredCustomers}</span>
-        <span className="company-stat-label">Expired</span>
-      </div>
-    </div>
-    <div className="company-stat-card">
-      <div className="company-stat-icon" style={{ background: '#f59e0b20' }}><Clock size={20} color="#f59e0b" /></div>
-      <div className="company-stat-info">
-        <span className="company-stat-value">{stats.soonExpire}</span>
-        <span className="company-stat-label">Soon Expire</span>
-      </div>
-    </div>
-    <div className="company-stat-card">
-      <div className="company-stat-icon" style={{ background: '#8b5cf620' }}><Users size={20} color="#8b5cf6" /></div>
-      <div className="company-stat-info">
-        <span className="company-stat-value">{stats.totalStaff}</span>
-        <span className="company-stat-label">Total Staff</span>
-      </div>
-    </div>
-    <div className="company-stat-card">
-      <div className="company-stat-icon" style={{ background: '#10b98120' }}><DollarSign size={20} color="#10b981" /></div>
-      <div className="company-stat-info">
-        <span className="company-stat-value">${stats.totalRevenue.toLocaleString()}</span>
-        <span className="company-stat-label">Total Revenue</span>
-      </div>
-    </div>
+    <StatCard icon={Building} iconColor="#3b82f6" iconBackground="#3b82f620" value={stats.totalCompanies} label="Total Companies" />
+    <StatCard icon={AlertCircle} iconColor="#ef4444" iconBackground="#ef444420" value={stats.expiredCustomers} label="Expired" />
+    <StatCard icon={Clock} iconColor="#f59e0b" iconBackground="#f59e0b20" value={stats.soonExpire} label="Soon Expire" />
+    <StatCard icon={Users} iconColor="#8b5cf6" iconBackground="#8b5cf620" value={stats.totalStaff} label="Total Staff" />
+    <StatCard icon={UserCheck} iconColor="#06b6d4" iconBackground="#06b6d420" value={stats.licensedSeats} label="Licensed Seats" />
+    <StatCard icon={DollarSign} iconColor="#10b981" iconBackground="#10b98120" value={`$${stats.totalRevenue.toLocaleString()}`} label="Total Revenue" />
   </div>
 ));
 

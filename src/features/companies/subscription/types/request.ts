@@ -26,6 +26,11 @@ export interface UpdateSubscriptionStatusPayload {
   remark?: string;
 }
 
+export interface CancelSubscriptionPayload {
+  mode: 'ThisMonth' | 'Spot';
+  remark?: string;
+}
+
 export interface CreateRenewalQueuePayload {
   companyId: string;
   renewalDate: string;

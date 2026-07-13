@@ -8,8 +8,8 @@ interface TableNavProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
-  rowsPerPage: number;
-  onRowsPerPageChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  rowsPerPage?: number;
+  onRowsPerPageChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
   children?: ReactNode;
 }
 
@@ -22,17 +22,19 @@ const TableNav = ({
   children,
 }: TableNavProps) => (
   <div className="table-header-controls">
-    <div className="entries-select">
-      <label>
-        {LABEL_SHOW}
-        <select value={rowsPerPage} onChange={onRowsPerPageChange}>
-          {ROWS_OPTIONS_10_25_50_100.map(n => (
-            <option key={n} value={n}>{n}</option>
-          ))}
-        </select>
-        {LABEL_ENTRIES}
-      </label>
-    </div>
+    {onRowsPerPageChange && (
+      <div className="entries-select">
+        <label>
+          {LABEL_SHOW}
+          <select value={rowsPerPage} onChange={onRowsPerPageChange}>
+            {ROWS_OPTIONS_10_25_50_100.map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+          {LABEL_ENTRIES}
+        </label>
+      </div>
+    )}
     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       <div className="search-input">
         <Search size={16} />

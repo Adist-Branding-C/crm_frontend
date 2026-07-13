@@ -5,7 +5,7 @@ import { CompanyStatus } from '../../../shared/constants/enums/companyStatus';
  * Validation schema for creating or editing a company (platform tenant).
  *
  * Used by:
- * - AddCompanyModal (add company and edit company forms, shared by the same modal)
+ * - CompanyForm (add company and edit company forms, shared by the same form)
  *
  * Notes:
  * - Frontend validates format/required-ness only; the backend re-validates on submit.

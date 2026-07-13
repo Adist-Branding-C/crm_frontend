@@ -39,6 +39,7 @@ export function useLoginData() {
           id: response.data.id,
           name: response.data.name,
           phone: response.data.phone,
+          isSuperAdmin: response.data.isSuperAdmin,
         }));
         navigate(AUTH_ROUTES.DASHBOARD);
       } else {

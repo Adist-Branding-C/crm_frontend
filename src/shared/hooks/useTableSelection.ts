@@ -1,5 +1,10 @@
 import { useState, useCallback } from 'react';
 
+/**
+ * Generic checkbox-selection state for any list of ids - tracks which ids are selected and
+ * whether "select all" should read as checked, independent of any one feature's row/entity
+ * shape.
+ */
 export function useTableSelection<T = number>() {
   const [selectedIds, setSelectedIds] = useState<T[]>([]);
 
@@ -16,5 +21,7 @@ export function useTableSelection<T = number>() {
 
   const isSelected = useCallback((id: T) => selectedIds.includes(id), [selectedIds]);
 
-  return { selectedIds, handleSelectAll, handleSelectRow, isSelected, setSelectedIds };
+  const isAllSelected = useCallback((visibleCount: number) => selectedIds.length === visibleCount && visibleCount > 0, [selectedIds]);
+
+  return { selectedIds, handleSelectAll, handleSelectRow, isSelected, isAllSelected, setSelectedIds };
 }

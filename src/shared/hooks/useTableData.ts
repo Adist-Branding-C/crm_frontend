@@ -84,6 +84,20 @@ export function useTableData<T>({
     fetchData(pageNumber, limit, searchQuery, sortOrder);
   }, [fetchData, pageNumber, limit, searchQuery, sortOrder]);
 
+  /**
+   * For consumers with extra filters this hook doesn't know about (closed over inside their
+   * own fetchFn): reset to page 1 and guarantee a refetch. setPageNumber(1) alone is a no-op,
+   * and thus fetches nothing, when already on page 1 - refresh() covers that case explicitly
+   * instead of leaving the caller to work out the same page===1 branch itself.
+   */
+  const resetToFirstPage = useCallback(() => {
+    if (pageNumber === 1) {
+      refresh();
+    } else {
+      setPageNumber(1);
+    }
+  }, [pageNumber, refresh]);
+
   const handleSearchChange = useCallback((value: string) => {
     setSearchQuery(value);
     setPageNumber(1);
@@ -111,7 +125,7 @@ export function useTableData<T>({
     searchQuery, setSearchQuery, handleSearchChange,
     handleRowsPerPageChange,
     sortOrder, toggleSortOrder,
-    refresh,
+    refresh, resetToFirstPage,
     setIsLoading, setError,
   };
 }

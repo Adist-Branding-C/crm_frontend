@@ -9,15 +9,19 @@ export interface Company {
   dateOfRegistration: string;
   status: string;
   leads: number;
-  /** Placeholder - no per-company staff API exists yet. */
-  staffCount: string;
-  /** Mock value - no per-company deals API exists yet. */
+  licensedSeats: number;
   deals: number;
   createdAt: string;
 }
 
 export interface CompanyFilters {
   status: string;
+  subscriptionStatus: string;
+  soonExpiring: boolean;
+  minLicensedSeats: number | '';
+  maxLicensedSeats: number | '';
+  minPerStaffPrice: number | '';
+  maxPerStaffPrice: number | '';
 }
 
 export interface CompanyStats {
@@ -25,6 +29,7 @@ export interface CompanyStats {
   expiredCustomers: number;
   soonExpire: number;
   totalStaff: number;
+  licensedSeats: number;
   totalRevenue: number;
 }
 
@@ -37,43 +42,4 @@ export interface NewCompany {
   gstNumber: string;
   dateOfRegistration: string;
   status: string;
-}
-
-export interface CompaniesFiltersProps {
-  filters: CompanyFilters;
-  onFilterChange: (filters: CompanyFilters) => void;
-  onClearFilters: () => void;
-  onClose: () => void;
-}
-
-export interface CompaniesTableProps {
-  data: Company[];
-  selectedRows: string[];
-  onSelectAll: () => void;
-  onSelectRow: (companyId: string) => void;
-  onView: (company: Company) => void;
-  onEdit: (company: Company) => void;
-  onDelete: (companyId: string) => void;
-  onManageSubscription: (company: Company) => void;
-}
-
-export interface CompaniesToolbarProps {
-  searchQuery: string;
-  onSearchChange: (v: string) => void;
-  showFilters: boolean;
-  onToggleFilters: () => void;
-  onAddCompany: () => void;
-}
-
-export interface CompaniesStatsGridProps {
-  stats: CompanyStats;
-}
-
-export interface CompaniesPaginationProps {
-  currentPage: number;
-  totalPages: number;
-  startIndex: number;
-  rowsPerPage: number;
-  totalItems: number;
-  onPageChange: (page: number) => void;
 }

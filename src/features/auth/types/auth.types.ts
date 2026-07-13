@@ -21,12 +21,14 @@ export interface AuthUser {
   id: number
   phone: string
   name: string
+  isSuperAdmin: boolean
 }
 
 export interface LoginResponseData {
   id: number
   phone: string
   name: string
+  isSuperAdmin: boolean
   accessToken: string
   refreshToken: string
 }

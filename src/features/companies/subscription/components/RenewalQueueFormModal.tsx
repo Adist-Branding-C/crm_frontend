@@ -59,7 +59,7 @@ const RenewalQueueFormModal = ({ isOpen, editingQueue, isSaving, error, onClearE
                   <Field type="checkbox" name="immediate" />
                   Apply immediately instead of waiting for the renewal date
                 </label>
-                <SubscriptionTotalPreview staffCount={values.staffCount} perStaffPrice={values.perStaffPrice} label="New total" />
+                <SubscriptionTotalPreview staffCount={values.staffCount} perStaffPrice={values.perStaffPrice} durationInDays={values.durationInDays} label="New total" />
               </Form>
             </div>
             <div className="modal-footer">

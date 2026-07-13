@@ -1,9 +1,12 @@
 import React from 'react';
 import { CheckCircle, MessageCircle, Home, LayoutDashboard, Flame, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import './Sidebar.css';
 
 const Sidebar = () => {
+  const { isSuperAdmin } = useAuth();
+
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: MessageCircle, label: 'Leads', path: '/leads' },
@@ -18,7 +21,7 @@ const Sidebar = () => {
     { icon: Megaphone, label: 'Campaigns', path: '/campaigns' },
     { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: BarChart3, label: 'Staff Performance', path: '/staff-performance' },
-    { icon: Building, label: 'Companies', path: '/companies' },
+    ...(isSuperAdmin ? [{ icon: Building, label: 'Companies', path: '/companies' }] : []),
   ];
 
   return (

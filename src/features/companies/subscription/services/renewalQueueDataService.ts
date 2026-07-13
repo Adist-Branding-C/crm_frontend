@@ -1,11 +1,11 @@
 import axiosInstance from '../../../../api/axiosInstance';
 import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import {
-  RENEWAL_QUEUE_API_ENDPOINTS,
   queueByCompanyId,
   queueById,
   applyQueueNow,
 } from '../constants/subscriptionApiEndpoints';
+import { RENEWAL_QUEUE_API_ENDPOINTS } from '../types/enum';
 import type { ApiResponse } from '../../../../shared/types/common';
 import type { RenewalQueueApiItem } from '../types/response';
 import type { CreateRenewalQueuePayload, UpdateRenewalQueuePayload } from '../types/request';

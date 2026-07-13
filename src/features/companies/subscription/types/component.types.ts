@@ -3,9 +3,12 @@ import type {
   CreateSubscriptionPayload,
   UpdateStaffCountPayload,
   UpdateSubscriptionStatusPayload,
+  CancelSubscriptionPayload,
   CreateRenewalQueuePayload,
   UpdateRenewalQueuePayload,
 } from './request';
+
+export type CancelAction = 'thisMonth' | 'spot' | null;
 
 export interface StaffPricingFieldsProps {
   errors: { staffCount?: string; perStaffPrice?: string };
@@ -15,6 +18,7 @@ export interface StaffPricingFieldsProps {
 export interface SubscriptionTotalPreviewProps {
   staffCount: number | '';
   perStaffPrice: number | '';
+  durationInDays: number | '';
   label?: string;
 }
 
@@ -25,6 +29,7 @@ export interface SubscriptionOverviewCardProps {
   onClearError: () => void;
   onUpdateStaffCount: (payload: UpdateStaffCountPayload) => Promise<boolean>;
   onUpdateStatus: (payload: UpdateSubscriptionStatusPayload) => Promise<boolean>;
+  onCancelSubscription: (payload: CancelSubscriptionPayload) => Promise<boolean>;
 }
 
 export interface EditStaffCountModalProps {

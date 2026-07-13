@@ -10,6 +10,8 @@ export interface CompanyApiItem {
   dateOfRegistration: string | null;
   status: string | null;
   leadsCount: number;
+  dealsCount: number;
+  licensedSeats: number;
   createdAt: string | null;
 }
 
@@ -37,6 +39,7 @@ export interface CompanyStatisticsData {
   expired: number;
   soonExpired: number;
   totalStaff: number;
+  licensedSeats: number;
   totalRevenue: number;
   total: number;
 }

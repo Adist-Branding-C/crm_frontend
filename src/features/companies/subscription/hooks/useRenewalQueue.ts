@@ -120,5 +120,6 @@ export function useRenewalQueue(companyId: string | undefined) {
     updateQueue,
     deleteQueue,
     applyNow,
+    refetchQueue: fetchQueue,
   };
 }

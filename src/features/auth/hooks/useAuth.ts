@@ -36,5 +36,5 @@ export const useAuth = () => {
     user = null;
   }
 
-  return { isAuthenticated, isLoading, user, logout };
+  return { isAuthenticated, isLoading, user, isSuperAdmin: !!user?.isSuperAdmin, logout };
 };
