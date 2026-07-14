@@ -1,33 +1,37 @@
-import { useState, useCallback } from 'react';
-import type { DealTypeItem, DealTypeFormData } from '../types/deal-type.types';
+import { useCallback } from 'react';
+import { useAddEditForm } from '../../../../shared/hooks/useAddEditForm';
+import type { DealTypeItem } from '../types/interface';
+import type { DealTypeFormData } from '../types/request';
 import { ADD_DEAL_TYPE_INITIAL_VALUES } from '../constants/deal-type.constants';
 
+const mapItemToFormData = (item: DealTypeItem): DealTypeFormData => ({
+  name: item.name || '',
+  status: Boolean(item.status),
+});
+
+/**
+ * Add/edit drawer state for deal-settings/type.
+ *
+ * Notes:
+ * - Thin wrapper around the shared useAddEditForm, configured with the deal type item->form mapper.
+ */
 export function useDealTypeDrawer() {
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [editingItem, setEditingItem] = useState<DealTypeItem | null>(null);
-  const [formData, setFormData] = useState<DealTypeFormData>(ADD_DEAL_TYPE_INITIAL_VALUES);
-
-  const openAddDrawer = useCallback(() => {
-    setEditingItem(null);
-    setFormData(ADD_DEAL_TYPE_INITIAL_VALUES);
-    setShowDrawer(true);
-  }, []);
-
-  const openEditDrawer = useCallback((item: DealTypeItem) => {
-    setEditingItem(item);
-    setFormData({ name: item.name || '', status: item.status || '' });
-    setShowDrawer(true);
-  }, []);
-
-  const closeDrawer = useCallback(() => {
-    setShowDrawer(false);
-    setEditingItem(null);
-    setFormData(ADD_DEAL_TYPE_INITIAL_VALUES);
-  }, []);
+  const form = useAddEditForm<DealTypeItem, DealTypeFormData>({
+    emptyFormData: ADD_DEAL_TYPE_INITIAL_VALUES,
+    mapItemToFormData,
+  });
 
   const handleFormChange = useCallback((values: DealTypeFormData) => {
-    setFormData(values);
-  }, []);
+    form.setFormData(values);
+  }, [form.setFormData]);
 
-  return { showDrawer, editingItem, formData, openAddDrawer, openEditDrawer, closeDrawer, handleFormChange };
+  return {
+    showDrawer: form.isOpen,
+    editingItem: form.editingItem,
+    formData: form.formData,
+    openAddDrawer: form.openAdd,
+    openEditDrawer: form.openEdit,
+    closeDrawer: form.reset,
+    handleFormChange,
+  };
 }
