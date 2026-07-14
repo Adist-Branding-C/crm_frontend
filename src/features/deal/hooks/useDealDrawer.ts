@@ -1,64 +1,25 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useEditDrawer } from '../../../shared/hooks/useEditDrawer';
+import { ADD_DEAL_INITIAL_VALUES } from '../constants/deal.constants';
 import type { DealItem, DealFormData } from '../types';
 
+const mapDealToFormData = (item: DealItem): DealFormData => ({
+  dealName: item.dealName || '',
+  lead: item.lead || '',
+  mobile: item.mobile || '',
+  amount: String(item.amount || ''),
+  status: item.status || '',
+  type: item.type || '',
+  stage: item.stage || '',
+  priority: item.priority || '',
+  assignedTo: item.assignedTo || '',
+  startDate: item.startDate || '',
+  endDate: item.endDate || '',
+  notes: '',
+});
+
 export function useDealDrawer() {
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [editingItem, setEditingItem] = useState<DealItem | null>(null);
-
-  const openAddDrawer = useCallback(() => {
-    setEditingItem(null);
-    setShowDrawer(true);
-  }, []);
-
-  const openEditDrawer = useCallback((item: DealItem) => {
-    setEditingItem(item);
-    setShowDrawer(true);
-  }, []);
-
-  const closeDrawer = useCallback(() => {
-    setShowDrawer(false);
-    setEditingItem(null);
-  }, []);
-
-  const drawerInitialValues: DealFormData = useMemo(
-    () => editingItem
-      ? {
-          dealName: editingItem.dealName || '',
-          lead: editingItem.lead || '',
-          mobile: editingItem.mobile || '',
-          amount: String(editingItem.amount || ''),
-          status: editingItem.status || '',
-          type: editingItem.type || '',
-          stage: editingItem.stage || '',
-          priority: editingItem.priority || '',
-          assignedTo: editingItem.assignedTo || '',
-          startDate: editingItem.startDate || '',
-          endDate: editingItem.endDate || '',
-          notes: '',
-        }
-      : {
-          dealName: '',
-          lead: '',
-          mobile: '',
-          amount: '',
-          status: '',
-          type: '',
-          stage: '',
-          priority: '',
-          assignedTo: '',
-          startDate: '',
-          endDate: '',
-          notes: '',
-        },
-    [editingItem]
-  );
-
-  return {
-    showDrawer,
-    editingItem,
-    openAddDrawer,
-    openEditDrawer,
-    closeDrawer,
-    drawerInitialValues,
-  };
+  return useEditDrawer<DealItem, DealFormData>({
+    mapItemToFormData: mapDealToFormData,
+    emptyFormData: ADD_DEAL_INITIAL_VALUES,
+  });
 }

@@ -1,5 +1,3 @@
-import type { FormikHelpers } from 'formik';
-
 export interface DealItem {
   id: number;
   dealId?: string;
@@ -54,12 +52,6 @@ export interface DealActionMenuProps {
   onDelete: (id: number) => void;
 }
 
-export interface MenuPosition {
-  top: number;
-  left: number;
-  openUpward: boolean;
-}
-
 export interface LeadOption {
   label: string;
   value: string | number;
@@ -70,23 +62,19 @@ export interface StaffOption {
   value: string | number;
 }
 
-export interface DeleteDealModalProps {
-  isOpen: boolean;
-  itemName: string;
-  onConfirm: () => void;
-  onClose: () => void;
+export interface UseDealCrudParams {
+  pagination: {
+    setError: (message: string) => void;
+    setIsLoading: (loading: boolean) => void;
+    refresh: () => void;
+  };
 }
 
-export interface UseDealActionsParams {
-  deal: {
-    handleAddDeal: (values: DealFormData, helpers: FormikHelpers<DealFormData>) => Promise<boolean>;
-    handleUpdateDeal: (dealId: string, values: DealFormData, helpers: FormikHelpers<DealFormData>) => Promise<boolean>;
-    handleDeleteDeal: (dealId: string) => Promise<boolean>;
-  };
-  drawer: {
-    editingItem: DealItem | null;
-    closeDrawer: () => void;
-  };
+export interface UseDealFormSubmitParams {
+  editingItem: DealItem | null;
+  closeDrawer: () => void;
+  handleAddDeal: (values: DealFormData) => Promise<boolean>;
+  handleUpdateDeal: (dealId: string, values: DealFormData) => Promise<boolean>;
 }
 
 export interface DealStage {
@@ -95,13 +83,23 @@ export interface DealStage {
   label: string;
 }
 
-export interface DealFilters {
-  search?: string;
-  stage?: string;
-  status?: string;
-  assignedTo?: string;
-  dateFrom?: string;
-  dateTo?: string;
+export interface DealStatusFilters {
+  status: string;
+  type: string;
+  assignedTo: string;
+}
+
+export interface DealFiltersProps {
+  filters: DealStatusFilters;
+  onFilterChange: (filters: DealStatusFilters) => void;
+  onApplyFilters: () => void;
+  onClearFilters: () => void;
+}
+
+export interface DealSortDropdownProps {
+  sortBy: string;
+  sortOrder: string;
+  onSortChange: (field: string, direction: string) => void;
 }
 
 export interface DealListResponse {

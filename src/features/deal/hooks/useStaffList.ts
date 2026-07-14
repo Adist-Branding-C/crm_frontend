@@ -1,22 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
+import { useAsyncOptions } from '../../../shared/hooks/useAsyncOptions';
 import { staffService } from '../services/staff.service';
 import type { StaffOption } from '../types';
 
-export function useStaffList() {
-  const [staff, setStaff] = useState<StaffOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+interface StaffApiItem {
+  id: string | number;
+  name: string;
+}
 
-  useEffect(() => {
-    setIsLoading(true);
-    staffService.getStaff()
-      .then((response) => {
-        const data = response?.data ?? response ?? [];
-        const items = Array.isArray(data) ? data : [];
-        setStaff(items.map((s: any) => ({ label: s.name, value: s.id })));
-      })
-      .catch(() => setStaff([]))
-      .finally(() => setIsLoading(false));
+export function useStaffList() {
+  const fetchStaffItems = useCallback(async (): Promise<StaffApiItem[]> => {
+    const response = await staffService.getStaff();
+    const data = (response as { data?: unknown })?.data ?? response ?? [];
+    return Array.isArray(data) ? (data as StaffApiItem[]) : [];
   }, []);
+
+  const mapToOption = useCallback((s: StaffApiItem): StaffOption => ({ label: s.name, value: s.id }), []);
+
+  const { options: staff, isLoading } = useAsyncOptions(fetchStaffItems, mapToOption);
 
   return { staff, isLoading };
 }

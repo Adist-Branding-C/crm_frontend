@@ -1,27 +1,24 @@
-import { useState, useMemo } from 'react';
-import type { DealItem } from '../types';
+import { useState, useMemo, useCallback } from 'react';
+import type { DealItem, DealStatusFilters } from '../types';
+
+const EMPTY_FILTERS: DealStatusFilters = { status: '', type: '', assignedTo: '' };
 
 export function useDealFilters(dealList: DealItem[]) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<DealStatusFilters>(EMPTY_FILTERS);
 
-  const filteredData = useMemo(
-    () => dealList.filter(item =>
-      (item.dealName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.lead || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.mobile || '').includes(searchQuery) ||
-      (item.status || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.type || '').toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    [dealList, searchQuery]
-  );
+  const filteredData = useMemo(() => {
+    let data = dealList;
+    if (filters.status) data = data.filter(item => item.status === filters.status);
+    if (filters.type) data = data.filter(item => item.type === filters.type);
+    if (filters.assignedTo) data = data.filter(item => item.agent === filters.assignedTo);
+    return data;
+  }, [dealList, filters]);
 
-  return {
-    searchQuery,
-    setSearchQuery,
-    rowsPerPage,
-    setRowsPerPage,
-    filteredData,
-    totalRecords: filteredData.length,
-  };
+  const clearFilters = useCallback(() => {
+    setFilters(EMPTY_FILTERS);
+    setShowFilters(false);
+  }, []);
+
+  return { showFilters, setShowFilters, filters, setFilters, filteredData, clearFilters };
 }
