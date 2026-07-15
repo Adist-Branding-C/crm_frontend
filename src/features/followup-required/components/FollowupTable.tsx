@@ -23,19 +23,24 @@ const FollowupTable: React.FC<FollowupTableProps> = ({
       <thead>
         <tr>
           {columns.map((col) => (
-            <th
-              key={col.key}
-              className={col.sortable ? 'sortable' : ''}
-              onClick={col.sortable ? () => onSort(col.key) : undefined}
-            >
-              {col.label}
-              {col.sortable &&
-                sortConfig.key === col.key &&
-                (sortConfig.direction === 'asc' ? (
-                  <ChevronUp size={14} />
-                ) : (
-                  <ChevronDown size={14} />
-                ))}
+            <th key={col.key} className={col.sortable ? 'sortable' : ''}>
+              {col.sortable ? (
+                <button
+                  type="button"
+                  className="table-sort-button"
+                  onClick={() => onSort(col.key)}
+                >
+                  {col.label}
+                  {sortConfig.key === col.key &&
+                    (sortConfig.direction === 'asc' ? (
+                      <ChevronUp size={14} />
+                    ) : (
+                      <ChevronDown size={14} />
+                    ))}
+                </button>
+              ) : (
+                col.label
+              )}
             </th>
           ))}
         </tr>

@@ -25,8 +25,9 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
     )}
     <div className="filter-row">
       <div className="filter-group">
-        <label>Type</label>
+        <label htmlFor="followup-filter-type">Type</label>
         <select
+          id="followup-filter-type"
           value={filters.type}
           onChange={(e) => onFilterChange({ ...filters, type: e.target.value })}
           disabled={isLoadingFilterOptions}
@@ -40,8 +41,9 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
         </select>
       </div>
       <div className="filter-group">
-        <label>Status</label>
+        <label htmlFor="followup-filter-status">Status</label>
         <select
+          id="followup-filter-status"
           value={filters.status}
           onChange={(e) =>
             onFilterChange({ ...filters, status: e.target.value })
@@ -57,8 +59,9 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
         </select>
       </div>
       <div className="filter-group">
-        <label>Source</label>
+        <label htmlFor="followup-filter-source">Source</label>
         <select
+          id="followup-filter-source"
           value={filters.source}
           onChange={(e) =>
             onFilterChange({ ...filters, source: e.target.value })
@@ -74,8 +77,9 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
         </select>
       </div>
       <div className="filter-group">
-        <label>Assigned To</label>
+        <label htmlFor="followup-filter-assigned-to">Assigned To</label>
         <select
+          id="followup-filter-assigned-to"
           value={filters.assignedTo}
           onChange={(e) =>
             onFilterChange({ ...filters, assignedTo: e.target.value })
@@ -93,10 +97,11 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
     </div>
     <div className="filter-row">
       <div className="filter-group">
-        <label>Date Range</label>
-        <div className="date-range-input">
+        <label id="followup-filter-date-range-label">Date Range</label>
+        <div className="date-range-input" role="group" aria-labelledby="followup-filter-date-range-label">
           <input
             type="date"
+            aria-label="Start date"
             value={filters.dateRange.start}
             onChange={(e) =>
               onFilterChange({
@@ -108,6 +113,7 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
           <span>to</span>
           <input
             type="date"
+            aria-label="End date"
             value={filters.dateRange.end}
             onChange={(e) =>
               onFilterChange({

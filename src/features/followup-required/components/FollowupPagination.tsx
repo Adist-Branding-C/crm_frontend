@@ -43,6 +43,7 @@ const FollowupPagination: React.FC<FollowupPaginationProps> = React.memo(
         </button>
         <button
           className="pagination-btn"
+          aria-label="Previous page"
           disabled={currentPage === 1}
           onClick={() => onPageChange((prev) => prev - 1)}
         >
@@ -53,6 +54,7 @@ const FollowupPagination: React.FC<FollowupPaginationProps> = React.memo(
         </span>
         <button
           className="pagination-btn"
+          aria-label="Next page"
           disabled={currentPage === totalPages}
           onClick={() => onPageChange((prev) => prev + 1)}
         >
