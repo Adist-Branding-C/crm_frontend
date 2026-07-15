@@ -96,6 +96,10 @@
   to { transform: rotate(360deg); }
 }
 
+.spin {
+  animation: spin 1s linear infinite;
+}
+
 .error-banner {
   display: flex;
   align-items: center;
@@ -212,4 +216,28 @@
   .search-input {
     width: 140px;
   }
+}
+
+.field-error-text {
+  display: block;
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-control.input-error {
+  border-color: #dc2626;
+}
+
+.form-control.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}
+
+.table-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }

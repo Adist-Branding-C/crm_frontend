@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { dealService } from '../services/deal.service';
 import { parseErrorMessage } from '../utils/parseErrorMessage';
 import type { DealItem } from '../types';
@@ -6,14 +6,10 @@ import type { DealItem } from '../types';
 /**
  * List/pagination/search/sort fetch for the Deal entity.
  *
- * Notes:
- * - Deliberately kept feature-specific rather than migrated onto the shared
- *   useTableData: Deal's sort control lets the user pick both a field (createdAt,
- *   amount, startDate, dealName) and a direction, while useTableData only exposes a
- *   single ASC/DESC toggle with no field selection. Extending useTableData's shared
- *   contract to support arbitrary sort fields would ripple into every other feature
- *   that already consumes it (Task, Campaign, etc.), which is out of scope for this
- *   feature-local hook cleanup.
+ * Follows the same architecture as useLeadListData:
+ * - Central fetch function accepts page, limit, search, and extraParams (filter params).
+ * - requestSeqRef prevents stale responses from overwriting newer ones.
+ * - currentFetchParams stores the last fetch call so refreshCurrentPage can re-fetch.
  */
 export function useDealList() {
   const [dealList, setDealList] = useState<DealItem[]>([]);
@@ -21,35 +17,26 @@ export function useDealList() {
   const [error, setError] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [hasNext, setHasNext] = useState(false);
-  const [hasPrevious, setHasPrevious] = useState(false);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('');
-  const [sortOrder, setSortOrder] = useState('');
+  const requestSeqRef = useRef(0);
+  const currentFetchParams = useRef({ page: 1, limit: 10, search: '', extraParams: {} as Record<string, string | number> });
 
-  const handleSearchChange = useCallback((query: string) => {
-    setSearchQuery(query);
-    setPageNumber(1);
-  }, []);
-
-  const handleSortChange = useCallback((field: string, direction: string) => {
-    setSortBy(field);
-    setSortOrder(direction);
-    setPageNumber(1);
-  }, []);
-
-  const fetchDeals = useCallback(async () => {
+  const fetchDeals = useCallback(async (
+    page: number,
+    limit: number,
+    search: string,
+    extraParams: Record<string, string | number> = {},
+  ) => {
+    const requestSeq = ++requestSeqRef.current;
+    currentFetchParams.current = { page, limit, search, extraParams };
     setIsLoading(true);
     setError('');
 
     try {
-      const params: Record<string, string | number | undefined> = { pageNumber, limit };
-      if (searchQuery) params.search = searchQuery;
-      if (sortBy) params.sortBy = sortBy;
-      if (sortOrder) params.sortOrder = sortOrder;
+      const params: Record<string, string | number | undefined> = { pageNumber: page, limit, ...extraParams };
+      if (search) params.search = search;
       const response = await dealService.getAllDeals(params);
+
+      if (requestSeq !== requestSeqRef.current) return;
 
       if (response.status) {
         const data = response.data as { items?: DealItem[]; pagination?: { total: number; total_pages: number; has_next: boolean; has_previous: boolean; page: number } } | undefined;
@@ -58,23 +45,37 @@ export function useDealList() {
         setDealList((Array.isArray(items) ? items : []).map((item: any) => ({
           ...item,
           dealId: item.dealId ?? String(item.id),
+          lead: item.lead?.name ?? item.lead ?? '',
+          leadId: item.lead?.id ?? item.leadId ?? '',
+          status: item.status?.dealStatus ?? item.status?.name ?? item.status ?? '',
+          statusId: item.status?.id ?? item.statusId ?? '',
+          type: item.type?.dealType ?? item.type?.name ?? item.type ?? '',
+          typeId: item.type?.id ?? item.typeId ?? '',
+          agent: item.agent?.name ?? item.agent ?? '',
+          agentId: item.agent?.id ?? item.agentId ?? '',
         })));
         setTotalCount(pagination?.total ?? 0);
         setTotalPages(pagination?.total_pages ?? 1);
-        setHasNext(pagination?.has_next ?? false);
-        setHasPrevious(pagination?.has_previous ?? false);
       } else {
+        setDealList([]);
+        setTotalCount(0);
+        setTotalPages(1);
         setError(response.message || 'Failed to fetch deals');
       }
     } catch (err: unknown) {
+      if (requestSeq !== requestSeqRef.current) return;
+      setDealList([]);
+      setTotalCount(0);
+      setTotalPages(1);
       setError(parseErrorMessage(err, 'Failed to fetch deals'));
     } finally {
       setIsLoading(false);
     }
-  }, [pageNumber, limit, searchQuery, sortBy, sortOrder]);
+  }, []);
 
-  useEffect(() => {
-    fetchDeals();
+  const refreshCurrentPage = useCallback(() => {
+    const { page, limit, search, extraParams } = currentFetchParams.current;
+    fetchDeals(page, limit, search, extraParams);
   }, [fetchDeals]);
 
   return {
@@ -85,17 +86,7 @@ export function useDealList() {
     setError,
     totalCount,
     totalPages,
-    hasNext,
-    hasPrevious,
-    pageNumber,
-    setPageNumber,
-    limit,
-    setLimit,
-    searchQuery,
-    handleSearchChange,
-    sortBy,
-    sortOrder,
-    handleSortChange,
-    refresh: fetchDeals,
+    fetchDeals,
+    refreshCurrentPage,
   };
 }

@@ -3,7 +3,7 @@ import { MoreHorizontal, Eye, Edit2, Phone, MessageSquare, Trash2 } from 'lucide
 import ActionMenuPortal from '../../../shared/components/ActionMenuPortal';
 import type { DealActionMenuProps } from '../types';
 
-const DealActionMenu = ({ isOpen, onToggle, onClose, row, onEdit, onDelete }: DealActionMenuProps) => {
+const DealActionMenu = ({ isOpen, onToggle, onClose, row, onEdit, onDelete, onWhatsApp, onMessage }: DealActionMenuProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -18,16 +18,16 @@ const DealActionMenu = ({ isOpen, onToggle, onClose, row, onEdit, onDelete }: De
       </button>
       <ActionMenuPortal isOpen={isOpen} triggerRef={buttonRef} onClose={onClose}>
         <div className="deal-action-dropdown">
-          <button type="button">
+          {/* <button type="button">
             <Eye size={14} /> View Deal
-          </button>
+          </button> */}
           <button type="button" onClick={() => { onEdit(row); onClose(); }}>
             <Edit2 size={14} /> Edit Deal
           </button>
-          <button type="button">
+          <button type="button" onClick={() => { onWhatsApp(row); onClose(); }}>
             <Phone size={14} /> WhatsApp
           </button>
-          <button type="button">
+          <button type="button" onClick={() => { onMessage(row); onClose(); }}>
             <MessageSquare size={14} /> Message
           </button>
           <button type="button" className="delete" onClick={() => { onDelete(row.id); onClose(); }}>

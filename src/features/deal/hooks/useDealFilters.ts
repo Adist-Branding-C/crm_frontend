@@ -1,24 +1,56 @@
-import { useState, useMemo, useCallback } from 'react';
-import type { DealItem, DealStatusFilters } from '../types';
+import { useState, useCallback, useRef } from 'react';
+import { INITIAL_DEAL_FILTERS } from '../constants/deal.constants';
+import { useDealAdditionalFieldDefs } from './useDealAdditionalFieldDefs';
+import type { DealStatusFilters } from '../types';
 
-const EMPTY_FILTERS: DealStatusFilters = { status: '', type: '', assignedTo: '' };
+const DEAL_DATE_FILTER_BY_API_MAP: Record<string, string> = {
+  created: 'createdAt',
+  updated: 'updatedAt',
+  start: 'startDate',
+  end: 'endDate',
+};
 
-export function useDealFilters(dealList: DealItem[]) {
+export function useDealFilters(
+  onFetch: (page: number, limit: number, search: string, extraParams: Record<string, string | number>) => void,
+  searchQueryRef: React.MutableRefObject<string>,
+  rowsPerPageRef: React.MutableRefObject<number>,
+) {
+  const [filters, setFilters] = useState<DealStatusFilters>(INITIAL_DEAL_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<DealStatusFilters>(EMPTY_FILTERS);
+  const activeFiltersRef = useRef<Record<string, string | number>>({});
+  const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
 
-  const filteredData = useMemo(() => {
-    let data = dealList;
-    if (filters.status) data = data.filter(item => item.status === filters.status);
-    if (filters.type) data = data.filter(item => item.type === filters.type);
-    if (filters.assignedTo) data = data.filter(item => item.agent === filters.assignedTo);
-    return data;
-  }, [dealList, filters]);
-
-  const clearFilters = useCallback(() => {
-    setFilters(EMPTY_FILTERS);
+  const handleApplyFilters = useCallback(() => {
+    const params: Record<string, string | number> = {};
+    if (filters.status) params.statusId = filters.status;
+    if (filters.type) params.typeId = filters.type;
+    if (filters.assignedTo) params.assignedTo = filters.assignedTo;
+    if (filters.dateRange.start && filters.dateRange.end) {
+      params.startDate = filters.dateRange.start;
+      params.endDate = filters.dateRange.end;
+    }
+    if (filters.filterByDate) params.dateFilterBy = DEAL_DATE_FILTER_BY_API_MAP[filters.filterByDate] ?? filters.filterByDate;
+    const additionalFieldFilters = Object.entries(filters.additionalFields)
+      .filter(([, value]) => value)
+      .map(([fieldId, value]) => ({
+        fieldId,
+        value,
+        isDropdown: dealAdditionalFieldDefs.find((f) => f.fieldId === fieldId)?.fieldType.toLowerCase() === 'dropdown',
+      }));
+    if (additionalFieldFilters.length > 0) {
+      params.additionalFieldFilters = JSON.stringify(additionalFieldFilters);
+    }
+    activeFiltersRef.current = params;
     setShowFilters(false);
-  }, []);
+    onFetch(1, rowsPerPageRef.current, searchQueryRef.current, params);
+  }, [filters, onFetch, searchQueryRef, rowsPerPageRef, dealAdditionalFieldDefs]);
 
-  return { showFilters, setShowFilters, filters, setFilters, filteredData, clearFilters };
+  return {
+    filters,
+    showFilters,
+    activeFiltersRef,
+    setFilters,
+    setShowFilters,
+    handleApplyFilters,
+  };
 }

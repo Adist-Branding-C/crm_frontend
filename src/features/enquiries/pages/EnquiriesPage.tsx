@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { ChevronUp, ChevronDown, Filter, Plus } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
@@ -44,6 +44,14 @@ const EnquiriesPage = () => {
   const { activeFiltersRef } = filtersHook;
 
   const sortHook = useLeadSort(crud.fetchLeads, activeFiltersRef, searchQueryRef, rowsPerPageRef);
+
+  const handleSortChange = useCallback((field: string, direction: string) => {
+    if (direction === 'desc') {
+      sortHook.handleSortDesc(field);
+    } else {
+      sortHook.handleSortAsc(field);
+    }
+  }, [sortHook]);
 
   const pagination = useLeadPagination(crud.fetchLeads, activeFiltersRef, searchQueryRef, crud.total);
 
@@ -109,9 +117,9 @@ const EnquiriesPage = () => {
           </button>
 
           <LeadSortDropdown
-            sortConfig={sortHook.sortConfig}
-            onSortDesc={sortHook.handleSortDesc}
-            onSortAsc={sortHook.handleSortAsc}
+            sortBy={sortHook.sortConfig.key ?? 'createdAt'}
+            sortOrder={sortHook.sortConfig.direction}
+            onSortChange={handleSortChange}
           />
 
           <LeadActionsDropdown

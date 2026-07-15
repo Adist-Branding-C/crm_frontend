@@ -1,6 +1,3 @@
-export { useDealStatus } from './useDealStatus';
-export { useDealStatusActions } from './useDealStatusActions';
 export { useDealStatusDrawer } from './useDealStatusDrawer';
-export { useDealStatusDropdown } from './useDealStatusDropdown';
-export { useDealStatusFilters } from './useDealStatusFilters';
-export { useDealStatusPage } from './useDealStatusPage';
+export { useDealStatusCrud } from './useDealStatusCrud';
+export { useDealStatusSubmitHandlers } from './useDealStatusSubmitHandlers';

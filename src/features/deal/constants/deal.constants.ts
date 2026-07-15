@@ -1,6 +1,15 @@
 import type { CsvColumn } from '../../../shared/types/csv';
 import type { DealFormData, DealItem } from '../types';
 
+export const INITIAL_DEAL_FILTERS = {
+  dateRange: { start: '', end: '' },
+  filterByDate: '',
+  status: '',
+  type: '',
+  assignedTo: '',
+  additionalFields: {},
+};
+
 export const ADD_DEAL_INITIAL_VALUES: DealFormData = {
   dealName: '',
   lead: '',

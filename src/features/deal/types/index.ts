@@ -8,7 +8,9 @@ export interface DealItem {
   mobile?: string;
   amount?: number;
   status?: string;
+  statusId?: string | number;
   type?: string;
+  typeId?: string | number;
   stage?: string;
   priority?: string;
   assignedTo?: string;
@@ -18,6 +20,7 @@ export interface DealItem {
   agentId?: string | number;
   createdBy?: string;
   createdAt?: string;
+  additionalFields?: { fieldId: string; name: string; value: string }[];
 }
 
 export interface DealFormData {
@@ -27,7 +30,9 @@ export interface DealFormData {
   mobile: string;
   amount: string;
   status: string;
+  statusId?: string | number;
   type: string;
+  typeId?: string | number;
   stage: string;
   priority: string;
   assignedTo: string;
@@ -35,6 +40,7 @@ export interface DealFormData {
   startDate: string;
   endDate: string;
   notes: string;
+  additionalFields?: { fieldId: string; value: string }[];
 }
 
 export interface DealResponse {
@@ -50,6 +56,8 @@ export interface DealActionMenuProps {
   row: DealItem;
   onEdit: (item: DealItem) => void;
   onDelete: (id: number) => void;
+  onWhatsApp: (item: DealItem) => void;
+  onMessage: (item: DealItem) => void;
 }
 
 export interface LeadOption {
@@ -75,6 +83,21 @@ export interface UseDealFormSubmitParams {
   closeDrawer: () => void;
   handleAddDeal: (values: DealFormData) => Promise<boolean>;
   handleUpdateDeal: (dealId: string, values: DealFormData) => Promise<boolean>;
+  dealAdditionalFieldDefs: import('./additionalField').DealAdditionalFieldDef[];
+}
+
+export interface DealFormProps {
+  editingItem?: DealItem | null;
+  validationSchema: import('yup').Schema<Record<string, unknown>>;
+  initialValues: import('../../../shared/types/drawers').DealFormData;
+  onSubmit: (
+    values: import('../../../shared/types/drawers').DealFormData,
+    helpers: import('formik').FormikHelpers<import('../../../shared/types/drawers').DealFormData>,
+  ) => Promise<void | boolean>;
+  isLoading?: boolean;
+  error?: string | null;
+  onCancel: () => void;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export interface DealStage {
@@ -84,9 +107,12 @@ export interface DealStage {
 }
 
 export interface DealStatusFilters {
+  dateRange: { start: string; end: string };
+  filterByDate: string;
   status: string;
   type: string;
   assignedTo: string;
+  additionalFields: Record<string, string>;
 }
 
 export interface DealFiltersProps {
@@ -94,6 +120,7 @@ export interface DealFiltersProps {
   onFilterChange: (filters: DealStatusFilters) => void;
   onApplyFilters: () => void;
   onClearFilters: () => void;
+  isLoadingOptions?: boolean;
 }
 
 export interface DealSortDropdownProps {

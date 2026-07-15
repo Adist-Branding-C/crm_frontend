@@ -1,22 +1,80 @@
 import { useCallback } from 'react';
+import type { FormikHelpers } from 'formik';
+import { buildAdditionalFieldsPayload } from '../utils/additionalFields';
 import type { DealFormData as DealDrawerFormData } from '../../../shared/types/drawers';
 import type { DealFormData, UseDealFormSubmitParams } from '../types';
 
 /**
- * The Deal add/edit drawer (shared/components/drawers/AddDealDrawer) manages its own
- * form state and calls a single onSave(data) callback - it isn't a Formik form - so
- * this only needs one save handler rather than separate submit/edit-submit pairs.
- * Its onSave payload is shaped by that drawer's own (unrelated, same-named) DealFormData
- * type, not this feature's - hence the aliased import.
+ * Submit handlers for the Deal add/edit Formik form.
+ *
+ * Follows the same pattern as useCampaignSubmitHandlers:
+ * - Receives FormikHelpers so it can call setSubmitting(false) in the finally block.
+ * - Builds an ID-only payload from the form values before calling the CRUD handlers.
+ * - On success the drawer is closed by the caller; on failure the page-level error
+ *   is set by the CRUD handler.
  */
-export function useDealFormSubmit({ editingItem, closeDrawer, handleAddDeal, handleUpdateDeal }: UseDealFormSubmitParams) {
-  const handleDrawerSave = useCallback(async (data: DealDrawerFormData) => {
-    const values = { ...data, assignedTo: data.assignAgent } as unknown as DealFormData;
-    const success = editingItem?.dealId
-      ? await handleUpdateDeal(editingItem.dealId, values)
-      : await handleAddDeal(values);
-    if (success) closeDrawer();
-  }, [editingItem, handleAddDeal, handleUpdateDeal, closeDrawer]);
+export function useDealFormSubmit({ editingItem, closeDrawer, handleAddDeal, handleUpdateDeal, dealAdditionalFieldDefs }: UseDealFormSubmitParams) {
+  const handleAddSubmit = useCallback(async (
+    values: DealDrawerFormData,
+    { setSubmitting }: FormikHelpers<DealDrawerFormData>,
+  ): Promise<boolean> => {
+    const additionalFields = buildAdditionalFieldsPayload(values as unknown as Record<string, string>, dealAdditionalFieldDefs);
+    const payload = {
+      dealName: values.dealName,
+      leadId: values.leadId,
+      agentId: values.agentId,
+      assignedTo: values.agentId,
+      assignAgent: values.agentId,
+      statusId: values.statusId,
+      typeId: values.typeId,
+      mobile: values.mobile,
+      amount: values.amount,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      ...(additionalFields.length > 0 ? { additionalFields } : {}),
+    };
 
-  return { handleDrawerSave };
+    try {
+      const featureValues = payload as unknown as DealFormData;
+      const success = await handleAddDeal(featureValues);
+      if (success) closeDrawer();
+      return success;
+    } finally {
+      setSubmitting(false);
+    }
+  }, [handleAddDeal, closeDrawer, dealAdditionalFieldDefs]);
+
+  const handleEditSubmit = useCallback(async (
+    values: DealDrawerFormData,
+    { setSubmitting }: FormikHelpers<DealDrawerFormData>,
+  ): Promise<boolean> => {
+    if (!editingItem?.dealId) return false;
+
+    const additionalFields = buildAdditionalFieldsPayload(values as unknown as Record<string, string>, dealAdditionalFieldDefs);
+    const payload = {
+      dealName: values.dealName,
+      leadId: values.leadId,
+      agentId: values.agentId,
+      assignedTo: values.agentId,
+      assignAgent: values.agentId,
+      statusId: values.statusId,
+      typeId: values.typeId,
+      mobile: values.mobile,
+      amount: values.amount,
+      startDate: values.startDate,
+      endDate: values.endDate,
+      ...(additionalFields.length > 0 ? { additionalFields } : {}),
+    };
+
+    try {
+      const featureValues = payload as unknown as DealFormData;
+      const success = await handleUpdateDeal(editingItem.dealId, featureValues);
+      if (success) closeDrawer();
+      return success;
+    } finally {
+      setSubmitting(false);
+    }
+  }, [editingItem, handleUpdateDeal, closeDrawer, dealAdditionalFieldDefs]);
+
+  return { handleAddSubmit, handleEditSubmit };
 }
