@@ -1,8 +1,12 @@
-export { useDeal } from './useDeal';
+export { useDealList } from './useDealList';
+export { useDealCrud } from './useDealCrud';
 export { useDealDrawer } from './useDealDrawer';
-export { useDealDropdown } from './useDealDropdown';
+export { useDealDeleteConfirm } from './useDealDeleteConfirm';
+export { useDealFormSubmit } from './useDealFormSubmit';
 export { useDealFilters } from './useDealFilters';
-export { useDealActions } from './useDealActions';
-export { useDealPage } from './useDealPage';
+export { useDealClearFilters } from './useDealClearFilters';
+export { useDealFilterOptions } from './useDealFilterOptions';
+export { useDealExport } from './useDealExport';
 export { useLeadSearch } from './useLeadSearch';
 export { useStaffList } from './useStaffList';
+export { useDealFormOptions } from './useDealFormOptions';

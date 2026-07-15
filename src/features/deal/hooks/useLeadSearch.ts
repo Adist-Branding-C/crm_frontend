@@ -1,30 +1,32 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { leadService } from '../services/lead.service';
 import type { LeadOption } from '../types';
 
 export function useLeadSearch() {
   const [leads, setLeads] = useState<LeadOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [search, setSearch] = useState('');
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const fetchLeads = useCallback(async (value: string) => {
+    setIsLoading(true);
+    try {
+      const response = await leadService.getLeads(value || undefined);
+      const data = response?.data ?? response ?? [];
+      const items = Array.isArray(data) ? data : [];
+      setLeads(items.map((lead: any) => ({ label: lead.name, value: lead.id })));
+    } catch {
+      setLeads([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const { searchValue, handleSearchChange } = useDebouncedSearch(fetchLeads, 400);
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      setIsLoading(true);
-      try {
-        const response = await leadService.getLeads(search || undefined);
-        const data = response?.data ?? response ?? [];
-        const items = Array.isArray(data) ? data : [];
-        setLeads(items.map((lead: any) => ({ label: lead.name, value: lead.id })));
-      } catch {
-        setLeads([]);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 400);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [search]);
+    handleSearchChange('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return { leads, isLoading, search, setSearch };
+  return { leads, isLoading, search: searchValue, setSearch: handleSearchChange };
 }

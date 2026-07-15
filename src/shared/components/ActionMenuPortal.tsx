@@ -13,13 +13,26 @@ const ActionMenuPortal = ({ isOpen, triggerRef, onClose, children }: ActionMenuP
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
     const DROPDOWN_HEIGHT = 160;
+    const MENU_WIDTH = 220;
+    const MARGIN = 8;
     const shouldOpenUp = spaceBelow < DROPDOWN_HEIGHT && spaceAbove > spaceBelow;
     setOpenUp(shouldOpenUp);
+
+    let left: number | undefined;
+    let right: number | undefined;
+
+    if (rect.left < MENU_WIDTH) {
+      left = rect.left;
+    } else {
+      right = window.innerWidth - rect.right;
+    }
+
     setStyle({
       position: 'fixed',
-      top: shouldOpenUp ? undefined : rect.bottom + 4,
-      bottom: shouldOpenUp ? window.innerHeight - rect.top + 4 : undefined,
-      right: window.innerWidth - rect.right,
+      top: shouldOpenUp ? undefined : rect.bottom + MARGIN,
+      bottom: shouldOpenUp ? window.innerHeight - rect.top + MARGIN : undefined,
+      left,
+      right,
       zIndex: 9999,
     });
   }, [isOpen, triggerRef]);
