@@ -25,6 +25,7 @@ export function useLeadFilterOptions(): UseLeadFilterOptionsReturn {
   const [statusOptions, setStatusOptions] = useState<LabelValuePair[]>(cachedStatusOptions ?? []);
   const [additionalFields, setAdditionalFields] = useState<AdditionalFieldDef[]>(cachedAdditionalFields ?? []);
   const [isLoading, setIsLoading] = useState(!cachedTypeOptions || !cachedStatusOptions);
+  const [error, setError] = useState<string | null>(null);
   const hasLoaded = useRef(!!cachedTypeOptions && !!cachedStatusOptions && !!cachedAdditionalFields);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export function useLeadFilterOptions(): UseLeadFilterOptionsReturn {
 
     const load = async () => {
       try {
+        setError(null);
         const [typeRes, sourceRes, purposeRes, staffRes, statusRes, additionalRes] = await Promise.all([
           leadTypeService.getLeadTypes(1, 100),
           leadSourceService.getLeadSources(1, 100),
@@ -79,7 +81,7 @@ export function useLeadFilterOptions(): UseLeadFilterOptionsReturn {
         setStatusOptions(statuses);
         setAdditionalFields(filteredAdditional);
       } catch {
-        // silently fail, filters will have no options
+        setError('Failed to load filter options');
       } finally {
         setIsLoading(false);
       }
@@ -87,5 +89,5 @@ export function useLeadFilterOptions(): UseLeadFilterOptionsReturn {
     load();
   }, []);
 
-  return { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, additionalFields, isLoading };
+  return { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, additionalFields, isLoading, error };
 }
