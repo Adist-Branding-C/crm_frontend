@@ -28,7 +28,6 @@ export interface Filters {
 
 export type { SortConfig };
 
-/** Raw shape of one item in GET /followup/leads, before mapping to FollowupLead. */
 export interface FollowupLeadApiItem {
   id: number;
   leadId: string;
@@ -107,4 +106,4 @@ export interface FollowupTableProps {
   onViewLead: (lead: FollowupLead) => void;
 }
 
-export interface FollowupPaginationProps extends PaginationProps {}
+export interface FollowupPaginationProps extends PaginationProps { }

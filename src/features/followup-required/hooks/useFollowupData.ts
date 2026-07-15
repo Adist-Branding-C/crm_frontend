@@ -17,15 +17,6 @@ const SORT_KEY_TO_API: Record<string, GetFollowupLeadsParams['sort_by']> = {
   nextFollowUp: 'nextFollowUp',
 };
 
-/**
- * Fetch-triggering state (currentPage, rowsPerPage, committedSearch, filters,
- * sortConfig) only ever changes together with an explicit page reset where
- * needed - filters is the applied set (only written by applyFilters/
- * clearFilters), separate from draftFilters (bound to the panel's controlled
- * inputs while the user is still adjusting them). This mirrors the
- * stage-then-apply pattern already used by useLeadFilters/useLeadSearch, so a
- * filter/search change can never fire a fetch against a stale page number.
- */
 export const useFollowupData = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,12 +72,6 @@ export const useFollowupData = () => {
         setData(response.data.items.map(mapApiItemToFollowupLead));
         setTotal(response.data.pagination?.total ?? 0);
         setTotalPages(newTotalPages);
-        // Self-healing invariant: if the page we just requested no longer
-        // exists (e.g. an in-drawer edit removed enough leads from the due
-        // list that the last page a user was on is now out of range), snap
-        // back to the last valid page. currentPage is a fetch dependency, so
-        // this triggers one corrective re-fetch rather than leaving the UI
-        // showing an empty table against an impossible "page X of Y" state.
         if (currentPage > newTotalPages) {
           setCurrentPage(newTotalPages);
         }

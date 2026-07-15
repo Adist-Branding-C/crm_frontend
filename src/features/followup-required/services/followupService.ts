@@ -5,12 +5,6 @@ import { FOLLOWUP_API_ENDPOINTS } from '../constants/followupApiEndpoints';
 import type { ApiResponse } from '../../../shared/types/common';
 import type { FollowupLeadsData, GetFollowupLeadsParams } from '../types';
 
-/**
- * HTTP client for the Follow-up Required API - communicates with the backend only.
- *
- * Used by:
- * - followupService singleton, consumed by useFollowupData (list/refresh).
- */
 class FollowupService {
   async getFollowupLeads(
     params: GetFollowupLeadsParams,
