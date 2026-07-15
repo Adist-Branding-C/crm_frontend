@@ -1,5 +1,4 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { normalizeFieldType } from '../utils/fieldType';
 import { LEAD_ADDITIONAL_API_ENDPOINTS } from '../constants/leadAdditionalApiEndpoints';
 import type { CreateLeadAdditionalPayload, UpdateLeadAdditionalPayload } from '../types/request';
@@ -26,13 +25,7 @@ class LeadAdditionalService {
         values: payload.values,
       },
     );
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-      errors: response.data.errors,
-      field: response.data.field,
-    });
+    return response.data;
   }
 
   async getAll(page = 1, limit = 10, search?: string, sortOrder?: 'ASC' | 'DESC'): Promise<LeadAdditionalListResponse> {
@@ -40,20 +33,12 @@ class LeadAdditionalService {
     if (search) params.search = search;
     if (sortOrder) params.sort_order = sortOrder;
     const response = await axiosInstance.get<LeadAdditionalListResponse>(LEAD_ADDITIONAL_API_ENDPOINTS.ADDITIONAL_FIELDS, { params });
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 
   async getById(fieldId: string): Promise<LeadAdditionalResponse> {
     const response = await axiosInstance.get<LeadAdditionalResponse>(`${LEAD_ADDITIONAL_API_ENDPOINTS.ADDITIONAL_FIELDS}/${fieldId}`);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 
   async update(fieldId: string, payload: UpdateLeadAdditionalPayload): Promise<UpdateLeadAdditionalResponse> {
@@ -70,20 +55,12 @@ class LeadAdditionalService {
         values: payload.values,
       },
     );
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      errors: response.data.errors,
-      field: response.data.field,
-    });
+    return response.data;
   }
 
   async delete(fieldId: string): Promise<DeleteLeadAdditionalResponse> {
     const response = await axiosInstance.delete<DeleteLeadAdditionalResponse>(`${LEAD_ADDITIONAL_API_ENDPOINTS.ADDITIONAL_FIELDS}/${fieldId}`);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-    });
+    return response.data;
   }
 }
 

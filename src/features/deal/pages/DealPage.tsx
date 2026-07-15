@@ -1,62 +1,67 @@
-import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
-import { Filter, ChevronDown, Plus, Download } from 'lucide-react';
+import React, { useRef, useEffect, useMemo } from 'react';
+import { ChevronUp, ChevronDown, Filter, Plus } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Drawer from '../../../shared/components/Drawer';
 import Toast from '../../../shared/components/Toast';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
-import { useDropdownMenu } from '../../../shared/hooks/useDropdownMenu';
-import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useToast } from '../../../shared/hooks/useToast';
-import { useDealList, useDealCrud, useDealDrawer, useDealDeleteConfirm, useDealFormSubmit, useDealFilters, useDealClearFilters, useDealExport } from '../hooks';
+import { useDealList } from '../hooks/useDealList';
+import { useDealPagination } from '../hooks/useDealPagination';
+import { useDealSearch } from '../hooks/useDealSearch';
+import { useDealSort } from '../hooks/useDealSort';
+import { useDealFilters } from '../hooks/useDealFilters';
+import { useDealDeleteConfirm } from '../hooks/useDealDeleteConfirm';
+import { useDealActionMenu } from '../hooks/useDealActionMenu';
+import { useDealRowActions } from '../hooks/useDealRowActions';
+import { useDealClearFilters } from '../hooks/useDealClearFilters';
+import { useDealCrud } from '../hooks/useDealCrud';
+import { useDealDrawer } from '../hooks/useDealDrawer';
+import { useDealFormSubmit } from '../hooks/useDealFormSubmit';
 import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
-import DealActionMenu from '../components/DealActionMenu';
+import { useDealExport } from '../hooks/useDealExport';
+import { getDealColumns } from '../utils/dealColumns';
+import { getDealIds } from '../utils/dealMapper';
+import { getFieldKey, getInitialValues } from '../utils/additionalFields';
+import { getDealValidationSchema } from '../validations';
+import DealRow from '../components/DealRow';
 import DealFilters from '../components/DealFilters';
 import DealSortDropdown from '../components/DealSortDropdown';
 import DealForm from '../components/DealForm';
-import { getDealValidationSchema } from '../validations';
-import { getFieldKey, getInitialValues } from '../utils/additionalFields';
-import { DEAL_STATUS_LABEL_MAP, DEAL_TYPE_LABEL_MAP } from '../../../shared/constants/dealOptions';
+import { LABEL_NO_DATA } from '../../../shared/constants/labels';
+import { DEAL_FORM_DEFAULT_VALUES } from '../constants/dealFormDefaults';
 import type { DealFormData } from '../../../shared/types/drawers';
-import type { DealItem } from '../types';
+import type { DealItem } from '../types/interface';
 import './DealPage.css';
 
-const getStatusBadge = (status: string) => {
-  const colorMap: Record<string, string> = { win: '#10b981', lost: '#ef4444', pending: '#f59e0b', invoice: '#3b82f6' };
-  const color = colorMap[status.toLowerCase()] || '#6b7280';
-  const label = DEAL_STATUS_LABEL_MAP[status] || status;
-  return <span className="status-pill" style={{ background: `${color}20`, color }}>{label}</span>;
-};
-
-const getTypeBadge = (type: string) => {
-  const colorMap: Record<string, string> = { sales: '#10b981', registration: '#8b5cf6', renewal: '#3b82f6', upsell: '#fb923c' };
-  const color = colorMap[type.toLowerCase()] || '#6b7280';
-  const label = DEAL_TYPE_LABEL_MAP[type] || type;
-  return <span className="type-pill" style={{ background: `${color}20`, color }}>{label}</span>;
-};
-
-const ADD_DEAL_EMPTY_VALUES: DealFormData = {
-  dealName: '',
-  lead: '',
-  leadId: '',
-  mobile: '',
-  amount: '',
-  status: '',
-  statusId: '',
-  type: '',
-  typeId: '',
-  startDate: '',
-  endDate: '',
-  assignAgent: '',
-  agentId: '',
-};
-
 const DealPage = () => {
-  const list = useDealList();
+  const toast = useToast();
+  const list = useDealList(toast.showToastMessage);
+
+  const rowsPerPageRef = useRef(10);
+  const searchQueryRef = useRef('');
+
+  const filtersHook = useDealFilters(list.fetchDeals, searchQueryRef, rowsPerPageRef);
+  const { activeFiltersRef } = filtersHook;
+
+  const sortHook = useDealSort(list.fetchDeals, activeFiltersRef, searchQueryRef, rowsPerPageRef);
+
+  const pagination = useDealPagination(list.fetchDeals, activeFiltersRef, searchQueryRef, list.totalCount);
+
+  const dealSearch = useDealSearch(list.fetchDeals, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
+
+  useEffect(() => {
+    rowsPerPageRef.current = pagination.rowsPerPage;
+    searchQueryRef.current = dealSearch.searchQuery;
+  });
+
   const crud = useDealCrud({ pagination: { setError: list.setError, setIsLoading: list.setIsLoading, refresh: list.refreshCurrentPage } });
   const drawer = useDealDrawer();
   const deleteConfirm = useDealDeleteConfirm(crud.handleDeleteDeal);
+  const actionMenu = useDealActionMenu();
+  const rowActions = useDealRowActions(actionMenu, drawer, deleteConfirm);
+
   const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
   const formSubmit = useDealFormSubmit({
     editingItem: drawer.editingItem,
@@ -65,66 +70,17 @@ const DealPage = () => {
     handleUpdateDeal: crud.handleUpdateDeal,
     dealAdditionalFieldDefs,
   });
+
   const dealValidationSchema = useMemo(
     () => getDealValidationSchema(dealAdditionalFieldDefs),
     [dealAdditionalFieldDefs],
   );
 
-  const rowsPerPageRef = useRef(10);
-  const searchQueryRef = useRef('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
-
-  const filtersHook = useDealFilters(list.fetchDeals, searchQueryRef, rowsPerPageRef);
-  const { activeFiltersRef } = filtersHook;
-
-  const handleCommittedSearch = useCallback((value: string) => {
-    searchQueryRef.current = value;
-    setCurrentPage(1);
-    list.fetchDeals(1, rowsPerPageRef.current, value, activeFiltersRef.current);
-  }, [list.fetchDeals, activeFiltersRef]);
-  const { searchValue: searchQuery, handleSearchChange: rawSearchChange, resetSearch } = useDebouncedSearch(handleCommittedSearch, 2000);
-  const setSearchQuery = rawSearchChange;
-
-  const handleSetCurrentPage = useCallback((page: number | ((prev: number) => number)) => {
-    const next = typeof page === 'function' ? page(currentPage) : page;
-    setCurrentPage(next);
-    list.fetchDeals(next, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
-  }, [list.fetchDeals, activeFiltersRef, currentPage]);
-
-  const resetPage = useCallback(() => { setCurrentPage(1); }, []);
-
-  const clearFilters = useDealClearFilters(filtersHook, resetSearch, resetPage, list.fetchDeals, rowsPerPageRef);
-
-  const handleSortChange = useCallback((field: string, direction: string) => {
-    setSortBy(field);
-    setSortOrder(direction);
-    setCurrentPage(1);
-    const params = { ...activeFiltersRef.current, sortBy: field, sortOrder: direction };
-    activeFiltersRef.current = params;
-    list.fetchDeals(1, rowsPerPageRef.current, searchQueryRef.current, params);
-  }, [list.fetchDeals, activeFiltersRef, rowsPerPageRef, searchQueryRef]);
-
-  const dropdown = useDropdownMenu<number>();
-  const { handleExportCSV } = useDealExport(list.dealList);
-  const formBodyRef = useRef<HTMLDivElement>(null);
-
-  const additionalFieldColumnNames = useMemo(() => {
-    const names = new Set<string>();
-    for (const row of list.dealList) {
-      for (const af of row.additionalFields || []) {
-        names.add(af.name);
-      }
-    }
-    return [...names];
-  }, [list.dealList]);
-
   const editInitialValues = useMemo((): DealFormData => {
     const additionalFieldValues = getInitialValues(dealAdditionalFieldDefs);
 
     if (!drawer.editingItem) {
-      return { ...ADD_DEAL_EMPTY_VALUES, ...additionalFieldValues };
+      return { ...DEAL_FORM_DEFAULT_VALUES, ...additionalFieldValues };
     }
 
     for (const af of drawer.editingItem.additionalFields || []) {
@@ -152,26 +108,42 @@ const DealPage = () => {
     };
   }, [drawer.editingItem, dealAdditionalFieldDefs]);
 
-  const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = Number(e.target.value);
-    rowsPerPageRef.current = value;
-    setCurrentPage(1);
-    list.fetchDeals(1, value, searchQueryRef.current, activeFiltersRef.current);
-  }, [list.fetchDeals, activeFiltersRef]);
+  const formBodyRef = useRef<HTMLDivElement>(null);
 
-  const handleAddDealClick = useCallback(() => {
-    filtersHook.setShowFilters(false);
-    drawer.openAddDrawer();
-  }, [filtersHook.setShowFilters, drawer.openAddDrawer]);
+  const initialFetchDone = useRef(false);
+  useEffect(() => {
+    if (initialFetchDone.current) return;
+    initialFetchDone.current = true;
+    list.fetchDeals(1, 10, '', {});
+  }, []);
 
-  const handleDeleteRow = useCallback((id: number) => {
-    const item = list.dealList.find(d => d.id === id);
-    if (item) deleteConfirm.handleDeleteClick(item);
-  }, [list.dealList, deleteConfirm.handleDeleteClick]);
+  useEffect(() => {
+    if (!drawer.editingItem) return;
+    const updated = list.dealList.find(d => d.id === drawer.editingItem!.id);
+    if (updated && updated.createdAt !== drawer.editingItem!.createdAt) {
+      drawer.openEditDrawer(updated);
+    }
+  }, [list.dealList, drawer.editingItem, drawer.openEditDrawer]);
 
-  const toast = useToast();
+  const paginatedIds = useMemo(() => getDealIds(list.dealList), [list.dealList]);
 
-  const handleWhatsApp = useCallback((item: DealItem) => {
+  const clearFilters = useDealClearFilters(filtersHook, dealSearch, pagination, sortHook, list.fetchDeals, rowsPerPageRef);
+
+  const { handleExportCSV } = useDealExport(list.dealList);
+
+  const columns = useMemo(() => getDealColumns(list.dealList), [list.dealList]);
+
+  const additionalFieldColumnNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const row of list.dealList) {
+      for (const af of row.additionalFields || []) {
+        names.add(af.name);
+      }
+    }
+    return [...names];
+  }, [list.dealList]);
+
+  const handleWhatsApp = (item: DealItem) => {
     if (!item.mobile) {
       toast.showToastMessage('Phone number is not available.', 'error');
       return;
@@ -186,23 +158,16 @@ const DealPage = () => {
       number = digits;
     }
     window.open(`https://wa.me/${number}`, '_blank');
-  }, [toast.showToastMessage]);
+  };
 
-  const handleMessage = useCallback((item: DealItem) => {
+  const handleMessage = (item: DealItem) => {
     if (!item.mobile) {
       toast.showToastMessage('Phone number is not available.', 'error');
       return;
     }
     const digits = item.mobile.replace(/[^0-9]/g, '');
     window.open(`sms:${digits}`);
-  }, [toast.showToastMessage]);
-
-  const initialFetchDone = useRef(false);
-  useEffect(() => {
-    if (initialFetchDone.current) return;
-    initialFetchDone.current = true;
-    list.fetchDeals(1, 10, '', {});
-  }, []);
+  };
 
   return (
     <PageContainer>
@@ -214,31 +179,37 @@ const DealPage = () => {
       {list.error && (
         <div className="error-banner">
           <span>{list.error}</span>
-          <button className="btn btn-sm btn-secondary" onClick={() => list.fetchDeals(currentPage, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current)}>Retry</button>
+          <button className="btn btn-sm btn-secondary" onClick={() => list.fetchDeals(pagination.currentPage, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current)}>Retry</button>
         </div>
       )}
 
       <div className="table-container">
         <TableNav
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          searchQuery={dealSearch.searchQuery}
+          onSearchChange={dealSearch.setSearchQuery}
           searchPlaceholder="Search deals..."
-          rowsPerPage={rowsPerPageRef.current}
-          onRowsPerPageChange={handleRowsPerPageChange}
+          rowsPerPage={pagination.rowsPerPage}
+          onRowsPerPageChange={pagination.handleRowsPerPageChange}
         >
           <button className="btn btn-secondary" onClick={() => filtersHook.setShowFilters(!filtersHook.showFilters)}>
-            <Filter size={16} />
-            Filter
-            <ChevronDown size={14} className={filtersHook.showFilters ? 'rotate' : ''} />
+            <Filter size={16} /> Filter <ChevronDown size={14} className={filtersHook.showFilters ? 'rotate' : ''} />
           </button>
-          <DealSortDropdown sortBy={sortBy} sortOrder={sortOrder} onSortChange={handleSortChange} />
+
+          <DealSortDropdown
+            sortBy={sortHook.sortConfig.key}
+            sortOrder={sortHook.sortConfig.direction}
+            onSortChange={(field: string, direction: string) => {
+              if (direction === 'desc') sortHook.handleSortDesc(field);
+              else sortHook.handleSortAsc(field);
+            }}
+          />
+
           <button className="btn btn-secondary" onClick={handleExportCSV}>
-            <Download size={16} />
             Export
           </button>
-          <button className="btn btn-primary" onClick={handleAddDealClick}>
-            <Plus size={16} />
-            Deals
+
+          <button className="btn btn-primary" onClick={() => { filtersHook.setShowFilters(false); drawer.openAddDrawer(); }}>
+            <Plus size={16} /> Add Deal
           </button>
         </TableNav>
 
@@ -254,56 +225,44 @@ const DealPage = () => {
         <Table wrapperClassName="table-scroll" className="enquiries-table">
           <THead>
             <TRow>
-              <TCell variant="th">Action</TCell>
-              <TCell variant="th">Deal Name</TCell>
-              <TCell variant="th">Lead</TCell>
-              <TCell variant="th">Phone</TCell>
-              <TCell variant="th">Amount</TCell>
-              <TCell variant="th">Status</TCell>
-              <TCell variant="th">Type</TCell>
-              <TCell variant="th">Start Date</TCell>
-              <TCell variant="th">End Date</TCell>
-              <TCell variant="th">Agent</TCell>
-              <TCell variant="th">Created By</TCell>
-              <TCell variant="th">Created At</TCell>
-              {additionalFieldColumnNames.map(name => (
-                <TCell variant="th" key={name}>{name}</TCell>
+              {columns.map(col => (
+                <TCell
+                  key={col.key}
+                  variant="th"
+                  className={col.sortable ? 'sortable' : ''}
+                  onClick={col.sortable ? () => sortHook.handleSort(col.key) : undefined}
+                >
+                  {col.label}
+                  {col.sortable && sortHook.sortConfig.key === col.key && (
+                    sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                  )}
+                </TCell>
               ))}
             </TRow>
           </THead>
           <TBody>
             {list.dealList.length === 0 && !list.isLoading ? (
-              <EmptyState colSpan={12 + additionalFieldColumnNames.length} message="No deals found" />
+              <EmptyState colSpan={columns.length} message={LABEL_NO_DATA} />
             ) : (
-              list.dealList.map(row => (
-                <TRow key={row.id}>
-                  <TCell className="action-cell">
-                    <DealActionMenu
-                      isOpen={dropdown.dropdownOpen === row.id}
-                      onToggle={() => dropdown.toggleDropdown(dropdown.dropdownOpen === row.id ? null : row.id)}
-                      onClose={dropdown.closeDropdown}
-                      row={row}
-                      onEdit={drawer.openEditDrawer}
-                      onDelete={handleDeleteRow}
-                      onWhatsApp={handleWhatsApp}
-                      onMessage={handleMessage}
-                    />
-                  </TCell>
-                  <TCell className="lead-name-cell">{row.dealName}</TCell>
-                  <TCell>{row.lead}</TCell>
-                  <TCell>{row.mobile || ''}</TCell>
-                  <TCell>₹{Number(row.amount).toLocaleString()}</TCell>
-                  <TCell>{getStatusBadge(row.status || '')}</TCell>
-                  <TCell>{getTypeBadge(row.type || '')}</TCell>
-                  <TCell>{row.startDate}</TCell>
-                  <TCell>{row.endDate}</TCell>
-                  <TCell>{row.agent}</TCell>
-                  <TCell>{row.createdBy}</TCell>
-                  <TCell>{row.createdAt}</TCell>
-                  {additionalFieldColumnNames.map(name => (
-                    <TCell key={name}>{row.additionalFields?.find(af => af.name === name)?.value ?? ''}</TCell>
-                  ))}
-                </TRow>
+              list.dealList.map(deal => (
+                <DealRow
+                  key={deal.id}
+                  deal={deal}
+                  columns={columns}
+                  additionalFieldColumns={additionalFieldColumnNames}
+                  isSelected={false}
+                  onSelectRow={() => {}}
+                  actionMenu={{
+                    isOpen: actionMenu.openId === deal.id,
+                    buttonRect: actionMenu.openId === deal.id ? actionMenu.buttonRect : null,
+                    onOpen: actionMenu.open,
+                    onClose: actionMenu.close,
+                  }}
+                  onEditDeal={drawer.openEditDrawer}
+                  onDeleteDeal={rowActions.handleDeleteFromRow}
+                  onWhatsApp={handleWhatsApp}
+                  onMessage={handleMessage}
+                />
               ))
             )}
           </TBody>
@@ -312,11 +271,11 @@ const DealPage = () => {
         {list.isLoading && <div className="table-loading">Loading...</div>}
 
         <Pagination
-          currentPage={currentPage}
+          currentPage={pagination.currentPage}
           totalPages={list.totalPages}
-          totalItems={list.totalCount}
-          rowsPerPage={rowsPerPageRef.current}
-          onPageChange={handleSetCurrentPage}
+          totalItems={pagination.totalItems}
+          rowsPerPage={pagination.rowsPerPage}
+          onPageChange={pagination.handleSetCurrentPage}
         />
       </div>
 

@@ -1,8 +1,8 @@
 import { useEditDrawer } from '../../../shared/hooks/useEditDrawer';
 import { ADD_DEAL_INITIAL_VALUES } from '../constants/deal.constants';
-import type { DealItem, DealFormData } from '../types';
+import type { DealItem } from '../types/interface';
 
-const mapDealToFormData = (item: DealItem): DealFormData => ({
+const mapDealToFormData = (item: DealItem) => ({
   dealName: item.dealName || '',
   lead: item.lead || '',
   leadId: item.leadId || '',
@@ -20,9 +20,11 @@ const mapDealToFormData = (item: DealItem): DealFormData => ({
   notes: '',
 });
 
+type DealDrawerFormData = ReturnType<typeof mapDealToFormData>;
+
 export function useDealDrawer() {
-  return useEditDrawer<DealItem, DealFormData>({
+  return useEditDrawer<DealItem, DealDrawerFormData>({
     mapItemToFormData: mapDealToFormData,
-    emptyFormData: ADD_DEAL_INITIAL_VALUES,
+    emptyFormData: ADD_DEAL_INITIAL_VALUES as unknown as DealDrawerFormData,
   });
 }

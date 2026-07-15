@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import type { DealAdditionalFieldDef } from '../types/additionalField';
+import type { DealAdditionalFieldDef } from '../types/interface';
 
 /**
  * Single validation schema shared by the Deal add and edit forms.

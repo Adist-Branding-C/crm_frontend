@@ -1,11 +1,5 @@
 import React from 'react';
-import type { DealAdditionalFieldDef } from '../types/additionalField';
-
-interface DealAdditionalFieldControlProps {
-  field: DealAdditionalFieldDef;
-  value: string;
-  onChange: (value: string) => void;
-}
+import type { DealAdditionalFieldControlProps } from '../types/component.types';
 
 const DealAdditionalFieldControl: React.FC<DealAdditionalFieldControlProps> = ({ field, value, onChange }) => {
   switch (field.fieldType.toLowerCase()) {

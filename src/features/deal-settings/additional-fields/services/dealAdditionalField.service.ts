@@ -1,5 +1,4 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { getErrorMessage } from '../../../../shared/utils/error';
 import { DEAL_ADDITIONAL_FIELD_API_ENDPOINTS } from '../constants/dealAdditionalFieldApiEndpoints';
 import { DealAdditionalFieldMapper } from '../mappers/dealAdditionalField.mapper';
@@ -15,11 +14,7 @@ class DealAdditionalFieldService {
 
     try {
       const response = await axiosInstance.get<DealAdditionalFieldListResponse>(url);
-      return ServiceResponseUtil.successResponse({
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
-      });
+      return response.data;
     } catch (error) {
       throw new Error(getErrorMessage(error, 'Network error. Please try again.'));
     }
@@ -28,11 +23,7 @@ class DealAdditionalFieldService {
   async createDealAdditionalField(data: DealAdditionalFieldPayload): Promise<DealAdditionalFieldResponse> {
     try {
       const response = await axiosInstance.post<DealAdditionalFieldResponse>(DEAL_ADDITIONAL_FIELD_API_ENDPOINTS.CREATE, data);
-      return ServiceResponseUtil.successResponse({
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
-      });
+      return response.data;
     } catch (error) {
       throw new Error(getErrorMessage(error, 'Network error. Please try again.'));
     }
@@ -41,11 +32,7 @@ class DealAdditionalFieldService {
   async updateDealAdditionalField(id: number, data: DealAdditionalFieldPayload): Promise<DealAdditionalFieldResponse> {
     try {
       const response = await axiosInstance.patch<DealAdditionalFieldResponse>(DEAL_ADDITIONAL_FIELD_API_ENDPOINTS.UPDATE(id), data);
-      return ServiceResponseUtil.successResponse({
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
-      });
+      return response.data;
     } catch (error) {
       throw new Error(getErrorMessage(error, 'Network error. Please try again.'));
     }
@@ -54,10 +41,7 @@ class DealAdditionalFieldService {
   async deleteDealAdditionalField(id: number): Promise<DeleteDealAdditionalFieldResponse> {
     try {
       const response = await axiosInstance.delete<DeleteDealAdditionalFieldResponse>(DEAL_ADDITIONAL_FIELD_API_ENDPOINTS.DELETE(id));
-      return ServiceResponseUtil.successResponse({
-        status: response.data.status,
-        message: response.data.message,
-      });
+      return response.data;
     } catch (error) {
       throw new Error(getErrorMessage(error, 'Network error. Please try again.'));
     }

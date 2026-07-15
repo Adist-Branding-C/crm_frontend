@@ -1,15 +1,6 @@
 import React from 'react';
-import type { DealAdditionalFieldDef } from '../types/additionalField';
+import type { DealDynamicAdditionalFieldsProps } from '../types/component.types';
 import { getFieldKey } from '../utils/additionalFields';
-
-interface DealDynamicAdditionalFieldsProps {
-  fields: DealAdditionalFieldDef[];
-  values: Record<string, unknown>;
-  errors: Record<string, unknown>;
-  touched: Record<string, unknown>;
-  handleChange: (e: React.ChangeEvent<unknown>) => void;
-  handleBlur: (e: React.FocusEvent<unknown>) => void;
-}
 
 const DealDynamicAdditionalFields: React.FC<DealDynamicAdditionalFieldsProps> = ({
   fields,

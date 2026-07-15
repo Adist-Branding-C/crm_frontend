@@ -1,7 +1,6 @@
 import axiosInstance from '../../../../api/axiosInstance';
 import { PASSWORD_API_ENDPOINTS } from '../constants/passwordApiEndpoints';
 import type { ChangePasswordPayload, ChangePasswordResponse } from '../types';
-import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 
 class PasswordService {
   async changePassword(payload: ChangePasswordPayload): Promise<ChangePasswordResponse> {
@@ -9,7 +8,7 @@ class PasswordService {
       PASSWORD_API_ENDPOINTS.CHANGE_PASSWORD,
       payload
     );
-    return ServiceResponseUtil.normalize(response.data);
+    return response.data;
   }
 }
 

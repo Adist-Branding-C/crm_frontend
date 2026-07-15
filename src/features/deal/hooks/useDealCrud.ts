@@ -1,9 +1,11 @@
 import { useCallback } from 'react';
 import { dealService } from '../services/deal.service';
 import { parseErrorMessage } from '../utils/parseErrorMessage';
-import type { DealFormData, UseDealCrudParams } from '../types';
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages';
+import type { DealFormData } from '../types/interface';
+import type { UseDealCrudParams, UseDealCrudReturn } from '../types/hook.types';
 
-export function useDealCrud({ pagination }: UseDealCrudParams) {
+export function useDealCrud({ pagination }: UseDealCrudParams): UseDealCrudReturn {
   const handleAddDeal = useCallback(async (values: DealFormData): Promise<boolean> => {
     pagination.setError('');
     pagination.setIsLoading(true);
@@ -14,10 +16,10 @@ export function useDealCrud({ pagination }: UseDealCrudParams) {
         pagination.refresh();
         return true;
       }
-      pagination.setError(response.message || 'Failed to add deal');
+      pagination.setError(response.message || ERROR_MESSAGES.CREATE_DEAL);
       return false;
     } catch (err: unknown) {
-      pagination.setError(parseErrorMessage(err, 'Failed to add deal'));
+      pagination.setError(parseErrorMessage(err, ERROR_MESSAGES.CREATE_DEAL));
       return false;
     } finally {
       pagination.setIsLoading(false);
@@ -34,10 +36,10 @@ export function useDealCrud({ pagination }: UseDealCrudParams) {
         pagination.refresh();
         return true;
       }
-      pagination.setError(response.message || 'Failed to update deal');
+      pagination.setError(response.message || ERROR_MESSAGES.UPDATE_DEAL);
       return false;
     } catch (err: unknown) {
-      pagination.setError(parseErrorMessage(err, 'Failed to update deal'));
+      pagination.setError(parseErrorMessage(err, ERROR_MESSAGES.UPDATE_DEAL));
       return false;
     } finally {
       pagination.setIsLoading(false);
@@ -53,10 +55,10 @@ export function useDealCrud({ pagination }: UseDealCrudParams) {
         pagination.refresh();
         return true;
       }
-      pagination.setError(response.message || 'Failed to delete deal');
+      pagination.setError(response.message || ERROR_MESSAGES.DELETE_DEAL);
       return false;
     } catch (err: unknown) {
-      pagination.setError(parseErrorMessage(err, 'Failed to delete deal'));
+      pagination.setError(parseErrorMessage(err, ERROR_MESSAGES.DELETE_DEAL));
       return false;
     }
   }, [pagination]);

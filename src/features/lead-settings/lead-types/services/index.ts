@@ -1,5 +1,4 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { LEAD_TYPE_API_ENDPOINTS } from '../constants/leadTypeApiEndpoints';
 import type { CreateLeadTypePayload, UpdateLeadTypePayload } from '../types/request';
 import type {
@@ -12,13 +11,7 @@ import type {
 class LeadTypeService {
   async createLeadType(payload: CreateLeadTypePayload): Promise<CreateLeadTypeResponse> {
     const response = await axiosInstance.post<CreateLeadTypeResponse>(LEAD_TYPE_API_ENDPOINTS.TYPES, payload);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-      errors: response.data.errors,
-      field: response.data.field,
-    });
+    return response.data;
   }
 
   async getLeadTypes(page = 1, limit = 10, search?: string, sortOrder?: 'ASC' | 'DESC'): Promise<LeadTypeListResponse> {
@@ -26,30 +19,17 @@ class LeadTypeService {
     if (search) params.search = search;
     if (sortOrder) params.sort_order = sortOrder;
     const response = await axiosInstance.get<LeadTypeListResponse>(LEAD_TYPE_API_ENDPOINTS.TYPES, { params });
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 
   async updateLeadType(typeId: string, payload: UpdateLeadTypePayload): Promise<LeadTypeResponse> {
     const response = await axiosInstance.patch<LeadTypeResponse>(`${LEAD_TYPE_API_ENDPOINTS.TYPES}/${typeId}`, payload);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-      errors: response.data.errors,
-      field: response.data.field,
-    });
+    return response.data;
   }
 
   async deleteLeadType(typeId: string): Promise<DeleteLeadTypeResponse> {
     const response = await axiosInstance.delete<DeleteLeadTypeResponse>(`${LEAD_TYPE_API_ENDPOINTS.TYPES}/${typeId}`);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-    });
+    return response.data;
   }
 }
 

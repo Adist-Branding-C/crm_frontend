@@ -1,6 +1,5 @@
 import axiosInstance from '../../../../api/axiosInstance';
 import { ApiResponse } from '../../../../shared/types/common';
-import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { TASK_API } from '../constants/taskApiEndpoints';
 import type { TaskCategory, StaffMember, LeadMember } from '../types/lookupResponses';
 
@@ -10,11 +9,7 @@ export class TaskLookupService {
       TASK_API.CATEGORY,
       { params: { pageNumber: 1, limit: 10 } },
     );
-    return ServiceResponseUtil.successResponse({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 
   async getLeads(): Promise<ApiResponse<{ items: LeadMember[] }>> {
@@ -22,11 +17,7 @@ export class TaskLookupService {
       TASK_API.LEAD,
       { params: { pageNumber: 1, limit: 100 } },
     );
-    return ServiceResponseUtil.successResponse({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 
   async getStaff(): Promise<ApiResponse<{ items: StaffMember[] }>> {
@@ -34,11 +25,7 @@ export class TaskLookupService {
       TASK_API.STAFF,
       { params: { pageNumber: 1, limit: 100 } },
     );
-    return ServiceResponseUtil.successResponse({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 }
 

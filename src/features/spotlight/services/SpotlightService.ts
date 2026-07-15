@@ -19,11 +19,7 @@ class SpotlightService {
       : SPOTLIGHT_API_ENDPOINTS.LEADS;
 
     const response = await axiosInstance.get<SpotlightApiResponse>(url);
-    return {
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data ?? null,
-    };
+    return response.data;
   }
 }
 

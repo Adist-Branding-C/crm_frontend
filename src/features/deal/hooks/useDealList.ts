@@ -1,17 +1,12 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { dealService } from '../services/deal.service';
-import { parseErrorMessage } from '../utils/parseErrorMessage';
-import type { DealItem } from '../types';
+import { mapApiToUI } from '../utils/dealMapper';
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages';
+import type { DealItem } from '../types/interface';
+import type { GetDealsParams } from '../types/request';
+import type { UseDealListReturn } from '../types/hook.types';
 
-/**
- * List/pagination/search/sort fetch for the Deal entity.
- *
- * Follows the same architecture as useLeadListData:
- * - Central fetch function accepts page, limit, search, and extraParams (filter params).
- * - requestSeqRef prevents stale responses from overwriting newer ones.
- * - currentFetchParams stores the last fetch call so refreshCurrentPage can re-fetch.
- */
-export function useDealList() {
+export function useDealList(onShowToast?: (message: string, type: 'success' | 'error') => void): UseDealListReturn {
   const [dealList, setDealList] = useState<DealItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -32,42 +27,30 @@ export function useDealList() {
     setError('');
 
     try {
-      const params: Record<string, string | number | undefined> = { pageNumber: page, limit, ...extraParams };
+      const params: GetDealsParams = { pageNumber: page, limit, ...extraParams };
       if (search) params.search = search;
       const response = await dealService.getAllDeals(params);
 
       if (requestSeq !== requestSeqRef.current) return;
 
-      if (response.status) {
-        const data = response.data as { items?: DealItem[]; pagination?: { total: number; total_pages: number; has_next: boolean; has_previous: boolean; page: number } } | undefined;
-        const pagination = data?.pagination;
-        const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);
-        setDealList((Array.isArray(items) ? items : []).map((item: any) => ({
-          ...item,
-          dealId: item.dealId ?? String(item.id),
-          lead: item.lead?.name ?? item.lead ?? '',
-          leadId: item.lead?.id ?? item.leadId ?? '',
-          status: item.status?.dealStatus ?? item.status?.name ?? item.status ?? '',
-          statusId: item.status?.id ?? item.statusId ?? '',
-          type: item.type?.dealType ?? item.type?.name ?? item.type ?? '',
-          typeId: item.type?.id ?? item.typeId ?? '',
-          agent: item.agent?.name ?? item.agent ?? '',
-          agentId: item.agent?.id ?? item.agentId ?? '',
-        })));
-        setTotalCount(pagination?.total ?? 0);
-        setTotalPages(pagination?.total_pages ?? 1);
+      if (response.status && response.data) {
+        const data = response.data as { items?: unknown[]; pagination?: { total: number; total_pages?: number; totalPages?: number } };
+        const items = data?.items ?? [];
+        setDealList(items.map((item) => mapApiToUI(item as never)));
+        setTotalCount(data?.pagination?.total ?? 0);
+        setTotalPages(data?.pagination?.total_pages ?? data?.pagination?.totalPages ?? 1);
       } else {
         setDealList([]);
         setTotalCount(0);
         setTotalPages(1);
-        setError(response.message || 'Failed to fetch deals');
+        setError(response.message || ERROR_MESSAGES.FETCH_DEALS);
       }
-    } catch (err: unknown) {
+    } catch {
       if (requestSeq !== requestSeqRef.current) return;
       setDealList([]);
       setTotalCount(0);
       setTotalPages(1);
-      setError(parseErrorMessage(err, 'Failed to fetch deals'));
+      setError(ERROR_MESSAGES.FETCH_DEALS);
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { dealAdditionalFieldService } from '../../deal-settings/additional-fields/services/dealAdditionalField.service';
-import type { DealAdditionalFieldDef } from '../types/additionalField';
+import type { DealAdditionalFieldDef } from '../types/interface';
 
 let cachedDefs: DealAdditionalFieldDef[] | null = null;
 

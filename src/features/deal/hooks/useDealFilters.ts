@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
-import { INITIAL_DEAL_FILTERS } from '../constants/deal.constants';
+import { INITIAL_DEAL_FILTERS } from '../constants';
 import { useDealAdditionalFieldDefs } from './useDealAdditionalFieldDefs';
-import type { DealStatusFilters } from '../types';
+import type { DealStatusFilters } from '../types/interface';
+import type { UseDealFiltersReturn } from '../types/hook.types';
 
 const DEAL_DATE_FILTER_BY_API_MAP: Record<string, string> = {
   created: 'createdAt',
@@ -14,7 +15,7 @@ export function useDealFilters(
   onFetch: (page: number, limit: number, search: string, extraParams: Record<string, string | number>) => void,
   searchQueryRef: React.MutableRefObject<string>,
   rowsPerPageRef: React.MutableRefObject<number>,
-) {
+): UseDealFiltersReturn {
   const [filters, setFilters] = useState<DealStatusFilters>(INITIAL_DEAL_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
   const activeFiltersRef = useRef<Record<string, string | number>>({});

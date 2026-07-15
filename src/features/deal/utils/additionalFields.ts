@@ -1,4 +1,4 @@
-import type { DealAdditionalFieldDef } from '../types/additionalField';
+import type { DealAdditionalFieldDef } from '../types/interface';
 
 const FIELD_KEY_PREFIX = 'additionalField_';
 

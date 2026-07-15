@@ -1,5 +1,4 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { LEAD_SOURCE_API_ENDPOINTS } from '../constants/leadSourceApiEndpoints';
 import type { CreateLeadSourcePayload, UpdateLeadSourcePayload } from '../types/request';
 import type {
@@ -12,13 +11,7 @@ import type {
 class LeadSourceService {
   async createLeadSource(payload: CreateLeadSourcePayload): Promise<CreateLeadSourceResponse> {
     const response = await axiosInstance.post<CreateLeadSourceResponse>(LEAD_SOURCE_API_ENDPOINTS.SOURCES, payload);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-      errors: response.data.errors,
-      field: response.data.field,
-    });
+    return response.data;
   }
 
   async getLeadSources(page = 1, limit = 10, search?: string, sortOrder?: 'ASC' | 'DESC'): Promise<LeadSourceListResponse> {
@@ -26,39 +19,22 @@ class LeadSourceService {
     if (search) params.search = search;
     if (sortOrder) params.sort_order = sortOrder;
     const response = await axiosInstance.get<LeadSourceListResponse>(LEAD_SOURCE_API_ENDPOINTS.SOURCES, { params });
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 
   async getLeadSourceById(sourceId: string): Promise<LeadSourceResponse> {
     const response = await axiosInstance.get<LeadSourceResponse>(`${LEAD_SOURCE_API_ENDPOINTS.SOURCES}/${sourceId}`);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    });
+    return response.data;
   }
 
   async updateLeadSource(sourceId: string, payload: UpdateLeadSourcePayload): Promise<LeadSourceResponse> {
     const response = await axiosInstance.patch<LeadSourceResponse>(`${LEAD_SOURCE_API_ENDPOINTS.SOURCES}/${sourceId}`, payload);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-      errors: response.data.errors,
-      field: response.data.field,
-    });
+    return response.data;
   }
 
   async deleteLeadSource(sourceId: string): Promise<DeleteLeadSourceResponse> {
     const response = await axiosInstance.delete<DeleteLeadSourceResponse>(`${LEAD_SOURCE_API_ENDPOINTS.SOURCES}/${sourceId}`);
-    return ServiceResponseUtil.normalize({
-      status: response.data.status,
-      message: response.data.message,
-    });
+    return response.data;
   }
 }
 

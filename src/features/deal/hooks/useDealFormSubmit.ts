@@ -2,18 +2,10 @@ import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { buildAdditionalFieldsPayload } from '../utils/additionalFields';
 import type { DealFormData as DealDrawerFormData } from '../../../shared/types/drawers';
-import type { DealFormData, UseDealFormSubmitParams } from '../types';
+import type { DealFormData } from '../types/interface';
+import type { UseDealFormSubmitParams, UseDealFormSubmitReturn } from '../types/hook.types';
 
-/**
- * Submit handlers for the Deal add/edit Formik form.
- *
- * Follows the same pattern as useCampaignSubmitHandlers:
- * - Receives FormikHelpers so it can call setSubmitting(false) in the finally block.
- * - Builds an ID-only payload from the form values before calling the CRUD handlers.
- * - On success the drawer is closed by the caller; on failure the page-level error
- *   is set by the CRUD handler.
- */
-export function useDealFormSubmit({ editingItem, closeDrawer, handleAddDeal, handleUpdateDeal, dealAdditionalFieldDefs }: UseDealFormSubmitParams) {
+export function useDealFormSubmit({ editingItem, closeDrawer, handleAddDeal, handleUpdateDeal, dealAdditionalFieldDefs }: UseDealFormSubmitParams): UseDealFormSubmitReturn {
   const handleAddSubmit = useCallback(async (
     values: DealDrawerFormData,
     { setSubmitting }: FormikHelpers<DealDrawerFormData>,
