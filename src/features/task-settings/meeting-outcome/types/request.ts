@@ -7,5 +7,4 @@ export interface FetchMeetingOutcomesParams {
   pageNumber: number;
   limit: number;
   search?: string;
-  [key: string]: unknown;
 }

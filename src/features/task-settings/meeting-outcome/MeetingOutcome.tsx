@@ -9,7 +9,7 @@ import { useMeetingOutcomeFormSubmit } from './hooks/useMeetingOutcomeFormSubmit
 import { useMeetingOutcomeRowActions } from './hooks/useMeetingOutcomeRowActions';
 import { useDropdownMenu } from '../../../shared/hooks/useDropdownMenu';
 import { useToast } from '../../../shared/hooks/useToast';
-import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
+import { useTaskSettingsSearch } from '../hooks/useTaskSettingsSearch';
 import { SETTINGS_TABS } from '../constants/index';
 import { addMeetingOutcomeValidationSchema, editMeetingOutcomeValidationSchema } from './validations/index';
 import { ADD_MEETING_OUTCOME_INITIAL_VALUES, MEETING_OUTCOME_CSV_COLUMNS } from './constants/index';
@@ -45,7 +45,7 @@ const MeetingOutcomePage = () => {
     closeDropdown: dropdown.closeDropdown,
   });
 
-  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleExportCSV = useCallback(() => {
     exportToCsv(fetch.meetingOutcomeList, MEETING_OUTCOME_CSV_COLUMNS, 'meeting-outcomes.csv');
@@ -64,7 +64,7 @@ const MeetingOutcomePage = () => {
             searchQuery={searchValue}
             onSearchChange={handleSearchInput}
             rowsPerPage={fetch.limit}
-            onRowsPerPageChange={fetch.handleRowsPerPageChange}
+            onRowsPerPageChange={(e) => fetch.handleRowsPerPageChange(Number(e.target.value))}
           >
             <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Download size={16} />Export
