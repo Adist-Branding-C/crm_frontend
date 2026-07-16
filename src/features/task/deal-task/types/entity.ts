@@ -12,7 +12,7 @@ export interface DealTaskItem {
     id: number;
     name: string;
   } | null;
-  lead?: {
+  leadId?: {
     id: number;
     name: string;
   } | null;

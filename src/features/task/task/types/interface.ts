@@ -13,7 +13,7 @@ export interface TaskItem {
     id: number;
     name: string;
   } | null;
-  lead?: {
+  leadId?: {
     id: number;
     name: string;
   } | null;
