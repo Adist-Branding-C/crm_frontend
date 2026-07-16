@@ -2,6 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams, NavLink, Routes, Route, Navigate } from 'react-router-dom';
 import { Search, Plus, MoreVertical, Edit2, Trash2, ChevronLeft, X, Check, AlertTriangle } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import ToastNotification from '../shared/components/ToastNotification';
+import { useToast } from '../shared/hooks/useToast';
+import { facebookLogin, fetchFacebookProfile } from '../shared/utils/facebookSdk';
 import './FacebookWorkflows.css';
 
 const facebookPages = [
@@ -67,6 +70,37 @@ let workflowsStore = [
   { id: 2, name: 'Product Inquiry Handler', pageName: 'Leadist Official', formName: 'Product Inquiry Form', status: 'active', createdAt: '2026-04-18' },
   { id: 3, name: 'Support Ticket Flow', pageName: 'CRM Solutions', formName: 'Support Request Form', status: 'inactive', createdAt: '2026-04-15' },
 ];
+
+const useFacebookConnect = () => {
+  const toast = useToast();
+  const [connecting, setConnecting] = useState(false);
+  const [fbUser, setFbUser] = useState(null);
+
+  const connect = async () => {
+    setConnecting(true);
+    try {
+      await facebookLogin('public_profile,email,pages_show_list,leads_retrieval');
+      const profile = await fetchFacebookProfile();
+      setFbUser(profile);
+      toast.showToastMessage(`Connected to Facebook as ${profile.name}`, 'success');
+    } catch (error) {
+      toast.showToastMessage(error.message || 'Facebook connection failed', 'error');
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  return { connect, connecting, fbUser, toast };
+};
+
+const FacebookConnectButton = ({ connect, connecting, fbUser }) => (
+  <button className="facebook-connect-btn" onClick={connect} disabled={connecting}>
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.637H7.9v-3.577h2.3V9.275c0-2.18 1.313-3.396 3.3-3.396.955 0 1.95.16 1.95.16v2.133h-1.097c-1.078 0-1.413.676-1.413 1.37v1.645h2.393l-.383 3.577h-2.01v8.637C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+    {connecting ? 'Connecting...' : fbUser ? `Connected as ${fbUser.name}` : 'Connect with Facebook'}
+  </button>
+);
 
 const FacebookWorkflowsPage = () => {
   const navigate = useNavigate();
@@ -312,6 +346,7 @@ const FacebookWorkflowsPage = () => {
 
 const CreateWorkflowPage = () => {
   const navigate = useNavigate();
+  const { connect, connecting, fbUser, toast } = useFacebookConnect();
   const [formData, setFormData] = useState({
     name: '',
     pageId: '',
@@ -386,15 +421,10 @@ const CreateWorkflowPage = () => {
           />
         </div>
         <div className="header-actions">
-          <button className="facebook-connect-btn">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.637H7.9v-3.577h2.3V9.275c0-2.18 1.313-3.396 3.3-3.396.955 0 1.95.16 1.95.16v2.133h-1.097c-1.078 0-1.413.676-1.413 1.37v1.645h2.393l-.383 3.577h-2.01v8.637C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-            Connect with Facebook
-          </button>
+          <FacebookConnectButton connect={connect} connecting={connecting} fbUser={fbUser} />
           <label className="toggle-switch">
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               checked={formData.status === 'active'}
               onChange={(e) => handleChange('status', e.target.checked ? 'active' : 'inactive')}
             />
@@ -407,8 +437,8 @@ const CreateWorkflowPage = () => {
       <div className="workflow-form-card">
         <div className="form-group">
           <label>Workflow Name <span className="required">*</span></label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Enter workflow name"
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
@@ -420,7 +450,7 @@ const CreateWorkflowPage = () => {
         <div className="form-row">
           <div className="form-group">
             <label>Choose Facebook Page <span className="required">*</span></label>
-            <select 
+            <select
               value={formData.pageId}
               onChange={(e) => handleChange('pageId', e.target.value)}
               className={errors.pageId ? 'error' : ''}
@@ -435,7 +465,7 @@ const CreateWorkflowPage = () => {
 
           <div className="form-group">
             <label>Select Lead Form <span className="required">*</span></label>
-            <select 
+            <select
               value={formData.formId}
               onChange={(e) => handleChange('formId', e.target.value)}
               className={errors.formId ? 'error' : ''}
@@ -457,7 +487,7 @@ const CreateWorkflowPage = () => {
           <div className="mapping-rows">
             {formData.mappings.map((mapping, index) => (
               <div key={index} className="mapping-row">
-                <select 
+                <select
                   value={mapping.label}
                   onChange={(e) => updateMapping(index, 'label', e.target.value)}
                 >
@@ -466,7 +496,7 @@ const CreateWorkflowPage = () => {
                     <option key={field.value} value={field.value}>{field.label}</option>
                   ))}
                 </select>
-                <select 
+                <select
                   value={mapping.value}
                   onChange={(e) => updateMapping(index, 'value', e.target.value)}
                 >
@@ -475,7 +505,7 @@ const CreateWorkflowPage = () => {
                     <option key={field.value} value={field.value}>{field.label}</option>
                   ))}
                 </select>
-                <button 
+                <button
                   className="remove-mapping-btn"
                   onClick={() => removeMapping(index)}
                   disabled={formData.mappings.length === 1}
@@ -499,6 +529,13 @@ const CreateWorkflowPage = () => {
           </button>
         </div>
       </div>
+
+      <ToastNotification
+        isVisible={toast.showToast}
+        type={toast.toastType}
+        message={toast.toastMessage}
+        onDismiss={() => toast.setShowToast(false)}
+      />
     </div>
   );
 };
@@ -506,8 +543,9 @@ const CreateWorkflowPage = () => {
 const EditWorkflowPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { connect, connecting, fbUser, toast } = useFacebookConnect();
   const workflow = workflowsStore.find(w => w.id === Number(id));
-  
+
   const [formData, setFormData] = useState({
     name: workflow?.name || '',
     pageId: facebookPages.find(p => p.name === workflow?.pageName)?.id || '',
@@ -595,15 +633,10 @@ const EditWorkflowPage = () => {
           />
         </div>
         <div className="header-actions">
-          <button className="facebook-connect-btn">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.637H7.9v-3.577h2.3V9.275c0-2.18 1.313-3.396 3.3-3.396.955 0 1.95.16 1.95.16v2.133h-1.097c-1.078 0-1.413.676-1.413 1.37v1.645h2.393l-.383 3.577h-2.01v8.637C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-            Connect with Facebook
-          </button>
+          <FacebookConnectButton connect={connect} connecting={connecting} fbUser={fbUser} />
           <label className="toggle-switch">
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               checked={formData.status === 'active'}
               onChange={(e) => handleChange('status', e.target.checked ? 'active' : 'inactive')}
             />
@@ -616,8 +649,8 @@ const EditWorkflowPage = () => {
       <div className="workflow-form-card">
         <div className="form-group">
           <label>Workflow Name <span className="required">*</span></label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Enter workflow name"
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
@@ -711,6 +744,13 @@ const EditWorkflowPage = () => {
           </button>
         </div>
       </div>
+
+      <ToastNotification
+        isVisible={toast.showToast}
+        type={toast.toastType}
+        message={toast.toastMessage}
+        onDismiss={() => toast.setShowToast(false)}
+      />
     </div>
   );
 };
