@@ -73,7 +73,7 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
   );
 
   const updateRemark = useCallback(
-    async (id: number, remarkText: string) => {
+    async (id: string, remarkText: string) => {
       setIsUpdating(true);
       try {
         await remarkService.updateRemark(id, { remark: remarkText });
@@ -86,7 +86,7 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
   );
 
   const deleteRemark = useCallback(
-    async (id: number) => {
+    async (id: string) => {
       setIsDeleting(true);
       try {
         await remarkService.deleteRemark(id);

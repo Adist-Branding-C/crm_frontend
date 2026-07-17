@@ -614,9 +614,9 @@
 }
 
 .leaddrawer-note-user {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 .leaddrawer-note-time {
@@ -625,8 +625,8 @@
 }
 
 .leaddrawer-note-text {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
+  font-size: 0.875rem;
+  color: var(--text-main);
   line-height: 1.5;
 }
 
@@ -634,12 +634,6 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.leaddrawer-note-card:hover .leaddrawer-note-actions {
-  opacity: 1;
 }
 
 .leaddrawer-note-action {
