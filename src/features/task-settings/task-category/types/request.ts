@@ -7,5 +7,4 @@ export interface FetchTaskCategoriesParams {
   pageNumber: number;
   limit: number;
   search?: string;
-  [key: string]: unknown;
 }
