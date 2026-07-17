@@ -233,6 +233,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
       await addRemark(trimmed);
       setNewRemarkText('');
       showToastMessage(SUCCESS_MESSAGES.REMARK_ADDED, 'success');
+      onLeadUpdated?.();
     } catch {
       showToastMessage(ERROR_MESSAGES.ADD_REMARK, 'error');
     }
