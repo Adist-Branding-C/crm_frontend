@@ -2,9 +2,11 @@ import React from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { ACTION_EDIT, ACTION_ADD, ACTION_UPDATE, ACTION_SAVE, ACTION_CANCEL } from '../../constants/actionLabels';
+import Drawer from '../Drawer';
 import ValidationAlert from '../ValidationAlert';
-import type { FormField, AdminFormDrawerProps } from '../../types/crud';
+import AdminForm from './AdminForm';
+import { ACTION_EDIT, ACTION_ADD, ACTION_UPDATE, ACTION_SAVE, ACTION_CANCEL } from '../../constants/actionLabels';
+import type { AdminFormDrawerProps, FormField } from '../../types/crud';
 
 function buildValidationSchema(fields: FormField[]) {
   const shape: Record<string, Yup.StringSchema<string | undefined>> = {};
@@ -96,11 +98,11 @@ const AdminFormDrawer: React.FC<AdminFormDrawerProps> = ({ isOpen, title, fields
                           onChange={syncOnChange} />
                       )}
                       {field.type === 'switch' && (
-                        <label className="switch">
+                        <label className="toggle-switch">
                           <input type="checkbox" name={field.name}
                             checked={Boolean(values[field.name])}
                             onChange={syncOnChange} />
-                          <span className="slider round"></span>
+                          <span className="toggle-slider"></span>
                         </label>
                       )}
                       {field.type === 'select' && (

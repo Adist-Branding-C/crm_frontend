@@ -1,46 +1,92 @@
-import type { Column } from '../../../../shared/types/crud';
-import type { LeadAdditionalItem } from '../types';
+import type { FieldErrorMap, FieldErrorFallback } from '../../../../shared/types/formFieldError.types';
 
-export const columns: Column<LeadAdditionalItem>[] = [
-  { key: 'field', label: 'Field' },
-  { key: 'type', label: 'Type' },
-  {
-    key: 'dropdownValues',
-    label: 'Values',
-    render: (item) => (
-      <span>{item.dropdownValues.length > 0 ? item.dropdownValues.join(', ') : '-'}</span>
-    ),
-  },
-  {
-    key: 'inFilter',
-    label: 'in filter',
-    render: (item) => (
-      <span className={`badge ${item.inFilter ? 'badge-success' : 'badge-secondary'}`}>
-        {item.inFilter ? 'YES' : 'NO'}
-      </span>
-    ),
-  },
-  {
-    key: 'inList',
-    label: 'in list',
-    render: (item) => (
-      <span className={`badge ${item.inList ? 'badge-success' : 'badge-secondary'}`}>
-        {item.inList ? 'YES' : 'NO'}
-      </span>
-    ),
-  },
-  {
-    key: 'required',
-    label: 'Required',
-    render: (item) => (
-      <span className={`badge ${item.required ? 'badge-success' : 'badge-secondary'}`}>
-        {item.required ? 'YES' : 'NO'}
-      </span>
-    ),
-  },
-  {
-    key: 'purpose',
-    label: 'Purpose',
-    render: (item) => <span>{item.purposeName}</span>,
-  },
+/**
+ * "Added By" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_ADDED_BY = 'Added By';
+
+/**
+ * "Field" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_FIELD = 'Field';
+
+/**
+ * "Type" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_TYPE = 'Type';
+
+/**
+ * "Values" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_VALUES = 'Values';
+
+/**
+ * "in filter" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_IN_FILTER = 'in filter';
+
+/**
+ * "in list" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_IN_LIST = 'in list';
+
+/**
+ * "Required" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_REQUIRED = 'Required';
+
+/**
+ * "Purpose" column header for the lead additional-fields table.
+ *
+ * Used by:
+ * - LeadAdditionalPage
+ */
+export const LEAD_ADDITIONAL_COLUMN_PURPOSE = 'Purpose';
+
+/**
+ * Maps backend lead-additional-field field names to frontend Formik field names. The backend's
+ * "values" field is the frontend's "dropdownValues" - see AdditionalFieldFormData.
+ *
+ * Used by:
+ * - useLeadAdditionalCrud (create/update error handling, via shared applyFieldErrors)
+ */
+export const LEAD_ADDITIONAL_FIELD_MAP: FieldErrorMap = {
+  name: 'name',
+  fieldType: 'fieldType',
+  purposeId: 'purposeId',
+  values: 'dropdownValues',
+};
+
+/**
+ * Keyword -> field fallback used when the backend returns a plain message with no field-scoped
+ * errors (e.g. a generic "Field name already exists" string). Order matters; first match wins.
+ *
+ * Used by:
+ * - useLeadAdditionalCrud (create/update error handling, via shared applyFieldErrors)
+ */
+export const LEAD_ADDITIONAL_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
+  { keyword: 'name', field: 'name' },
+  { keyword: 'purpose', field: 'purposeId' },
+  { keyword: 'type', field: 'fieldType' },
 ];

@@ -42,35 +42,26 @@ const ActionDropdownPortal = ({ isOpen, buttonRect, onClose, children }) => {
     const rect = buttonRect;
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
+    const margin = 8;
 
     const spaceBelow = viewportHeight - rect.bottom;
     const spaceAbove = rect.top;
-    const spaceRight = viewportWidth - rect.right;
-    const spaceLeft = rect.left;
 
-    let vertical = 'bottom';
-    let horizontal = 'right';
-
-    if (spaceBelow < DROPDOWN_HEIGHT && spaceAbove > spaceBelow) {
-      vertical = 'top';
-    }
-
-    if (spaceRight < DROPDOWN_WIDTH && spaceLeft > spaceRight) {
-      horizontal = 'left';
-    }
-
-    let top, left;
-    if (vertical === 'bottom') {
+    let top;
+    if (spaceBelow >= DROPDOWN_HEIGHT || spaceBelow >= spaceAbove) {
       top = rect.bottom + 4;
     } else {
       top = rect.top - DROPDOWN_HEIGHT - 4;
     }
+    top = Math.max(margin, Math.min(top, viewportHeight - DROPDOWN_HEIGHT - margin));
 
-    if (horizontal === 'right') {
-      left = rect.right - DROPDOWN_WIDTH;
-    } else {
-      left = rect.left;
-    }
+    // Align the dropdown's left edge to the button when there's room to its
+    // right (natural for buttons near the left edge, e.g. the "Action"
+    // column); otherwise anchor the dropdown's right edge to the button so it
+    // extends leftward instead of overflowing the viewport.
+    const spaceRight = viewportWidth - rect.left;
+    let left = spaceRight >= DROPDOWN_WIDTH ? rect.left : rect.right - DROPDOWN_WIDTH;
+    left = Math.max(margin, Math.min(left, viewportWidth - DROPDOWN_WIDTH - margin));
 
     setPosition({ top, left });
   }, [buttonRect]);

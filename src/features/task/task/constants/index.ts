@@ -1,13 +1,23 @@
-import type { TaskFormData } from '../types/index';
-
+/**
+ * REST endpoints for the Task entity.
+ *
+ * Used by:
+ * - TaskApiService (task/task/services/task.api.ts)
+ */
 export const TASK_API_ENDPOINTS = {
-  GET_ALL: '/tasks',
-  CREATE: '/tasks',
-  UPDATE: (id: number) => `/tasks/${id}`,
-  DELETE: (id: number) => `/tasks/${id}`,
+  BASE: '/tasks',
+  BY_ID: (id: number) => `/tasks/${id}`,
 };
 
-export const ADD_TASK_INITIAL_VALUES: TaskFormData = {
+/**
+ * Blank form values for the Add Task drawer, and the fallback used by
+ * `TaskMapper.toFormValues` when there's no editing item yet.
+ *
+ * Used by:
+ * - TaskPage (Add drawer initial values)
+ * - TaskMapper.toFormValues
+ */
+export const ADD_TASK_INITIAL_VALUES = {
   title: '',
   description: '',
   categoryId: '',

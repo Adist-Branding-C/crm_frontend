@@ -5,6 +5,7 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import { PRIORITY_OPTIONS } from '../constants/priorityOptions';
 import { STATUS_OPTIONS } from '../constants/statusOptions';
 import { scrollToFirstError } from '../utils/scrollToFirstError';
+import { getFieldClassName } from '../utils/fieldClassName';
 import type { GenericTaskFormProps } from '../types/genericTaskForm.types';
 
 const GenericTaskForm = ({
@@ -47,13 +48,15 @@ const GenericTaskForm = ({
             }
           }
 
-          const fieldClass = (name: string) =>
-            `form-control${(touched as Record<string, boolean | undefined>)[name] && (errors as Record<string, string | undefined>)[name] ? ' input-error' : ''}`;
+          const fieldClass = (name: string) => getFieldClassName(
+            name,
+            touched as Record<string, boolean | undefined>,
+            errors as Record<string, string | undefined>,
+          );
 
-          const formError = error;
           return (
             <Form>
-              {formError && <ErrorMessage message={formError} />}
+              {error && <ErrorMessage message={error} />}
 
               <div className="form-group">
                 <label>Title <span className="text-danger">*</span></label>
@@ -62,7 +65,7 @@ const GenericTaskForm = ({
               </div>
 
               <div className="form-group">
-                <label>Description</label>
+                <label>Description <span className="text-danger">*</span></label>
                 <Field as="textarea" name="description" className={fieldClass('description')} placeholder="Enter description" rows={3} />
                 <FormikError name="description" component="small" className="field-error-text" />
               </div>
@@ -107,7 +110,7 @@ const GenericTaskForm = ({
               </div>
 
               <div className="form-group">
-                <label>Lead</label>
+                <label>Lead <span className="text-danger">*</span></label>
                 <Field as="select" name="leadId" className={fieldClass('leadId')}>
                   <option value="">{leadLoading ? 'Loading leads...' : 'Select a lead'}</option>
                   {(leadOptions ?? []).map(lead => (

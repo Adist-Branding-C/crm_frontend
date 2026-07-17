@@ -1,10 +1,11 @@
 import React from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { ACTION_CONFIRM, ACTION_CANCEL } from '../../constants/actionLabels';
 import { LABEL_CONFIRM_DELETE } from '../../constants/labels';
 import type { AdminDeleteModalProps } from '../../types/crud';
+import ValidationAlert from '../ValidationAlert';
 
-const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, onConfirm, onClose, isDeleting }) => {
+const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, error, onConfirm, onClose }) => {
   if (!isOpen) return null;
 
   return (
@@ -12,9 +13,10 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h5>{LABEL_CONFIRM_DELETE}</h5>
-          <button className="modal-close" onClick={onClose}><X size={20} /></button>
+          <button type="button" className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
         <div className="modal-body">
+          <ValidationAlert message={error || null} />
           <p className="delete-warning">
             {itemName ? (
               <>Are you sure you want to delete <strong>{itemName}</strong>{itemType ? ` ${itemType}` : ''}?</>
@@ -24,10 +26,8 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
           </p>
         </div>
         <div className="modal-footer">
-          <button className="btn btn-danger" onClick={onConfirm} disabled={isDeleting}>
-            {isDeleting ? <><Loader2 size={16} className="spin" /> Deleting...</> : ACTION_CONFIRM}
-          </button>
-          <button className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
+          <button type="button" className="btn btn-danger" onClick={onConfirm}>{ACTION_CONFIRM}</button>
+          <button type="button" className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
         </div>
       </div>
     </div>

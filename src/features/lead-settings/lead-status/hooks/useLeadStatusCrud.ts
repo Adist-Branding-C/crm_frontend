@@ -1,88 +1,100 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import type { FormikHelpers } from 'formik';
 import { leadStatusService } from '../services';
 import { getErrorMessage } from '../../../../shared/utils/error';
+import { useSubmitErrorHandler } from '../../../../shared/hooks/useSubmitErrorHandler';
 import { ERROR_MESSAGES } from '../../constants/messages';
-import { mapApiToUI } from '../mappers/leadStatus.mapper';
-import type { LeadStatusItem, CreateLeadStatusPayload, UpdateLeadStatusPayload } from '../types';
-import type { UseLeadStatusCrudOptions } from '../types/hook.types';
+import { LEAD_STATUS_FIELD_MAP, LEAD_STATUS_FIELD_ERROR_FALLBACKS } from '../constants';
+import type { LeadStatusFormData } from '../types/interface';
+import type { UseLeadStatusCrudParams } from '../types/use-lead-status-crud.types';
 
-export function useLeadStatusCrud({
-  onError,
-  onDeleteSuccess,
-  onDropdownClose,
-  refetch,
-}: UseLeadStatusCrudOptions) {
-  const [items, setItems] = useState<LeadStatusItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<LeadStatusItem | null>(null);
+/**
+ * Lead status create/update/delete API orchestration.
+ *
+ * Notes:
+ * - Takes the list/pagination setters it needs to drive (loading, error, refresh, reset-to-page-1)
+ *   as a narrow dependency rather than owning or re-exporting the pagination hook itself -
+ *   LeadStatusPage.tsx owns useTableData directly and reads its full state from there.
+ */
+export function useLeadStatusCrud({ table }: UseLeadStatusCrudParams) {
+  const submitError = useSubmitErrorHandler({
+    fieldMap: LEAD_STATUS_FIELD_MAP,
+    fieldFallbacks: LEAD_STATUS_FIELD_ERROR_FALLBACKS,
+    setError: table.setError,
+  });
 
-  const fetchData = useCallback(async (page: number, limit: number, search: string) => {
-    setIsLoading(true);
-    onError(null);
+  const handleCreateLeadStatus = useCallback(async (
+    values: LeadStatusFormData,
+    { setSubmitting, resetForm, setFieldError }: FormikHelpers<LeadStatusFormData>,
+  ) => {
+    table.setError('');
+    table.setIsLoading(true);
     try {
-      const response = await leadStatusService.getLeadStatuses(page, limit, search || undefined);
-      setItems((response.data.items || []).map(mapApiToUI));
-      setTotal(response.data.pagination?.total ?? 0);
-      setTotalPages(response.data.pagination?.total_pages ?? 1);
+      const response = await leadStatusService.createLeadStatus({
+        status: values.status.trim(),
+        color: values.color,
+        conversion: values.useForConversion,
+      });
+      if (response.status) {
+        table.setPageNumber(1);
+        table.refresh();
+        resetForm();
+        return true;
+      }
+      submitError.handleErrorResponse(response, setFieldError, ERROR_MESSAGES.CREATE_LEAD_STATUS);
+      return false;
     } catch (err: unknown) {
-      onError(getErrorMessage(err, ERROR_MESSAGES.FETCH_LEAD_STATUSES));
+      submitError.handleThrownError(err, setFieldError, ERROR_MESSAGES.CREATE_LEAD_STATUS);
+      return false;
     } finally {
-      setIsLoading(false);
+      table.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, [onError]);
+  }, [table, submitError]);
 
-  const createStatus = useCallback(async (payload: CreateLeadStatusPayload) => {
-    const response = await leadStatusService.createLeadStatus(payload);
-    return response;
-  }, []);
-
-  const updateStatus = useCallback(async (id: string, payload: UpdateLeadStatusPayload) => {
-    const response = await leadStatusService.updateLeadStatus(id, payload);
-    return response;
-  }, []);
-
-  const deleteStatus = useCallback(async (id: string) => {
-    const response = await leadStatusService.deleteLeadStatus(id);
-    return response;
-  }, []);
-
-  const handleDeleteClick = useCallback((item: LeadStatusItem) => {
-    setDeletingItem(item);
-    onDropdownClose();
-  }, [onDropdownClose]);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingItem) return;
-    setIsDeleting(true);
-    onError(null);
+  const handleUpdateLeadStatus = useCallback(async (
+    id: string,
+    values: LeadStatusFormData,
+    { setSubmitting, setFieldError }: FormikHelpers<LeadStatusFormData>,
+  ) => {
+    table.setError('');
+    table.setIsLoading(true);
     try {
-      await deleteStatus(String(deletingItem.id));
-      setDeletingItem(null);
-      await refetch();
-      onDeleteSuccess('Lead Status deleted successfully.');
+      const response = await leadStatusService.updateLeadStatus(id, {
+        status: values.status.trim(),
+        color: values.color,
+        conversion: values.useForConversion,
+      });
+      if (response.status) {
+        table.refresh();
+        return true;
+      }
+      submitError.handleErrorResponse(response, setFieldError, ERROR_MESSAGES.UPDATE_LEAD_STATUS);
+      return false;
     } catch (err: unknown) {
-      onError(getErrorMessage(err, ERROR_MESSAGES.DELETE_LEAD_STATUS));
-      setDeletingItem(null);
+      submitError.handleThrownError(err, setFieldError, ERROR_MESSAGES.UPDATE_LEAD_STATUS);
+      return false;
     } finally {
-      setIsDeleting(false);
+      table.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, [deletingItem, deleteStatus, onError, onDeleteSuccess, refetch]);
+  }, [table, submitError]);
 
-  return {
-    items,
-    total,
-    totalPages,
-    isLoading,
-    isDeleting,
-    deletingItem,
-    setDeletingItem,
-    fetchData,
-    createStatus,
-    updateStatus,
-    handleDeleteClick,
-    handleConfirmDelete,
-  };
+  const handleDeleteLeadStatus = useCallback(async (id: string) => {
+    table.setError('');
+    try {
+      const response = await leadStatusService.deleteLeadStatus(id);
+      if (response.status) {
+        table.refresh();
+        return true;
+      }
+      table.setError(response.message || ERROR_MESSAGES.DELETE_LEAD_STATUS);
+      return false;
+    } catch (err: unknown) {
+      table.setError(getErrorMessage(err, ERROR_MESSAGES.DELETE_LEAD_STATUS));
+      return false;
+    }
+  }, [table]);
+
+  return { handleCreateLeadStatus, handleUpdateLeadStatus, handleDeleteLeadStatus };
 }

@@ -1,29 +1,18 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
+import { useLookupOptions } from '../../../../shared/hooks/useLookupOptions';
 import { taskService } from '../services/taskService';
-import type { StaffOption } from '../types/genericTaskForm.types';
+import type { StaffOption } from '../types/options';
 
 export function useStaffOptions() {
-  const [staffOptions, setStaffOptions] = useState<StaffOption[]>([]);
-  const [staffLoading, setStaffLoading] = useState(false);
-  const staffLoaded = useRef(false);
-
-  const loadStaff = useCallback(async () => {
-    if (staffLoaded.current) return;
-    staffLoaded.current = true;
-    setStaffLoading(true);
-    try {
-      const staffRes = await taskService.getStaff();
-      if (staffRes.status && staffRes.data?.items) {
-        setStaffOptions(
-          staffRes.data.items.map((s: { id: number; name: string }) => ({ value: s.id, label: s.name }))
-        );
-      }
-    } catch {
-      staffLoaded.current = false;
-    } finally {
-      setStaffLoading(false);
+  const fetchStaff = useCallback(async (): Promise<StaffOption[]> => {
+    const staffRes = await taskService.getStaff();
+    if (staffRes.status && staffRes.data?.items) {
+      return staffRes.data.items.map((s: { id: number; name: string }) => ({ value: s.id, label: s.name }));
     }
+    return [];
   }, []);
+
+  const { options: staffOptions, isLoading: staffLoading, load: loadStaff } = useLookupOptions(fetchStaff);
 
   return { staffOptions, staffLoading, loadStaff };
 }

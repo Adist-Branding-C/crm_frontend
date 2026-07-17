@@ -1,10 +1,5 @@
-export type {
-  CallStatusItem,
-  CallStatusFormData,
-  CallStatusApiResponse,
-  CallStatusTableProps,
-  CallStatusActionsProps,
-  AddCallStatusDrawerProps,
-  EditCallStatusDrawerProps,
-  DeleteCallStatusDialogProps,
-} from './callStatus.types';
+export * from './interface';
+export * from './request';
+export * from './response';
+export * from './props';
+export * from './hook';

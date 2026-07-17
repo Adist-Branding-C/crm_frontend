@@ -397,6 +397,16 @@
   outline: none;
 }
 
+.leaddrawer-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.leaddrawer-edit-field .leaddrawer-note-edit-actions {
+  margin-bottom: 0;
+}
+
 .leaddrawer-detail-full {
   grid-column: 1 / -1;
 }

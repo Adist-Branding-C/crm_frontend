@@ -9,6 +9,10 @@ import AdminDeleteModal from '../shared/components/crud/AdminDeleteModal';
 import { useLeadRemarks } from '../features/enquiries/hooks/useLeadRemarks';
 import { useLeadTasks } from '../features/enquiries/hooks/useLeadTasks';
 import { useLeadTaskDropdowns } from '../features/enquiries/hooks/useLeadTaskDropdowns';
+import { useLeadFormOptions } from '../features/enquiries/hooks/useLeadFormOptions';
+import { leadDataService } from '../features/enquiries/services/leadDataService';
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../features/enquiries/constants/messages';
+import EditableDetailField from '../shared/components/drawers/EditableDetailField';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../shared/utils/dateUtils';
 
@@ -87,12 +91,45 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
     staffError,
   } = useLeadTaskDropdowns(showTaskDrawer);
 
+  const {
+    staffOptions: agentOptions,
+    purposeOptions,
+    typeOptions,
+    statusOptions,
+    sourceOptions,
+    additionalFieldDefs,
+  } = useLeadFormOptions(isOpen);
+
   if (!isVisible || !lead) return null;
 
   const showToastMessage = (message, type) => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
+  };
+
+  const toSelectOptions = (options) => options.map((o) => ({ value: o.value, label: o.label }));
+
+  const findOptionValueByLabel = (options, label) => {
+    if (!label) return '';
+    return options.find((o) => o.label === label)?.value ?? '';
+  };
+
+  const saveLeadField = async (payload) => {
+    if (!lead?.leadId) return false;
+    try {
+      const res = await leadDataService.updateLead(lead.leadId, payload);
+      if (res.status) {
+        showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
+        onLeadUpdated?.();
+        return true;
+      }
+      showToastMessage(res.message || ERROR_MESSAGES.UPDATE_LEAD, 'error');
+      return false;
+    } catch {
+      showToastMessage(ERROR_MESSAGES.UPDATE_LEAD, 'error');
+      return false;
+    }
   };
 
   const handleAddTask = async (formData) => {
@@ -304,41 +341,91 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
               <div className="leaddrawer-section">
                 <div className="leaddrawer-section-title">More Info</div>
                 <div className="leaddrawer-details-grid">
-                  <div className="leaddrawer-detail-card">
-                    <div className="leaddrawer-detail-label">Source</div>
-                    <div className="leaddrawer-detail-value">{lead.source || '-'}</div>
-                  </div>
-                  <div className="leaddrawer-detail-card">
-                    <div className="leaddrawer-detail-label">Purpose</div>
-                    <div className="leaddrawer-detail-value">{lead.purpose || '-'}</div>
-                  </div>
-                  <div className="leaddrawer-detail-card">
-                    <div className="leaddrawer-detail-label">Status</div>
-                    <div className="leaddrawer-detail-value">{lead.status || '-'}</div>
-                  </div>
-                  <div className="leaddrawer-detail-card">
-                    <div className="leaddrawer-detail-label">Assigned To</div>
-                    <div className="leaddrawer-detail-value">{lead.assignedTo || '-'}</div>
-                  </div>
-                  <div className="leaddrawer-detail-card">
-                    <div className="leaddrawer-detail-label">Type</div>
-                    <div className="leaddrawer-detail-value">{lead.type || '-'}</div>
-                  </div>
-                  <div className="leaddrawer-detail-card">
-                    <div className="leaddrawer-detail-label">Follow Up</div>
-                    <div className="leaddrawer-detail-value">{formatFollowUpDate(lead.nextFollowUp)}</div>
-                  </div>
-                  <div className="leaddrawer-detail-card leaddrawer-detail-full">
-                    <div className="leaddrawer-detail-label">Location</div>
-                    <div className="leaddrawer-detail-value">{lead.location || '-'}</div>
-                  </div>
+                  <EditableDetailField
+                    label="Source"
+                    displayValue={lead.source || ''}
+                    editValue={findOptionValueByLabel(sourceOptions, lead.source)}
+                    type="select"
+                    options={toSelectOptions(sourceOptions)}
+                    onSave={(v) => saveLeadField({ sourceId: v })}
+                  />
+                  <EditableDetailField
+                    label="Purpose"
+                    displayValue={lead.purpose || ''}
+                    editValue={findOptionValueByLabel(purposeOptions, lead.purpose)}
+                    type="select"
+                    options={toSelectOptions(purposeOptions)}
+                    onSave={(v) => saveLeadField({ purposeId: v })}
+                  />
+                  <EditableDetailField
+                    label="Status"
+                    displayValue={lead.status || ''}
+                    editValue={findOptionValueByLabel(statusOptions, lead.status)}
+                    type="select"
+                    options={toSelectOptions(statusOptions)}
+                    onSave={(v) => saveLeadField({ statusId: v })}
+                  />
+                  <EditableDetailField
+                    label="Assigned To"
+                    displayValue={lead.assignedTo || ''}
+                    editValue={findOptionValueByLabel(agentOptions, lead.assignedTo)}
+                    type="select"
+                    options={toSelectOptions(agentOptions)}
+                    onSave={(v) => saveLeadField({ agentId: v })}
+                  />
+                  <EditableDetailField
+                    label="Type"
+                    displayValue={lead.type || ''}
+                    editValue={findOptionValueByLabel(typeOptions, lead.type)}
+                    type="select"
+                    options={toSelectOptions(typeOptions)}
+                    onSave={(v) => saveLeadField({ typeId: v })}
+                  />
+                  <EditableDetailField
+                    label="Follow Up"
+                    displayValue={formatFollowUpDate(lead.nextFollowUp)}
+                    editValue={lead.nextFollowUp ? lead.nextFollowUp.slice(0, 10) : ''}
+                    type="date"
+                    onSave={(v) => saveLeadField({ nextFollowUp: v })}
+                  />
+                  <EditableDetailField
+                    label="Location"
+                    displayValue={lead.location || ''}
+                    editValue={lead.location || ''}
+                    type="text"
+                    fullWidth
+                    onSave={(v) => saveLeadField({ location: v })}
+                  />
 
-                  {(lead.additionalFields || []).map((af) => (
-                    <div key={af.fieldId} className="leaddrawer-detail-card">
-                      <div className="leaddrawer-detail-label">{af.name}</div>
-                      <div className="leaddrawer-detail-value">{af.value != null ? af.value : '-'}</div>
-                    </div>
-                  ))}
+                  {(lead.additionalFields || []).map((af) => {
+                    const def = additionalFieldDefs.find((d) => d.name === af.name);
+                    const fieldType = (def?.fieldType || 'text').toLowerCase();
+                    const isCheckbox = fieldType === 'checkbox';
+                    const options = (def?.values || []).map((v) => ({ value: v, label: v }));
+                    const editValue = isCheckbox
+                      ? (af.value ? af.value.split(',').map((v) => v.trim()) : [])
+                      : (af.value || '');
+                    const inputType =
+                      fieldType === 'dropdown' ? 'select' : (fieldType === 'date' || fieldType === 'datetime') ? 'date' : isCheckbox ? 'checkbox' : 'text';
+
+                    return (
+                      <EditableDetailField
+                        key={af.fieldId}
+                        label={af.name}
+                        displayValue={af.value != null ? af.value : ''}
+                        editValue={editValue}
+                        type={inputType}
+                        options={options}
+                        onSave={(v) => {
+                          const nextValue = Array.isArray(v) ? v.join(',') : v;
+                          const nextFields = (lead.additionalFields || []).map((f) =>
+                            f.fieldId === af.fieldId ? { fieldId: f.fieldId, value: nextValue } : { fieldId: f.fieldId, value: f.value }
+                          );
+                          return saveLeadField({ additionalFields: nextFields });
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>

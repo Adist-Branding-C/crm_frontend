@@ -51,7 +51,9 @@ export interface DealFormData {
   mobile: string;
   amount: string;
   status: string;
+  statusId?: string | number;
   type: string;
+  typeId?: string | number;
   startDate: string;
   endDate: string;
   assignAgent: string;
@@ -91,6 +93,7 @@ export interface AddLeadDrawerProps {
 export interface AddLeadFormValues {
   name: string;
   phone: string;
+  countryCode: string;
   email: string;
   agentId: string;
   purposeId: string;
@@ -123,10 +126,12 @@ export interface ActivityLogItem {
 export interface LeadDetailDrawerProps {
   lead: {
     id: number;
+    leadId?: string;
     name: string;
     phone: string;
     email?: string;
     location?: string;
+    address?: string;
     assignedTo: string;
     purpose: string;
     type: string;

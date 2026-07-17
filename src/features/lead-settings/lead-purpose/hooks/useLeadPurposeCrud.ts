@@ -1,88 +1,92 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import type { FormikHelpers } from 'formik';
 import { leadPurposeService } from '../services';
 import { getErrorMessage } from '../../../../shared/utils/error';
+import { useSubmitErrorHandler } from '../../../../shared/hooks/useSubmitErrorHandler';
 import { ERROR_MESSAGES } from '../../constants/messages';
-import { mapApiToUI } from '../mappers/leadPurpose.mapper';
-import type { LeadPurposeItem, CreateLeadPurposePayload, UpdateLeadPurposePayload } from '../types';
-import type { UseLeadPurposeCrudOptions } from '../types/hook.types';
+import { LEAD_PURPOSE_FIELD_MAP, LEAD_PURPOSE_FIELD_ERROR_FALLBACKS } from '../constants';
+import type { LeadPurposeFormData } from '../types/interface';
+import type { UseLeadPurposeCrudParams } from '../types/use-lead-purpose-crud.types';
 
-export function useLeadPurposeCrud({
-  onError,
-  onDeleteSuccess,
-  onDropdownClose,
-  refetch,
-}: UseLeadPurposeCrudOptions) {
-  const [items, setItems] = useState<LeadPurposeItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deletingItem, setDeletingItem] = useState<LeadPurposeItem | null>(null);
+/**
+ * Lead purpose create/update/delete API orchestration.
+ *
+ * Notes:
+ * - Takes the list/pagination setters it needs to drive (loading, error, refresh, reset-to-page-1)
+ *   as a narrow dependency rather than owning or re-exporting the pagination hook itself -
+ *   LeadPurposePage.tsx owns useTableData directly and reads its full state from there.
+ */
+export function useLeadPurposeCrud({ table }: UseLeadPurposeCrudParams) {
+  const submitError = useSubmitErrorHandler({
+    fieldMap: LEAD_PURPOSE_FIELD_MAP,
+    fieldFallbacks: LEAD_PURPOSE_FIELD_ERROR_FALLBACKS,
+    setError: table.setError,
+  });
 
-  const fetchData = useCallback(async (page: number, limit: number, search: string) => {
-    setIsLoading(true);
-    onError(null);
+  const handleCreateLeadPurpose = useCallback(async (
+    values: LeadPurposeFormData,
+    { setSubmitting, resetForm, setFieldError }: FormikHelpers<LeadPurposeFormData>,
+  ) => {
+    table.setError('');
+    table.setIsLoading(true);
     try {
-      const response = await leadPurposeService.getLeadPurposes(page, limit, search || undefined);
-      setItems((response.data.items || []).map(mapApiToUI));
-      setTotal(response.data.pagination?.total ?? 0);
-      setTotalPages(response.data.pagination?.total_pages ?? 1);
+      const response = await leadPurposeService.createLeadPurpose({ purpose: values.title.trim() });
+      if (response.status) {
+        table.setPageNumber(1);
+        table.refresh();
+        resetForm();
+        return true;
+      }
+      submitError.handleErrorResponse(response, setFieldError, ERROR_MESSAGES.CREATE_LEAD_PURPOSE);
+      return false;
     } catch (err: unknown) {
-      onError(getErrorMessage(err, ERROR_MESSAGES.FETCH_LEAD_PURPOSES));
+      submitError.handleThrownError(err, setFieldError, ERROR_MESSAGES.CREATE_LEAD_PURPOSE);
+      return false;
     } finally {
-      setIsLoading(false);
+      table.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, [onError]);
+  }, [table, submitError]);
 
-  const createPurpose = useCallback(async (payload: CreateLeadPurposePayload) => {
-    const response = await leadPurposeService.createLeadPurpose(payload);
-    return response;
-  }, []);
-
-  const updatePurpose = useCallback(async (id: string, payload: UpdateLeadPurposePayload) => {
-    const response = await leadPurposeService.updateLeadPurpose(id, payload);
-    return response;
-  }, []);
-
-  const deletePurpose = useCallback(async (id: string) => {
-    const response = await leadPurposeService.deleteLeadPurpose(id);
-    return response;
-  }, []);
-
-  const handleDeleteClick = useCallback((item: LeadPurposeItem) => {
-    setDeletingItem(item);
-    onDropdownClose();
-  }, [onDropdownClose]);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingItem) return;
-    setIsDeleting(true);
-    onError(null);
+  const handleUpdateLeadPurpose = useCallback(async (
+    id: string,
+    values: LeadPurposeFormData,
+    { setSubmitting, setFieldError }: FormikHelpers<LeadPurposeFormData>,
+  ) => {
+    table.setError('');
+    table.setIsLoading(true);
     try {
-      await deletePurpose(String(deletingItem.id));
-      setDeletingItem(null);
-      await refetch();
-      onDeleteSuccess('Lead Purpose deleted successfully.');
+      const response = await leadPurposeService.updateLeadPurpose(id, { purpose: values.title.trim() });
+      if (response.status) {
+        table.refresh();
+        return true;
+      }
+      submitError.handleErrorResponse(response, setFieldError, ERROR_MESSAGES.UPDATE_LEAD_PURPOSE);
+      return false;
     } catch (err: unknown) {
-      onError(getErrorMessage(err, ERROR_MESSAGES.DELETE_LEAD_PURPOSE));
-      setDeletingItem(null);
+      submitError.handleThrownError(err, setFieldError, ERROR_MESSAGES.UPDATE_LEAD_PURPOSE);
+      return false;
     } finally {
-      setIsDeleting(false);
+      table.setIsLoading(false);
+      setSubmitting(false);
     }
-  }, [deletingItem, deletePurpose, onError, onDeleteSuccess, refetch]);
+  }, [table, submitError]);
 
-  return {
-    items,
-    total,
-    totalPages,
-    isLoading,
-    isDeleting,
-    deletingItem,
-    setDeletingItem,
-    fetchData,
-    createPurpose,
-    updatePurpose,
-    handleDeleteClick,
-    handleConfirmDelete,
-  };
+  const handleDeleteLeadPurpose = useCallback(async (id: string) => {
+    table.setError('');
+    try {
+      const response = await leadPurposeService.deleteLeadPurpose(id);
+      if (response.status) {
+        table.refresh();
+        return true;
+      }
+      table.setError(response.message || ERROR_MESSAGES.DELETE_LEAD_PURPOSE);
+      return false;
+    } catch (err: unknown) {
+      table.setError(getErrorMessage(err, ERROR_MESSAGES.DELETE_LEAD_PURPOSE));
+      return false;
+    }
+  }, [table]);
+
+  return { handleCreateLeadPurpose, handleUpdateLeadPurpose, handleDeleteLeadPurpose };
 }

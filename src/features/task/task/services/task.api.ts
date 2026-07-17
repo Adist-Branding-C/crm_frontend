@@ -1,29 +1,48 @@
 import axiosInstance from '../../../../api/axiosInstance';
-import { ApiResponse } from '../../../../shared/types/common';
-import { TASK_API_ENDPOINTS } from '../constants/index';
-import type { TaskItem, TaskFormData } from '../types/index';
+import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
+import { QueryMapper } from '../../../../shared/mappers/query.mapper';
+import { TASK_API_ENDPOINTS } from '../constants';
+import type { ApiResponse } from '../../../../shared/types/common';
+import type { TaskListParams } from '../../shared/types/listParams';
+import type { TaskItem, TaskFormData } from '../types';
 
 export class TaskApiService {
-  async fetchAll(params: Record<string, string | number | undefined> = {}): Promise<ApiResponse<TaskItem[]>> {
+  async getAll(params: TaskListParams): Promise<ApiResponse<TaskItem[]>> {
     const response = await axiosInstance.get<ApiResponse<TaskItem[]>>(
-      TASK_API_ENDPOINTS.GET_ALL,
-      { params }
+      TASK_API_ENDPOINTS.BASE,
+      { params: QueryMapper.toQuery(params) },
     );
-    return response.data;
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
   }
 
   async create(data: TaskFormData): Promise<ApiResponse<TaskItem>> {
-    const response = await axiosInstance.post<ApiResponse<TaskItem>>(TASK_API_ENDPOINTS.CREATE, data);
-    return response.data;
+    const response = await axiosInstance.post<ApiResponse<TaskItem>>(TASK_API_ENDPOINTS.BASE, data);
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
   }
 
   async update(id: number, data: TaskFormData): Promise<ApiResponse<TaskItem>> {
-    const response = await axiosInstance.patch<ApiResponse<TaskItem>>(TASK_API_ENDPOINTS.UPDATE(id), data);
-    return response.data;
+    const response = await axiosInstance.patch<ApiResponse<TaskItem>>(TASK_API_ENDPOINTS.BY_ID(id), data);
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
   }
 
   async delete(id: number): Promise<ApiResponse<null>> {
-    const response = await axiosInstance.delete<ApiResponse<null>>(TASK_API_ENDPOINTS.DELETE(id));
-    return response.data;
+    const response = await axiosInstance.delete<ApiResponse<null>>(TASK_API_ENDPOINTS.BY_ID(id));
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
   }
 }

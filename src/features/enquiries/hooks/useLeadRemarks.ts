@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { remarkService } from '../services/remarkService';
-import type { Remark } from '../types/remark.types';
+import type { Remark } from '../types';
+import { ERROR_MESSAGES } from '../constants/messages';
 
 export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, activeTab: string) {
   const [remarks, setRemarks] = useState<Remark[]>([]);
@@ -32,7 +33,7 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
           fetchedRef.current = true;
         }
       } catch {
-        if (!cancelled) setError('Failed to load remarks.');
+        if (!cancelled) setError(ERROR_MESSAGES.FETCH_REMARKS);
       } finally {
         if (!cancelled) setIsLoading(false);
       }

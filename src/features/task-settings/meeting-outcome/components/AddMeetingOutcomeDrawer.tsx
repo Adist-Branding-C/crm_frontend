@@ -2,12 +2,11 @@ import { useEffect, useRef } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import { scrollToFirstError } from '../../utils/scrollToFirstError';
+import { ScrollToFirstError } from '../../../../shared/components/ScrollToFirstError';
 import type { AddMeetingOutcomeDrawerProps } from '../types/index';
 
 const AddMeetingOutcomeDrawer = ({ isOpen, onClose, validationSchema, initialValues, onSubmit, isLoading, error, isEditing }: AddMeetingOutcomeDrawerProps) => {
   const drawerBodyRef = useRef<HTMLDivElement>(null);
-  const prevSubmitCountRef = useRef(0);
 
   useEffect(() => {
     if (error) {
@@ -34,18 +33,12 @@ const AddMeetingOutcomeDrawer = ({ isOpen, onClose, validationSchema, initialVal
             onSubmit={onSubmit}
           >
             {({ errors, touched, dirty, submitCount, isSubmitting }) => {
-              if (submitCount > prevSubmitCountRef.current) {
-                prevSubmitCountRef.current = submitCount;
-                if (Object.keys(errors).length > 0) {
-                  requestAnimationFrame(() => scrollToFirstError(drawerBodyRef.current));
-                }
-              }
-
               const fieldClass = (name: keyof typeof initialValues) =>
                 `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
               return (
                 <Form>
+                  <ScrollToFirstError errors={errors} submitCount={submitCount} containerRef={drawerBodyRef} />
                   {error && <ErrorMessage message={error} />}
 
                   <div className="form-group">
