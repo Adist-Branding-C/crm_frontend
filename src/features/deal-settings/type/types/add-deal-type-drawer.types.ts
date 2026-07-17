@@ -1,4 +1,4 @@
-import type { DealTypeFormData } from './deal-type.types';
+import type { DealTypeFormData } from './request';
 
 export interface AddDealTypeDrawerProps {
   isOpen: boolean;

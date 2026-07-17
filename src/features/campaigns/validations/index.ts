@@ -12,7 +12,8 @@ const nameValidation = yup
 const descriptionValidation = yup
   .string()
   .trim()
-  .max(500, 'Description must not exceed 500 characters');
+  .required('Description is required')
+  .max(500, 'Description cannot exceed 500 characters');
 
 const poolNameValidation = yup
   .string()
@@ -36,7 +37,7 @@ const agentsValidation = yup
  * - A single schema covers both create and edit since the two forms share the
  *   exact same field shape (CampaignFormData) and conditional rules.
  * - Fields are conditionally required based on `type`: Lead Campaign requires
- *   name/agents, Data Pool requires poolName/poolAgents.
+ *   name/agents/startDate/endDate/description, Data Pool requires poolName/poolAgents.
  * - End date is validated against start date on the frontend for immediate
  *   feedback; the backend re-validates all fields on submit.
  */
@@ -47,19 +48,51 @@ const campaignValidationSchema = yup.object({
     then: (schema) => nameValidation,
     otherwise: (schema) => schema.notRequired(),
   }),
-  startDate: yup.string(),
+  startDate: yup.string().when('type', {
+    is: 'Lead Campaign',
+    then: (schema) =>
+      schema
+        .required('Start date is required')
+        .test(
+          'not-in-past',
+          'Start date cannot be in the past',
+          function (value) {
+            if (!value) return true;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const input = new Date(value);
+            input.setHours(0, 0, 0, 0);
+            return input >= today;
+          },
+        ),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   endDate: yup.string().when('type', {
     is: 'Lead Campaign',
     then: (schema) =>
-      schema.test(
-        'end-date-not-before-start',
-        'End date cannot be earlier than Start date',
-        function (value) {
-          const { startDate } = this.parent;
-          if (!value || !startDate) return true;
-          return new Date(value) >= new Date(startDate);
-        },
-      ),
+      schema
+        .required('End date is required')
+        .test(
+          'not-before-start',
+          'End date must be after start date',
+          function (value) {
+            const { startDate } = this.parent;
+            if (!value || !startDate) return true;
+            return new Date(value) > new Date(startDate);
+          },
+        )
+        .test(
+          'not-in-past',
+          'End date cannot be in the past',
+          function (value) {
+            if (!value) return true;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const input = new Date(value);
+            input.setHours(0, 0, 0, 0);
+            return input >= today;
+          },
+        ),
     otherwise: (schema) => schema.notRequired(),
   }),
   description: yup.string().when('type', {
