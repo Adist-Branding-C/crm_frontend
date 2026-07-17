@@ -1,5 +1,6 @@
 import PageHeader from '../../../shared/components/layout/PageHeader';
-import { staffList, activityTypes } from '../constants';
+import ToastNotification from '../../../shared/components/ToastNotification';
+import { activityTypes } from '../constants';
 import { useDailyActivityData } from '../hooks/useDailyActivityData';
 import ActivitySummaryCard from '../components/ActivitySummaryCard';
 import ActivityFilters from '../components/ActivityFilters';
@@ -16,17 +17,20 @@ const DailyActivityPage = () => {
     currentPage,
     showStaffDropdown,
     setShowStaffDropdown,
-    localSearchQuery,
-    setLocalSearchQuery,
+    staffSearchQuery,
+    setStaffSearchQuery,
     totalActivities,
     totalPages,
     paginatedActivities,
     selectedStaffName,
+    staffOptions,
+    pageNumbers,
     handleFilterChange,
+    handleStaffSelect,
     handleApply,
     handleReset,
     handlePageChange,
-    getPageNumbers,
+    toast,
   } = useDailyActivityData();
 
   return (
@@ -36,19 +40,27 @@ const DailyActivityPage = () => {
         description="Logged interactions, aiding in customer relationship management and informed decisions."
       />
 
+      <ToastNotification
+        isVisible={toast.showToast}
+        type={toast.toastType}
+        message={toast.toastMessage}
+        onDismiss={() => toast.setShowToast(false)}
+      />
+
       <div className="activity-summary-card">
         <ActivitySummaryCard totalActivities={totalActivities} />
         <ActivityFilters
           filters={filters}
           showStaffDropdown={showStaffDropdown}
-          localSearchQuery={localSearchQuery}
+          staffSearchQuery={staffSearchQuery}
           selectedStaffName={selectedStaffName}
-          staffList={staffList}
+          staffList={staffOptions}
           onFilterChange={handleFilterChange}
+          onStaffSelect={handleStaffSelect}
           onApply={handleApply}
           onReset={handleReset}
           onShowStaffDropdownChange={setShowStaffDropdown}
-          onLocalSearchQueryChange={setLocalSearchQuery}
+          onStaffSearchQueryChange={setStaffSearchQuery}
         />
       </div>
 
@@ -66,8 +78,8 @@ const DailyActivityPage = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         totalActivities={totalActivities}
+        pageNumbers={pageNumbers}
         onPageChange={handlePageChange}
-        getPageNumbers={getPageNumbers}
       />
     </div>
   );
