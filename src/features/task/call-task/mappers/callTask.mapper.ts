@@ -16,7 +16,7 @@ export class CallTaskMapper {
       scheduledDate: item.scheduledDate || '',
       scheduledTime: item.scheduledTime || '',
       assignedTo: item.assignedTo ? String(item.assignedTo.id) : '',
-      leadId: item.leadId ? String(item.leadId.id) : '',
+      leadId: item.leadId != null ? String(item.leadId) : '',
       priority: item.priority || '',
       status: item.status || '',
     };

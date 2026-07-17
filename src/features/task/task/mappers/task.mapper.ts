@@ -20,7 +20,7 @@ export class TaskMapper {
       scheduledDate: item.scheduledDate || '',
       scheduledTime: item.scheduledTime || '',
       assignedTo: (raw.assignedTo as string) || '',
-      leadId: item.leadId ? String(item.leadId.id) : '',
+      leadId: item.leadId != null ? String(item.leadId) : '',
       priority: item.priority || '',
       status: item.status || '',
     };

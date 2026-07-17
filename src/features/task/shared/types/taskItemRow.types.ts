@@ -5,7 +5,7 @@ export interface TaskItemRowShape {
   assignedTo?: { name: string } | null;
   priority: string;
   status: string;
-  leadId?: { name: string } | null;
+  leadId?: { id: number; name: string } | null;
 }
 
 export interface TaskItemRowProps<T extends TaskItemRowShape> {
