@@ -75,6 +75,7 @@ export interface UseLeadFilterOptionsReturn {
   statusOptions: LabelValuePair[];
   additionalFields: AdditionalFieldDef[];
   isLoading: boolean;
+  error: string | null;
 }
 
 export interface UseLeadBulkActionsReturn {

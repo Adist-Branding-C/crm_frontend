@@ -1,0 +1,136 @@
+import React from 'react';
+import { Loader2 } from 'lucide-react';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import { ACTION_UPDATE, ACTION_SAVE, ACTION_CANCEL } from '../../constants/actionLabels';
+import ValidationAlert from '../ValidationAlert';
+import type { FormField, AdminFormProps } from '../../types/crud';
+
+function buildValidationSchema(fields: FormField[]) {
+  const shape: Record<string, Yup.StringSchema<string | undefined>> = {};
+  for (const field of fields) {
+    if (field.required) {
+      let validator = Yup.string().trim().required(`${field.label} is required`);
+      if (field.type === 'email') {
+        validator = validator.email('Invalid email address');
+      }
+      shape[field.name] = validator;
+    }
+  }
+  return Object.keys(shape).length > 0 ? Yup.object().shape(shape) : undefined;
+}
+
+const AdminForm: React.FC<AdminFormProps> = ({ fields, formData, onChange, onSave, onClose, isEditing, error, onClearError, isSaving, saveDisabled, validationSchema: validationSchemaProp }) => {
+  const autoValidationSchema = React.useMemo(() => buildValidationSchema(fields), [fields]);
+  const validationSchema = validationSchemaProp ?? autoValidationSchema;
+
+  return (
+    <>
+      <ValidationAlert message={error ?? null} onClose={onClearError} />
+      <Formik
+        enableReinitialize
+        initialValues={formData as Record<string, string>}
+        validationSchema={validationSchema}
+        onSubmit={(values) => {
+          onChange(values);
+          onSave();
+        }}
+      >
+        {({ values, errors, touched, handleChange, handleBlur, setFieldValue }) => {
+          const syncOnChange = (e: React.ChangeEvent<any>) => {
+            handleChange(e);
+            const target = e.target;
+            const name = target.name;
+            const value = target.type === 'checkbox' ? target.checked : target.value;
+            onChange({ ...values, [name]: value });
+          };
+
+          return (
+            <Form>
+              {fields.map(field => (
+                <div className="form-group" key={field.name}>
+                  <label>{field.label} {field.required && <span className="text-danger">*</span>}</label>
+                  {field.type === 'text' && (
+                    <input type="text" name={field.name} className="form-control"
+                      placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}`}
+                      value={String(values[field.name] ?? '')}
+                      onChange={syncOnChange}
+                      onBlur={handleBlur} />
+                  )}
+                  {field.type === 'email' && (
+                    <input type="email" name={field.name} className="form-control"
+                      placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}`}
+                      value={String(values[field.name] ?? '')}
+                      onChange={syncOnChange}
+                      onBlur={handleBlur} />
+                  )}
+                  {field.type === 'password' && (
+                    <input type="password" name={field.name} className="form-control"
+                      placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}`}
+                      value={String(values[field.name] ?? '')}
+                      onChange={syncOnChange}
+                      onBlur={handleBlur} />
+                  )}
+                  {field.type === 'number' && (
+                    <input type="number" name={field.name} className="form-control"
+                      placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}`}
+                      value={String(values[field.name] ?? '')}
+                      onChange={syncOnChange}
+                      onBlur={handleBlur} />
+                  )}
+                  {field.type === 'color' && (
+                    <input type="color" name={field.name} className="form-control form-control-color"
+                      value={String(values[field.name] ?? '#3b82f6')}
+                      onChange={syncOnChange} />
+                  )}
+                  {field.type === 'checkbox' && (
+                    <input type="checkbox" name={field.name} className="form-check-input"
+                      checked={Boolean(values[field.name])}
+                      onChange={syncOnChange} />
+                  )}
+                  {field.type === 'switch' && (
+                    <label className="switch">
+                      <input type="checkbox" name={field.name}
+                        checked={Boolean(values[field.name])}
+                        onChange={syncOnChange} />
+                      <span className="slider round"></span>
+                    </label>
+                  )}
+                  {field.type === 'select' && (
+                    <select name={field.name} className="form-control"
+                      value={String(values[field.name] ?? '')}
+                      onChange={syncOnChange}
+                      onBlur={handleBlur}>
+                      <option value="">Select {field.label.toLowerCase()}</option>
+                      {field.options?.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  )}
+                  {field.type === 'textarea' && (
+                    <textarea name={field.name} className="form-control"
+                      placeholder={field.placeholder ?? `Enter ${field.label.toLowerCase()}`}
+                      value={String(values[field.name] ?? '')}
+                      onChange={syncOnChange}
+                      onBlur={handleBlur} />
+                  )}
+                  {errors[field.name] && touched[field.name] && (
+                    <div className="text-danger" style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>{String(errors[field.name])}</div>
+                  )}
+                </div>
+              ))}
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary" disabled={isSaving || saveDisabled}>
+                  {isSaving ? <><Loader2 size={16} className="spin" /> Saving...</> : (isEditing ? ACTION_UPDATE : ACTION_SAVE)}
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
+              </div>
+            </Form>
+          );
+        }}
+      </Formik>
+    </>
+  );
+};
+
+export default AdminForm;

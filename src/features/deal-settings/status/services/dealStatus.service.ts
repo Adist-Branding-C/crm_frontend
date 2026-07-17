@@ -1,50 +1,49 @@
 import axiosInstance from '../../../../api/axiosInstance';
+import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { DEAL_STATUS_API_ENDPOINTS } from '../constants/dealStatusApiEndpoints';
-import type { DealStatusFormData, DealStatusResponse } from '../types/deal-status.types';
+import { DealStatusMapper } from '../mappers/dealStatus.mapper';
+import type { DealStatusFormData, DealStatusQueryParams } from '../types/request';
+import type { DealStatusListResponse, DealStatusResponse, DeleteDealStatusResponse } from '../types/response';
 
 class DealStatusService {
-  async getAllDealStatuses(params: Record<string, string | number | undefined> = {}): Promise<DealStatusResponse> {
-    const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value));
-      }
-    });
-    const url = queryParams.toString()
-      ? `${DEAL_STATUS_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
-      : DEAL_STATUS_API_ENDPOINTS.GET_ALL;
-    const response = await axiosInstance.get<DealStatusResponse>(url);
-    return {
+  async getAllDealStatuses(params: DealStatusQueryParams = {}): Promise<DealStatusListResponse> {
+    const queryString = DealStatusMapper.toQueryParams(params);
+    const url = queryString ? `${DEAL_STATUS_API_ENDPOINTS.GET_ALL}?${queryString}` : DEAL_STATUS_API_ENDPOINTS.GET_ALL;
+
+    const response = await axiosInstance.get<DealStatusListResponse>(url);
+    return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,
       data: response.data.data,
-    };
+    });
   }
 
   async createDealStatus(data: DealStatusFormData): Promise<DealStatusResponse> {
-    const response = await axiosInstance.post<DealStatusResponse>(DEAL_STATUS_API_ENDPOINTS.CREATE, data);
-    return {
+    const payload = DealStatusMapper.toApiPayload(data);
+    const response = await axiosInstance.post<DealStatusResponse>(DEAL_STATUS_API_ENDPOINTS.CREATE, payload);
+    return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,
       data: response.data.data,
-    };
+    });
   }
 
   async updateDealStatus(id: number, data: DealStatusFormData): Promise<DealStatusResponse> {
-    const response = await axiosInstance.patch<DealStatusResponse>(DEAL_STATUS_API_ENDPOINTS.UPDATE(id), data);
-    return {
+    const payload = DealStatusMapper.toApiPayload(data);
+    const response = await axiosInstance.patch<DealStatusResponse>(DEAL_STATUS_API_ENDPOINTS.UPDATE(id), payload);
+    return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,
       data: response.data.data,
-    };
+    });
   }
 
-  async deleteDealStatus(id: number): Promise<Pick<DealStatusResponse, 'status' | 'message'>> {
-    const response = await axiosInstance.delete<DealStatusResponse>(DEAL_STATUS_API_ENDPOINTS.DELETE(id));
-    return {
+  async deleteDealStatus(id: number): Promise<DeleteDealStatusResponse> {
+    const response = await axiosInstance.delete<DeleteDealStatusResponse>(DEAL_STATUS_API_ENDPOINTS.DELETE(id));
+    return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,
-    };
+    });
   }
 }
 

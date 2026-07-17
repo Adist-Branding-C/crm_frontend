@@ -1,22 +1,14 @@
 import axiosInstance from '../../../api/axiosInstance';
+import { QueryMapper } from '../../../shared/mappers/query.mapper';
 import { DEAL_API_ENDPOINTS } from '../constants/dealApiEndpoints';
-import type { DealFormData, DealResponse } from '../types';
+import type { DealFormData } from '../types/interface';
+import type { GetDealsParams } from '../types/request';
 
 class DealService {
-  async getAllDeals(params: Record<string, string | number | undefined> = {}): Promise<DealResponse> {
-    const queryParams = new URLSearchParams();
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value));
-      }
+  async getAllDeals(params: GetDealsParams) {
+    const response = await axiosInstance.get(DEAL_API_ENDPOINTS.GET_ALL, {
+      params: QueryMapper.toQuery(params),
     });
-
-    const url = queryParams.toString()
-      ? `${DEAL_API_ENDPOINTS.GET_ALL}?${queryParams.toString()}`
-      : DEAL_API_ENDPOINTS.GET_ALL;
-
-    const response = await axiosInstance.get<DealResponse>(url);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -24,8 +16,8 @@ class DealService {
     };
   }
 
-  async getDealById(dealId: string): Promise<DealResponse> {
-    const response = await axiosInstance.get<DealResponse>(DEAL_API_ENDPOINTS.GET_BY_ID(dealId));
+  async getDealById(dealId: string) {
+    const response = await axiosInstance.get(DEAL_API_ENDPOINTS.GET_BY_ID(dealId));
     return {
       status: response.data.status,
       message: response.data.message,
@@ -33,8 +25,8 @@ class DealService {
     };
   }
 
-  async createDeal(data: DealFormData): Promise<DealResponse> {
-    const response = await axiosInstance.post<DealResponse>(DEAL_API_ENDPOINTS.CREATE, data);
+  async createDeal(payload: DealFormData) {
+    const response = await axiosInstance.post(DEAL_API_ENDPOINTS.CREATE, payload);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -42,8 +34,8 @@ class DealService {
     };
   }
 
-  async updateDeal(dealId: string, data: Partial<DealFormData>): Promise<DealResponse> {
-    const response = await axiosInstance.patch<DealResponse>(DEAL_API_ENDPOINTS.UPDATE(dealId), data);
+  async updateDeal(dealId: string, payload: Partial<DealFormData>) {
+    const response = await axiosInstance.patch(DEAL_API_ENDPOINTS.UPDATE(dealId), payload);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -51,28 +43,19 @@ class DealService {
     };
   }
 
-  async deleteDeal(dealId: string): Promise<Pick<DealResponse, 'status' | 'message'>> {
-    const response = await axiosInstance.delete<DealResponse>(DEAL_API_ENDPOINTS.DELETE(dealId));
+  async deleteDeal(dealId: string) {
+    const response = await axiosInstance.delete(DEAL_API_ENDPOINTS.DELETE(dealId));
     return {
       status: response.data.status,
       message: response.data.message,
+      data: response.data.data,
     };
   }
 
-  async getDealStages(params: Record<string, string | number | undefined> = {}): Promise<DealResponse> {
-    const queryParams = new URLSearchParams();
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value));
-      }
+  async getDealStages(params: Record<string, string | number> = {}) {
+    const response = await axiosInstance.get(DEAL_API_ENDPOINTS.GET_STAGES, {
+      params: QueryMapper.toQuery(params),
     });
-
-    const url = queryParams.toString()
-      ? `${DEAL_API_ENDPOINTS.GET_STAGES}?${queryParams.toString()}`
-      : DEAL_API_ENDPOINTS.GET_STAGES;
-
-    const response = await axiosInstance.get<DealResponse>(url);
     return {
       status: response.data.status,
       message: response.data.message,
@@ -80,20 +63,10 @@ class DealService {
     };
   }
 
-  async getDealDropdown(params: Record<string, string | number | undefined> = {}): Promise<DealResponse> {
-    const queryParams = new URLSearchParams();
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        queryParams.append(key, String(value));
-      }
+  async getDealDropdown(params: Record<string, string | number> = {}) {
+    const response = await axiosInstance.get(DEAL_API_ENDPOINTS.GET_DROPDOWN, {
+      params: QueryMapper.toQuery(params),
     });
-
-    const url = queryParams.toString()
-      ? `${DEAL_API_ENDPOINTS.GET_DROPDOWN}?${queryParams.toString()}`
-      : DEAL_API_ENDPOINTS.GET_DROPDOWN;
-
-    const response = await axiosInstance.get<DealResponse>(url);
     return {
       status: response.data.status,
       message: response.data.message,

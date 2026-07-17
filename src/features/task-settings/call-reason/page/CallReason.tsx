@@ -9,7 +9,7 @@ import { useCallReasonFormSubmit } from '../hooks/useCallReasonFormSubmit';
 import { useCallReasonRowActions } from '../hooks/useCallReasonRowActions';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useToast } from '../../../../shared/hooks/useToast';
-import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
+import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addCallReasonValidationSchema, editCallReasonValidationSchema } from '../validations/index';
 import { ADD_CALL_REASON_INITIAL_VALUES, CALL_REASON_CSV_COLUMNS } from '../constants/index';
@@ -45,7 +45,7 @@ const CallReasonPage = () => {
     closeDropdown: dropdown.closeDropdown,
   });
 
-  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleExportCSV = useCallback(() => {
     exportToCsv(fetch.callReasonList, CALL_REASON_CSV_COLUMNS, 'call-reasons.csv');
@@ -64,7 +64,7 @@ const CallReasonPage = () => {
             searchQuery={searchValue}
             onSearchChange={handleSearchInput}
             rowsPerPage={fetch.limit}
-            onRowsPerPageChange={fetch.handleRowsPerPageChange}
+            onRowsPerPageChange={(e) => fetch.handleRowsPerPageChange(Number(e.target.value))}
           >
             <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Download size={16} />Export

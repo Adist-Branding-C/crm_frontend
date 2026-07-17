@@ -9,7 +9,7 @@ import { useCallStatusFormSubmit } from '../hooks/useCallStatusFormSubmit';
 import { useCallStatusRowActions } from '../hooks/useCallStatusRowActions';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useToast } from '../../../../shared/hooks/useToast';
-import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
+import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addCallStatusValidationSchema, editCallStatusValidationSchema } from '../validations/index';
 import { ADD_CALL_STATUS_INITIAL_VALUES, CALL_STATUS_CSV_COLUMNS } from '../constants/index';
@@ -45,7 +45,7 @@ const CallStatusPage = () => {
     closeDropdown: dropdown.closeDropdown,
   });
 
-  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleExportCSV = useCallback(() => {
     exportToCsv(fetch.callStatusList, CALL_STATUS_CSV_COLUMNS, 'call-status.csv');
@@ -64,7 +64,7 @@ const CallStatusPage = () => {
             searchQuery={searchValue}
             onSearchChange={handleSearchInput}
             rowsPerPage={fetch.limit}
-            onRowsPerPageChange={fetch.handleRowsPerPageChange}
+            onRowsPerPageChange={(e) => fetch.handleRowsPerPageChange(Number(e.target.value))}
           >
             <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Download size={16} />Export

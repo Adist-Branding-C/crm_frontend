@@ -1,13 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
-import { scrollToFirstError } from '../../utils/scrollToFirstError';
+import { ScrollToFirstError } from '../../../../shared/components/ScrollToFirstError';
 import type { MeetingOutcomeFormProps } from '../types/index';
 
 const MeetingOutcomeForm = ({ validationSchema, initialValues, onSubmit, onCancel, isLoading, error, isEditing, bodyRef }: MeetingOutcomeFormProps) => {
-  const prevSubmitCountRef = useRef(0);
-
   useEffect(() => {
     if (error) {
       bodyRef?.current?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -22,18 +20,12 @@ const MeetingOutcomeForm = ({ validationSchema, initialValues, onSubmit, onCance
       onSubmit={onSubmit}
     >
       {({ errors, touched, dirty, submitCount, isSubmitting }) => {
-        if (submitCount > prevSubmitCountRef.current) {
-          prevSubmitCountRef.current = submitCount;
-          if (Object.keys(errors).length > 0) {
-            requestAnimationFrame(() => scrollToFirstError(bodyRef?.current ?? null));
-          }
-        }
-
         const fieldClass = (name: keyof typeof initialValues) =>
           `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
 
         return (
           <Form>
+            <ScrollToFirstError errors={errors} submitCount={submitCount} containerRef={bodyRef} />
             {error && <ErrorMessage message={error} />}
 
             <div className="form-group">

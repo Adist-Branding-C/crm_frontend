@@ -20,7 +20,7 @@ export interface Campaign {
   endDate?: string;
   description?: string;
   poolName?: string;
-  poolAgents?: string[];
+  poolAgents?: PoolAgentInfo[];
   agents?: string[];
 }
 
@@ -34,6 +34,12 @@ export type CampaignFormData = {
   poolAgents: string[];
   agents: string[];
 };
+
+export interface PoolAgentInfo {
+  id: number;
+  agentId: string;
+  name: string;
+}
 
 export interface Agent {
   id: string;

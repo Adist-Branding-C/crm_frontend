@@ -16,7 +16,7 @@ export class DealTaskMapper {
       scheduledDate: item.scheduledDate || '',
       scheduledTime: item.scheduledTime || '',
       assignedTo: item.assignedTo ? String(item.assignedTo.id) : '',
-      leadId: item.lead ? String(item.lead.id) : '',
+      leadId: item.leadId != null ? String(item.leadId) : '',
       priority: item.priority || '',
       status: item.status || '',
     };

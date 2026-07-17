@@ -1,5 +1,4 @@
 @import '../../../../shared/styles/dropdowns.css';
-@import '../../../../shared/styles/tables.css';
 @import '../../../../shared/styles/buttons.css';
 @import '../../../../shared/styles/badges.css';
 @import '../../../../shared/styles/pagination.css';
@@ -7,9 +6,8 @@
 @import '../../../../shared/styles/forms.css';
 @import '../../../../shared/styles/modals.css';
 @import '../../../../shared/styles/tabs.css';
-@import '../../../../shared/styles/sidebar-layout.css';
 
-.account-content .table-scroll {
+.table-scroll {
   overflow: visible;
 }
 

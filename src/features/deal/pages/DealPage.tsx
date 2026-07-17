@@ -1,75 +1,173 @@
-import { Search, Filter, ChevronDown, ArrowUp, ArrowDown, Plus, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useRef, useEffect, useMemo } from 'react';
+import { ChevronUp, ChevronDown, Filter, Plus } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
-import AddDealDrawer from '../../../shared/components/drawers/AddDealDrawer';
-import { useDealPage } from '../hooks';
-import DeleteDealModal from '../components/DeleteDealModal';
-import DealActionMenu from '../components/DealActionMenu';
-import { DEAL_STATUS_LABEL_MAP, DEAL_STATUS_MAP, DEAL_TYPE_LABEL_MAP } from '../../../shared/constants/dealOptions';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import Drawer from '../../../shared/components/Drawer';
+import Toast from '../../../shared/components/Toast';
+import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useDealList } from '../hooks/useDealList';
+import { useDealPagination } from '../hooks/useDealPagination';
+import { useDealSearch } from '../hooks/useDealSearch';
+import { useDealSort } from '../hooks/useDealSort';
+import { useDealFilters } from '../hooks/useDealFilters';
+import { useDealDeleteConfirm } from '../hooks/useDealDeleteConfirm';
+import { useDealActionMenu } from '../hooks/useDealActionMenu';
+import { useDealRowActions } from '../hooks/useDealRowActions';
+import { useDealClearFilters } from '../hooks/useDealClearFilters';
+import { useDealCrud } from '../hooks/useDealCrud';
+import { useDealDrawer } from '../hooks/useDealDrawer';
+import { useDealFormSubmit } from '../hooks/useDealFormSubmit';
+import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
+import { useDealExport } from '../hooks/useDealExport';
+import { getDealColumns } from '../utils/dealColumns';
+import { getDealIds } from '../utils/dealMapper';
+import { getFieldKey, getInitialValues } from '../utils/additionalFields';
+import { getDealValidationSchema } from '../validations';
+import DealRow from '../components/DealRow';
+import DealFilters from '../components/DealFilters';
+import DealSortDropdown from '../components/DealSortDropdown';
+import DealForm from '../components/DealForm';
+import { LABEL_NO_DATA } from '../../../shared/constants/labels';
+import { DEAL_FORM_DEFAULT_VALUES } from '../constants/dealFormDefaults';
+import type { DealFormData } from '../../../shared/types/drawers';
+import type { DealItem } from '../types/interface';
 import './DealPage.css';
 
-const getStatusBadge = (status: string) => {
-  const colorMap: Record<string, string> = { win: '#10b981', lost: '#ef4444', pending: '#f59e0b', invoice: '#3b82f6' };
-  const color = colorMap[status.toLowerCase()] || '#6b7280';
-  const label = DEAL_STATUS_LABEL_MAP[status] || status;
-  return <span className="status-pill" style={{ background: `${color}20`, color }}>{label}</span>;
-};
-
-const getTypeBadge = (type: string) => {
-  const colorMap: Record<string, string> = { sales: '#10b981', registration: '#8b5cf6', renewal: '#3b82f6', upsell: '#fb923c' };
-  const color = colorMap[type.toLowerCase()] || '#6b7280';
-  const label = DEAL_TYPE_LABEL_MAP[type] || type;
-  return <span className="type-pill" style={{ background: `${color}20`, color }}>{label}</span>;
-};
-
 const DealPage = () => {
-  const {
-    deal,
-    searchQuery, setSearchQuery,
-    showDrawer,
-    dropdownOpen, onToggleDropdown,
-    editingItem,
-    deletingItem,
-    filteredData,
-    totalCount,
-    drawerInitialValues,
-    handleAddClick,
-    handleCloseDrawer,
-    handleEditClick,
-    handleDeleteClick,
-    handleConfirmDelete,
-    handleCloseDeleteModal,
-    rowsPerPage,
-    handleDrawerSave,
+  const toast = useToast();
+  const list = useDealList(toast.showToastMessage);
 
-    totalDealAmount,
-    totalDealsCount,
-    showFilters,
-    setShowFilters,
-    dealFilters,
-    setDealFilters,
-    clearFilters,
-    sortBy,
-    sortOrder,
-    handleSortChange,
-    showSortDropdown,
-    setShowSortDropdown,
-    actionMenuOpen,
-    setActionMenuOpen,
-    paginatedData,
-    currentPage,
-    setCurrentPage,
-    handleRowsPerPageChange,
-    totalPages,
-    hasNext,
-    hasPrevious,
-    startIndex,
-    handleAddDeal,
-    handleEditDeal,
-    handleDeleteDeal,
-    handleExportCSV,
-  } = useDealPage();
+  const rowsPerPageRef = useRef(10);
+  const searchQueryRef = useRef('');
+
+  const filtersHook = useDealFilters(list.fetchDeals, searchQueryRef, rowsPerPageRef);
+  const { activeFiltersRef } = filtersHook;
+
+  const sortHook = useDealSort(list.fetchDeals, activeFiltersRef, searchQueryRef, rowsPerPageRef);
+
+  const pagination = useDealPagination(list.fetchDeals, activeFiltersRef, searchQueryRef, list.totalCount);
+
+  const dealSearch = useDealSearch(list.fetchDeals, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
+
+  useEffect(() => {
+    rowsPerPageRef.current = pagination.rowsPerPage;
+    searchQueryRef.current = dealSearch.searchQuery;
+  });
+
+  const crud = useDealCrud({ pagination: { setError: list.setError, setIsLoading: list.setIsLoading, refresh: list.refreshCurrentPage } });
+  const drawer = useDealDrawer();
+  const deleteConfirm = useDealDeleteConfirm(crud.handleDeleteDeal);
+  const actionMenu = useDealActionMenu();
+  const rowActions = useDealRowActions(actionMenu, drawer, deleteConfirm);
+
+  const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
+  const formSubmit = useDealFormSubmit({
+    editingItem: drawer.editingItem,
+    closeDrawer: drawer.closeDrawer,
+    handleAddDeal: crud.handleAddDeal,
+    handleUpdateDeal: crud.handleUpdateDeal,
+    dealAdditionalFieldDefs,
+  });
+
+  const dealValidationSchema = useMemo(
+    () => getDealValidationSchema(dealAdditionalFieldDefs),
+    [dealAdditionalFieldDefs],
+  );
+
+  const editInitialValues = useMemo((): DealFormData => {
+    const additionalFieldValues = getInitialValues(dealAdditionalFieldDefs);
+
+    if (!drawer.editingItem) {
+      return { ...DEAL_FORM_DEFAULT_VALUES, ...additionalFieldValues };
+    }
+
+    for (const af of drawer.editingItem.additionalFields || []) {
+      const def = dealAdditionalFieldDefs.find(d => d.fieldId === af.fieldId);
+      if (def) {
+        additionalFieldValues[getFieldKey(def.fieldKey)] = af.value || '';
+      }
+    }
+
+    return {
+      dealName: drawer.editingItem.dealName || '',
+      lead: drawer.editingItem.lead || '',
+      leadId: drawer.editingItem.leadId || '',
+      mobile: drawer.editingItem.mobile || '',
+      amount: String(drawer.editingItem.amount || '').replace(/\.00$/, ''),
+      status: drawer.editingItem.status || '',
+      statusId: drawer.editingItem.statusId || '',
+      type: drawer.editingItem.type || '',
+      typeId: drawer.editingItem.typeId || '',
+      startDate: drawer.editingItem.startDate || '',
+      endDate: drawer.editingItem.endDate || '',
+      assignAgent: drawer.editingItem.agent || '',
+      agentId: drawer.editingItem.agentId || '',
+      ...additionalFieldValues,
+    };
+  }, [drawer.editingItem, dealAdditionalFieldDefs]);
+
+  const formBodyRef = useRef<HTMLDivElement>(null);
+
+  const initialFetchDone = useRef(false);
+  useEffect(() => {
+    if (initialFetchDone.current) return;
+    initialFetchDone.current = true;
+    list.fetchDeals(1, 10, '', {});
+  }, []);
+
+  useEffect(() => {
+    if (!drawer.editingItem) return;
+    const updated = list.dealList.find(d => d.id === drawer.editingItem!.id);
+    if (updated && updated.createdAt !== drawer.editingItem!.createdAt) {
+      drawer.openEditDrawer(updated);
+    }
+  }, [list.dealList, drawer.editingItem, drawer.openEditDrawer]);
+
+  const paginatedIds = useMemo(() => getDealIds(list.dealList), [list.dealList]);
+
+  const clearFilters = useDealClearFilters(filtersHook, dealSearch, pagination, sortHook, list.fetchDeals, rowsPerPageRef);
+
+  const { handleExportCSV } = useDealExport(list.dealList);
+
+  const columns = useMemo(() => getDealColumns(list.dealList), [list.dealList]);
+
+  const additionalFieldColumnNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const row of list.dealList) {
+      for (const af of row.additionalFields || []) {
+        names.add(af.name);
+      }
+    }
+    return [...names];
+  }, [list.dealList]);
+
+  const handleWhatsApp = (item: DealItem) => {
+    if (!item.mobile) {
+      toast.showToastMessage('Phone number is not available.', 'error');
+      return;
+    }
+    const digits = item.mobile.replace(/[^0-9]/g, '');
+    let number: string;
+    if (digits.length === 10) {
+      number = `91${digits}`;
+    } else if (digits.length === 12 && digits.startsWith('91')) {
+      number = digits;
+    } else {
+      number = digits;
+    }
+    window.open(`https://wa.me/${number}`, '_blank');
+  };
+
+  const handleMessage = (item: DealItem) => {
+    if (!item.mobile) {
+      toast.showToastMessage('Phone number is not available.', 'error');
+      return;
+    }
+    const digits = item.mobile.replace(/[^0-9]/g, '');
+    window.open(`sms:${digits}`);
+  };
 
   return (
     <PageContainer>
@@ -78,272 +176,135 @@ const DealPage = () => {
         description="Track sales opportunities, aiding management and conversion of potential customers."
       />
 
-      <div className="deals-stats-row">
-        <div className="stat-item">
-          <span className="stat-label">Total Deal Amount:</span>
-          <span className="stat-value">₹{totalDealAmount.toLocaleString()}</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Total Deals Count:</span>
-          <span className="stat-value">{totalDealsCount}</span>
-        </div>
-      </div>
-
-      <div className="enquiries-toolbar">
-        <div className="toolbar-left">
-          <div className="search-box">
-            <Search size={16} className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search deals..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-          </div>
-          <button className="btn btn-secondary" onClick={() => setShowFilters(!showFilters)}>
-            <Filter size={16} />
-            Filter
-            <ChevronDown size={14} className={showFilters ? 'rotate' : ''} />
-          </button>
-          <div className="dropdown-container">
-            <button className="btn btn-secondary" onClick={() => setShowSortDropdown(!showSortDropdown)}>
-              <ArrowUp size={16} />
-              Sort By
-              <ChevronDown size={14} className={showSortDropdown ? 'rotate' : ''} />
-            </button>
-            {showSortDropdown && (
-              <div className="premium-dropdown sort-dropdown dropup">
-                <div className="dropdown-header">Sort By</div>
-                <button
-                  className={`dropdown-item ${sortBy === 'createdAt' && sortOrder === 'desc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('createdAt', 'desc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowUp size={16} />
-                  <span>Newest First</span>
-                </button>
-                <button
-                  className={`dropdown-item ${sortBy === 'createdAt' && sortOrder === 'asc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('createdAt', 'asc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowDown size={16} />
-                  <span>Oldest First</span>
-                </button>
-                <button
-                  className={`dropdown-item ${sortBy === 'amount' && sortOrder === 'desc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('amount', 'desc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowUp size={16} />
-                  <span>Highest Amount</span>
-                </button>
-                <button
-                  className={`dropdown-item ${sortBy === 'amount' && sortOrder === 'asc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('amount', 'asc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowDown size={16} />
-                  <span>Lowest Amount</span>
-                </button>
-                <button
-                  className={`dropdown-item ${sortBy === 'startDate' && sortOrder === 'desc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('startDate', 'desc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowUp size={16} />
-                  <span>Start Date (Newest)</span>
-                </button>
-                <button
-                  className={`dropdown-item ${sortBy === 'startDate' && sortOrder === 'asc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('startDate', 'asc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowDown size={16} />
-                  <span>Start Date (Oldest)</span>
-                </button>
-                <button
-                  className={`dropdown-item ${sortBy === 'dealName' && sortOrder === 'asc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('dealName', 'asc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowDown size={16} />
-                  <span>Name (A-Z)</span>
-                </button>
-                <button
-                  className={`dropdown-item ${sortBy === 'dealName' && sortOrder === 'desc' ? 'selected' : ''}`}
-                  onClick={() => { handleSortChange('dealName', 'desc'); setShowSortDropdown(false); }}
-                >
-                  <ArrowUp size={16} />
-                  <span>Name (Z-A)</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="toolbar-right">
-          <button className="btn btn-secondary" onClick={handleExportCSV}>
-            <Download size={16} />
-            Export
-          </button>
-          <button className="btn btn-primary" onClick={handleAddDeal}>
-            <Plus size={16} />
-            Deals
-          </button>
-        </div>
-      </div>
-
-      {showFilters && (
-        <div className="filters-panel">
-          <div className="filter-row">
-            <div className="filter-group">
-              <label>Status</label>
-              <select value={dealFilters.status} onChange={(e) => setDealFilters({ ...dealFilters, status: e.target.value })}>
-                <option value="">All</option>
-                <option value="win">Deal Win</option>
-                <option value="lost">Deal Lost</option>
-                <option value="invoice">Invoice</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-            <div className="filter-group">
-              <label>Type</label>
-              <select value={dealFilters.type} onChange={(e) => setDealFilters({ ...dealFilters, type: e.target.value })}>
-                <option value="">All</option>
-                <option value="sales">Sales</option>
-                <option value="registration">Registration</option>
-                <option value="renewal">Renewal</option>
-                <option value="upsell">Upsell</option>
-              </select>
-            </div>
-            <div className="filter-group">
-              <label>Assigned To</label>
-              <select value={dealFilters.assignedTo} onChange={(e) => setDealFilters({ ...dealFilters, assignedTo: e.target.value })}>
-                <option value="">Select</option>
-                <option value="John Doe">John Doe</option>
-                <option value="Jane Smith">Jane Smith</option>
-                <option value="Mike Johnson">Mike Johnson</option>
-              </select>
-            </div>
-          </div>
-          <div className="filter-row">
-            <div className="filter-actions">
-              <button className="btn btn-primary" onClick={() => setShowFilters(false)}>Filter</button>
-              <button className="btn btn-secondary" onClick={clearFilters}>Clear</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {deal.isLoading && (
-        <div className="loading-overlay">
-          <div className="loading-spinner" />
-          <span>Loading deals...</span>
-        </div>
-      )}
-
-      {deal.error && (
+      {list.error && (
         <div className="error-banner">
-          <span>{deal.error}</span>
-          <button className="btn btn-sm btn-secondary" onClick={() => deal.fetchDeals()}>Retry</button>
+          <span>{list.error}</span>
+          <button className="btn btn-sm btn-secondary" onClick={() => list.fetchDeals(pagination.currentPage, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current)}>Retry</button>
         </div>
       )}
 
       <div className="table-container">
-        <table className="enquiries-table">
-          <thead>
-            <tr>
-              <th>Action</th>
-              <th>Deal Name</th>
-              <th>Lead</th>
-              <th>Phone</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Type</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Agent</th>
-              <th>Created By</th>
-              <th>Created At</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length === 0 && !deal.isLoading && (
-              <tr>
-                <td colSpan={12} className="empty-state">No deals found</td>
-              </tr>
+        <TableNav
+          searchQuery={dealSearch.searchQuery}
+          onSearchChange={dealSearch.setSearchQuery}
+          searchPlaceholder="Search deals..."
+          rowsPerPage={pagination.rowsPerPage}
+          onRowsPerPageChange={pagination.handleRowsPerPageChange}
+        >
+          <button className="btn btn-secondary" onClick={() => filtersHook.setShowFilters(!filtersHook.showFilters)}>
+            <Filter size={16} /> Filter <ChevronDown size={14} className={filtersHook.showFilters ? 'rotate' : ''} />
+          </button>
+
+          <DealSortDropdown
+            sortBy={sortHook.sortConfig.key}
+            sortOrder={sortHook.sortConfig.direction}
+            onSortChange={(field: string, direction: string) => {
+              if (direction === 'desc') sortHook.handleSortDesc(field);
+              else sortHook.handleSortAsc(field);
+            }}
+          />
+
+          <button className="btn btn-secondary" onClick={handleExportCSV}>
+            Export
+          </button>
+
+          <button className="btn btn-primary" onClick={() => { filtersHook.setShowFilters(false); drawer.openAddDrawer(); }}>
+            <Plus size={16} /> Add Deal
+          </button>
+        </TableNav>
+
+        {filtersHook.showFilters && (
+          <DealFilters
+            filters={filtersHook.filters}
+            onFilterChange={filtersHook.setFilters}
+            onApplyFilters={filtersHook.handleApplyFilters}
+            onClearFilters={clearFilters}
+          />
+        )}
+
+        <Table wrapperClassName="table-scroll" className="enquiries-table">
+          <THead>
+            <TRow>
+              {columns.map(col => (
+                <TCell
+                  key={col.key}
+                  variant="th"
+                  className={col.sortable ? 'sortable' : ''}
+                  onClick={col.sortable ? () => sortHook.handleSort(col.key) : undefined}
+                >
+                  {col.label}
+                  {col.sortable && sortHook.sortConfig.key === col.key && (
+                    sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                  )}
+                </TCell>
+              ))}
+            </TRow>
+          </THead>
+          <TBody>
+            {list.dealList.length === 0 && !list.isLoading ? (
+              <EmptyState colSpan={columns.length} message={LABEL_NO_DATA} />
+            ) : (
+              list.dealList.map(deal => (
+                <DealRow
+                  key={deal.id}
+                  deal={deal}
+                  columns={columns}
+                  additionalFieldColumns={additionalFieldColumnNames}
+                  isSelected={false}
+                  onSelectRow={() => {}}
+                  actionMenu={{
+                    isOpen: actionMenu.openId === deal.id,
+                    buttonRect: actionMenu.openId === deal.id ? actionMenu.buttonRect : null,
+                    onOpen: actionMenu.open,
+                    onClose: actionMenu.close,
+                  }}
+                  onEditDeal={drawer.openEditDrawer}
+                  onDeleteDeal={rowActions.handleDeleteFromRow}
+                  onWhatsApp={handleWhatsApp}
+                  onMessage={handleMessage}
+                />
+              ))
             )}
-            {paginatedData.map(row => (
-              <tr key={row.id}>
-                <td className="action-cell">
-                  <DealActionMenu
-                    isOpen={actionMenuOpen === row.id}
-                    onToggle={() => setActionMenuOpen(actionMenuOpen === row.id ? null : row.id)}
-                    onClose={() => setActionMenuOpen(null)}
-                    row={row}
-                    onEdit={handleEditDeal}
-                    onDelete={handleDeleteDeal}
-                  />
-                </td>
-                <td className="lead-name-cell">{row.dealName}</td>
-                <td>{row.lead}</td>
-                <td>{row.mobile || row.phone || row.phoneNumber || ''}</td>
-                <td>₹{Number(row.amount).toLocaleString()}</td>
-                <td>{getStatusBadge(row.status || '')}</td>
-                <td>{getTypeBadge(row.type || '')}</td>
-                <td>{row.startDate}</td>
-                <td>{row.endDate}</td>
-                <td>{row.agent}</td>
-                <td>{row.createdBy}</td>
-                <td>{row.createdAt}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
+
+        {list.isLoading && <div className="table-loading">Loading...</div>}
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={list.totalPages}
+          totalItems={pagination.totalItems}
+          rowsPerPage={pagination.rowsPerPage}
+          onPageChange={pagination.handleSetCurrentPage}
+        />
       </div>
 
-      <div className="pagination-container">
-        <div className="pagination-left">
-          <span className="rows-label">Show entries:</span>
-          <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
-          </select>
-          <span className="pagination-info">
-            Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, totalCount)} of {totalCount}
-          </span>
-        </div>
-        <div className="pagination-right">
-          <button className="pagination-btn" disabled={!hasPrevious} onClick={() => setCurrentPage(1)}>First</button>
-          <button className="pagination-btn" disabled={!hasPrevious} onClick={() => setCurrentPage(prev => prev - 1)}>
-            <ChevronLeft size={16} />
-          </button>
-          <span className="page-indicator">Page {currentPage} of {totalPages}</span>
-          <button className="pagination-btn" disabled={!hasNext} onClick={() => setCurrentPage(prev => prev + 1)}>
-            <ChevronRight size={16} />
-          </button>
-          <button className="pagination-btn" disabled={!hasNext} onClick={() => setCurrentPage(totalPages)}>Last</button>
-        </div>
-      </div>
+      <Drawer ref={formBodyRef} isOpen={drawer.showDrawer} onClose={drawer.closeDrawer} title={drawer.editingItem ? 'Edit Deal' : 'Add Deal'}>
+        <DealForm
+          key={drawer.editingItem ? `edit-${drawer.editingItem.id}` : 'add-drawer'}
+          editingItem={drawer.editingItem}
+          validationSchema={dealValidationSchema}
+          initialValues={editInitialValues}
+          onSubmit={drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleAddSubmit}
+          isLoading={list.isLoading}
+          error={list.error}
+          onCancel={drawer.closeDrawer}
+          scrollContainerRef={formBodyRef}
+        />
+      </Drawer>
 
-      <AddDealDrawer
-        key={editingItem ? `edit-${editingItem.id}` : 'add-drawer'}
-        isOpen={showDrawer}
-        onClose={handleCloseDrawer}
-        deal={editingItem ? {
-          dealName: editingItem.dealName || '',
-          lead: editingItem.lead || '',
-          leadId: editingItem.leadId,
-          mobile: editingItem.mobile || '',
-          amount: String(editingItem.amount || '').replace(/\.00$/, ''),
-          status: (editingItem.status || '').toLowerCase(),
-          type: (editingItem.type || '').toLowerCase(),
-          startDate: editingItem.startDate || '',
-          endDate: editingItem.endDate || '',
-          assignAgent: editingItem.agent || '',
-          agentId: editingItem.agentId,
-        } : null}
-        onSave={handleDrawerSave}
+      <AdminDeleteModal
+        isOpen={!!deleteConfirm.deletingItem}
+        itemName={deleteConfirm.deletingItem?.dealName || ''}
+        onConfirm={deleteConfirm.handleConfirmDelete}
+        onClose={deleteConfirm.closeDeleteModal}
       />
 
-      <DeleteDealModal
-        isOpen={!!deletingItem}
-        itemName={deletingItem?.dealName || ''}
-        onConfirm={handleConfirmDelete}
-        onClose={handleCloseDeleteModal}
+      <Toast
+        message={toast.toastMessage}
+        type={toast.toastType}
+        isVisible={toast.showToast}
+        onClose={() => toast.setShowToast(false)}
       />
     </PageContainer>
   );

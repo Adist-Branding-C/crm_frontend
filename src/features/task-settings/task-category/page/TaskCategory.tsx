@@ -9,7 +9,7 @@ import { useTaskCategoryFormSubmit } from '../hooks/useTaskCategoryFormSubmit';
 import { useTaskCategoryRowActions } from '../hooks/useTaskCategoryRowActions';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useToast } from '../../../../shared/hooks/useToast';
-import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
+import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addTaskCategoryValidationSchema, editTaskCategoryValidationSchema } from '../validations/index';
 import { ADD_TASK_CATEGORY_INITIAL_VALUES, TASK_CATEGORY_CSV_COLUMNS } from '../constants/index';
@@ -45,7 +45,7 @@ const TaskCategoryPage = () => {
     closeDropdown: dropdown.closeDropdown,
   });
 
-  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleExportCSV = useCallback(() => {
     exportToCsv(fetch.taskCategoryList, TASK_CATEGORY_CSV_COLUMNS, 'task-categories.csv');
@@ -64,7 +64,7 @@ const TaskCategoryPage = () => {
             searchQuery={searchValue}
             onSearchChange={handleSearchInput}
             rowsPerPage={fetch.limit}
-            onRowsPerPageChange={fetch.handleRowsPerPageChange}
+            onRowsPerPageChange={(e) => fetch.handleRowsPerPageChange(Number(e.target.value))}
           >
             <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Download size={16} />Export

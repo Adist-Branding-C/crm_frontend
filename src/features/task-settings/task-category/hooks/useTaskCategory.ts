@@ -4,7 +4,7 @@ import { useTableData } from '../../../../shared/hooks/useTableData';
 import { useDrawerScroll } from '../../hooks/useDrawerScroll';
 import { useToast } from '../../hooks/useToast';
 import { taskCategoryApiService } from '../services';
-import type { TaskCategoryItem, TaskCategoryFormData, TaskCategoryApiResponse } from '../types/index';
+import type { TaskCategoryItem, TaskCategoryFormData, TaskCategoryApiResponse, FetchTaskCategoriesParams } from '../types/index';
 
 const FIELD_MAP: Record<string, string> = {};
 
@@ -13,7 +13,7 @@ export function useTaskCategory() {
 
   const pagination = useTableData<TaskCategoryItem>({
     fetchFn: async (params) => {
-      const response = await taskCategoryApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
+      const response = await taskCategoryApiService.fetchAll(params as unknown as FetchTaskCategoriesParams);
       if (response.status) {
         const data = response.data as { items: TaskCategoryItem[]; pagination?: { total: number } } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);

@@ -56,6 +56,6 @@ export const MEETING_OUTCOME_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
  * - MeetingOutcomePage (Export button)
  */
 export const MEETING_OUTCOME_CSV_COLUMNS: CsvColumn<MeetingOutcomeItem>[] = [
-  { header: 'Outcome', value: (item) => `"${item.name}"` },
+  { header: 'Outcome', value: (item) => item.name },
   { header: 'Status', value: (item) => item.status ?? '' },
 ];
