@@ -1,11 +1,15 @@
 import React from 'react';
 import { Search } from 'lucide-react';
-import type { PipelineToolbarProps } from '../types/pipeline.types';
+import type { PipelineToolbarProps } from '../types';
 
 const PipelineToolbar: React.FC<PipelineToolbarProps> = ({
-  searchQuery, setSearchQuery,
-  activeView, loading, error,
-  fetchLeads, fetchDeals, fetchTasks,
+  searchQuery,
+  setSearchQuery,
+  activeView,
+  loading,
+  onViewLeads,
+  onViewDeals,
+  onViewTasks,
 }) => {
   return (
     <>
@@ -15,33 +19,34 @@ const PipelineToolbar: React.FC<PipelineToolbarProps> = ({
           type="text"
           placeholder="Search deals..."
           value={searchQuery}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchQuery(e.target.value)
+          }
           className="search-input"
         />
       </div>
       <button
         className={`btn-filter ${activeView === 'leads' ? 'active' : ''}`}
-        onClick={fetchLeads}
+        onClick={onViewLeads}
         disabled={loading}
       >
         Lead
       </button>
       <button
         className={`btn-filter ${activeView === 'deals' ? 'active' : ''}`}
-        onClick={fetchDeals}
+        onClick={onViewDeals}
         disabled={loading}
       >
         Deal
       </button>
       <button
         className={`btn-filter ${activeView === 'tasks' ? 'active' : ''}`}
-        onClick={fetchTasks}
+        onClick={onViewTasks}
         disabled={loading}
       >
         Task
       </button>
       {loading && <span className="pipeline-loading">Loading...</span>}
-      {error && <span className="pipeline-error">{error}</span>}
     </>
   );
 };
