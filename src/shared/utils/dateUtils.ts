@@ -48,6 +48,15 @@ export function formatRelativeDate(dateStr: string | null | undefined): string {
   return formatDateTime(dateStr);
 }
 
+export function formatTime12hr(time: string | null | undefined): string {
+  if (!time) return '-';
+  const [hourStr, minute] = time.split(':');
+  let hour = parseInt(hourStr ?? '', 10);
+  const period = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12 || 12;
+  return `${String(hour).padStart(2, '0')}:${minute} ${period}`;
+}
+
 export function formatFollowUpDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '-';
   const date = new Date(dateStr);
