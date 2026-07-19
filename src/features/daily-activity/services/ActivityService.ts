@@ -24,10 +24,10 @@ class ActivityService {
     });
   }
 
-  async getStaffOptions(): Promise<ApiResponse<StaffListResponseData>> {
+  async getStaffOptions(search?: string): Promise<ApiResponse<StaffListResponseData>> {
     const response = await axiosInstance.get<ApiResponse<StaffListResponseData>>(
       ACTIVITY_API_ENDPOINTS.STAFF,
-      { params: { limit: 100 } },
+      { params: { limit: 100, search } },
     );
     return ServiceResponseUtil.successResponse({
       status: response.data.status,

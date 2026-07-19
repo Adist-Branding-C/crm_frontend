@@ -4,6 +4,7 @@ import EnquiriesPage from '../features/enquiries/pages/EnquiriesPage';
 import CampaignsPage from '../features/campaigns/page/CampaignsPage';
 import FollowupRequiredPage from '../features/followup-required/pages/FollowupRequiredPage';
 import SalesPipelinePage from '../features/sales-pipeline/pages/SalesPipelinePage';
+import SpotlightPage from '../features/spotlight/pages/SpotlightPage';
 import CompaniesPage from '../features/companies/pages/CompaniesPage';
 import CompanySubscriptionPage from '../features/companies/subscription/pages/CompanySubscriptionPage';
 import FacebookWorkflows from '../pages/FacebookWorkflows';
@@ -16,6 +17,7 @@ export default (
     <Route path="campaigns" element={<CampaignsPage />} />
     <Route path="followup-required" element={<FollowupRequiredPage />} />
     <Route path="sales-pipeline" element={<SalesPipelinePage />} />
+    <Route path="spotlight" element={<SpotlightPage />} />
     <Route path="companies" element={<CompaniesPage />} />
     <Route path="companies/:companyId/subscription" element={<CompanySubscriptionPage />} />
     <Route path="facebook/workflows/*" element={<FacebookWorkflows />} />

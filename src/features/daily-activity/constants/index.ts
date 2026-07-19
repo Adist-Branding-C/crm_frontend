@@ -68,6 +68,6 @@ export const DEFAULT_FILTERS: Filters = {
  * the windowed pagination control.
  *
  * Used by:
- * - useDailyActivityData (computePageNumbers call).
+ * - DailyActivityPage (computePageNumbers call).
  */
 export const PAGE_WINDOW = 2;

@@ -22,8 +22,8 @@ export function useSpotlightLeadsFetch() {
         if (requestId !== latestRequestId.current) return;
         if (response.status && response.data) {
           setData(SpotlightLeadMapper.toDisplayList(response.data.items));
-          setTotalRecords(response.data.total);
-          setTotalPages(response.data.total_pages);
+          setTotalRecords(response.data.pagination.total);
+          setTotalPages(response.data.pagination.total_pages);
         } else {
           setData([]);
           setTotalRecords(0);

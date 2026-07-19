@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { Phone, User, DollarSign, CheckSquare, MessageSquare, Megaphone, ListChecks } from 'lucide-react';
+import { Phone, User, DollarSign, CheckSquare, MessageSquare, Megaphone, ListChecks, ArrowRight } from 'lucide-react';
+import { getChangeFieldLabel } from '../utils/activityHelpers';
 import type { ActivityTimelineCardProps } from '../types';
 import './ActivityTimelineCard.css';
 
@@ -61,6 +62,19 @@ const ActivityTimelineCard = memo(({ activity }: ActivityTimelineCardProps) => {
             <div className="timeline-description">
               {activity.description}
             </div>
+
+            {activity.changes.length > 0 && (
+              <div className="timeline-changes">
+                {activity.changes.map((change, index) => (
+                  <div className="timeline-change-row" key={`${change.fieldName}-${index}`}>
+                    <span className="change-field-label">{getChangeFieldLabel(change.fieldName)}</span>
+                    <span className="change-old-value">{change.oldValue || 'None'}</span>
+                    <ArrowRight size={12} className="change-arrow" />
+                    <span className="change-new-value">{change.newValue || 'None'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="timeline-badges">
               <span className={`badge ${activity.badge.toLowerCase()}`}>{activity.badge}</span>

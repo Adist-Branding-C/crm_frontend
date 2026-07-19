@@ -99,6 +99,47 @@
   line-height: 1.5;
 }
 
+.timeline-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 0.625rem;
+}
+
+.timeline-change-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: calc(var(--border-radius) - 4px);
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+}
+
+.change-field-label {
+  font-weight: 600;
+  color: var(--text-main);
+  min-width: 6.5rem;
+}
+
+.change-old-value {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--text-muted);
+}
+
+.change-arrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.change-new-value {
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .timeline-badges {
   display: flex;
   gap: 0.5rem;

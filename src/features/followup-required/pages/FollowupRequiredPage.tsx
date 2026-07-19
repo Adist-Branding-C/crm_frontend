@@ -1,45 +1,110 @@
+import { useState, useEffect, useCallback } from 'react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import LeadDetailDrawer from '../../../components/LeadDetailDrawer';
+import ListToolbar from '../../../shared/components/table/ListToolbar';
+import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useLeadFilterOptions } from '../../enquiries/hooks/useLeadFilterOptions';
-import { COLUMNS } from '../constants';
-import { useFollowupData } from '../hooks/useFollowupData';
-import FollowupToolbar from '../components/FollowupToolbar';
+import { COLUMNS, SORT_OPTIONS } from '../constants';
+import { useFollowupFilters } from '../hooks/useFollowupFilters';
+import { useFollowupSort } from '../hooks/useFollowupSort';
+import { useFollowupDrawer } from '../hooks/useFollowupDrawer';
+import { useFollowupFetch } from '../hooks/useFollowupFetch';
 import FollowupFilters from '../components/FollowupFilters';
 import FollowupTable from '../components/FollowupTable';
 import FollowupPagination from '../components/FollowupPagination';
 import './FollowupRequiredPage.css';
 
 const FollowupRequiredPage = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [committedSearch, setCommittedSearch] = useState('');
+
+  const filtersState = useFollowupFilters();
+  const sortState = useFollowupSort();
+  const drawerState = useFollowupDrawer();
+  const { data, total, totalPages, isLoading, error, fetchFollowupLeads } = useFollowupFetch();
+
+  const handleCommittedSearch = useCallback((value: string) => {
+    setCurrentPage(1);
+    setCommittedSearch(value.trim());
+  }, []);
+
   const {
-    searchQuery,
-    setSearchQuery,
-    showFilters,
-    setShowFilters,
+    searchValue: searchQuery,
+    handleSearchChange: setSearchQuery,
+  } = useDebouncedSearch(handleCommittedSearch);
+
+  // Reactive: any change to page, page size, committed search, applied
+  // filters, or sort re-fetches - matches the original single-effect design
+  // rather than an explicit refetch call per handler.
+  useEffect(() => {
+    fetchFollowupLeads(
+      currentPage,
+      rowsPerPage,
+      committedSearch,
+      filtersState.appliedFilters,
+      sortState.sortConfig,
+    );
+  }, [
     currentPage,
-    setCurrentPage,
     rowsPerPage,
-    sortConfig,
-    showSortDropdown,
-    setShowSortDropdown,
-    selectedLead,
-    isDrawerOpen,
-    filters,
-    setFilters,
-    data,
-    total,
-    totalPages,
-    startIndex,
-    isLoading,
-    error,
-    handleSort,
-    handleRowsPerPageChange,
-    applyFilters,
-    clearFilters,
-    handleViewLead,
-    handleCloseDrawer,
-    refresh,
-  } = useFollowupData();
+    committedSearch,
+    filtersState.appliedFilters,
+    sortState.sortConfig,
+    fetchFollowupLeads,
+  ]);
+
+  // A filter/search change can leave currentPage past the new last page
+  // (e.g. narrowing results while on page 5) - snap back into range.
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setRowsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const applyFilters = () => {
+    const hasChanged = filtersState.applyFilters();
+    if (hasChanged) {
+      setCurrentPage(1);
+    }
+  };
+
+  const clearFilters = () => {
+    filtersState.clearFilters();
+    setCurrentPage(1);
+  };
+
+  const handleSort = (key: string) => {
+    sortState.handleSort(key);
+    setCurrentPage(1);
+  };
+
+  const refresh = useCallback(
+    () =>
+      fetchFollowupLeads(
+        currentPage,
+        rowsPerPage,
+        committedSearch,
+        filtersState.appliedFilters,
+        sortState.sortConfig,
+      ),
+    [
+      currentPage,
+      rowsPerPage,
+      committedSearch,
+      filtersState.appliedFilters,
+      sortState.sortConfig,
+      fetchFollowupLeads,
+    ],
+  );
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
 
   const {
     typeOptions,
@@ -57,30 +122,31 @@ const FollowupRequiredPage = () => {
         description="Leads whose next follow-up date is due today or overdue."
       />
 
-      <FollowupToolbar
+      <ListToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        showFilters={showFilters}
-        onToggleFilters={() => setShowFilters(!showFilters)}
-        sortConfig={sortConfig}
+        showFilters={filtersState.showFilters}
+        onToggleFilters={() => filtersState.setShowFilters(!filtersState.showFilters)}
+        sortConfig={sortState.sortConfig}
         onSort={(key) => {
           handleSort(key);
-          setShowSortDropdown(false);
+          sortState.setShowSortDropdown(false);
         }}
-        showSortDropdown={showSortDropdown}
-        onToggleSortDropdown={() => setShowSortDropdown(!showSortDropdown)}
+        showSortDropdown={sortState.showSortDropdown}
+        onToggleSortDropdown={() => sortState.setShowSortDropdown(!sortState.showSortDropdown)}
+        sortOptions={SORT_OPTIONS}
       />
 
-      {showFilters && (
+      {filtersState.showFilters && (
         <FollowupFilters
-          filters={filters}
+          filters={filtersState.filters}
           typeOptions={typeOptions}
           statusOptions={statusOptions}
           sourceOptions={sourceOptions}
           staffOptions={staffOptions}
           isLoadingFilterOptions={isLoadingFilterOptions}
           filterOptionsError={filterOptionsError}
-          onFilterChange={setFilters}
+          onFilterChange={filtersState.setFilters}
           onApply={applyFilters}
           onClear={clearFilters}
         />
@@ -89,12 +155,12 @@ const FollowupRequiredPage = () => {
       <FollowupTable
         data={data}
         columns={COLUMNS}
-        sortConfig={sortConfig}
+        sortConfig={sortState.sortConfig}
         onSort={handleSort}
         isLoading={isLoading}
         error={error}
         onRetry={refresh}
-        onViewLead={handleViewLead}
+        onViewLead={drawerState.handleViewLead}
       />
 
       <FollowupPagination
@@ -108,9 +174,9 @@ const FollowupRequiredPage = () => {
       />
 
       <LeadDetailDrawer
-        lead={selectedLead}
-        isOpen={!!selectedLead && isDrawerOpen}
-        onClose={handleCloseDrawer}
+        lead={drawerState.selectedLead}
+        isOpen={!!drawerState.selectedLead && drawerState.isDrawerOpen}
+        onClose={drawerState.handleCloseDrawer}
         onLeadUpdated={refresh}
       />
     </PageContainer>

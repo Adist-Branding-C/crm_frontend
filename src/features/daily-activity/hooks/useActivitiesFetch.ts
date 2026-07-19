@@ -9,13 +9,13 @@ import type { Activity, Filters, PaginationInfo } from '../types';
  * activities + pagination state.
  *
  * Used by:
- * - useDailyActivityData (calls fetchActivities on mount, apply, reset, and
+ * - DailyActivityPage (calls fetchActivities on mount, apply, reset, and
  *   page-change).
  *
  * Notes:
  * - fetchActivities is imperative rather than reactive-on-filter-change, since
  *   the filter panel uses an explicit "Apply" action rather than live refetch
- *   on every field edit - see useDailyActivityData for why the shared
+ *   on every field edit - see DailyActivityPage for why the shared
  *   useTableData hook (which auto-refetches on state change) wasn't used here.
  * - requestSeqRef discards responses for requests that are no longer the most
  *   recent in-flight one (e.g. a fast page click superseding a slow one).
