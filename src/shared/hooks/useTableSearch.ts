@@ -1,6 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-export function useTaskSettingsSearch(
+/**
+ * Debounced search-box state for the task-settings sub-module pages, kept in sync with an
+ * externally-owned search query (e.g. cleared when the page resets filters).
+ *
+ * Used by:
+ * - call-reason, call-status, meeting-outcome, task-category pages
+ *
+ * Notes:
+ * - Builds on the same debounce pattern as the shared `useDebouncedSearch`, but that hook has
+ *   no way to resync its internal value when the external query changes elsewhere (e.g. a
+ *   "clear filters" action), which every task-settings page relies on.
+ */
+export function useTableSearch(
   externalSearchQuery: string,
   onSearchChange: (value: string) => void,
 ) {

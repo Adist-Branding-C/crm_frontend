@@ -12,10 +12,9 @@ import NotificationSettingsPage from '../features/notification-settings/pages/No
 import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
 import IntegrationsPage from '../features/integrations/pages/IntegrationsPage';
 import LeadGenerationAPIPage from '../features/lead-generation-api/pages/LeadGenerationAPIPage';
-import UserLayout from '../features/task-settings/components/UserLayout';
 import CallStatusPage from '../features/task-settings/call-status/page/CallStatus';
 import CallReasonPage from '../features/task-settings/call-reason/page/CallReason';
-import MeetingOutcomePage from '../features/task-settings/meeting-outcome/MeetingOutcome';
+import MeetingOutcomePage from '../features/task-settings/meeting-outcome/pages/MeetingOutcome';
 import TaskCategoryPage from '../features/task-settings/task-category/page/TaskCategory';
 
 export default (
@@ -31,11 +30,9 @@ export default (
     <Route path="user/payment-plans" element={<PaymentPlansPage />} />
     <Route path="user/gl-connect" element={<IntegrationsPage />} />
     <Route path="user/gl-connect/lead-api" element={<LeadGenerationAPIPage />} />
-    <Route path="user" element={<UserLayout />}>
-      <Route path="call_status" element={<CallStatusPage />} />
-      <Route path="call_reasons" element={<CallReasonPage />} />
-      <Route path="meeting_outcome" element={<MeetingOutcomePage />} />
-      <Route path="task_categories" element={<TaskCategoryPage />} />
-    </Route>
+    <Route path="user/call_status" element={<ErrorBoundary><CallStatusPage /></ErrorBoundary>} />
+    <Route path="user/call_reasons" element={<ErrorBoundary><CallReasonPage /></ErrorBoundary>} />
+    <Route path="user/meeting_outcome" element={<ErrorBoundary><MeetingOutcomePage /></ErrorBoundary>} />
+    <Route path="user/task_categories" element={<ErrorBoundary><TaskCategoryPage /></ErrorBoundary>} />
   </>
 );

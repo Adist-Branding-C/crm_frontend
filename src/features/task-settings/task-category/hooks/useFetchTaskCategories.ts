@@ -5,6 +5,11 @@ import { taskCategoryApiService } from '../services';
 import type { TaskCategoryItem } from '../types/index';
 import type { TaskCategoryRawItem } from '../types/response';
 
+/**
+ * Fetches the task-category list with pagination/search state via the shared useTableData hook.
+ * Response items are additionally mapped through TaskCategoryMapper because the backend has
+ * historically sent the category field as either `category` or `taskCategory`.
+ */
 export function useFetchTaskCategories() {
   const pagination = useTableData<TaskCategoryItem>({
     fetchFn: async (params) => {

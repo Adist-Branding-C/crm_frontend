@@ -46,7 +46,7 @@ const CampaignsPage = () => {
     toast,
   );
 
-  const { searchValue, handleSearchChange } = useDebouncedSearch(fetch.handleSearchChange);
+  const { searchValue, handleSearchChange } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
     fetch.handleRowsPerPageChange(Number(e.target.value));

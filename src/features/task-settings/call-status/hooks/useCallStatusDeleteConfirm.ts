@@ -2,10 +2,7 @@ import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirm
 import type { CallStatusItem } from '../types/index';
 
 /**
- * Delete-confirmation modal state for call statuses.
- *
- * Notes:
- * - Thin wrapper around the shared useDeleteConfirmation.
+ * Thin wrapper around the shared useDeleteConfirmation, scoped to call-status items.
  */
 export function useCallStatusDeleteConfirm(handleDeleteCallStatus: (id: number) => Promise<boolean>) {
   return useDeleteConfirmation<CallStatusItem>((item) => handleDeleteCallStatus(item.id));
