@@ -9,7 +9,6 @@ import { useCallReasonFormSubmit } from '../hooks/useCallReasonFormSubmit';
 import { useCallReasonRowActions } from '../hooks/useCallReasonRowActions';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useToast } from '../../../../shared/hooks/useToast';
-import { useTaskSettingsSearch } from '../../hooks/useTaskSettingsSearch';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addCallReasonValidationSchema, editCallReasonValidationSchema } from '../validations/index';
 import { ADD_CALL_REASON_INITIAL_VALUES, CALL_REASON_CSV_COLUMNS } from '../constants/index';
@@ -21,9 +20,15 @@ import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModa
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../components/SettingsTabs/SettingsTabs';
 import './CallReason.css';
+import SettingsTabs from '../../../../shared/components/SettingsTabs';
+import { useTableSearch } from '../../../../shared/hooks/useTableSearch';
 
+/**
+ * Call-reasons settings page: composes the fetch/crud/drawer/form/delete/row-action hooks and
+ * renders them through shared table, drawer, and modal primitives. Holds no business logic of
+ * its own — every handler here is a single hook call or a thin event-unwrapping adapter.
+ */
 const CallReasonPage = () => {
   const fetch = useFetchCallReasons();
   const toast = useToast();
@@ -45,7 +50,7 @@ const CallReasonPage = () => {
     closeDropdown: dropdown.closeDropdown,
   });
 
-  const { searchValue, handleSearchInput } = useTaskSettingsSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useTableSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleExportCSV = useCallback(() => {
     exportToCsv(fetch.callReasonList, CALL_REASON_CSV_COLUMNS, 'call-reasons.csv');
@@ -57,18 +62,18 @@ const CallReasonPage = () => {
   return (
     <div className="task-settings-page">
       <PageHeader title="Task Settings" description="Manage task configurations and settings" />
-      <SettingsTabs tabs={SETTINGS_TABS} />
+      <SettingsTabs items={SETTINGS_TABS} />
       <div className="account-content">
         <div className="call-reason-table-wrapper table-container">
           <TableNav
             searchQuery={searchValue}
             onSearchChange={handleSearchInput}
             rowsPerPage={fetch.limit}
-            onRowsPerPageChange={(e) => fetch.handleRowsPerPageChange(Number(e.target.value))}
+            onRowsPerPageChange={fetch.handleRowsPerPageChange}
           >
-            <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Download size={16} />Export
-            </button>
+            </button> */}
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={16} /> Add Reason
             </button>

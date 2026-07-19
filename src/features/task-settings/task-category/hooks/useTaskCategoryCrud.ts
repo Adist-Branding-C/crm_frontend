@@ -6,11 +6,9 @@ import { TASK_CATEGORY_FIELD_MAP, TASK_CATEGORY_FIELD_ERROR_FALLBACKS } from '..
 import type { TaskCategoryFormData, UseTaskCategoryCrudParams } from '../types/index';
 
 /**
- * Task-category create/update/delete API orchestration.
- *
- * Notes:
- * - Takes the list/pagination setters it needs to drive and a toast trigger as narrow
- *   dependencies, rather than owning or re-exporting the pagination or toast hooks themselves.
+ * Create/update/delete API orchestration for task categories. Adding resets the page to 1 and
+ * clears any active search before refreshing the list; updating just refreshes in place. Delete
+ * errors are parsed inline rather than going through the shared submit-error handler.
  */
 export function useTaskCategoryCrud({ pagination, showToastMessage }: UseTaskCategoryCrudParams) {
   const submitError = useSubmitErrorHandler({
@@ -27,8 +25,8 @@ export function useTaskCategoryCrud({ pagination, showToastMessage }: UseTaskCat
     pagination.setIsLoading(true);
 
     try {
-      const { category, action } = values;
-      const response = await taskCategoryApiService.create({ category: category.trim(), action: action.trim() });
+      const { category, status } = values;
+      const response = await taskCategoryApiService.create({ category: category.trim(), status: status.trim() });
 
       if (response.status) {
         pagination.setPageNumber(1);
@@ -59,8 +57,8 @@ export function useTaskCategoryCrud({ pagination, showToastMessage }: UseTaskCat
     pagination.setIsLoading(true);
 
     try {
-      const { category, action } = values;
-      const response = await taskCategoryApiService.update(id, { category: category.trim(), action: action.trim() });
+      const { category, status } = values;
+      const response = await taskCategoryApiService.update(id, { category: category.trim(), status: status.trim() });
 
       if (response.status) {
         pagination.refresh();

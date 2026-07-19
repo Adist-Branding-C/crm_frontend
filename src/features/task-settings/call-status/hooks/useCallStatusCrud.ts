@@ -6,11 +6,9 @@ import { CALL_STATUS_FIELD_MAP, CALL_STATUS_FIELD_ERROR_FALLBACKS } from '../con
 import type { CallStatusFormData, UseCallStatusCrudParams } from '../types/index';
 
 /**
- * Call-status create/update/delete API orchestration.
- *
- * Notes:
- * - Takes the list/pagination setters it needs to drive and a toast trigger as narrow
- *   dependencies, rather than owning or re-exporting the pagination or toast hooks themselves.
+ * Create/update/delete API orchestration for call statuses. Adding resets the page to 1 and
+ * clears any active search before refreshing the list; updating just refreshes in place. Delete
+ * errors are parsed inline rather than going through the shared submit-error handler.
  */
 export function useCallStatusCrud({ pagination, showToastMessage }: UseCallStatusCrudParams) {
   const submitError = useSubmitErrorHandler({
