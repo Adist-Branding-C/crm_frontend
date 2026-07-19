@@ -3,11 +3,16 @@ import TaskCategoryActions from './TaskCategoryActions';
 import { TRow, TCell } from '../../../../shared/components/table';
 import type { TaskCategoryRowProps } from '../types/index';
 
+/**
+ * Renders a single task-category table row; memoized since the list can re-render often while
+ * only one row's data actually changes. Purely presentational — click handling is delegated to
+ * the parent via onEdit/onDelete/onToggleDropdown.
+ */
 const TaskCategoryRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, onDelete }: TaskCategoryRowProps) => (
   <TRow>
     <TCell>{index + 1}</TCell>
     <TCell>{item.category || '-'}</TCell>
-    <TCell>{item.action || '-'}</TCell>
+    <TCell>{item.status || '-'}</TCell>
     <TCell>
       <TaskCategoryActions
         item={item}

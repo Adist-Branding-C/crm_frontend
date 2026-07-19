@@ -28,23 +28,3 @@ export interface UseCallReasonRowActionsParams {
   onDeleteClick: (item: CallReasonItem) => void;
   closeDropdown: () => void;
 }
-
-export interface SubmitHandlerConfig {
-  editingItem: CallReasonItem | null;
-  deletingItem: CallReasonItem | null;
-  onAddSuccess: () => void;
-  onEditSuccess: () => void;
-  onDeleteSuccess: () => void;
-}
-
-export interface FetchHandlers {
-  setError: (message: string) => void;
-  setIsLoading: (value: boolean) => void;
-  setPageNumber: Dispatch<SetStateAction<number>>;
-  setSearchQuery: Dispatch<SetStateAction<string>>;
-  refresh: () => void;
-}
-
-export interface ToastHandlers {
-  showToastMessage: (message: string, type: ToastType) => void;
-}

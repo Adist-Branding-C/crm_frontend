@@ -12,7 +12,7 @@ import type { MeetingOutcomeListResponse } from '../types/response';
  *
  * Used by:
  * - meetingOutcomeApiService singleton (services/index.ts), consumed by
- *   useFetchMeetingOutcomes (list) and useMeetingOutcome (create/update/delete).
+ *   useFetchMeetingOutcomes (list) and useMeetingOutcomeCrud (create/update/delete).
  */
 export class MeetingOutcomeApiService {
   async fetchAll(params: FetchMeetingOutcomesParams): Promise<ApiResponse<MeetingOutcomeListResponse>> {

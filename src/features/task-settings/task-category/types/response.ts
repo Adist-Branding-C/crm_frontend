@@ -11,7 +11,7 @@ export interface TaskCategoryRawItem {
   id: number;
   category?: string;
   taskCategory?: string;
-  action?: string;
+  status?: string;
 }
 
 export interface TaskCategoryListResponse {

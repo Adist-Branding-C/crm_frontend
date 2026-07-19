@@ -2,6 +2,11 @@ import { useMemo } from 'react';
 import type { CallReasonItem, CallReasonFormData } from '../types/index';
 import { ADD_CALL_REASON_INITIAL_VALUES } from '../constants/index';
 
+/**
+ * Derives the Formik initial values for the edit drawer from the item being edited, defaulting
+ * status to 'Active' if it's missing. Memoized on editingItem so the add drawer's blank initial
+ * values aren't recomputed on every render.
+ */
 export function useCallReasonForm(editingItem: CallReasonItem | null) {
   const editInitialValues: CallReasonFormData = useMemo(
     () => editingItem

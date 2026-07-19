@@ -28,7 +28,7 @@ export function useTaskCategoryFormSubmit({
     if (!editingItem) return;
     const original: TaskCategoryFormData = {
       category: editingItem.category || '',
-      action: editingItem.action || '',
+      status: editingItem.status || '',
     };
     if (JSON.stringify(values) === JSON.stringify(original)) {
       helpers.setSubmitting(false);
