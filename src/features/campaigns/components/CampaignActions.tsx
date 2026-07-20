@@ -1,9 +1,15 @@
-import { useRef } from 'react';
-import { MoreHorizontal, Eye, Edit2, Trash2, User } from 'lucide-react';
-import ActionMenuPortal from '../../task-settings/components/ActionMenuPortal';
+import { memo, useRef } from 'react';
+import { MoreHorizontal, Eye, Edit2, Trash2 } from 'lucide-react';
+import ActionMenuPortal from '../../../shared/components/ActionMenuPortal';
 import { ACTION_VIEW, ACTION_EDIT, ACTION_DELETE } from '../../../shared/constants/actionLabels';
 import type { CampaignActionsProps } from '../types';
 
+/**
+ * Renders the row's kebab-menu trigger and the view/edit/delete actions inside a portal, so the
+ * menu can float above the table instead of being clipped by an overflow:hidden ancestor.
+ * Open/close state is fully controlled by the parent (dropdownOpen/onToggleDropdown), not owned
+ * locally. Assign is wired through onAssign but its button is not yet exposed in the menu.
+ */
 const CampaignActions = ({ campaign, dropdownOpen, onToggleDropdown, onView, onEdit, onAssign, onDelete }: CampaignActionsProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -26,4 +32,4 @@ const CampaignActions = ({ campaign, dropdownOpen, onToggleDropdown, onView, onE
   );
 };
 
-export default CampaignActions;
+export default memo(CampaignActions);

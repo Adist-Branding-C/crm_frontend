@@ -5,6 +5,11 @@ import { formatDisplayDate } from '../utils/date.utils';
 import { getCreatedByLabel, getPoolAgentsLabel, getCampaignTypeBadgeClass } from '../utils/campaign.utils';
 import type { CampaignRowProps } from '../types';
 
+/**
+ * Renders a single campaign table row; memoized since the list can re-render often while only
+ * one row's data actually changes. Purely presentational — click handling is delegated to the
+ * parent via onView/onEdit/onAssign/onDelete/onToggleDropdown.
+ */
 const CampaignRow = ({ campaign, dropdownOpen, onToggleDropdown, onView, onEdit, onAssign, onDelete }: CampaignRowProps) => (
   <TRow>
     <TCell>{campaign.slNo}</TCell>

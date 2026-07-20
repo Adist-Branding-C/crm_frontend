@@ -1,4 +1,15 @@
-export interface GetCampaignsParams {
+export type CampaignFormData = {
+  type: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  poolName: string;
+  poolAgents: string[];
+  agents: string[];
+};
+
+export interface FetchCampaignsParams {
   pageNumber: number;
   limit: number;
   search?: string | undefined;

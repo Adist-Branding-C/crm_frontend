@@ -1,64 +1,66 @@
-import { useCallback, useMemo, useRef } from 'react';
-import type { ChangeEvent } from 'react';
+import { useCallback, useRef } from 'react';
 import { Download, Plus } from 'lucide-react';
-import { useDrawer } from '../../../shared/hooks/useDrawer';
-import { useRowDropdown } from '../../../shared/hooks/useRowDropdown';
-import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useFetchCampaigns } from '../hooks/useFetchCampaigns';
-import { useCampaignSubmitHandlers } from '../hooks/useCampaignSubmitHandlers';
+import { useCampaignCrud } from '../hooks/useCampaignCrud';
+import { useCampaignDrawer } from '../hooks/useCampaignDrawer';
+import { useCampaignForm } from '../hooks/useCampaignForm';
+import { useCampaignDeleteConfirm } from '../hooks/useCampaignDeleteConfirm';
+import { useCampaignFormSubmit } from '../hooks/useCampaignFormSubmit';
+import { useCampaignRowActions } from '../hooks/useCampaignRowActions';
 import { useCampaignExport } from '../hooks/useCampaignExport';
-import { useToast } from '../../task-settings/hooks/useToast';
-import { CampaignMapper } from '../mappers/campaign.mapper';
+import { useDropdownMenu } from '../../../shared/hooks/useDropdownMenu';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useTableSearch } from '../../../shared/hooks/useTableSearch';
 import { campaignValidationSchema } from '../validations/index';
 import { ADD_CAMPAIGN_INITIAL_VALUES } from '../constants/index';
 import { LABEL_NO_DATA } from '../../../shared/constants/labels';
 import CampaignForm from '../components/CampaignForm';
 import CampaignRow from '../components/CampaignRow';
-import DeleteCampaignDialog from '../components/DeleteCampaignDialog';
-import ToastNotification from '../../task-settings/components/ToastNotification';
+import ToastNotification from '../../../shared/components/ToastNotification';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Drawer from '../../../shared/components/Drawer';
-import Modal from '../../../shared/components/Modal';
+import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
 import type { Campaign } from '../types';
 import './CampaignsPage.css';
 
+/**
+ * Campaigns page: composes the fetch/crud/drawer/form/delete/row-action hooks and renders them
+ * through shared table, drawer, and modal primitives. Holds no business logic of its own — every
+ * handler here is a single hook call or a thin event-unwrapping adapter. View and Assign are the
+ * exception: both are intentionally unimplemented stubs (see useCampaignRowActions), so they stay
+ * as inline no-ops here rather than being wired through any hook.
+ */
 const CampaignsPage = () => {
   const fetch = useFetchCampaigns();
-  const addDrawer = useDrawer();
-  const editDrawer = useDrawer<Campaign>();
-  const deleteDialog = useDrawer<Campaign>();
-  const dropdown = useRowDropdown();
   const toast = useToast();
+  const crud = useCampaignCrud({ pagination: fetch, showToastMessage: toast.showToastMessage });
+  const drawer = useCampaignDrawer();
+  const form = useCampaignForm(drawer.editingItem);
+  const dropdown = useDropdownMenu<number>();
+  const deleteConfirm = useCampaignDeleteConfirm(crud.handleDeleteCampaign);
+  const formSubmit = useCampaignFormSubmit({
+    editingItem: drawer.editingItem,
+    closeAddDrawer: drawer.closeAddDrawer,
+    closeEditDrawer: drawer.closeEditDrawer,
+    handleAddCampaign: crud.handleAddCampaign,
+    handleUpdateCampaign: crud.handleUpdateCampaign,
+  });
+  const rowActions = useCampaignRowActions({
+    openEditDrawer: drawer.openEditDrawer,
+    onDeleteClick: deleteConfirm.handleDeleteClick,
+    closeDropdown: dropdown.closeDropdown,
+  });
   const { handleExportCSV } = useCampaignExport(fetch.campaignList);
-  const formBodyRef = useRef<HTMLDivElement>(null);
 
-  const handlers = useCampaignSubmitHandlers(
-    {
-      onAddSuccess: addDrawer.close,
-      onEditSuccess: editDrawer.close,
-      onDeleteSuccess: deleteDialog.close,
-      editingItem: editDrawer.item,
-      deletingItem: deleteDialog.item,
-    },
-    fetch,
-    toast,
-  );
-
-  const { searchValue, handleSearchChange } = useDebouncedSearch(fetch.handleSearchChange);
-
-  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    fetch.handleRowsPerPageChange(Number(e.target.value));
-  }, [fetch.handleRowsPerPageChange]);
-
-  const editInitialValues = useMemo(
-    () => CampaignMapper.toFormValues(editDrawer.item),
-    [editDrawer.item],
-  );
+  const { searchValue, handleSearchInput } = useTableSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleView = useCallback((_campaign: Campaign) => {}, []);
   const handleAssignClick = useCallback((_campaign: Campaign) => {}, []);
+
+  const addDrawerBodyRef = useRef<HTMLDivElement>(null);
+  const editDrawerBodyRef = useRef<HTMLDivElement>(null);
 
   return (
     <PageContainer>
@@ -67,14 +69,14 @@ const CampaignsPage = () => {
       <div className="table-container">
         <TableNav
           searchQuery={searchValue}
-          onSearchChange={handleSearchChange}
+          onSearchChange={handleSearchInput}
           rowsPerPage={fetch.limit}
-          onRowsPerPageChange={handleRowsPerPageChange}
+          onRowsPerPageChange={fetch.handleRowsPerPageChange}
         >
           <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Download size={16} />Export
           </button>
-          <button className="btn btn-primary" onClick={() => addDrawer.open()} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Plus size={16} /> Campaign
           </button>
         </TableNav>
@@ -105,9 +107,9 @@ const CampaignsPage = () => {
                   dropdownOpen={dropdown.dropdownOpen}
                   onToggleDropdown={dropdown.toggleDropdown}
                   onView={handleView}
-                  onEdit={editDrawer.open}
+                  onEdit={rowActions.handleEditClick}
                   onAssign={handleAssignClick}
-                  onDelete={deleteDialog.open}
+                  onDelete={rowActions.handleDeleteClick}
                 />
               ))
             )}
@@ -123,45 +125,43 @@ const CampaignsPage = () => {
         />
       </div>
 
-      <Drawer ref={formBodyRef} isOpen={addDrawer.isOpen} onClose={addDrawer.close} title="Add Campaign">
+      <Drawer isOpen={drawer.showAddDrawer} onClose={drawer.closeAddDrawer} title="Add Campaign" ref={addDrawerBodyRef}>
         <CampaignForm
-          editingItem={null}
           validationSchema={campaignValidationSchema}
           initialValues={ADD_CAMPAIGN_INITIAL_VALUES}
-          onSubmit={handlers.handleAddSubmit}
+          onSubmit={formSubmit.handleSubmit}
+          onCancel={drawer.closeAddDrawer}
           isLoading={fetch.isLoading}
           error={fetch.error}
-          onCancel={addDrawer.close}
-          scrollContainerRef={formBodyRef}
+          bodyRef={addDrawerBodyRef}
         />
       </Drawer>
 
-      <Drawer ref={formBodyRef} isOpen={editDrawer.isOpen} onClose={editDrawer.close} title="Edit Campaign">
+      <Drawer isOpen={drawer.showEditDrawer} onClose={drawer.closeEditDrawer} title="Edit Campaign" ref={editDrawerBodyRef}>
         <CampaignForm
-          editingItem={editDrawer.item}
           validationSchema={campaignValidationSchema}
-          initialValues={editInitialValues}
-          onSubmit={handlers.handleEditSubmit}
+          initialValues={form.editInitialValues}
+          onSubmit={formSubmit.handleEditSubmit}
+          onCancel={drawer.closeEditDrawer}
           isLoading={fetch.isLoading}
           error={fetch.error}
-          onCancel={editDrawer.close}
-          scrollContainerRef={formBodyRef}
+          isEditing
+          bodyRef={editDrawerBodyRef}
         />
       </Drawer>
 
-      <Modal isOpen={deleteDialog.isOpen} onClose={deleteDialog.close} title="Confirm Delete" maxWidth="450px">
-        <DeleteCampaignDialog
-          itemName={deleteDialog.item?.name || ''}
-          onConfirm={handlers.handleConfirmDelete}
-          onCancel={deleteDialog.close}
-        />
-      </Modal>
+      <AdminDeleteModal
+        isOpen={!!deleteConfirm.deletingItem}
+        itemName={deleteConfirm.deletingItem?.name || ''}
+        onConfirm={deleteConfirm.handleConfirmDelete}
+        onClose={deleteConfirm.closeDeleteModal}
+      />
 
       <ToastNotification
-        message={toast.toastMessage}
+        isVisible={toast.showToast}
         type={toast.toastType}
-        visible={toast.showToast}
-        onClose={() => toast.setShowToast(false)}
+        message={toast.toastMessage}
+        onDismiss={() => toast.setShowToast(false)}
       />
     </PageContainer>
   );

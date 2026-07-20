@@ -1,8 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { agentService } from '../../account-settings/agent/services/agent.service';
 import type { Agent } from '../types';
 import type { AgentItem } from '../../account-settings/agent/types/agent.types';
 
+/**
+ * Loads the agent/staff options for the campaign form's Agents multi-select, scoped to the
+ * currently-selected campaign type (only Lead Campaign and Data Pool need agents at all).
+ *
+ * Notes:
+ * - Caches the fetched list in a ref rather than refetching per type change, since both
+ *   campaign types draw from the same agent pool; clearCache() resets it for a fresh Add form.
+ */
 export function useStaffOptions() {
   const [selectedType, setSelectedType] = useState('');
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -22,37 +30,43 @@ export function useStaffOptions() {
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-    agentService.getAllAgents({ pageNumber: 1, limit: 10 })
-      .then(res => {
+    let cancelled = false;
+
+    const loadAgents = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const res = await agentService.getAllAgents({ pageNumber: 1, limit: 10 });
         const rawItems = (res.data as { items?: unknown[] })?.items ?? [];
         const items = rawItems as AgentItem[];
-        if (!Array.isArray(items) || items.length === 0) {
-          const empty: Agent[] = [];
-          cachedAgents.current = empty;
-          setAgents(empty);
-          return;
-        }
-        const mapped: Agent[] = items.map((a: AgentItem) => {
+        const mapped: Agent[] = !Array.isArray(items) ? [] : items.map((a: AgentItem) => {
           const agent: Agent = { id: String(a.staff_id), name: String(a.name ?? a.fullName ?? '') };
           if (a.email) agent.email = a.email;
           if (a.phone_number || a.phone || a.phoneNumber) agent.designation = String(a.phone_number ?? a.phone ?? a.phoneNumber ?? '');
           return agent;
         });
+
+        if (cancelled) return;
         cachedAgents.current = mapped;
         setAgents(mapped);
-      })
-      .catch(err => {
-        setError(err?.response?.data?.message || err?.message || 'Failed to load staff');
+      } catch (err: unknown) {
+        if (cancelled) return;
+        const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+        setError(axiosErr?.response?.data?.message || axiosErr?.message || 'Failed to load staff');
         setAgents([]);
-      })
-      .finally(() => setIsLoading(false));
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    loadAgents();
+    return () => { cancelled = true; };
   }, [selectedType]);
 
-  const clearCache = () => {
+  const clearCache = useCallback(() => {
     cachedAgents.current = null;
-  };
+  }, []);
 
   return { selectedType, setSelectedType, agents, isLoading, error, clearCache };
 }

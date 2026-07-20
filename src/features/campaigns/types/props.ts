@@ -1,7 +1,8 @@
 import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
 import type { RefObject } from 'react';
-import type { Campaign, CampaignFormData, Agent } from './interface';
+import type { Campaign, Agent } from './interface';
+import type { CampaignFormData } from './request';
 
 export interface CampaignActionsProps {
   campaign: Campaign;
@@ -24,20 +25,14 @@ export interface CampaignRowProps {
 }
 
 export interface CampaignFormProps {
-  editingItem: Campaign | null;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: CampaignFormData;
   onSubmit: (values: CampaignFormData, helpers: FormikHelpers<CampaignFormData>) => Promise<void | boolean>;
+  onCancel: () => void;
   isLoading: boolean;
   error: string | null;
-  onCancel: () => void;
-  scrollContainerRef?: RefObject<HTMLDivElement | null>;
-}
-
-export interface DeleteCampaignDialogProps {
-  itemName: string;
-  onConfirm: () => void;
-  onCancel: () => void;
+  isEditing?: boolean;
+  bodyRef?: RefObject<HTMLDivElement | null>;
 }
 
 export interface AgentMultiSelectProps {

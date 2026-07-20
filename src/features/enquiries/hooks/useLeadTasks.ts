@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { taskService } from '../../task/shared/services/taskService';
+// import { taskService } from '../../task/common/services/taskService';
 import type { LeadTaskItem, LeadTaskFormData } from '../types';
 import { ERROR_MESSAGES } from '../constants/messages';
 
@@ -40,63 +40,63 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
     }
   }, [isOpen, activeTab, leadId, fetchTasks]);
 
-  const addTask = useCallback(async (data: LeadTaskFormData): Promise<boolean> => {
-    setError(null);
-    try {
-      const response = await taskService.createTask({ ...data, entityType: 'lead', entityId: leadId });
-      if (response.status) {
-        await fetchTasks();
-        return true;
-      } else {
-        setError(response.message || ERROR_MESSAGES.ADD_TASK);
-        return false;
-      }
-    } catch {
-      setError(ERROR_MESSAGES.ADD_TASK);
-      return false;
-    }
-  }, [leadId, fetchTasks]);
+  // const addTask = useCallback(async (data: LeadTaskFormData): Promise<boolean> => {
+  //   setError(null);
+  //   try {
+  //     const response = await taskService.createTask({ ...data, entityType: 'lead', entityId: leadId });
+  //     if (response.status) {
+  //       await fetchTasks();
+  //       return true;
+  //     } else {
+  //       setError(response.message || ERROR_MESSAGES.ADD_TASK);
+  //       return false;
+  //     }
+  //   } catch {
+  //     setError(ERROR_MESSAGES.ADD_TASK);
+  //     return false;
+  //   }
+  // }, [leadId, fetchTasks]);
 
-  const updateTask = useCallback(async (id: number, data: LeadTaskFormData): Promise<boolean> => {
-    setError(null);
-    try {
-      const response = await taskService.updateTask(id, data);
-      if (response.status) {
-        await fetchTasks();
-        return true;
-      } else {
-        setError(response.message || ERROR_MESSAGES.UPDATE_TASK);
-        return false;
-      }
-    } catch {
-      setError(ERROR_MESSAGES.UPDATE_TASK);
-      return false;
-    }
-  }, [fetchTasks]);
+  // const updateTask = useCallback(async (id: number, data: LeadTaskFormData): Promise<boolean> => {
+  //   setError(null);
+  //   try {
+  //     const response = await taskService.updateTask(id, data);
+  //     if (response.status) {
+  //       await fetchTasks();
+  //       return true;
+  //     } else {
+  //       setError(response.message || ERROR_MESSAGES.UPDATE_TASK);
+  //       return false;
+  //     }
+  //   } catch {
+  //     setError(ERROR_MESSAGES.UPDATE_TASK);
+  //     return false;
+  //   }
+  // }, [fetchTasks]);
 
-  const deleteTask = useCallback(async (id: number): Promise<boolean> => {
-    try {
-      const response = await taskService.deleteTask(id);
-      if (response.status) {
-        await fetchTasks();
-        return true;
-      } else {
-        setError(response.message || ERROR_MESSAGES.DELETE_TASK);
-        return false;
-      }
-    } catch {
-      setError(ERROR_MESSAGES.DELETE_TASK);
-      return false;
-    }
-  }, [fetchTasks]);
+  // const deleteTask = useCallback(async (id: number): Promise<boolean> => {
+  //   try {
+  //     const response = await taskService.deleteTask(id);
+  //     if (response.status) {
+  //       await fetchTasks();
+  //       return true;
+  //     } else {
+  //       setError(response.message || ERROR_MESSAGES.DELETE_TASK);
+  //       return false;
+  //     }
+  //   } catch {
+  //     setError(ERROR_MESSAGES.DELETE_TASK);
+  //     return false;
+  //   }
+  // }, [fetchTasks]);
 
   return {
     tasks,
     isLoading,
     error,
     fetchTasks,
-    addTask,
-    updateTask,
-    deleteTask,
+    // addTask,
+    // updateTask,
+    // deleteTask,
   };
 }

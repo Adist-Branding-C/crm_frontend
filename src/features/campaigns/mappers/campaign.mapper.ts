@@ -1,7 +1,7 @@
 import { CAMPAIGN_TYPES, ADD_CAMPAIGN_INITIAL_VALUES } from '../constants';
 import { computeSlNo } from '../utils/campaign.utils';
-import type { Campaign, CampaignFormData } from '../types/interface';
-import type { CreateCampaignPayload, UpdateCampaignPayload } from '../types/request';
+import type { Campaign } from '../types/interface';
+import type { CampaignFormData, CreateCampaignPayload, UpdateCampaignPayload } from '../types/request';
 
 /**
  * Explicit shape transformations between the Campaign API/entity form and the

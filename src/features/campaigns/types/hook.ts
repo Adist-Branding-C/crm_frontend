@@ -1,22 +1,30 @@
+import type { Dispatch, SetStateAction } from 'react';
+import type { FormikHelpers } from 'formik';
+import type { ToastType } from '../../../shared/types/toast.types';
 import type { Campaign } from './interface';
+import type { CampaignFormData } from './request';
 
-export interface SubmitHandlerConfig {
-  onAddSuccess: () => void;
-  onEditSuccess: () => void;
-  onDeleteSuccess: () => void;
+export interface UseCampaignCrudParams {
+  pagination: {
+    setError: (message: string) => void;
+    setIsLoading: (value: boolean) => void;
+    setPageNumber: Dispatch<SetStateAction<number>>;
+    setSearchQuery: Dispatch<SetStateAction<string>>;
+    refresh: () => void;
+  };
+  showToastMessage: (message: string, type: ToastType) => void;
+}
+
+export interface UseCampaignFormSubmitParams {
   editingItem: Campaign | null;
-  deletingItem: Campaign | null;
+  closeAddDrawer: () => void;
+  closeEditDrawer: () => void;
+  handleAddCampaign: (values: CampaignFormData, helpers: FormikHelpers<CampaignFormData>) => Promise<boolean>;
+  handleUpdateCampaign: (id: number, values: CampaignFormData, helpers: FormikHelpers<CampaignFormData>) => Promise<boolean>;
 }
 
-export interface FetchHandlers {
-  setError: (msg: string) => void;
-  setIsLoading: (loading: boolean) => void;
-  setPageNumber: (page: number) => void;
-  setSearchQuery: (q: string) => void;
-  refresh: () => void;
-  campaignList: Campaign[];
-}
-
-export interface ToastHandlers {
-  showToastMessage: (msg: string, type: 'success' | 'error') => void;
+export interface UseCampaignRowActionsParams {
+  openEditDrawer: (item: Campaign) => void;
+  onDeleteClick: (item: Campaign) => void;
+  closeDropdown: () => void;
 }

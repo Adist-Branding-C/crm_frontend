@@ -3,7 +3,7 @@ import { ServiceResponseUtil } from '../../../shared/utils/serviceResponse.util'
 import { QueryMapper } from '../../../shared/mappers/query.mapper';
 import { CAMPAIGN_API_ENDPOINTS } from '../constants';
 import type { ApiResponse } from '../../../shared/types/common';
-import type { CreateCampaignPayload, UpdateCampaignPayload, GetCampaignsParams } from '../types/request';
+import type { CreateCampaignPayload, UpdateCampaignPayload, FetchCampaignsParams } from '../types/request';
 import type { CampaignListResponse } from '../types/response';
 
 /**
@@ -11,10 +11,10 @@ import type { CampaignListResponse } from '../types/response';
  *
  * Used by:
  * - campaignApiService singleton (services/index.ts), consumed by useFetchCampaigns
- *   (list) and useCampaignApi (create/update/delete).
+ *   (list) and useCampaignCrud (create/update/delete).
  */
 export class CampaignApiService {
-  async getAll(params: GetCampaignsParams): Promise<ApiResponse<CampaignListResponse>> {
+  async fetchAll(params: FetchCampaignsParams): Promise<ApiResponse<CampaignListResponse>> {
     const response = await axiosInstance.get<ApiResponse<CampaignListResponse>>(
       CAMPAIGN_API_ENDPOINTS.BASE,
       { params: QueryMapper.toQuery(params) },
@@ -62,7 +62,7 @@ export class CampaignApiService {
     });
   }
 
-  async export(params?: Partial<GetCampaignsParams>): Promise<Blob> {
+  async export(params?: Partial<FetchCampaignsParams>): Promise<Blob> {
     const response = await axiosInstance.get(CAMPAIGN_API_ENDPOINTS.EXPORT, {
       params: params ? QueryMapper.toQuery(params) : undefined,
       responseType: 'blob',

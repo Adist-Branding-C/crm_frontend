@@ -24,17 +24,6 @@ export interface Campaign {
   agents?: string[];
 }
 
-export type CampaignFormData = {
-  type: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-  poolName: string;
-  poolAgents: string[];
-  agents: string[];
-};
-
 export interface PoolAgentInfo {
   id: number;
   agentId: string;

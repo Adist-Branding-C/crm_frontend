@@ -1,6 +1,7 @@
 import { getCreatedByLabel, getPoolAgentsLabel } from '../utils/campaign.utils';
 import type { CampaignFormData, Campaign } from '../types';
 import type { CsvColumn } from '../../../shared/types/csv';
+import type { FieldErrorMap, FieldErrorFallback } from '../../../shared/types/formFieldError.types';
 
 /**
  * The two campaign types supported by the backend, used as the canonical
@@ -61,8 +62,30 @@ export const ADD_CAMPAIGN_INITIAL_VALUES: CampaignFormData = {
 };
 
 /**
- * Column definitions for the campaigns CSV export - one shared CsvColumn per
- * exported field, in export order.
+ * Maps backend campaign field names to frontend Formik field names.
+ *
+ * Used by:
+ * - useCampaignCrud (create/update error handling, via shared useSubmitErrorHandler)
+ *
+ * Notes:
+ * - Empty because the backend already uses the same field names as the form; kept for
+ *   parity with the shared useSubmitErrorHandler contract.
+ */
+export const CAMPAIGN_FIELD_MAP: FieldErrorMap = {};
+
+/**
+ * Keyword -> field fallback used when the backend returns a plain message with no
+ * field-scoped errors. Order matters; first match wins.
+ *
+ * Used by:
+ * - useCampaignCrud (create/update error handling, via shared useSubmitErrorHandler)
+ */
+export const CAMPAIGN_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
+  { keyword: 'name', field: 'name' },
+];
+
+/**
+ * CSV column definitions for campaign export.
  *
  * Used by:
  * - useCampaignExport (passed to the shared exportToCsv helper)

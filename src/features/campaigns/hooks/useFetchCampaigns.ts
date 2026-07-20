@@ -3,10 +3,15 @@ import { campaignApiService } from '../services';
 import { CampaignMapper } from '../mappers/campaign.mapper';
 import type { Campaign } from '../types/interface';
 
+/**
+ * Fetches the campaign list with pagination/search state via the shared useTableData hook.
+ * Response items are additionally mapped through CampaignMapper to compute each row's
+ * page-relative serial number.
+ */
 export function useFetchCampaigns() {
   const pagination = useTableData<Campaign>({
     fetchFn: async (params) => {
-      const response = await campaignApiService.getAll({
+      const response = await campaignApiService.fetchAll({
         pageNumber: params.pageNumber,
         limit: params.limit,
         search: params.search,
@@ -25,7 +30,8 @@ export function useFetchCampaigns() {
     setPageNumber: pagination.setPageNumber,
     limit: pagination.limit,
     totalCount: pagination.totalCount,
-    totalPages: Math.ceil(pagination.totalCount / pagination.limit) || 1,
+    startIndex: pagination.startIndex,
+    totalPages: pagination.totalPages,
     searchQuery: pagination.searchQuery,
     handleSearchChange: pagination.handleSearchChange,
     handleRowsPerPageChange: pagination.handleRowsPerPageChange,
