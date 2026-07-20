@@ -1,5 +1,5 @@
 import { buildQueryParams } from '../../../../shared/utils/queryParams.util';
-import type { DealTypeQueryParams } from '../types/request';
+import type { DealTypeFormData, DealTypeQueryParams } from '../types/request';
 import type { ApiDealTypeItem, DealTypeItem } from '../types/interface';
 import type { DealTypeListResponse } from '../types/response';
 
@@ -8,7 +8,8 @@ import type { DealTypeListResponse } from '../types/response';
  *
  * Used by:
  * - dealType.service.ts (toQueryParams)
- * - DealTypePage.tsx (toEntity, toListResult, via the page's useTableData fetchFn)
+ * - DealTypePage.tsx (toEntity, toListResult, toFormData, via the page's useTableData fetchFn
+ *   and the edit drawer's initialValues)
  *
  * Notes:
  * - The API returns each row's display name under `dealType`; toEntity is the one place
@@ -24,6 +25,13 @@ export class DealTypeMapper {
       id: raw.id,
       name: raw.dealType || raw.name || '',
       status: raw.status,
+    };
+  }
+
+  static toFormData(item: DealTypeItem): DealTypeFormData {
+    return {
+      name: item.name,
+      status: Boolean(item.status),
     };
   }
 

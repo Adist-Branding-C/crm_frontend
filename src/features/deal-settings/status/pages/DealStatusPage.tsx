@@ -73,9 +73,9 @@ const DealStatusPage = () => {
           rowsPerPage={pagination.limit}
           onRowsPerPageChange={pagination.handleRowsPerPageChange}
         >
-          <button className="btn btn-secondary" onClick={() => exportDealStatusRowsToCsv(pagination.list, 'deal-stages.csv')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* <button className="btn btn-secondary" onClick={() => exportDealStatusRowsToCsv(pagination.list, 'deal-stages.csv')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Download size={16} /> Export
-          </button>
+          </button> */}
           <button className="btn btn-primary" onClick={() => addDrawer.open()} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Plus size={16} /> Add Deal Status
           </button>
