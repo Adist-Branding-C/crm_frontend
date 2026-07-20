@@ -1,20 +1,20 @@
 import * as yup from 'yup';
 
 /**
- * Validation schema for the shared {name, status} form shape.
+ * Validation schema for the deal type create/edit form.
  *
  * Used by:
- * - AddDealTypeDrawer (deal-settings/type)
+ * - DealTypeForm (deal-settings/type)
  *
  * Notes:
- * - Deal type form uses this two-field schema.
+ * - Mirrors dealStatus.validation.ts's name+status shape (deal type has no stage field).
  * - Text fields use .trim() to reject whitespace-only input, with min/max length
  *   matching the Campaign module's validation conventions.
  * - Status uses a custom test because Yup's boolean().required() coerces "" to false,
  *   which would incorrectly pass validation when the user hasn't selected anything.
  * - Backend is the source of truth for uniqueness and further business validation.
  */
-export const nameStatusValidationSchema = yup.object({
+export const dealTypeValidationSchema = yup.object({
   name: yup
     .string()
     .trim()

@@ -1,5 +1,6 @@
 export interface DealAdditionalField {
-  id: number;
+  id: string;
+  addedBy: string;
   field: string;
   type: string;
   inFilter: boolean;
@@ -9,11 +10,15 @@ export interface DealAdditionalField {
 }
 
 export interface ApiDealAdditionalField {
-  id: number;
+  fieldId: string;
   fieldName: string;
+  fieldKey: string;
   fieldType: string;
   isRequired: boolean;
   showInList: boolean;
   showInFilter: boolean;
   values: string[];
+  createdAt: string;
+  createdByName: string | null;
+  createdByType: string;
 }
