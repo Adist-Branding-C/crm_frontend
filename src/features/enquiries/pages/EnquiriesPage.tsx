@@ -204,6 +204,8 @@ const EnquiriesPage = () => {
       </div>
 
       <AddLeadDrawer isOpen={addDrawer.isOpen} onClose={addDrawer.close} onSaved={crud.handleLeadSaved} />
+      
+      
       <LeadDetailDrawer lead={detailDrawer.item} isOpen={detailDrawer.isOpen} onClose={detailDrawer.close} onLeadUpdated={crud.refreshCurrentPage} onDeleteLead={rowActions.handleDeleteFromDrawer} />
       <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.name} itemType="lead"
         onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />

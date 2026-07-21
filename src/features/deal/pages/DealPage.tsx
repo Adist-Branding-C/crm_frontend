@@ -25,8 +25,8 @@ const getTypeBadge = (type: string) => {
 
 const DealPage = () => {
   const {
-    deal,
     searchQuery, setSearchQuery,
+    deal,
     showDrawer,
     dropdownOpen, onToggleDropdown,
     editingItem,
@@ -43,31 +43,37 @@ const DealPage = () => {
     rowsPerPage,
     handleDrawerSave,
 
-    totalDealAmount,
+    totalDealAmount, //statitics
     totalDealsCount,
+
     showFilters,
-    setShowFilters,
+    setShowFilters, //filters
     dealFilters,
     setDealFilters,
     clearFilters,
-    sortBy,
+
+    sortBy, //sort
     sortOrder,
     handleSortChange,
-    showSortDropdown,
+
+    showSortDropdown, //dropdown
     setShowSortDropdown,
-    actionMenuOpen,
+
+    actionMenuOpen, //action
     setActionMenuOpen,
+
     paginatedData,
     currentPage,
     setCurrentPage,
     handleRowsPerPageChange,
     totalPages,
     hasNext,
-    hasPrevious,
+    hasPrevious, //pagination
     startIndex,
     handleAddDeal,
-    handleEditDeal,
+    handleEditDeal,  //crud api
     handleDeleteDeal,
+
     handleExportCSV,
   } = useDealPage();
 
@@ -318,6 +324,9 @@ const DealPage = () => {
           <button className="pagination-btn" disabled={!hasNext} onClick={() => setCurrentPage(totalPages)}>Last</button>
         </div>
       </div>
+
+      
+    
 
       <AddDealDrawer
         key={editingItem ? `edit-${editingItem.id}` : 'add-drawer'}

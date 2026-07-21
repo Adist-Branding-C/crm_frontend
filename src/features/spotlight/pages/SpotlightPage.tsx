@@ -68,7 +68,7 @@ const SpotlightPage = () => {
       <SpotlightPagination
         currentPage={spotlightData.currentPage}
         totalPages={spotlightData.totalPages}
-        startIndex={spotlightData.startIndex}
+        startIndex={spotlartIndex}
         rowsPerPage={spotlightData.rowsPerPage}
         totalItems={spotlightData.totalRecords}
         onPageChange={spotlightData.setCurrentPage}

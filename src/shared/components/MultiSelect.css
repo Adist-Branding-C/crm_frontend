@@ -1,0 +1,213 @@
+.multi-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.multi-select-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 42px;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.multi-select-trigger:hover {
+  border-color: #c0c4cc;
+}
+
+.multi-select-trigger--open {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(241, 65, 79, 0.1);
+}
+
+.multi-select-trigger-inner {
+  flex: 1;
+  min-width: 0;
+}
+
+.multi-select-placeholder {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.multi-select-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.multi-select-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.375rem;
+  background: #fef2f2;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+.multi-select-tag-label {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.multi-select-tag-remove {
+  flex-shrink: 0;
+  cursor: pointer;
+  color: #991b1b;
+  border-radius: 50%;
+  padding: 1px;
+  transition: background-color 0.15s ease;
+}
+
+.multi-select-tag-remove:hover {
+  background: rgba(153, 27, 27, 0.12);
+}
+
+.multi-select-chevron {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.multi-select-chevron--open {
+  transform: rotate(180deg);
+}
+
+.multi-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: multiSelectSlideIn 0.2s ease forwards;
+  overflow: hidden;
+}
+
+@keyframes multiSelectSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.multi-select-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.multi-select-search-icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.multi-select-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  background: transparent;
+  font-family: var(--font-family);
+}
+
+.multi-select-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.multi-select-options {
+  max-height: 260px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.multi-select-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.multi-select-option:hover,
+.multi-select-option--highlighted {
+  background: #f8f9fa;
+}
+
+.multi-select-option--selected {
+  background: #fef2f2;
+}
+
+.multi-select-option--selected:hover,
+.multi-select-option--selected.multi-select-option--highlighted {
+  background: #fde8e8;
+}
+
+.multi-select-option-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  color: var(--text-main);
+}
+
+.multi-select-option-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+
+.multi-select-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.multi-select-empty .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Error state — matches project's .form-control.input-error */
+.multi-select-container.input-error .multi-select-trigger {
+  border-color: #dc2626;
+}
+
+.multi-select-container.input-error .multi-select-trigger:focus,
+.multi-select-container.input-error .multi-select-trigger--open {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+}
