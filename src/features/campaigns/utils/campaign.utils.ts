@@ -1,3 +1,4 @@
+import { CampaignLeadStatus } from '../../../shared/constants/enums';
 import type { CreatedByDisplay, PoolAgentInfo } from '../types/interface';
 
 export function getCreatedByLabel(createdBy: CreatedByDisplay): string {
@@ -17,4 +18,9 @@ export function computeSlNo(index: number, currentPage: number, rowsPerPage: num
 
 export function getCampaignTypeBadgeClass(type: string): string {
   return `badge badge-${type.toLowerCase().replace(/ /g, '-')}`;
+}
+
+export function getCampaignLeadStatusBadgeClass(status: CampaignLeadStatus): string {
+  if (status === CampaignLeadStatus.COMPLETED) return 'badge badge-completed';
+  return 'badge badge-pending';
 }

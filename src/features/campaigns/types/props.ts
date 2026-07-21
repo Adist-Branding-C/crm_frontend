@@ -2,6 +2,7 @@ import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
 import type { RefObject } from 'react';
 import type { Campaign, CampaignFormData, Agent } from './interface';
+import type { CampaignFilters } from './hook';
 
 export interface CampaignActionsProps {
   campaign: Campaign;
@@ -9,7 +10,6 @@ export interface CampaignActionsProps {
   onToggleDropdown: (id: number | null) => void;
   onView: (campaign: Campaign) => void;
   onEdit: (campaign: Campaign) => void;
-  onAssign: (campaign: Campaign) => void;
   onDelete: (campaign: Campaign) => void;
 }
 
@@ -19,7 +19,6 @@ export interface CampaignRowProps {
   onToggleDropdown: (id: number | null) => void;
   onView: (campaign: Campaign) => void;
   onEdit: (campaign: Campaign) => void;
-  onAssign: (campaign: Campaign) => void;
   onDelete: (campaign: Campaign) => void;
 }
 
@@ -38,6 +37,8 @@ export interface DeleteCampaignDialogProps {
   itemName: string;
   onConfirm: () => void;
   onCancel: () => void;
+  isDeleting?: boolean;
+  error?: string | null;
 }
 
 export interface AgentMultiSelectProps {
@@ -46,4 +47,14 @@ export interface AgentMultiSelectProps {
   onChange: (selected: string[]) => void;
   isLoading?: boolean;
   error?: boolean;
+  labelledBy?: string;
+}
+
+export interface CampaignFiltersProps {
+  filters: CampaignFilters;
+  onFilterChange: (patch: Partial<CampaignFilters>) => void;
+  onClearFilters: () => void;
+  onClose: () => void;
+  agentOptions: Agent[];
+  agentOptionsLoading: boolean;
 }

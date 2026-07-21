@@ -45,6 +45,8 @@ export class CampaignMapper {
 
   static toFormValues(item: Campaign | null): CampaignFormData {
     if (!item) return ADD_CAMPAIGN_INITIAL_VALUES;
+    const assignedAgentIds = (item.poolAgents || []).map((agent) => agent.agentId || String(agent.id));
+    const isLeadCampaign = item.type === CAMPAIGN_TYPES.LEAD_CAMPAIGN;
     return {
       type: item.type || '',
       name: item.name || '',
@@ -52,8 +54,8 @@ export class CampaignMapper {
       endDate: item.endDate || '',
       description: item.description || '',
       poolName: item.poolName || (item.type === CAMPAIGN_TYPES.DATA_POOL ? item.name : '') || '',
-      poolAgents: (item.poolAgents || []).map((agent) => agent.agentId || String(agent.id)),
-      agents: (item.type === CAMPAIGN_TYPES.LEAD_CAMPAIGN ? item.agents : []) || [],
+      poolAgents: isLeadCampaign ? [] : assignedAgentIds,
+      agents: isLeadCampaign ? assignedAgentIds : [],
     };
   }
 }

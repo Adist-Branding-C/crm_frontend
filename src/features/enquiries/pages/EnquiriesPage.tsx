@@ -30,6 +30,7 @@ import LeadSortDropdown from '../components/LeadSortDropdown';
 import LeadActionsDropdown from '../components/LeadActionsDropdown';
 import ChangeStatusModal from '../components/ChangeStatusModal';
 import AssignStaffModal from '../components/AssignStaffModal';
+import AssignCampaignModal from '../components/AssignCampaignModal';
 import SpotlightPanel from '../../spotlight/components/SpotlightPanel';
 import type { Lead } from '../../../features/enquiries/types';
 import './EnquiriesPage.css';
@@ -139,6 +140,7 @@ const EnquiriesPage = () => {
               onExportSelected: bulkActions.handleExportSelected,
               onChangeStatus: bulkActions.handleChangeStatusClick,
               onAssignStaff: bulkActions.handleAssignStaffClick,
+              onAssignCampaign: bulkActions.handleAssignCampaignClick,
               onDuplicateLead: bulkActions.handleDuplicateLeadAction,
               onDeleteSelected: bulkActions.handleDeleteSelectedClick,
             }}
@@ -241,6 +243,13 @@ const EnquiriesPage = () => {
         isProcessing={bulkActions.isProcessingSelected}
         onConfirm={bulkActions.handleConfirmAssignStaff}
         onClose={() => bulkActions.setShowAssignStaffModal(false)}
+      />
+      <AssignCampaignModal
+        isOpen={bulkActions.showAssignCampaignModal}
+        selectedCount={selection.selectedIds.length}
+        isProcessing={bulkActions.isProcessingSelected}
+        onConfirm={bulkActions.handleConfirmAssignCampaign}
+        onClose={() => bulkActions.setShowAssignCampaignModal(false)}
       />
       <AdminConfirmationModal
         isOpen={bulkActions.showDeleteSelectedModal}
