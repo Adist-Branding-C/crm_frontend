@@ -17,7 +17,8 @@ export interface DealApiItem {
   assignedTo?: string;
   agent?: string | { id?: string | number; name?: string };
   agentId?: string | number;
-  createdBy?: string;
+  createdBy?: string | { id?: string | number; name?: string } | null;
+  createdByType?: string;
   startDate?: string;
   endDate?: string;
   createdAt?: string;
