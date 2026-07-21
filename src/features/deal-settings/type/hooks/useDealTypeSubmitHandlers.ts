@@ -143,8 +143,6 @@ export function useDealTypeSubmitHandlers(
   const handleConfirmDelete = useCallback(async () => {
     if (!config.deletingItem) return;
 
-    fetch.setError('');
-
     try {
       const response = await dealTypeService.deleteDealType(config.deletingItem.id);
 
@@ -152,15 +150,13 @@ export function useDealTypeSubmitHandlers(
         fetch.refresh();
         config.onDeleteSuccess();
       } else {
-        fetch.setError(response.message || 'Failed to delete deal type');
+        toast.showToastMessage(response.message || 'Failed to delete deal type', 'error');
       }
     } catch (err: unknown) {
-      const msg = err && typeof err === 'object' && 'message' in err
-        ? (err as { message: string }).message
-        : 'Failed to delete deal type';
-      fetch.setError(msg);
+      const parsed = parseApiError(err);
+      toast.showToastMessage(parsed.message, 'error');
     }
-  }, [fetch, config]);
+  }, [fetch, config, toast]);
 
   return { handleAddSubmit, handleEditSubmit, handleConfirmDelete };
 }

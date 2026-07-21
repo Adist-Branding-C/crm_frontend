@@ -143,8 +143,6 @@ export function useDealStatusSubmitHandlers(
   const handleConfirmDelete = useCallback(async () => {
     if (!config.deletingItem) return;
 
-    fetch.setError('');
-
     try {
       const response = await dealStatusService.deleteDealStatus(config.deletingItem.id);
 
@@ -152,15 +150,13 @@ export function useDealStatusSubmitHandlers(
         fetch.refresh();
         config.onDeleteSuccess();
       } else {
-        fetch.setError(response.message || 'Failed to delete deal status');
+        toast.showToastMessage(response.message || 'Failed to delete deal status', 'error');
       }
     } catch (err: unknown) {
-      const msg = err && typeof err === 'object' && 'message' in err
-        ? (err as { message: string }).message
-        : 'Failed to delete deal status';
-      fetch.setError(msg);
+      const parsed = parseApiError(err);
+      toast.showToastMessage(parsed.message, 'error');
     }
-  }, [fetch, config]);
+  }, [fetch, config, toast]);
 
   return { handleAddSubmit, handleEditSubmit, handleConfirmDelete };
 }
