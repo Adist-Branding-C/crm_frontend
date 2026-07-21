@@ -24,6 +24,7 @@ import { useDealExport } from '../hooks/useDealExport';
 import { getDealColumns } from '../utils/dealColumns';
 import { getDealIds } from '../utils/dealMapper';
 import { getFieldKey, getInitialValues } from '../utils/additionalFields';
+import { splitMobileValue } from '../utils/mobileFormat';
 import { getDealValidationSchema } from '../validations';
 import DealRow from '../components/DealRow';
 import DealFilters from '../components/DealFilters';
@@ -72,8 +73,11 @@ const DealPage = () => {
   });
 
   const dealValidationSchema = useMemo(
-    () => getDealValidationSchema(dealAdditionalFieldDefs),
-    [dealAdditionalFieldDefs],
+    () => getDealValidationSchema(dealAdditionalFieldDefs, {
+      startDate: drawer.editingItem?.startDate,
+      endDate: drawer.editingItem?.endDate,
+    }),
+    [dealAdditionalFieldDefs, drawer.editingItem?.startDate, drawer.editingItem?.endDate],
   );
 
   const editInitialValues = useMemo((): DealFormData => {
@@ -90,11 +94,15 @@ const DealPage = () => {
       }
     }
 
+    const { countryCode: mobileCountryCode, number: mobileNumber } = splitMobileValue(drawer.editingItem.mobile);
+
     return {
       dealName: drawer.editingItem.dealName || '',
       lead: drawer.editingItem.lead || '',
       leadId: drawer.editingItem.leadId || '',
       mobile: drawer.editingItem.mobile || '',
+      mobileCountryCode,
+      mobileNumber,
       amount: String(drawer.editingItem.amount || '').replace(/\.00$/, ''),
       status: drawer.editingItem.status || '',
       statusId: drawer.editingItem.statusId || '',

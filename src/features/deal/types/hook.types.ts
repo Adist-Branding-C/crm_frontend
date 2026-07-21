@@ -73,7 +73,7 @@ export interface UseDealPaginationReturn {
   startIndex: number;
   totalItems: number;
   handleSetCurrentPage: (page: number | ((prev: number) => number)) => void;
-  handleRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleRowsPerPageChange: (value: number) => void;
   resetPage: () => void;
 }
 

@@ -1,5 +1,18 @@
 import * as yup from 'yup';
 import type { DealAdditionalFieldDef } from '../types/interface';
+import { isPastDate } from '../utils/dealDateValidation';
+import { isValidPhoneForCountry, getPhoneLengthErrorMessage } from '../../enquiries/constants/phoneValidation';
+
+/**
+ * Original Start/End Date values a Deal had when the edit drawer opened.
+ * Used only to exempt pre-filled, untouched dates from the "no past date"
+ * rule so editing an existing deal that legitimately started in the past
+ * isn't blocked; every other rule (required, end >= start) still applies.
+ */
+interface DealOriginalDates {
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+}
 
 /**
  * Single validation schema shared by the Deal add and edit forms.
@@ -11,36 +24,62 @@ import type { DealAdditionalFieldDef } from '../types/interface';
  * - `leadId` and `agentId` are validated as required because the form selects
  *   store IDs, while the shared DealFormData type also carries display names
  *   (`lead`, `assignAgent`) that are derived from the selected option.
- * - `mobile` is required and must be exactly 10 digits.
- * - `startDate` / `endDate` are required; endDate must be >= startDate.
+ * - `mobileCountryCode` / `mobileNumber` are required; the number's expected
+ *   length/format is validated per selected dial code, reusing the Leads
+ *   phone field's per-country rules (see enquiries/constants/phoneValidation.ts).
+ * - `startDate` / `endDate` are required, must not be in the past, and
+ *   endDate must be >= startDate. The "not in the past" check is skipped
+ *   when a date still equals the original value passed in via
+ *   `original` (i.e. an existing deal's pre-filled date that the user
+ *   hasn't touched during this edit).
  * - Dynamic `additionalField_<fieldKey>` rules are built from the company's
  *   configured Deal additional fields so the schema stays in sync with them;
  *   frontend validates required-ness only, the backend owns dropdown/type checks.
  */
-const BASE_VALIDATION_SHAPE = {
-  dealName: yup.string().trim().required('Deal name is required'),
-  lead: yup.string().notRequired(),
-  leadId: yup.string().required('Lead is required'),
-  mobile: yup
-    .string()
-    .trim()
-    .required('Mobile is required')
-    .matches(/^\d{10}$/, 'Mobile must be exactly 10 digits'),
-  amount: yup.string().trim().required('Amount is required'),
-  statusId: yup.string().required('Status is required'),
-  typeId: yup.string().required('Type is required'),
-  startDate: yup.string().required('Start date is required'),
-  endDate: yup
-    .string()
-    .required('End date is required')
-    .test('is-after-start', 'End date must be after start date', function (value) {
-      const { startDate } = this.parent;
-      if (!startDate || !value) return true;
-      return new Date(value) >= new Date(startDate);
-    }),
-  assignAgent: yup.string().notRequired(),
-  agentId: yup.string().required('Assign agent is required'),
-};
+function getBaseValidationShape(original?: DealOriginalDates) {
+  return {
+    dealName: yup.string().trim().required('Deal name is required'),
+    lead: yup.string().notRequired(),
+    leadId: yup.string().required('Lead is required'),
+    mobileCountryCode: yup.string().required('Country code is required'),
+    mobileNumber: yup
+      .string()
+      .trim()
+      .required('Mobile is required')
+      .test('valid-mobile-format', function (value) {
+        if (!value) return true;
+        const { mobileCountryCode } = this.parent;
+        if (isValidPhoneForCountry(value, mobileCountryCode)) return true;
+        return this.createError({ message: getPhoneLengthErrorMessage(mobileCountryCode) });
+      }),
+    amount: yup.string().trim().required('Amount is required'),
+    statusId: yup.string().required('Status is required'),
+    typeId: yup.string().required('Type is required'),
+    startDate: yup
+      .string()
+      .required('Start date is required')
+      .test('not-in-past', 'Start date cannot be in the past', (value) => {
+        if (!value) return true;
+        if (original?.startDate && value === original.startDate) return true;
+        return !isPastDate(value);
+      }),
+    endDate: yup
+      .string()
+      .required('End date is required')
+      .test('not-in-past', 'End date cannot be in the past', (value) => {
+        if (!value) return true;
+        if (original?.endDate && value === original.endDate) return true;
+        return !isPastDate(value);
+      })
+      .test('is-after-start', 'End date must be after start date', function (value) {
+        const { startDate } = this.parent;
+        if (!startDate || !value) return true;
+        return new Date(value) >= new Date(startDate);
+      }),
+    assignAgent: yup.string().notRequired(),
+    agentId: yup.string().required('Assign agent is required'),
+  };
+}
 
 function getAdditionalFieldsValidationShape(fields: DealAdditionalFieldDef[]): Record<string, yup.Schema> {
   const shape: Record<string, yup.Schema> = {};
@@ -53,9 +92,9 @@ function getAdditionalFieldsValidationShape(fields: DealAdditionalFieldDef[]): R
   return shape;
 }
 
-function getDealValidationSchema(additionalFields: DealAdditionalFieldDef[] = []) {
+function getDealValidationSchema(additionalFields: DealAdditionalFieldDef[] = [], original?: DealOriginalDates) {
   return yup.object({
-    ...BASE_VALIDATION_SHAPE,
+    ...getBaseValidationShape(original),
     ...getAdditionalFieldsValidationShape(additionalFields),
   });
 }
