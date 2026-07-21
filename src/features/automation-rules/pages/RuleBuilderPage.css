@@ -1,0 +1,8 @@
+@import '../../../shared/styles/forms.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/badges.css';
+@import '../../../shared/styles/modals.css';
+
+.automation-rules-page form {
+  max-width: 960px;
+}
