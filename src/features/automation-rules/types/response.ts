@@ -75,6 +75,9 @@ export interface WebhookHistoryApiItem {
   durationMs?: number | null;
   errorMessage?: string | null;
   createdAt: string;
+  // Only present on the company-wide list (GET /webhook-endpoints/history), not on the
+  // per-execution-log lookup (GET /execution-logs/:id/webhook-history).
+  webhookUrl?: string;
 }
 
 export interface WebhookEndpointApiItem {

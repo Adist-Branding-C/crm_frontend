@@ -95,6 +95,8 @@ export interface WebhookHistoryEntry {
   durationMs?: number;
   errorMessage?: string;
   createdAt: string;
+  webhookUrl?: string;
+  leadId?: string;
 }
 
 export interface ExecutionLog {

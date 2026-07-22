@@ -85,6 +85,8 @@ export function mapApiWebhookHistoryToUI(entry: WebhookHistoryApiItem): WebhookH
     ...(entry.durationMs != null ? { durationMs: entry.durationMs } : {}),
     ...(entry.errorMessage ? { errorMessage: entry.errorMessage } : {}),
     createdAt: entry.createdAt,
+    ...(entry.webhookUrl ? { webhookUrl: entry.webhookUrl } : {}),
+    leadId: entry.leadId,
   };
 }
 

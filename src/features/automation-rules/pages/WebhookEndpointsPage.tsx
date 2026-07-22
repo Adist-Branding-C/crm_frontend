@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { Table, THead, TBody, TRow, TCell, EmptyState } from '../../../shared/components/table';
 import WebhookEndpointRow from '../components/WebhookEndpointRow';
@@ -6,6 +7,7 @@ import '../styles/automation.css';
 import './WebhookEndpointsPage.css';
 
 const WebhookEndpointsPage = () => {
+  const navigate = useNavigate();
   const { webhookEndpoints, handleRowClick } = useWebhookEndpointsPage();
 
   return (
@@ -17,6 +19,11 @@ const WebhookEndpointsPage = () => {
           { label: 'Automation Rules', link: '/automation-rules' },
           { label: 'Webhook Endpoints', link: null },
         ]}
+        action={
+          <button className="btn btn-secondary" onClick={() => navigate('/automation/webhook-history')}>
+            View Full History
+          </button>
+        }
       />
 
       <div className="table-container">

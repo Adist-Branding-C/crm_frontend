@@ -102,6 +102,27 @@ class AutomationRulesApi {
     const response = await axiosInstance.get('/webhook-endpoints');
     return response.data;
   }
+
+  async getWebhookHistoryList(params: {
+    pageNumber?: number;
+    limit?: number;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    webhookEndpointId?: number;
+  }): Promise<ApiResponse<PaginatedApiResponse<WebhookHistoryApiItem>>> {
+    const query: Record<string, string | number> = {
+      pageNumber: params.pageNumber ?? 1,
+      limit: params.limit ?? 20,
+    };
+    if (params.status) query.status = params.status;
+    if (params.dateFrom) query.dateFrom = params.dateFrom;
+    if (params.dateTo) query.dateTo = params.dateTo;
+    if (params.webhookEndpointId) query.webhookEndpointId = params.webhookEndpointId;
+
+    const response = await axiosInstance.get('/webhook-endpoints/history', { params: query });
+    return response.data;
+  }
 }
 
 export const automationRulesApi = new AutomationRulesApi();

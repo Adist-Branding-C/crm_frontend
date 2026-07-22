@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Filter, Plus, Workflow } from 'lucide-react';
+import { ChevronDown, Filter, Plus, Workflow, History } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
 import ToastNotification from '../../../shared/components/ToastNotification';
@@ -27,9 +27,14 @@ const AutomationRulesListPage = () => {
         description="Automate lead assignment, tasks, notifications, and webhooks"
         breadcrumb={false}
         action={
-          <button className="btn btn-primary" onClick={() => navigate('/automation-rules/new')}>
-            <Plus size={16} /> Create Rule
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button className="btn btn-secondary" onClick={() => navigate('/automation/webhook-history')}>
+              <History size={16} /> Webhook History
+            </button>
+            <button className="btn btn-primary" onClick={() => navigate('/automation-rules/new')}>
+              <Plus size={16} /> Create Rule
+            </button>
+          </div>
         }
       />
 

@@ -66,6 +66,12 @@ export const EXECUTION_STATUS_FILTER_OPTIONS = [
   { value: 'dead', label: 'Dead' },
 ];
 
+export const WEBHOOK_ATTEMPT_STATUS_FILTER_OPTIONS = [
+  { value: '', label: 'All Statuses' },
+  { value: 'success', label: 'Success' },
+  { value: 'failed', label: 'Failed' },
+];
+
 export const DEFAULT_WEBHOOK_CONFIG: WebhookActionConfig = { url: '' };
 
 export const DEFAULT_ADD_TASK_CONFIG: AddTaskActionConfig = {
