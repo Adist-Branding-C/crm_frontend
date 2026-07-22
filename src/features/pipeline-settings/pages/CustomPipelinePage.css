@@ -1,0 +1,17 @@
+@import '../../../shared/styles/tables.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/badges.css';
+@import '../../../shared/styles/pagination.css';
+@import '../../../shared/styles/forms.css';
+@import '../../../shared/styles/settings-layout.css';
+
+.pipeline-settings-page {
+  padding: 1.5rem;
+}
+
+.field-hint-text {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}

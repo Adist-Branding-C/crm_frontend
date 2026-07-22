@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Filter, Plus } from 'lucide-react';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { ChevronUp, ChevronDown, Filter, Plus, Flame } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
@@ -30,10 +30,12 @@ import LeadSortDropdown from '../components/LeadSortDropdown';
 import LeadActionsDropdown from '../components/LeadActionsDropdown';
 import ChangeStatusModal from '../components/ChangeStatusModal';
 import AssignStaffModal from '../components/AssignStaffModal';
+import SpotlightPanel from '../../spotlight/components/SpotlightPanel';
 import type { Lead } from '../../../features/enquiries/types';
 import './EnquiriesPage.css';
 
 const EnquiriesPage = () => {
+  const [showSpotlight, setShowSpotlight] = useState(false);
   const toast = useToast();
   const crud = useLeadListData(toast.showToastMessage);
 
@@ -94,8 +96,25 @@ const EnquiriesPage = () => {
 
   return (
     <PageContainer>
-      <PageHeader title="Leads" description="Potential customers showing interest in a product or service." />
+      <PageHeader
+        title={showSpotlight ? 'Spotlight' : 'Leads'}
+        description={showSpotlight
+          ? 'High-priority leads that need immediate attention.'
+          : 'Potential customers showing interest in a product or service.'}
+        action={
+          <button
+            className={`btn btn-secondary ${showSpotlight ? 'active' : ''}`}
+            onClick={() => setShowSpotlight((v) => !v)}
+          >
+            <Flame size={16} /> {showSpotlight ? 'Back to Leads' : 'Spotlight'}
+          </button>
+        }
+      />
 
+      {showSpotlight && <SpotlightPanel />}
+
+      {!showSpotlight && (
+      <>
       <div className="table-container">
         <TableNav
           searchQuery={leadSearch.searchQuery}
@@ -233,6 +252,8 @@ const EnquiriesPage = () => {
         onConfirm={bulkActions.handleConfirmDeleteSelected}
         onCancel={() => bulkActions.setShowDeleteSelectedModal(false)}
       />
+      </>
+      )}
     </PageContainer>
   );
 };

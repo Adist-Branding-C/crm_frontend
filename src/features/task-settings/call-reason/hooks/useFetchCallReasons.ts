@@ -1,14 +1,19 @@
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ResponseMapper } from '../../../../shared/mappers/response.mapper';
 import { callReasonApiService } from '../services';
-import type { CallReason } from '../types/index';
+import type { CallReasonItem } from '../types/index';
 
+/**
+ * Fetches the call-reason list with pagination/search state via the shared useTableData hook,
+ * mapping the raw response through the shared ResponseMapper. All of the page's list state
+ * (page number, search, row count) lives here rather than in the page component.
+ */
 export function useFetchCallReasons() {
-  const pagination = useTableData<CallReason>({
+  const pagination = useTableData<CallReasonItem>({
     fetchFn: async (params) => {
       const response = await callReasonApiService.fetchAll(params);
       if (response.status) {
-        return ResponseMapper.toPagedList<CallReason>(response.data);
+        return ResponseMapper.toPagedList<CallReasonItem>(response.data);
       }
       throw new Error(response.message || 'Failed to fetch call reasons');
     },

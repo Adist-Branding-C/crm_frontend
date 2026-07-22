@@ -15,18 +15,23 @@ export function useAsyncOptions<TApiItem, TOption>(
   mapToOption: (item: TApiItem) => TOption,
 ) {
   const [options, setOptions] = useState<TOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    setIsLoading(true);
     fetchItems()
       .then((items) => {
         if (!cancelled) setOptions(items.map(mapToOption));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  return { options };
+  return { options, isLoading };
 }

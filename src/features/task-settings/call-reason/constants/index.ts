@@ -56,6 +56,6 @@ export const CALL_REASON_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
  * - CallReasonPage (Export button)
  */
 export const CALL_REASON_CSV_COLUMNS: CsvColumn<CallReasonItem>[] = [
-  { header: 'Reason', value: (item) => `"${item.name}"` },
+  { header: 'Reason', value: (item) => item.name },
   { header: 'Status', value: (item) => item.status ?? '' },
 ];

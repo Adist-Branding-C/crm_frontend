@@ -3,6 +3,11 @@ import { ResponseMapper } from '../../../../shared/mappers/response.mapper';
 import { callStatusApiService } from '../services';
 import type { CallStatusItem } from '../types/index';
 
+/**
+ * Fetches the call-status list with pagination/search state via the shared useTableData hook,
+ * mapping the raw response through the shared ResponseMapper. All of the page's list state
+ * (page number, search, row count) lives here rather than in the page component.
+ */
 export function useFetchCallStatus() {
   const pagination = useTableData<CallStatusItem>({
     fetchFn: async (params) => {

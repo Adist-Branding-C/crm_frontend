@@ -23,7 +23,7 @@ export const TASK_CATEGORY_API_ENDPOINTS = {
  */
 export const ADD_TASK_CATEGORY_INITIAL_VALUES = {
   category: '',
-  action: '',
+  status: '',
 };
 
 /**
@@ -47,7 +47,7 @@ export const TASK_CATEGORY_FIELD_MAP: FieldErrorMap = {};
  */
 export const TASK_CATEGORY_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
   { keyword: 'category', field: 'category' },
-  { keyword: 'action', field: 'action' },
+  { keyword: 'status', field: 'status' },
 ];
 
 /**
@@ -57,6 +57,6 @@ export const TASK_CATEGORY_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
  * - TaskCategoryPage (Export button)
  */
 export const TASK_CATEGORY_CSV_COLUMNS: CsvColumn<TaskCategoryItem>[] = [
-  { header: 'Category', value: (item) => `"${item.category}"` },
-  { header: 'Action', value: (item) => `"${item.action}"` },
+  { header: 'Category', value: (item) => item.category },
+  { header: 'Status', value: (item) => item.status },
 ];

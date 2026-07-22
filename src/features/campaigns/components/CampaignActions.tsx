@@ -17,10 +17,10 @@ const CampaignActions = ({ campaign, dropdownOpen, onToggleDropdown, onView, onE
         triggerRef={buttonRef}
         onClose={() => onToggleDropdown(null)}
       >
-        <button onClick={() => onView(campaign)}><Eye size={14} />{ACTION_VIEW}</button>
-        <button onClick={() => onEdit(campaign)}><Edit2 size={14} />{ACTION_EDIT}</button>
-        {/* <button onClick={() => onAssign(campaign)}><User size={14} />Assign</button> */}
-        <button className="delete" onClick={() => onDelete(campaign)}><Trash2 size={14} />{ACTION_DELETE}</button>
+        <button onClick={() => { onToggleDropdown(null); onView(campaign); }}><Eye size={14} />{ACTION_VIEW}</button>
+        <button onClick={() => { onToggleDropdown(null); onEdit(campaign); }}><Edit2 size={14} />{ACTION_EDIT}</button>
+        {/* <button onClick={() => { onToggleDropdown(null); onAssign(campaign); }}><User size={14} />Assign</button> */}
+        <button className="delete" onClick={() => { onToggleDropdown(null); onDelete(campaign); }}><Trash2 size={14} />{ACTION_DELETE}</button>
       </ActionMenuPortal>
     </div>
   );

@@ -51,7 +51,9 @@ export interface DealFormData {
   mobile: string;
   amount: string;
   status: string;
+  statusId?: string | number;
   type: string;
+  typeId?: string | number;
   startDate: string;
   endDate: string;
   assignAgent: string;

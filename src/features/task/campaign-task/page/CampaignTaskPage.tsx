@@ -45,7 +45,7 @@ const CampaignTaskPage = () => {
     handleAddCampaignTask: crud.handleAddCampaignTask,
     handleUpdateCampaignTask: crud.handleUpdateCampaignTask,
   });
-  const { searchValue, handleSearchInput } = useDebouncedSearch(pagination.searchQuery, pagination.handleSearchChange);
+  const { searchValue, handleSearchChange } = useDebouncedSearch(pagination.handleSearchChange);
 
   return (
     <div className="task-settings-page">
@@ -53,7 +53,7 @@ const CampaignTaskPage = () => {
       <SettingsTabs items={taskTabs} />
       <div className="account-content">
         <div className="table-container">
-          <TableNav searchQuery={searchValue} onSearchChange={handleSearchInput} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
+          <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={16} /> Add Campaign Task
             </button>

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { Download, Plus } from 'lucide-react';
 import { useDrawer } from '../../../shared/hooks/useDrawer';
 import { useRowDropdown } from '../../../shared/hooks/useRowDropdown';
@@ -45,7 +46,11 @@ const CampaignsPage = () => {
     toast,
   );
 
-  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchChange } = useDebouncedSearch(fetch.handleSearchChange);
+
+  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    fetch.handleRowsPerPageChange(Number(e.target.value));
+  }, [fetch.handleRowsPerPageChange]);
 
   const editInitialValues = useMemo(
     () => CampaignMapper.toFormValues(editDrawer.item),
@@ -62,9 +67,9 @@ const CampaignsPage = () => {
       <div className="table-container">
         <TableNav
           searchQuery={searchValue}
-          onSearchChange={handleSearchInput}
+          onSearchChange={handleSearchChange}
           rowsPerPage={fetch.limit}
-          onRowsPerPageChange={fetch.handleRowsPerPageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
         >
           <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Download size={16} />Export
@@ -84,13 +89,14 @@ const CampaignsPage = () => {
               <TCell variant="th">Completed Tasks</TCell>
               <TCell variant="th">Completed %</TCell>
               <TCell variant="th">Created By</TCell>
+              <TCell variant="th">Pool Agents</TCell>
               <TCell variant="th">Created At</TCell>
               <TCell variant="th">Actions</TCell>
             </TRow>
           </THead>
           <TBody>
             {fetch.campaignList.length === 0 ? (
-              <EmptyState colSpan={9} message={LABEL_NO_DATA} />
+              <EmptyState colSpan={10} message={LABEL_NO_DATA} />
             ) : (
               fetch.campaignList.map((campaign) => (
                 <CampaignRow

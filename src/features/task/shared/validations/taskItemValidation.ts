@@ -16,11 +16,29 @@ import * as yup from 'yup';
  */
 export const taskItemValidationSchema = yup.object({
   title: yup.string().trim().required('Title is required'),
-  description: yup.string().trim().notRequired(),
+  description: yup
+    .string()
+    .trim()
+    .required('Description is required')
+    .test(
+      'is-valid-description',
+      'Description cannot be only whitespace',
+      function (value) {
+        if (value === undefined || value === null || value === '') return true;
+        const trimmed = value.trim();
+        if (trimmed.length === 0) {
+          return this.createError({ message: 'Description cannot be only whitespace' });
+        }
+        if (trimmed.length > 500) {
+          return this.createError({ message: 'Description cannot exceed 500 characters' });
+        }
+        return true;
+      },
+    ),
   scheduledDate: yup.string().required('Scheduled date is required'),
   scheduledTime: yup.string().required('Scheduled time is required'),
   assignedTo: yup.string().required('Assigned to is required'),
-  leadId: yup.string().notRequired(),
+  leadId: yup.string().required('Lead is required'),
   priority: yup.string().required('Priority is required'),
   status: yup.string().required('Status is required'),
 });

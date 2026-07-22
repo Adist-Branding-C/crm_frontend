@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Search } from 'lucide-react';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
 import { LABEL_SHOW, LABEL_ENTRIES } from '../../constants/labels';
@@ -9,7 +9,7 @@ interface TableNavProps {
   onSearchChange: (value: string) => void;
   searchPlaceholder?: string;
   rowsPerPage: number;
-  onRowsPerPageChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  onRowsPerPageChange: (value: number) => void;
   children?: ReactNode;
 }
 
@@ -25,7 +25,7 @@ const TableNav = ({
     <div className="entries-select">
       <label>
         {LABEL_SHOW}
-        <select value={rowsPerPage} onChange={onRowsPerPageChange}>
+        <select value={rowsPerPage} onChange={(e) => onRowsPerPageChange(Number(e.target.value))}>
           {ROWS_OPTIONS_10_25_50_100.map(n => (
             <option key={n} value={n}>{n}</option>
           ))}
