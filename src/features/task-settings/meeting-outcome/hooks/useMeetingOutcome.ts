@@ -5,14 +5,14 @@ import { useDrawerScroll } from '../../hooks/useDrawerScroll';
 import { useToast } from '../../hooks/useToast';
 import { applyFieldErrors } from '../../call-reason/utils/applyFieldErrors';
 import { meetingOutcomeApiService } from '../services';
-import type { MeetingOutcomeItem, MeetingOutcomeFormData, MeetingOutcomeApiResponse } from '../types/index';
+import type { MeetingOutcomeItem, MeetingOutcomeFormData, MeetingOutcomeApiResponse, FetchMeetingOutcomesParams } from '../types/index';
 
 export function useMeetingOutcome() {
   const { showToastMessage, toastMessage, toastType, showToast, setShowToast } = useToast();
 
   const pagination = useTableData<MeetingOutcomeItem>({
     fetchFn: async (params) => {
-      const response = await meetingOutcomeApiService.fetchAll(params as unknown as Record<string, string | number | undefined>);
+      const response = await meetingOutcomeApiService.fetchAll(params as unknown as FetchMeetingOutcomesParams);
       if (response.status) {
         const data = response.data as { items: MeetingOutcomeItem[]; pagination?: { total: number } } | undefined;
         const items = data?.items ?? (Array.isArray(response.data) ? response.data : []);

@@ -80,8 +80,8 @@ export function useTableData<T>({
     fetchData(pageNumber, limit, searchQuery, sortOrder);
   }, [pageNumber, limit, searchQuery, sortOrder]);
 
-  const refresh = useCallback(() => {
-    fetchData(pageNumber, limit, searchQuery, sortOrder);
+  const refresh = useCallback((targetPage?: number) => {
+    fetchData(targetPage ?? pageNumber, limit, searchQuery, sortOrder);
   }, [fetchData, pageNumber, limit, searchQuery, sortOrder]);
 
   const handleSearchChange = useCallback((value: string) => {

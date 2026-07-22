@@ -3,7 +3,7 @@ import LeadDetailContent from '../../../features/enquiries/components/LeadDetail
 import type { LeadDetailDrawerProps } from '../../types/drawers';
 import './LeadDetailDrawer.css';
 
-const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => {}, onDeleteLead }: LeadDetailDrawerProps) => {
+const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated = () => { }, onDeleteLead }: LeadDetailDrawerProps) => {
   if (!lead) return null;
 
   return (

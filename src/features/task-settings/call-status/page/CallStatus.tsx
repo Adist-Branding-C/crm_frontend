@@ -9,7 +9,6 @@ import { useCallStatusFormSubmit } from '../hooks/useCallStatusFormSubmit';
 import { useCallStatusRowActions } from '../hooks/useCallStatusRowActions';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useToast } from '../../../../shared/hooks/useToast';
-import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
 import { SETTINGS_TABS } from '../../constants/index';
 import { addCallStatusValidationSchema, editCallStatusValidationSchema } from '../validations/index';
 import { ADD_CALL_STATUS_INITIAL_VALUES, CALL_STATUS_CSV_COLUMNS } from '../constants/index';
@@ -21,9 +20,15 @@ import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModa
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../components/SettingsTabs/SettingsTabs';
+import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import './CallStatus.css';
+import { useTableSearch } from '../../../../shared/hooks/useTableSearch';
 
+/**
+ * Call-statuses settings page: composes the fetch/crud/drawer/form/delete/row-action hooks and
+ * renders them through shared table, drawer, and modal primitives. Holds no business logic of
+ * its own — every handler here is a single hook call or a thin event-unwrapping adapter.
+ */
 const CallStatusPage = () => {
   const fetch = useFetchCallStatus();
   const toast = useToast();
@@ -45,7 +50,7 @@ const CallStatusPage = () => {
     closeDropdown: dropdown.closeDropdown,
   });
 
-  const { searchValue, handleSearchInput } = useDebouncedSearch(fetch.searchQuery, fetch.handleSearchChange);
+  const { searchValue, handleSearchInput } = useTableSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleExportCSV = useCallback(() => {
     exportToCsv(fetch.callStatusList, CALL_STATUS_CSV_COLUMNS, 'call-status.csv');
@@ -57,7 +62,7 @@ const CallStatusPage = () => {
   return (
     <div className="task-settings-page">
       <PageHeader title="Task Settings" description="Manage task configurations and settings" />
-      <SettingsTabs tabs={SETTINGS_TABS} />
+      <SettingsTabs items={SETTINGS_TABS} />
       <div className="account-content">
         <div className="call-status-table-wrapper table-container">
           <TableNav
@@ -66,9 +71,9 @@ const CallStatusPage = () => {
             rowsPerPage={fetch.limit}
             onRowsPerPageChange={fetch.handleRowsPerPageChange}
           >
-            <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Download size={16} />Export
-            </button>
+            </button> */}
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={16} /> Add Call Status
             </button>

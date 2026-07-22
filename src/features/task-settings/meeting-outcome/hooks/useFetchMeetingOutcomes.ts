@@ -3,6 +3,11 @@ import { ResponseMapper } from '../../../../shared/mappers/response.mapper';
 import { meetingOutcomeApiService } from '../services';
 import type { MeetingOutcomeItem } from '../types/index';
 
+/**
+ * Fetches the meeting-outcome list with pagination/search state via the shared useTableData
+ * hook, mapping the raw response through the shared ResponseMapper. All of the page's list
+ * state (page number, search, row count) lives here rather than in the page component.
+ */
 export function useFetchMeetingOutcomes() {
   const pagination = useTableData<MeetingOutcomeItem>({
     fetchFn: async (params) => {

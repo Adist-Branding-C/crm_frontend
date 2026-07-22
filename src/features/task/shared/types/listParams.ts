@@ -2,5 +2,6 @@ export interface TaskListParams {
   pageNumber: number;
   limit: number;
   search?: string;
-  type: string;
+  type?: string;
+  leadId?: string;
 }

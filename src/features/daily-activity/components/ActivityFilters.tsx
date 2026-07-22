@@ -1,19 +1,24 @@
 import { Search, Filter, RotateCcw, ChevronDown } from 'lucide-react';
+import { useClickOutside } from '../../../shared/hooks/useClickOutside';
+import ActivityStaffDropdownItem from './ActivityStaffDropdownItem';
 import type { ActivityFiltersProps } from '../types';
 import './ActivityFilters.css';
 
 const ActivityFilters = ({
   filters,
   showStaffDropdown,
-  localSearchQuery,
+  staffSearchQuery,
   selectedStaffName,
   staffList,
   onFilterChange,
+  onStaffSelect,
   onApply,
   onReset,
   onShowStaffDropdownChange,
-  onLocalSearchQueryChange,
+  onStaffSearchQueryChange,
 }: ActivityFiltersProps) => {
+  const dropdownRef = useClickOutside<HTMLDivElement>(() => onShowStaffDropdownChange(false));
+
   return (
     <div className="activity-filters-section">
       <div className="filter-group">
@@ -55,8 +60,8 @@ const ActivityFilters = ({
         />
       </div>
 
-      <div className="filter-group dropdown-group">
-        <label >Staff</label>
+      <div className="filter-group dropdown-group" ref={dropdownRef}>
+        <label htmlFor="activity-staff-filter">Staff</label>
         <button
           type="button"
           id="activity-staff-filter"
@@ -74,30 +79,19 @@ const ActivityFilters = ({
               <input
                 type="text"
                 placeholder="Search..."
-                value={localSearchQuery}
-                onChange={(e) => onLocalSearchQueryChange(e.target.value)}
+                value={staffSearchQuery}
+                onChange={(e) => onStaffSearchQueryChange(e.target.value)}
               />
             </div>
             <div className="dropdown-list">
-              {staffList
-                .filter(staff =>
-                  staff.name
-                    .toLowerCase()
-                    .includes(localSearchQuery.toLowerCase())
-                )
-                .map(staff => (
-                  <div
-                    key={staff.id}
-                    className={`dropdown-item ${filters.staff === staff.id ? 'selected' : ''
-                      }`}
-                    onClick={() => {
-                      onFilterChange('staff', staff.id);
-                      onShowStaffDropdownChange(false);
-                    }}
-                  >
-                    {staff.name}
-                  </div>
-                ))}
+              {staffList.map(staff => (
+                <ActivityStaffDropdownItem
+                  key={staff.id}
+                  staff={staff}
+                  isSelected={filters.staff === staff.id}
+                  onSelect={() => onStaffSelect(staff.id)}
+                />
+              ))}
             </div>
           </div>
         )}

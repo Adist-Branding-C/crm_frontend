@@ -14,7 +14,7 @@ export function mapApiToUI(item: LeadApiItem): Lead {
     email: item.email ?? '',
     location: item.location ?? '',
     address: item.address ?? '',
-    assignedTo: item.assignedStaff?.name ?? item.agent ?? item.assignedTo ?? '',
+    assignedTo: item.assignedStaff?.name ?? '',
     purpose: item.purpose?.purpose ?? '',
     type: item.type?.type ?? '',
     status: item.status?.status ?? '',

@@ -52,7 +52,7 @@ export class CampaignMapper {
       endDate: item.endDate || '',
       description: item.description || '',
       poolName: item.poolName || (item.type === CAMPAIGN_TYPES.DATA_POOL ? item.name : '') || '',
-      poolAgents: item.poolAgents || [],
+      poolAgents: (item.poolAgents || []).map((agent) => agent.agentId || String(agent.id)),
       agents: (item.type === CAMPAIGN_TYPES.LEAD_CAMPAIGN ? item.agents : []) || [],
     };
   }

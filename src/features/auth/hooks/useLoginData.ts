@@ -39,6 +39,9 @@ export function useLoginData() {
           id: response.data.id,
           name: response.data.name,
           phone: response.data.phone,
+          staffId: response.data.staffId,
+          companyId: response.data.companyId,
+          isAdmin: response.data.isAdmin,
         }));
         navigate(AUTH_ROUTES.DASHBOARD);
       } else {

@@ -31,3 +31,4 @@ export interface MeetingOutcomeFormProps {
   isEditing?: boolean;
   bodyRef?: RefObject<HTMLDivElement | null>;
 }
+

@@ -1,0 +1,57 @@
+@import '../../../shared/styles/tables.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/badges.css';
+@import '../../../shared/styles/pagination.css';
+@import '../../../shared/styles/forms.css';
+@import '../../../shared/styles/tabs.css';
+
+.lead-settings-page {
+  padding: 1.5rem;
+}
+
+.lead-settings-layout {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.color-pill {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.truncate-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.additional-fields-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 1.5rem;
+}
+
+.color-input {
+  height: 50px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+}
+
+@media (max-width: 1024px) {
+  .lead-settings-layout {
+    flex-direction: column;
+  }
+
+  .additional-fields-layout {
+    grid-template-columns: 1fr;
+  }
+}

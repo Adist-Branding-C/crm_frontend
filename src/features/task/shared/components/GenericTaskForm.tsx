@@ -65,7 +65,7 @@ const GenericTaskForm = ({
               </div>
 
               <div className="form-group">
-                <label>Description</label>
+                <label>Description <span className="text-danger">*</span></label>
                 <Field as="textarea" name="description" className={fieldClass('description')} placeholder="Enter description" rows={3} />
                 <FormikError name="description" component="small" className="field-error-text" />
               </div>
@@ -110,7 +110,7 @@ const GenericTaskForm = ({
               </div>
 
               <div className="form-group">
-                <label>Lead</label>
+                <label>Lead <span className="text-danger">*</span></label>
                 <Field as="select" name="leadId" className={fieldClass('leadId')}>
                   <option value="">{leadLoading ? 'Loading leads...' : 'Select a lead'}</option>
                   {(leadOptions ?? []).map(lead => (

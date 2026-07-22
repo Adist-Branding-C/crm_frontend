@@ -13,9 +13,11 @@ import { useLeadFormOptions } from '../features/enquiries/hooks/useLeadFormOptio
 import { leadDataService } from '../features/enquiries/services/leadDataService';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../features/enquiries/constants/messages';
 import EditableDetailField from '../shared/components/drawers/EditableDetailField';
+import { useAuth } from '../features/auth/hooks/useAuth';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../shared/utils/dateUtils';
 
 const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('activity');
   const [showTaskDrawer, setShowTaskDrawer] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
@@ -202,7 +204,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
   };
 
   const startEditRemark = (remark) => {
-    setEditingRemarkId(remark.id);
+    setEditingRemarkId(remark.remarkId);
     setEditingRemarkText(remark.remarkNote);
   };
 
@@ -213,7 +215,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
 
   const handleSaveEdit = async () => {
     const trimmed = editingRemarkText.trim();
-    const original = remarks.find((r) => r.id === editingRemarkId);
+    const original = remarks.find((r) => r.remarkId === editingRemarkId);
     if (!trimmed) {
       cancelEditRemark();
       return;
@@ -240,7 +242,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
   const handleDeleteConfirm = async () => {
     if (!remarkToDelete) return;
     try {
-      await deleteRemark(remarkToDelete.id);
+      await deleteRemark(remarkToDelete.remarkId);
       setShowDeleteRemarkModal(false);
       setRemarkToDelete(null);
       showToastMessage('Remark deleted successfully.', 'success');
@@ -277,8 +279,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
                 </div>
                 <h2 className="leaddrawer-name">{lead.name}</h2>
                 <div className="leaddrawer-badges">
-                  <span className={`leaddrawer-badge ${getTypeBadgeClass(lead.type)}`}>{lead.type}</span>
-                  <span className={`leaddrawer-badge ${lead.status?.toLowerCase()}`}>{lead.status}</span>
+                  <span className={`leaddrawer-badge ${getTypeBadgeClass(lead.type?.type)}`}>{lead.type?.type}</span>
+                  <span className={`leaddrawer-badge ${lead.status?.status?.toLowerCase()}`}>{lead.status?.status}</span>
                 </div>
               </div>
 
@@ -531,7 +533,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
                   ) : (
                     <div>
                       {remarks.map((remark) => (
-                        <div key={remark.id} className="leaddrawer-note-card">
+                        <div key={remark.remarkId} className="leaddrawer-note-card">
                           <div className="leaddrawer-note-avatar">
                             {(remark.agentName || '?').charAt(0).toUpperCase()}
                           </div>
@@ -540,7 +542,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
                               <span className="leaddrawer-note-user">{remark.agentName}</span>
                               <span className="leaddrawer-note-time">{formatDateTime(remark.createdAt)}</span>
                             </div>
-                            {editingRemarkId === remark.id ? (
+                            {editingRemarkId === remark.remarkId ? (
                               <div>
                                 <textarea
                                   className="leaddrawer-remark-edit-textarea"
@@ -568,14 +570,16 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
                             ) : (
                               <p className="leaddrawer-note-text">{remark.remarkNote}</p>
                             )}
-                            <div className="leaddrawer-note-actions">
-                              <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
-                                <Edit2 size={14} />
-                              </button>
-                              <button className="leaddrawer-note-action" onClick={() => handleDeleteClick(remark)}>
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
+                            {((!!remark.agentId && !!user?.staffId && String(remark.agentId) === String(user.staffId)) || user?.isAdmin) && (
+                              <div className="leaddrawer-note-actions">
+                                <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
+                                  <Edit2 size={14} />
+                                </button>
+                                <button className="leaddrawer-note-action" onClick={() => handleDeleteClick(remark)}>
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}

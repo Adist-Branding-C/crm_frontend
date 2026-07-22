@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, FileText, Phone, UserCircle, Settings, Users, CreditCard, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout } from 'lucide-react';
+import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, FileText, Phone, UserCircle, Settings, Users, CreditCard, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout, Link as LinkIcon } from 'lucide-react';
 import type { NotificationIconInfo, TopNavProps } from '../../types/layout';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
 import './TopNav.css';
@@ -383,6 +383,10 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                 <div className="profile-dropdown-item" onClick={() => navigate('/setup')}>
                   <Layout size={16} />
                   <span>Setup</span>
+                </div>
+                <div className="profile-dropdown-item" onClick={() => navigate('/user/connect')}>
+                  <LinkIcon size={16} />
+                  <span>Connect</span>
                 </div>
                 <div className="profile-dropdown-item" onClick={() => navigate('/settings/staff')}>
                   <Users size={16} />

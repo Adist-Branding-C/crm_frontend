@@ -1,18 +1,16 @@
 import { formatActivityType } from '../utils/activityHelpers';
-import type {Filters, StaffOption, ActivityTypeOption } from '../types';
+import type { Filters, StaffOption, ActivityTypeOption } from '../types';
 
-export const staffList: StaffOption[] = [
-  { id: 1, name: 'All Staff' },
-  { id: 2, name: 'Rameesa' },
-  { id: 3, name: 'Ameen' },
-  { id: 4, name: 'Shameena' },
-  { id: 5, name: 'Junaid' },
-  { id: 6, name: 'Fathima' },
-  { id: 7, name: 'Fida Fathima' },
-  { id: 8, name: 'Nandana K' },
-  { id: 9, name: 'Aysha' },
-  { id: 10, name: 'Nesri' },
-];
+/**
+ * Synthetic "All Staff" option prepended to the live-fetched staff list.
+ *
+ * Used by:
+ * - useStaffOptions (default + fallback entry).
+ *
+ * Notes:
+ * - '' means "no actorId filter applied".
+ */
+export const ALL_STAFF_OPTION: StaffOption = { id: '', name: 'All Staff' };
 
 const ACTIVITY_TYPE_ENUMS = [
   'CREATED',
@@ -41,14 +39,35 @@ const ACTIVITY_TYPE_ENUMS = [
   'CUSTOM_FIELD_UPDATED',
 ] as const;
 
+/**
+ * Activity-type filter dropdown options, mirroring the backend ActivityType enum.
+ *
+ * Used by:
+ * - DailyActivityPage (passed to ActivityTypeFilter).
+ */
 export const activityTypes: ActivityTypeOption[] = [
   { value: '', label: 'All' },
   ...ACTIVITY_TYPE_ENUMS.map((value) => ({ value, label: formatActivityType(value) })),
 ];
 
+/**
+ * Default/reset state for the activity filter panel.
+ *
+ * Used by:
+ * - useActivityFilters (initial state and reset target).
+ */
 export const DEFAULT_FILTERS: Filters = {
   date: '',
   startTime: '',
   endTime: '',
-  staff: 1,
+  staff: '',
 };
+
+/**
+ * Number of page-number buttons shown on either side of the current page in
+ * the windowed pagination control.
+ *
+ * Used by:
+ * - useDailyActivityData (computePageNumbers call).
+ */
+export const PAGE_WINDOW = 2;

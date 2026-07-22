@@ -1,23 +1,11 @@
-import { useCallback } from 'react';
+import { useRowActions } from '../../../../shared/hooks/useRowActions';
 import type { CallReasonItem, UseCallReasonRowActionsParams } from '../types/index';
 
 /**
- * Composes the call-reason row actions: opening the edit drawer or the delete-confirm
- * dialog must also close the open row dropdown, in the same user action.
- *
- * Used by:
- * - CallReasonPage
+ * Composes the call-reason row actions: opening the edit drawer or the delete-confirm dialog
+ * must also close the open row dropdown, in the same user action. Delegates the actual
+ * composition to the shared, entity-generic useRowActions hook.
  */
 export function useCallReasonRowActions({ openEditDrawer, onDeleteClick, closeDropdown }: UseCallReasonRowActionsParams) {
-  const handleEditClick = useCallback((item: CallReasonItem) => {
-    openEditDrawer(item);
-    closeDropdown();
-  }, [openEditDrawer, closeDropdown]);
-
-  const handleDeleteClick = useCallback((item: CallReasonItem) => {
-    onDeleteClick(item);
-    closeDropdown();
-  }, [onDeleteClick, closeDropdown]);
-
-  return { handleEditClick, handleDeleteClick };
+  return useRowActions<CallReasonItem>({ onEdit: openEditDrawer, onDelete: onDeleteClick, closeDropdown });
 }

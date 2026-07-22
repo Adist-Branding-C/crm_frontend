@@ -6,11 +6,10 @@ import { MEETING_OUTCOME_FIELD_MAP, MEETING_OUTCOME_FIELD_ERROR_FALLBACKS } from
 import type { MeetingOutcomeFormData, UseMeetingOutcomeCrudParams } from '../types/index';
 
 /**
- * Meeting-outcome create/update/delete API orchestration.
- *
- * Notes:
- * - Takes the list/pagination setters it needs to drive and a toast trigger as narrow
- *   dependencies, rather than owning or re-exporting the pagination or toast hooks themselves.
+ * Create/update/delete API orchestration for meeting outcomes. Adding resets the page to 1 and
+ * clears any active search before refreshing the list; updating just refreshes in place and,
+ * unlike add/delete, does not show a success toast. Delete errors are parsed inline rather than
+ * going through the shared submit-error handler.
  */
 export function useMeetingOutcomeCrud({ pagination, showToastMessage }: UseMeetingOutcomeCrudParams) {
   const submitError = useSubmitErrorHandler({

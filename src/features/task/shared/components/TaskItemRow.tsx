@@ -23,7 +23,7 @@ function TaskItemRow<T extends TaskItemRowShape>({ item, index, dropdownOpen, on
       <TCell>{item.assignedTo?.name ?? '-'}</TCell>
       <TCell><span className={`status-badge status-${(item.priority || '').toLowerCase()}`}>{item.priority || '-'}</span></TCell>
       <TCell><span className={`status-badge status-${(item.status || '').toLowerCase()}`}>{item.status}</span></TCell>
-      <TCell>{item.lead?.name ?? '-'}</TCell>
+      <TCell>{item.leadId?.name ?? '-'}</TCell>
       <TCell>
         <RowActions item={item} dropdownOpen={dropdownOpen} onToggleDropdown={onToggleDropdown} onEdit={onEdit} onDelete={onDelete} />
       </TCell>

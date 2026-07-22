@@ -1,108 +1,99 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { DEFAULT_ROWS_PER_PAGE } from '../../../shared/constants/pagination';
-import { activityService } from '../services/ActivityService';
-import { mapApiItemToUI } from '../utils/activityMapper';
-import type { Filters, Activity, PaginationInfo } from '../types';
-import { staffList, DEFAULT_FILTERS } from '../constants';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useSearchFilter } from '../../../shared/hooks/useSearchFilter';
+import { useStaffOptions } from './useStaffOptions';
+import { useStaffDropdown } from './useStaffDropdown';
+import { useActivityFilters } from './useActivityFilters';
+import { useActivitiesFetch } from './useActivitiesFetch';
+import { computePageNumbers } from '../utils/activityHelpers';
+import { PAGE_WINDOW, DEFAULT_FILTERS } from '../constants';
+import type { StaffOption } from '../types';
 
+const STAFF_SEARCH_FIELDS: (keyof StaffOption)[] = ['name'];
+
+/**
+ * Composes the Daily Activity page's underlying single-responsibility hooks
+ * (staff options, staff dropdown, filters, activities fetch) into the one set
+ * of state/actions the page needs, and owns the coordination between them
+ * (e.g. applying filters resets the page and refetches; selecting a staff
+ * option updates the filter and closes the dropdown in one action).
+ *
+ * Used by:
+ * - DailyActivityPage.
+ */
 export const useDailyActivityData = () => {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [activityTypeFilter, setActivityTypeFilter] = useState('');
-  const [appliedFilters, setAppliedFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [appliedActivityType, setAppliedActivityType] = useState('');
+  const toast = useToast();
+  const onError = useCallback(
+    (message: string) => toast.showToastMessage(message, 'error'),
+    [toast.showToastMessage],
+  );
+
+  const { staffOptions } = useStaffOptions(onError);
+  const staffSearch = useSearchFilter(staffOptions, STAFF_SEARCH_FIELDS);
+  const staffDropdown = useStaffDropdown();
+  const activityFilters = useActivityFilters();
+  const { activities, pagination, fetchActivities } = useActivitiesFetch(onError);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showStaffDropdown, setShowStaffDropdown] = useState(false);
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const rowsPerPage = DEFAULT_ROWS_PER_PAGE;
-  const requestSeqRef = useRef(0);
-
-  const fetchActivities = useCallback(async (page: number, f: Filters, at: string) => {
-    const requestSeq = ++requestSeqRef.current;
-    try {
-      const params: Record<string, string | number> = { pageNumber: page, limit: rowsPerPage };
-      if (f.date) params.date = f.date;
-      if (f.startTime) params.startTime = f.startTime;
-      if (f.endTime) params.endTime = f.endTime;
-      if (f.staff !== 1) params.actorId = f.staff;
-      if (at) params.activityType = at;
-
-      const response = await activityService.getActivities(params);
-      if (requestSeq !== requestSeqRef.current) return;
-      if (response.status) {
-        setActivities(response.data.items.map(mapApiItemToUI));
-        setPagination(response.data.pagination);
-      } else {
-        setActivities([]);
-        setPagination(null);
-      }
-    } catch {
-      if (requestSeq !== requestSeqRef.current) return;
-      setActivities([]);
-      setPagination(null);
-    }
-  }, [rowsPerPage]);
 
   useEffect(() => {
     fetchActivities(1, DEFAULT_FILTERS, '');
   }, [fetchActivities]);
 
   const handleApply = useCallback(() => {
-    const nextFilters = { ...filters };
-    setAppliedFilters(nextFilters);
-    setAppliedActivityType(activityTypeFilter);
+    const { appliedFilters, appliedActivityType } = activityFilters.applyFilters();
     setCurrentPage(1);
-    fetchActivities(1, nextFilters, activityTypeFilter);
-  }, [filters, activityTypeFilter, fetchActivities]);
+    fetchActivities(1, appliedFilters, appliedActivityType);
+  }, [activityFilters, fetchActivities]);
 
   const handleReset = useCallback(() => {
-    setFilters(DEFAULT_FILTERS);
-    setAppliedFilters(DEFAULT_FILTERS);
-    setActivityTypeFilter('');
-    setAppliedActivityType('');
+    const { appliedFilters, appliedActivityType } = activityFilters.resetFilters();
     setCurrentPage(1);
-    fetchActivities(1, DEFAULT_FILTERS, '');
-  }, [fetchActivities]);
+    fetchActivities(1, appliedFilters, appliedActivityType);
+  }, [activityFilters, fetchActivities]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
-    fetchActivities(page, appliedFilters, appliedActivityType);
-  }, [appliedFilters, appliedActivityType, fetchActivities]);
+    fetchActivities(page, activityFilters.appliedFilters, activityFilters.appliedActivityType);
+  }, [activityFilters.appliedFilters, activityFilters.appliedActivityType, fetchActivities]);
 
-  const handleFilterChange = useCallback((field: keyof Filters, value: string | number) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  const handleStaffSelect = useCallback((staffId: string) => {
+    activityFilters.handleFilterChange('staff', staffId);
+    staffDropdown.setIsOpen(false);
+  }, [activityFilters.handleFilterChange, staffDropdown.setIsOpen]);
 
   const totalActivities = pagination?.total ?? 0;
   const totalPages = pagination?.total_pages ?? 1;
 
-  const selectedStaffName =
-    staffList.find((s) => s.id === filters.staff)?.name || 'All Staff';
+  const selectedStaffName = useMemo(
+    () => staffOptions.find((s) => s.id === activityFilters.filters.staff)?.name || 'All Staff',
+    [staffOptions, activityFilters.filters.staff],
+  );
 
-  const getPageNumbers = useCallback(() => {
-    const pages: number[] = [];
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-    return pages;
-  }, [totalPages]);
+  const pageNumbers = useMemo(
+    () => computePageNumbers(currentPage, totalPages, PAGE_WINDOW),
+    [currentPage, totalPages],
+  );
 
   return {
-    filters,
-    activityTypeFilter,
-    setActivityTypeFilter,
+    filters: activityFilters.filters,
+    activityTypeFilter: activityFilters.activityTypeFilter,
+    setActivityTypeFilter: activityFilters.setActivityTypeFilter,
     currentPage,
-    showStaffDropdown,
-    setShowStaffDropdown,
-    localSearchQuery,
-    setLocalSearchQuery,
+    showStaffDropdown: staffDropdown.isOpen,
+    setShowStaffDropdown: staffDropdown.setIsOpen,
+    staffSearchQuery: staffSearch.query,
+    setStaffSearchQuery: staffSearch.setQuery,
     totalActivities,
     totalPages,
     paginatedActivities: activities,
     selectedStaffName,
-    handleFilterChange,
+    staffOptions: staffSearch.filteredData,
+    pageNumbers,
+    handleFilterChange: activityFilters.handleFilterChange,
+    handleStaffSelect,
     handleApply,
     handleReset,
     handlePageChange,
-    getPageNumbers,
+    toast,
   };
 };

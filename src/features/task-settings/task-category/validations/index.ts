@@ -7,7 +7,7 @@ const categoryValidation = yup
   .min(2, 'Category must be at least 2 characters')
   .max(100, 'Category must not exceed 100 characters');
 
-const actionValidation = yup.string().required('Please select an action');
+const statusValidation = yup.string().required('Please select a status');
 
 /**
  * Validation schema for creating and editing a task category.
@@ -21,7 +21,7 @@ const actionValidation = yup.string().required('Please select an action');
  */
 const taskCategoryValidationSchema = yup.object({
   category: categoryValidation,
-  action: actionValidation,
+  status: statusValidation,
 });
 
 export const addTaskCategoryValidationSchema = taskCategoryValidationSchema;
