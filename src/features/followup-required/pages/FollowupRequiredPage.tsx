@@ -35,9 +35,7 @@ const FollowupRequiredPage = () => {
     handleSearchChange: setSearchQuery,
   } = useDebouncedSearch(handleCommittedSearch);
 
-  // Reactive: any change to page, page size, committed search, applied
-  // filters, or sort re-fetches - matches the original single-effect design
-  // rather than an explicit refetch call per handler.
+
   useEffect(() => {
     fetchFollowupLeads(
       currentPage,
@@ -178,6 +176,7 @@ const FollowupRequiredPage = () => {
         isOpen={!!drawerState.selectedLead && drawerState.isDrawerOpen}
         onClose={drawerState.handleCloseDrawer}
         onLeadUpdated={refresh}
+        onFieldSaved={drawerState.updateSelectedLead}
       />
     </PageContainer>
   );

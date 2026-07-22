@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import type { AxiosError } from 'axios';
 import { followupService } from '../services/followupService';
 import { mapApiItemToFollowupLead } from '../mappers/followupLead.mapper';
 import { SortDirection } from '../../../shared/constants/enums/sortDirection';
@@ -10,16 +11,7 @@ const SORT_KEY_TO_API: Record<string, GetFollowupLeadsParams['sort_by']> = {
   nextFollowUp: 'nextFollowUp',
 };
 
-/**
- * Fetches a page of follow-up leads for the given page/filters/sort, and
- * holds the resulting list + pagination state. Mirrors the Daily Activity
- * feature's useActivitiesFetch (imperative fetch call, request-seq guarding
- * against a fast page click superseding a slow one).
- *
- * Used by:
- * - FollowupRequiredPage (calls fetchFollowupLeads on mount, apply, sort, and
- *   page/rows-per-page change).
- */
+
 export function useFollowupFetch() {
   const [data, setData] = useState<FollowupLead[]>([]);
   const [total, setTotal] = useState(0);
@@ -70,12 +62,15 @@ export function useFollowupFetch() {
           setTotalPages(1);
           setError(response.message || 'Failed to load follow-up leads');
         }
-      } catch {
+      } catch (err) {
         if (requestSeq !== requestSeqRef.current) return;
         setData([]);
         setTotal(0);
         setTotalPages(1);
-        setError('Failed to load follow-up leads');
+        setError(
+          (err as AxiosError<{ message?: string }>)?.response?.data?.message ||
+          'Failed to load follow-up leads',
+        );
       } finally {
         if (requestSeq === requestSeqRef.current) setIsLoading(false);
       }

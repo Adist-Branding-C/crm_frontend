@@ -40,8 +40,3 @@ export const CAMPAIGNS_DATA = [
   { name: 'Group A', value: 45, color: '#fbbf24' },
   { name: 'Group B', value: 55, color: '#e0323e' },
 ];
-
-export const ACTIVITIES_DATA = [
-  { id: 1, title: 'Farah left a Note', time: 'Jan 14 at 2:40 PM', highlight: false },
-  { id: 2, title: 'Getlead demo created a Call task', time: 'Jan 14 at 2:40 PM', highlight: true },
-];

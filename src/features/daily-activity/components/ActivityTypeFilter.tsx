@@ -1,7 +1,7 @@
 import type { ActivityTypeFilterProps } from '../types';
 import './ActivityTypeFilter.css';
 
-const ActivityTypeFilter = ({ activityTypeFilter, activityTypes, onChange }: ActivityTypeFilterProps) => (
+const ActivityTypeFilter = ({ activityTypeFilter, activityTypes, isLoading, onChange }: ActivityTypeFilterProps) => (
   <div className="activity-type-filter">
     <div className="activity-type-dropdown-group">
       <label htmlFor="activity-type-filter">Activity Type</label>
@@ -9,6 +9,7 @@ const ActivityTypeFilter = ({ activityTypeFilter, activityTypes, onChange }: Act
         id="activity-type-filter"
         className="filter-select"
         value={activityTypeFilter}
+        disabled={isLoading}
         onChange={(e) => onChange(e.target.value)}
       >
         {activityTypes.map(type => (

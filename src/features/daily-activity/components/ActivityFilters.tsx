@@ -10,6 +10,7 @@ const ActivityFilters = ({
   staffSearchQuery,
   selectedStaffName,
   staffList,
+  isLoading,
   onFilterChange,
   onStaffSelect,
   onApply,
@@ -31,6 +32,7 @@ const ActivityFilters = ({
           value={filters.date}
           onChange={(e) => onFilterChange('date', e.target.value)}
           className="filter-input"
+          max={new Date().toISOString().split('T')[0]}
         />
       </div>
 
@@ -98,11 +100,11 @@ const ActivityFilters = ({
       </div>
 
       <div className="filter-buttons">
-        <button className="apply-btn" onClick={onApply}>
+        <button className="apply-btn" onClick={onApply} disabled={isLoading}>
           <Filter size={16} />
           Apply Filter
         </button>
-        <button className="reset-btn" onClick={onReset}>
+        <button className="reset-btn" onClick={onReset} disabled={isLoading}>
           <RotateCcw size={16} />
           Reset
         </button>

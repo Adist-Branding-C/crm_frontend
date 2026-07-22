@@ -31,13 +31,10 @@ const DailyActivityPage = () => {
   const staffDropdown = useStaffDropdown();
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      fetchStaffOptions(staffSearch.query);
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [staffSearch.query, fetchStaffOptions]);
+    fetchStaffOptions();
+  }, [fetchStaffOptions]);
   const activityFilters = useActivityFilters();
-  const { activities, pagination, fetchActivities } = useActivitiesFetch(onError);
+  const { activities, pagination, isLoading, fetchActivities } = useActivitiesFetch(onError);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -101,6 +98,7 @@ const DailyActivityPage = () => {
           staffSearchQuery={staffSearch.query}
           selectedStaffName={selectedStaffName}
           staffList={staffSearch.filteredData}
+          isLoading={isLoading}
           onFilterChange={activityFilters.handleFilterChange}
           onStaffSelect={handleStaffSelect}
           onApply={handleApply}
@@ -113,16 +111,13 @@ const DailyActivityPage = () => {
       <ActivityTypeFilter
         activityTypeFilter={activityFilters.activityTypeFilter}
         activityTypes={activityTypes}
-        onChange={(type) => {
-          activityFilters.setActivityTypeFilter(type);
-          activityFilters.setAppliedActivityType(type);
-          setCurrentPage(1);
-          fetchActivities(1, activityFilters.appliedFilters, type);
-        }}
+        isLoading={isLoading}
+        onChange={activityFilters.setActivityTypeFilter}
       />
 
       <ActivityTimeline
         activities={activities}
+        isLoading={isLoading}
       />
 
       {activities.length > 0 && (
@@ -131,6 +126,7 @@ const DailyActivityPage = () => {
           totalPages={totalPages}
           totalActivities={totalActivities}
           pageNumbers={pageNumbers}
+          isLoading={isLoading}
           onPageChange={handlePageChange}
         />
       )}

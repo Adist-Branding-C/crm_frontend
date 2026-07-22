@@ -21,5 +21,10 @@ export function useFollowupDrawer() {
     setSelectedLead(null);
   };
 
-  return { selectedLead, isDrawerOpen, handleViewLead, handleCloseDrawer };
+
+  const updateSelectedLead = (patch: Partial<FollowupLead>) => {
+    setSelectedLead((current) => (current ? { ...current, ...patch } : current));
+  };
+
+  return { selectedLead, isDrawerOpen, handleViewLead, handleCloseDrawer, updateSelectedLead };
 }
