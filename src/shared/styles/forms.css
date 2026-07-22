@@ -135,3 +135,14 @@
 .toggle-switch input:checked + .toggle-slider:before {
   transform: translateX(22px);
 }
+
+.switch-field {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.switch-field label:not(.toggle-switch) {
+  margin-bottom: 0;
+  cursor: pointer;
+}

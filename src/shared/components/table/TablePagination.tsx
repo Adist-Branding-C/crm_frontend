@@ -1,49 +1,35 @@
-import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
-import {
-  LABEL_ROWS_PER_PAGE, LABEL_SHOWING, LABEL_OF,
-  LABEL_FIRST, LABEL_PAGE, LABEL_LAST,
-} from '../../constants/labels';
-import type { TablePaginationProps } from './types';
+import { LABEL_FIRST, LABEL_LAST, LABEL_PAGE, LABEL_OF, LABEL_SHOWING, LABEL_TO, LABEL_ENTRIES } from '../../constants/labels';
 
-const TablePagination: React.FC<TablePaginationProps> = React.memo(({
-  currentPage, totalPages, startIndex, rowsPerPage, totalItems,
-  onPageChange, onRowsPerPageChange,
-  rowsPerPageOptions = ROWS_OPTIONS_10_25_50_100,
-  showRowsSelector = true,
-  labelRowsPerPage = LABEL_ROWS_PER_PAGE,
-  labelShowing = LABEL_SHOWING,
-  labelOf = LABEL_OF,
-  labelPage = LABEL_PAGE,
-  labelFirst = LABEL_FIRST,
-  labelLast = LABEL_LAST,
-}) => (
-  <div className="pagination-container">
-    {showRowsSelector && onRowsPerPageChange && (
-      <div className="pagination-left">
-        <span className="rows-label">{labelRowsPerPage}</span>
-        <select value={rowsPerPage} onChange={onRowsPerPageChange} className="rows-select">
-          {rowsPerPageOptions.map(n => <option key={n} value={n}>{n}</option>)}
-        </select>
-        <span className="pagination-info">
-          {labelShowing} {startIndex + 1}-{Math.min(startIndex + rowsPerPage, totalItems)} {labelOf} {totalItems}
-        </span>
+interface TablePaginationProps {
+  currentPage: number;
+  totalPages: number;
+  rowsPerPage: number;
+  totalRecords: number;
+  onPageChange: (page: number) => void;
+}
+
+const TablePagination = ({ currentPage, totalPages, rowsPerPage, totalRecords, onPageChange }: TablePaginationProps) => {
+  const safeTotalPages = Math.max(1, Number(totalPages) || 1);
+  const safeCurrentPage = Math.max(1, Number(currentPage) || 1);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+
+  return (
+    <div className="table-footer">
+      <div className="table-info">
+        {LABEL_SHOWING} {Math.min(startIndex + 1, totalRecords)} {LABEL_TO} {Math.min(startIndex + rowsPerPage, totalRecords)} {LABEL_OF} {totalRecords} {LABEL_ENTRIES}
       </div>
-    )}
-    <div className="pagination-right">
-      <button className="pagination-btn" disabled={currentPage === 1} onClick={() => onPageChange(1)}>{labelFirst}</button>
-      <button className="pagination-btn" disabled={currentPage === 1} onClick={() => onPageChange(p => (p as number) - 1)}>
-        <ChevronLeft size={16} />
-      </button>
-      <span className="page-indicator">{labelPage} {currentPage} {labelOf} {totalPages}</span>
-      <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => onPageChange(p => (p as number) + 1)}>
-        <ChevronRight size={16} />
-      </button>
-      <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => onPageChange(totalPages)}>{labelLast}</button>
+      <div className="table-controls">
+        <div className="pagination-controls" style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <button className="pagination-btn" disabled={safeCurrentPage === 1} onClick={() => onPageChange(1)}>{LABEL_FIRST}</button>
+          <button className="pagination-btn" disabled={safeCurrentPage === 1} onClick={() => onPageChange(safeCurrentPage - 1)}><ChevronLeft size={16} /></button>
+          <span className="page-indicator">{LABEL_PAGE} {safeCurrentPage} {LABEL_OF} {safeTotalPages}</span>
+          <button className="pagination-btn" disabled={safeCurrentPage === safeTotalPages} onClick={() => onPageChange(safeCurrentPage + 1)}><ChevronRight size={16} /></button>
+          <button className="pagination-btn" disabled={safeCurrentPage === safeTotalPages} onClick={() => onPageChange(safeTotalPages)}>{LABEL_LAST}</button>
+        </div>
+      </div>
     </div>
-  </div>
-));
+  );
+};
 
-TablePagination.displayName = 'TablePagination';
 export default TablePagination;

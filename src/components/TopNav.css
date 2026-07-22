@@ -661,3 +661,34 @@
 .user-profile-trigger:hover {
   background: var(--bg-main);
 }
+
+@media (max-width: 768px) {
+  .topnav {
+    justify-content: space-between;
+  }
+
+  .search-bar {
+    flex: 1;
+    min-width: 120px;
+    max-width: 220px;
+  }
+
+  .topnav-actions {
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .btn-add {
+    white-space: nowrap;
+  }
+
+  .user-profile {
+    min-width: 0;
+  }
+
+  .user-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

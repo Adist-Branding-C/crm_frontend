@@ -1,111 +1,135 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { salesAgents, sampleDeals } from '../constants';
-import type { Deal } from '../types';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
+import { useSalesPipelineFilters } from './useSalesPipelineFilters';
+import { useSalesPipelineStaffOptions } from './useSalesPipelineStaffOptions';
+import { useDealsPipeline } from './useDealsPipeline';
+import { useLeadsPipeline } from './useLeadsPipeline';
+import { useTasksPipeline } from './useTasksPipeline';
+import { usePipelineDragDrop } from './usePipelineDragDrop';
+import { PipelineMapper } from '../mappers/pipeline.mapper';
+import type { ActiveView } from '../types';
+
 
 export function useSalesPipelineData() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [draggedDeal, setDraggedDeal] = useState<Deal | null>(null);
-  const [showDateFilter, setShowDateFilter] = useState(false);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [selectedAgent, setSelectedAgent] = useState(1);
-  const [selectedType, setSelectedType] = useState(1);
+  const [activeView, setActiveView] = useState<ActiveView>('deals');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [deals, setDeals] = useState<Deal[]>(sampleDeals);
-  const filterRef = useRef<HTMLDivElement | null>(null);
+  const [committedSearch, setCommittedSearch] = useState('');
+  const activeViewRef = useRef(activeView);
+  activeViewRef.current = activeView;
 
+  const toast = useToast();
+  const reportError = useCallback(
+    (message: string) => toast.showToastMessage(message, 'error'),
+    [toast.showToastMessage],
+  );
+
+  const search = useDebouncedSearch(setCommittedSearch);
+  const filters = useSalesPipelineFilters();
+  const { staffOptions } = useSalesPipelineStaffOptions();
+  const deals = useDealsPipeline(reportError);
+  const leads = useLeadsPipeline(reportError);
+  const tasks = useTasksPipeline(reportError);
+  const dragDrop = usePipelineDragDrop(
+    deals.setStatusGroups,
+    leads.setLeadGroups,
+    tasks.setTaskGroups,
+    reportError,
+  );
+
+  const filterParams = useMemo(
+    () =>
+      PipelineMapper.toQueryParams(
+        committedSearch,
+        filters.dateFrom,
+        filters.dateTo,
+        filters.selectedAgent,
+      ),
+    [committedSearch, filters.dateFrom, filters.dateTo, filters.selectedAgent],
+  );
+
+  const isInitialMount = useRef(true);
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setShowDateFilter(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const clearFilters = useCallback(() => {
-    setDateFrom('');
-    setDateTo('');
-    setSelectedAgent(1);
-    setSelectedType(1);
-  }, []);
-
-  const filteredDeals = useMemo(() =>
-    deals.filter(deal => {
-      const matchesSearch = searchQuery === '' ||
-        deal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        deal.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        deal.contact.toLowerCase().includes(searchQuery.toLowerCase());
-
-      let matchesDate = true;
-      if (dateFrom && dateTo) {
-        matchesDate = deal.dueDate >= dateFrom && deal.dueDate <= dateTo;
-      } else if (dateFrom) {
-        matchesDate = deal.dueDate >= dateFrom;
-      } else if (dateTo) {
-        matchesDate = deal.dueDate <= dateTo;
-      }
-
-      const matchesAgent = selectedAgent === 1 || deal.contact === salesAgents.find(a => a.id === selectedAgent)?.name;
-      return matchesSearch && matchesDate && matchesAgent;
-    }),
-    [deals, searchQuery, dateFrom, dateTo, selectedAgent]
-  );
-
-  const getDealsForStage = useCallback((stageId: number) =>
-    filteredDeals.filter(deal => deal.stage === stageId),
-    [filteredDeals]
-  );
-
-  const getStageTotal = useCallback((stageId: number) => {
-    const stageDeals = getDealsForStage(stageId);
-    return stageDeals.reduce((sum, deal) => sum + deal.value, 0);
-  }, [getDealsForStage]);
-
-  const handleDragStart = useCallback((_e: React.DragEvent, deal: Deal) => {
-    setDraggedDeal(deal);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent, stageId: number) => {
-    e.preventDefault();
-    if (draggedDeal) {
-      setDeals(prevDeals =>
-        prevDeals.map(deal =>
-          deal.id === draggedDeal.id ? { ...deal, stage: stageId } : deal
-        )
-      );
-      setDraggedDeal(null);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      deals.fetchDeals(filterParams);
+      return;
     }
-  }, [draggedDeal]);
+    const view = activeViewRef.current;
+    if (view === 'deals') deals.fetchDeals(filterParams);
+    else if (view === 'leads') leads.fetchLeads(filterParams);
+    else if (view === 'tasks') tasks.fetchTasks(filterParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterParams]);
+
+  const handleViewDeals = useCallback(() => {
+    setActiveView('deals');
+    deals.fetchDeals(filterParams);
+  }, [deals.fetchDeals, filterParams]);
+
+  const handleViewLeads = useCallback(() => {
+    setActiveView('leads');
+    leads.fetchLeads(filterParams);
+  }, [leads.fetchLeads, filterParams]);
+
+  const handleViewTasks = useCallback(() => {
+    setActiveView('tasks');
+    tasks.fetchTasks(filterParams);
+  }, [tasks.fetchTasks, filterParams]);
 
   const handleSaveDeal = useCallback(() => {
-    // Deal saved via drawer; integration with pipeline state can be added later
-  }, []);
+    setIsDrawerOpen(false);
+    deals.fetchDeals(filterParams);
+  }, [deals.fetchDeals, filterParams]);
 
-  const getAvatarColor = useCallback((name: string) => {
-    const colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#ec4899'];
-    return colors[name.charCodeAt(0) % colors.length] || '#6b7280';
-  }, []);
+  const handleClearFilters = useCallback(() => {
+    filters.clearFilters();
+    filters.setShowDateFilter(false);
+  }, [filters]);
+
+  const loading =
+    activeView === 'deals'
+      ? deals.isLoading
+      : activeView === 'leads'
+        ? leads.isLoading
+        : tasks.isLoading;
 
   return {
-    searchQuery, setSearchQuery,
-    draggedDeal, setDraggedDeal,
-    showDateFilter, setShowDateFilter,
-    dateFrom, setDateFrom,
-    dateTo, setDateTo,
-    selectedAgent, setSelectedAgent,
-    selectedType, setSelectedType,
-    isDrawerOpen, setIsDrawerOpen,
-    deals, setDeals,
-    filterRef,
-    clearFilters, filteredDeals,
-    getDealsForStage, getStageTotal,
-    handleDragStart, handleDragOver, handleDrop,
-    handleSaveDeal, getAvatarColor,
+    searchQuery: search.searchValue,
+    setSearchQuery: search.handleSearchChange,
+    showDateFilter: filters.showDateFilter,
+    setShowDateFilter: filters.setShowDateFilter,
+    dateFrom: filters.dateFrom,
+    setDateFrom: filters.setDateFrom,
+    dateTo: filters.dateTo,
+    setDateTo: filters.setDateTo,
+    selectedAgent: filters.selectedAgent,
+    setSelectedAgent: filters.setSelectedAgent,
+    staffOptions,
+    isDrawerOpen,
+    setIsDrawerOpen,
+    activeView,
+    loading,
+    loadingStatusId: deals.loadingStatusId,
+    loadingLeadStatusId: leads.loadingLeadStatusId,
+    loadingTaskStatus: tasks.loadingTaskStatus,
+    onViewLeads: handleViewLeads,
+    onViewDeals: handleViewDeals,
+    onViewTasks: handleViewTasks,
+    loadMoreDeals: deals.loadMoreDeals,
+    loadMoreLeads: leads.loadMoreLeads,
+    loadMoreTasks: tasks.loadMoreTasks,
+    filterRef: filters.filterRef,
+    onClearFilters: handleClearFilters,
+    filteredStatusGroups: deals.statusGroups,
+    filteredLeadGroups: leads.leadGroups,
+    filteredTaskGroups: tasks.taskGroups,
+    sensors: dragDrop.sensors,
+    activeItem: dragDrop.activeItem,
+    handleDragStart: dragDrop.handleDragStart,
+    handleDragEnd: dragDrop.handleDragEnd,
+    handleDragCancel: dragDrop.handleDragCancel,
+    handleSaveDeal,
+    toast,
   };
 }

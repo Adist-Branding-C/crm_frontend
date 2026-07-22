@@ -1,0 +1,60 @@
+/* Form-specific styles - uses shared form classes from forms.css */
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.card-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.card-header-title h5 {
+  margin: 0;
+}
+
+.card--editing {
+  border-left: 4px solid var(--primary);
+  overflow: hidden;
+}
+
+.card--editing .card-header {
+  margin: -1.25rem -1.25rem 1rem;
+  padding: 0.875rem 1.25rem;
+  background: rgba(241, 65, 79, 0.08);
+}
+
+.card-header-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.cancel-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.cancel-edit-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.editing-subtitle {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.8125rem;
+  color: var(--primary);
+  font-weight: 500;
+}

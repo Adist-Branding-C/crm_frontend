@@ -21,12 +21,18 @@ export interface AuthUser {
   id: number
   phone: string
   name: string
+  staffId?: string
+  companyId?: string
+  isAdmin?: boolean
 }
 
 export interface LoginResponseData {
   id: number
   phone: string
   name: string
+  staffId: string
+  companyId: string
+  isAdmin: boolean
   accessToken: string
   refreshToken: string
 }
@@ -54,4 +60,12 @@ export interface ResetPasswordRequest {
 export interface ResetPasswordResponse {
   status: boolean
   message: string
+}
+
+export interface RefreshTokenResponse {
+  status: boolean;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
 }

@@ -1,4 +1,5 @@
-import type { ReactNode, ChangeEvent } from 'react';
+import type { ReactNode, ChangeEvent, Ref } from 'react';
+import type { ObjectSchema } from 'yup';
 
 export interface Column<T> {
   key: string;
@@ -27,7 +28,11 @@ export interface AdminToolbarProps {
   onAdd: () => void;
   addLabel: string;
   showAddButton?: boolean;
+  rowsPerPage?: number;
+  onRowsPerPageChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
+
+
 
 export interface AdminPaginationProps {
   currentPage: number;
@@ -39,35 +44,67 @@ export interface AdminPaginationProps {
   onRowsPerPageChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   showRowsSelector?: boolean;
   prevNextOnly?: boolean;
+  alwaysShowNav?: boolean;
 }
 
 export interface AdminDeleteModalProps {
   isOpen: boolean;
   itemName?: string | undefined;
   itemType?: string;
+  error?: string | null;
   onConfirm: () => void;
   onClose: () => void;
+  isDeleting?: boolean;
 }
 
-export interface AdminTableProps<T extends { id: number }> {
+export interface AdminTableProps<T extends { id: number | string }> {
   data: T[];
   columns: Column<T>[];
   startIndex: number;
-  dropdownOpen: number | null;
-  onToggleDropdown: (id: number | null) => void;
+  dropdownOpen: T['id'] | null;
+  onToggleDropdown: (id: T['id'] | null) => void;
   onEdit: (item: T) => void;
   onDelete: (item: T) => void;
   renderActions?: (item: T) => ReactNode;
   emptyMessage?: string;
 }
 
-export interface AdminFormDrawerProps {
+export interface DrawerShellProps {
   isOpen: boolean;
   title: string;
+  onClose: () => void;
+  bodyRef?: Ref<HTMLDivElement>;
+  children: ReactNode;
+}
+
+export interface AdminConfirmationModalProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmButtonVariant?: 'primary' | 'danger';
+  isLoading?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export interface AdminFormProps {
   fields: FormField[];
   formData: Record<string, unknown>;
   onChange: (data: any) => void;
   onSave: () => void;
   onClose: () => void;
   isEditing: boolean;
+  error?: string | null;
+  onClearError?: () => void;
+  isSaving?: boolean;
+  saveDisabled?: boolean;
+  /** Overrides the schema AdminForm would otherwise auto-build from `fields[].required`. */
+  validationSchema?: ObjectSchema<any>;
+}
+
+export interface AdminFormDrawerProps extends AdminFormProps {
+  isOpen: boolean;
+  title: string;
 }

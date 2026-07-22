@@ -1,7 +1,10 @@
-import { Edit2, X, Save, CheckCircle, Zap, Calendar, RefreshCw } from 'lucide-react';
+import { Edit2, X, Save, CheckCircle, Zap, Calendar, RefreshCw, Check, Loader2 } from 'lucide-react';
+import { Formik, Form, Field } from 'formik';
 import { useProfileData } from '../hooks/useProfileData';
+import { profileValidationSchema } from '../validations/profile.validation';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
+import DrawerShell from '../../../shared/components/crud/DrawerShell';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -199,46 +202,60 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {d.showForm && (
-        <div className="drawer-overlay" onClick={() => d.setShowForm(false)}>
-          <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
-            <div className="drawer-header">
-              <h5>Edit Profile</h5>
-              <button className="drawer-close" onClick={() => d.setShowForm(false)}>
-                <X size={20} />
-              </button>
-            </div>
-            <div className="drawer-body">
-              <form onSubmit={d.handleSubmit}>
+      <DrawerShell isOpen={d.showForm} title="Edit Profile" onClose={() => d.setShowForm(false)}>
+        <Formik
+          enableReinitialize
+          initialValues={d.formData}
+          validationSchema={profileValidationSchema}
+          onSubmit={d.handleSubmit}
+        >
+          {({ errors, touched, dirty, submitCount, isSubmitting }) => {
+            const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
+            const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
+
+            return (
+              <Form noValidate>
                 <div className="form-group">
                   <label>Name <span className="text-danger">*</span></label>
-                  <input type="text" name="name" className="form-control" value={d.formData.name} onChange={d.handleInputChange} />
+                  <Field type="text" name="name" className={fieldClass('name')} />
+                  {showError('name') && errors.name && <small className="field-error-text">{errors.name}</small>}
                 </div>
                 <div className="form-group">
                   <label>Email <span className="text-danger">*</span></label>
-                  <input type="email" name="email" className="form-control" value={d.formData.email} onChange={d.handleInputChange} />
+                  <Field type="email" name="email" className={fieldClass('email')} />
+                  {showError('email') && errors.email && <small className="field-error-text">{errors.email}</small>}
                 </div>
                 <div className="form-group">
                   <label>Mobile Number</label>
-                  <input type="tel" name="mobile" className="form-control" value={d.formData.mobile} onChange={d.handleInputChange} />
+                  <Field type="tel" name="mobile" className={fieldClass('mobile')} />
+                  {showError('mobile') && errors.mobile && <small className="field-error-text">{errors.mobile}</small>}
                 </div>
                 <div className="form-group">
                   <label>Address</label>
-                  <textarea name="address" className="form-control" rows={3} value={d.formData.address} onChange={d.handleInputChange} />
+                  <Field as="textarea" name="address" className={fieldClass('address')} rows={3} />
+                  {showError('address') && errors.address && <small className="field-error-text">{errors.address}</small>}
                 </div>
                 <div className="form-group">
                   <label>GST Number</label>
-                  <input type="text" name="gstNumber" className="form-control" value={d.formData.gstNumber} onChange={d.handleInputChange} />
+                  <Field type="text" name="gstNumber" className={fieldClass('gstNumber')} />
+                  {showError('gstNumber') && errors.gstNumber && <small className="field-error-text">{errors.gstNumber}</small>}
                 </div>
                 <div className="form-actions">
-                  <button type="submit" className="btn btn-primary">
-                    <Save size={16} /> Save Changes
+                  <button type="submit" className="btn btn-primary" disabled={isSubmitting || !dirty}>
+                    {isSubmitting ? <Loader2 size={16} className="spin" /> : <Save size={16} />} Save Changes
                   </button>
                   <button type="button" className="btn btn-secondary" onClick={() => d.setShowForm(false)}>Cancel</button>
                 </div>
-              </form>
-            </div>
-          </div>
+              </Form>
+            );
+          }}
+        </Formik>
+      </DrawerShell>
+
+      {d.showToast && (
+        <div className={`toast-notification toast-${d.toastType}`} onClick={() => d.setShowToast(false)}>
+          {d.toastType === 'success' ? <Check size={18} /> : <X size={18} />}
+          <span>{d.toastMessage}</span>
         </div>
       )}
     </div>

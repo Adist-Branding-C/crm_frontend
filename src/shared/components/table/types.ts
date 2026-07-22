@@ -1,71 +1,28 @@
-import type { ReactNode, ChangeEvent } from 'react';
-import type { SortConfig } from '../../types/sort';
+import type { ReactNode } from 'react';
 
-export interface TableProps {
-  children?: ReactNode;
-}
-
-export interface TableHeadProps {
-  children?: ReactNode;
-}
-
-export interface TableBodyProps {
-  children?: ReactNode;
-}
-
-export interface TableHeaderCellProps {
-  sortable?: boolean;
-  sortKey?: string;
-  sortConfig?: SortConfig;
-  onSort?: (key: string) => void;
-  isCheckbox?: boolean;
-  checked?: boolean;
-  onCheckboxChange?: (checked: boolean) => void;
-  children?: ReactNode;
+export interface Column<T> {
+  header: string;
+  accessor?: keyof T;
+  render?: (row: T) => ReactNode;
   className?: string;
+  width?: string;
 }
 
-export interface TableRowProps {
-  selected?: boolean;
-  children?: ReactNode;
-  className?: string;
-}
-
-export interface TableCellProps {
-  children?: ReactNode;
-  className?: string;
-  colSpan?: number;
-  onClick?: () => void;
-}
-
-export interface TableCheckboxProps {
-  checked: boolean;
-  indeterminate?: boolean;
-  onChange: (checked: boolean) => void;
-}
-
-export interface ActionMenuProps {
-  isOpen: boolean;
-  buttonRect: DOMRect | null;
-  onToggle: (rect: DOMRect | null) => void;
-  onClose: () => void;
-  children?: ReactNode;
-}
-
-export interface TablePaginationProps {
+export interface DataTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
+  keyExtractor?: (row: T) => string | number;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onAdd?: () => void;
+  addLabel?: string;
   currentPage: number;
   totalPages: number;
-  startIndex: number;
+  totalRecords: number;
   rowsPerPage: number;
-  totalItems: number;
-  onPageChange: (page: number | ((prev: number) => number)) => void;
-  onRowsPerPageChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
-  rowsPerPageOptions?: readonly number[];
-  showRowsSelector?: boolean;
-  labelRowsPerPage?: string;
-  labelShowing?: string;
-  labelOf?: string;
-  labelPage?: string;
-  labelFirst?: string;
-  labelLast?: string;
+  onPageChange: (page: number) => void;
+  onRowsPerPageChange: (value: number) => void;
+  isLoading?: boolean;
+  emptyMessage?: string;
+  onExport?: () => void;
 }

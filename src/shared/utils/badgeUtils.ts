@@ -1,6 +1,7 @@
 import { WHITESPACE_REGEX } from '../constants/regex';
 
 export function badgeClass(value: string): string {
+  if (typeof value !== 'string' || !value) return 'unknown';
   return value.toLowerCase().replace(WHITESPACE_REGEX, '-');
 }
 

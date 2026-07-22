@@ -33,9 +33,10 @@ const ForgotPasswordPage = () => {
             <div className="success-animation">
               <CheckCircle size={48} />
             </div>
-            <h1>Check Your Phone</h1>
-            <p>Reset link sent to</p>
+            <h1>Check Your Email</h1>
+            <p>If an account exists for phone number</p>
             <p className="phone-highlight">{forgotPasswordData.submittedPhone}</p>
+            <p>a password reset link has been sent to the registered email address.</p>
             <p className="resend-text">
               Didn&apos;t receive?{' '}
               <button 
@@ -46,7 +47,7 @@ const ForgotPasswordPage = () => {
                 Resend
               </button>
             </p>
-            <button className="back-btn" onClick={() => navigate('/login')}>
+            <button className="auth-back-btn" onClick={() => navigate('/login')}>
               <ArrowLeft size={18} />
               <span>Back to Sign In</span>
             </button>
@@ -74,7 +75,7 @@ const ForgotPasswordPage = () => {
 
       <div className="auth-form-panel">
         <div className="auth-card">
-          <button className="back-link" onClick={() => navigate('/login')}>
+          <button className="auth-back-link" onClick={() => navigate('/login')}>
             <ArrowLeft size={18} />
             <span>Back</span>
           </button>
@@ -95,7 +96,7 @@ const ForgotPasswordPage = () => {
                 <Form className="auth-form">
                   {formError && <ErrorMessage message={formError} />}
                   
-                  <div className="form-group">
+                  <div className="auth-form-group">
                     <label htmlFor="phone">Phone Number</label>
                     <div className="input-wrapper-with-icon">
                       <span className="input-icon-left"><Phone size={18} /></span>

@@ -1,12 +1,18 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { DEFAULT_ROWS_PER_PAGE } from '../constants/pagination';
 
 export function useTablePagination<T>(data: T[], initialRowsPerPage = DEFAULT_ROWS_PER_PAGE) {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(initialRowsPerPage);
 
-  const totalPages = Math.max(1, Math.ceil(data.length / rowsPerPage));
-  const safePage = Math.min(currentPage, totalPages);
+  const [totalPages, setTotalPages]= useState(0)
+  const [safePage, setSafePage] = useState(0)
+  
+  useEffect(() => {
+    const pages = Math.max(1, Math.ceil(data.length / rowsPerPage));
+    setTotalPages(pages);
+    setSafePage(Math.min(currentPage, pages));
+  }, [data, currentPage, rowsPerPage])
 
   const startIndex = (safePage - 1) * rowsPerPage;
   const paginatedData = useMemo(

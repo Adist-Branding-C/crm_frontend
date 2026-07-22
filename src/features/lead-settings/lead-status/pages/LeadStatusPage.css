@@ -1,0 +1,83 @@
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/pagination.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/tabs.css';
+@import '../../../../shared/styles/settings-layout.css';
+
+.lead-settings-page {
+  padding: 1.5rem;
+}
+
+.color-pill {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.truncate-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.additional-fields-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 1.5rem;
+}
+
+.color-input {
+  height: 50px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+}
+
+.table-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.table-loading .spin {
+  animation: spin 1s linear infinite;
+  margin-bottom: 0.75rem;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .lead-settings-page {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lead-settings-page {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .additional-fields-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,19 +1,38 @@
+/**
+ * Default page size for the leads table.
+ *
+ * Used by:
+ * - useLeadPagination (initial rowsPerPage state)
+ */
+export const DEFAULT_ROWS_PER_PAGE = 10;
+
+/**
+ * Blank filter-form state for the leads filter panel.
+ *
+ * Used by:
+ * - useLeadFilters (initial state), EnquiriesPage (reset via clearFilters)
+ */
 export const INITIAL_FILTERS = {
-  type: '',
   dateRange: { start: '', end: '' },
   filterByDate: '',
   enquirySource: '',
   enquiryPurpose: '',
   leadStatus: '',
   followupAdded: '',
-  createdBy: '',
   assignedTo: '',
   leadType: '',
   location: '',
   remarks: '',
-  date: '',
+  additionalFields: {},
 };
 
+/**
+ * Fixed column definitions for the leads table header.
+ *
+ * Used by:
+ * - EnquiriesPage (merged with per-lead dynamic additional-field columns before
+ *   being passed to the table header and EnquiriesRow)
+ */
 export const COLUMNS = [
   { key: 'checkbox', label: '' },
   { key: 'action', label: 'Action' },

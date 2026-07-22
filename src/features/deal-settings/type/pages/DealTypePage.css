@@ -1,0 +1,17 @@
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/pagination.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/tabs.css';
+
+.table-scroll {
+  overflow: visible;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+}

@@ -1,25 +1,16 @@
-export { default as Table } from './Table';
-export { default as TableHead } from './TableHead';
+export { default as DataTable } from './DataTable';
+export { default as TableToolbar } from './TableToolbar';
+export { default as TableHeader } from './TableHeader';
 export { default as TableBody } from './TableBody';
-export { default as TableRow } from './TableRow';
-export { default as TableHeaderCell } from './TableHeaderCell';
-export { default as TableCell } from './TableCell';
-export { default as TableCheckbox } from './TableCheckbox';
-export { default as ActionMenu } from './ActionMenu';
 export { default as TablePagination } from './TablePagination';
-export { default as TableSkeleton } from './TableSkeleton';
-export { default as TableWrapper } from './TableWrapper';
-export { useTablePagination } from './useTablePagination';
-export { useTableSort } from './useTableSort';
-
-export type {
-  TableProps,
-  TableHeadProps,
-  TableBodyProps,
-  TableHeaderCellProps,
-  TableRowProps,
-  TableCellProps,
-  TableCheckboxProps,
-  ActionMenuProps,
-  TablePaginationProps,
-} from './types';
+export { default as EmptyState } from './EmptyState';
+export { default as Table } from './Table';
+export { default as THead } from './THead';
+export { default as TBody } from './TBody';
+export { default as TRow } from './TRow';
+export { default as TCell } from './TCell';
+export { default as RowActionsMenu } from './RowActionsMenu';
+export { default as TableNav } from './TableNav';
+export { default as SortToggleButton } from './SortToggleButton';
+export { default as Pagination } from './Pagination';
+export type { Column, DataTableProps } from './types';
