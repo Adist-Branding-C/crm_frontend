@@ -70,7 +70,7 @@ const LoginPage = () => {
                   <Form className="auth-form">
                     {formError && <ErrorMessage message={formError} />}
 
-                    <div className="form-group">
+                    <div className="auth-form-group">
                       <label htmlFor="phone">Phone Number</label>
                       <div className="input-wrapper-with-icon">
                         <span className="input-icon-left"><Phone size={18} /></span>
@@ -84,7 +84,7 @@ const LoginPage = () => {
                       </div>
                     </div>
 
-                    <div className="form-group">
+                    <div className="auth-form-group">
                       <label htmlFor="password">Password</label>
                       <div className="input-wrapper-with-icon">
                         <span className="input-icon-left"><Lock size={18} /></span>
@@ -108,7 +108,11 @@ const LoginPage = () => {
 
                     <div className="form-options">
                       <label className="remember-me">
-                        <input type="checkbox" />
+                        <input
+                          type="checkbox"
+                          checked={loginData.rememberMe}
+                          onChange={(e) => loginData.setRememberMe(e.target.checked)}
+                        />
                         <span>Remember me</span>
                       </label>
                       <button

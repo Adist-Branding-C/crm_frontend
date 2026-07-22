@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
 import type { FormikHelpers } from 'formik';
 import { AUTH_CONTENT_SLIDES, AUTH_ROUTES, AUTH_STORAGE_KEYS, MIN_SWIPE_DISTANCE } from '../constants/auth.constants';
 import { authService } from '../services/AuthService';
 import type { LoginFormData } from '../types/auth.types';
 import { loginValidationSchema } from '../validations/login.schema';
+import { setAuthTokens } from '../utils/tokenStorage';
 
 const loginInitialValues: LoginFormData = { phone: '', password: '' };
 
 export function useLoginData() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -33,12 +34,14 @@ export function useLoginData() {
       const response = await authService.login(values);
 
       if (response.status && response.data) {
-        Cookies.set(AUTH_STORAGE_KEYS.ACCESS_TOKEN, response.data.accessToken, { sameSite: 'strict' });
-        Cookies.set(AUTH_STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken, { sameSite: 'strict' });
+        setAuthTokens(response.data.accessToken, response.data.refreshToken, rememberMe);
         localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify({
           id: response.data.id,
           name: response.data.name,
           phone: response.data.phone,
+          staffId: response.data.staffId,
+          companyId: response.data.companyId,
+          isAdmin: response.data.isAdmin,
         }));
         navigate(AUTH_ROUTES.DASHBOARD);
       } else {
@@ -57,7 +60,7 @@ export function useLoginData() {
       setIsLoading(false);
       setSubmitting(false);
     }
-  }, [navigate]);
+  }, [navigate, rememberMe]);
 
   const onTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     setTouchEnd(null);
@@ -100,6 +103,7 @@ export function useLoginData() {
 
   return {
     showPassword, setShowPassword,
+    rememberMe, setRememberMe,
     isLoading, error,
     currentSlide, contentSlide, setContentSlide,
     touchStart, touchEnd, sliderRef,

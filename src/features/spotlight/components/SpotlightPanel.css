@@ -1,0 +1,56 @@
+@import '../../../shared/styles/tables.css';
+@import '../../../shared/styles/filters.css';
+@import '../../../shared/styles/toolbars.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/badges.css';
+@import '../../../shared/styles/pagination.css';
+@import '../../../shared/styles/drawers.css';
+@import '../../../shared/styles/forms.css';
+@import '../../../shared/styles/modals.css';
+@import '../../../shared/styles/tabs.css';
+@import '../../../shared/styles/stat-cards.css';
+@import '../../../shared/styles/dropdowns.css';
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+}
+
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.loading-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #fca5a5;
+  border-radius: var(--border-radius-sm);
+  background-color: #fef2f2;
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}

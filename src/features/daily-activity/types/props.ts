@@ -1,0 +1,47 @@
+import type { Activity, ActivityTypeOption, Filters, PageNumberEntry, StaffOption } from './interface';
+
+export interface ActivitySummaryCardProps {
+  totalActivities: number;
+}
+
+export interface ActivityFiltersProps {
+  filters: Filters;
+  showStaffDropdown: boolean;
+  staffSearchQuery: string;
+  selectedStaffName: string;
+  staffList: StaffOption[];
+  onFilterChange: (field: keyof Filters, value: string) => void;
+  onStaffSelect: (staffId: string) => void;
+  onApply: () => void;
+  onReset: () => void;
+  onShowStaffDropdownChange: (show: boolean) => void;
+  onStaffSearchQueryChange: (query: string) => void;
+}
+
+export interface ActivityStaffDropdownItemProps {
+  staff: StaffOption;
+  isSelected: boolean;
+  onSelect: () => void;
+}
+
+export interface ActivityTypeFilterProps {
+  activityTypeFilter: string;
+  activityTypes: ActivityTypeOption[];
+  onChange: (value: string) => void;
+}
+
+export interface ActivityTimelineProps {
+  activities: Activity[];
+}
+
+export interface ActivityTimelineCardProps {
+  activity: Activity;
+}
+
+export interface ActivityPaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalActivities: number;
+  pageNumbers: PageNumberEntry[];
+  onPageChange: (page: number) => void;
+}

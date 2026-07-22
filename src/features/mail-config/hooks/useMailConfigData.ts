@@ -1,44 +1,78 @@
-import { useState } from 'react';
-import { MAIL_CONFIG_DATA, INITIAL_MAIL_FORM } from '../constants';
-import type { MailConfigItem } from '../types';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import type { FormikHelpers } from 'formik';
+import { mailConfigService } from '../services/mailConfig.service';
+import { mapMailConfigToFormData } from '../utils/mapMailConfigToFormData';
+import { INITIAL_MAIL_FORM } from '../constants';
+import type { MailConfigItem, MailConfigFormData } from '../types';
+
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === 'object' && 'response' in err) {
+    const axiosErr = err as { response?: { data?: { message?: string } } };
+    return axiosErr.response?.data?.message || fallback;
+  }
+  if (err && typeof err === 'object' && 'message' in err) {
+    return (err as { message: string }).message;
+  }
+  return fallback;
+}
 
 export const useMailConfigData = () => {
+  const [data, setData] = useState<MailConfigItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<MailConfigItem | null>(null);
   const [deletingItem, setDeletingItem] = useState<MailConfigItem | null>(null);
-  const [formData, setFormData] = useState(INITIAL_MAIL_FORM);
   const [searchQuery, setSearchQuery] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [showToast, setShowToast] = useState(false);
 
-  const filteredData = MAIL_CONFIG_DATA.filter(item =>
+  const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3500);
+  }, []);
+
+  const fetchMailConfigs = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await mailConfigService.getAll({ search: searchQuery });
+      if (response.status) {
+        setData(response.data.items || []);
+      } else {
+        showToastMessage(response.message || 'Failed to load mail configurations', 'error');
+      }
+    } catch (err) {
+      showToastMessage(getErrorMessage(err, 'Failed to load mail configurations'), 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchQuery, showToastMessage]);
+
+  useEffect(() => {
+    fetchMailConfigs();
+  }, [fetchMailConfigs]);
+
+  const filteredData = data.filter(item =>
     item.driver.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const drawerInitialValues: MailConfigFormData = useMemo(
+    () => (editingItem ? mapMailConfigToFormData(editingItem) : INITIAL_MAIL_FORM),
+    [editingItem]
+  );
 
   const handleAddClick = () => {
-    setShowForm(true);
     setEditingItem(null);
-    setFormData(INITIAL_MAIL_FORM);
+    setShowForm(true);
   };
 
   const handleEditClick = (item: MailConfigItem) => {
-    setShowForm(true);
     setEditingItem(item);
-    setFormData({
-      driver: item.driver,
-      host: item.host || '',
-      port: String(item.port),
-      encryption: item.encryption,
-      username: item.username || '',
-      password: item.password || '',
-      fromEmail: item.fromEmail || '',
-      fromName: item.fromName || '',
-    });
+    setShowForm(true);
     setDropdownOpen(null);
   };
 
@@ -47,8 +81,21 @@ export const useMailConfigData = () => {
     setDropdownOpen(null);
   };
 
-  const handleConfirmDelete = () => {
-    setDeletingItem(null);
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
+    try {
+      const response = await mailConfigService.deleteMailConfig(deletingItem.id);
+      if (response.status) {
+        showToastMessage(response.message || 'Mail configuration deleted successfully', 'success');
+        await fetchMailConfigs();
+      } else {
+        showToastMessage(response.message || 'Failed to delete mail configuration', 'error');
+      }
+    } catch (err) {
+      showToastMessage(getErrorMessage(err, 'Failed to delete mail configuration'), 'error');
+    } finally {
+      setDeletingItem(null);
+    }
   };
 
   const handleCloseForm = () => {
@@ -56,12 +103,33 @@ export const useMailConfigData = () => {
     setEditingItem(null);
   };
 
+  const handleSubmit = async (values: MailConfigFormData, helpers: FormikHelpers<MailConfigFormData>) => {
+    try {
+      const response = editingItem
+        ? await mailConfigService.updateMailConfig(editingItem.id, values)
+        : await mailConfigService.createMailConfig(values);
+
+      if (response.status) {
+        showToastMessage(response.message || `Mail configuration ${editingItem ? 'updated' : 'saved'} successfully`, 'success');
+        handleCloseForm();
+        await fetchMailConfigs();
+      } else {
+        showToastMessage(response.message || 'Failed to save mail configuration', 'error');
+      }
+    } catch (err) {
+      showToastMessage(getErrorMessage(err, 'Failed to save mail configuration'), 'error');
+    } finally {
+      helpers.setSubmitting(false);
+    }
+  };
+
   return {
+    isLoading,
     showForm,
     editingItem,
     deletingItem,
     setDeletingItem,
-    formData,
+    drawerInitialValues,
     searchQuery,
     setSearchQuery,
     rowsPerPage,
@@ -69,11 +137,15 @@ export const useMailConfigData = () => {
     dropdownOpen,
     setDropdownOpen,
     filteredData,
-    handleInputChange,
+    toastMessage,
+    toastType,
+    showToast,
+    setShowToast,
     handleAddClick,
     handleEditClick,
     handleDeleteClick,
     handleConfirmDelete,
     handleCloseForm,
+    handleSubmit,
   };
 };

@@ -164,3 +164,13 @@
     transform: translateX(0);
   }
 }
+
+@media (max-width: 576px) {
+  .drawer-header {
+    padding: 1rem;
+  }
+
+  .drawer-content {
+    padding: 1rem;
+  }
+}

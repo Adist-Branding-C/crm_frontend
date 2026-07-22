@@ -1,120 +1,99 @@
-import { useState, useMemo } from 'react';
-import { staffList, activityTypes, sampleActivities } from '../constants';
-import { DEFAULT_ROWS_PER_PAGE } from '../../../shared/constants/pagination';
-import type { Filters } from '../types';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useSearchFilter } from '../../../shared/hooks/useSearchFilter';
+import { useStaffOptions } from './useStaffOptions';
+import { useStaffDropdown } from './useStaffDropdown';
+import { useActivityFilters } from './useActivityFilters';
+import { useActivitiesFetch } from './useActivitiesFetch';
+import { computePageNumbers } from '../utils/activityHelpers';
+import { PAGE_WINDOW, DEFAULT_FILTERS } from '../constants';
+import type { StaffOption } from '../types';
 
+const STAFF_SEARCH_FIELDS: (keyof StaffOption)[] = ['name'];
+
+/**
+ * Composes the Daily Activity page's underlying single-responsibility hooks
+ * (staff options, staff dropdown, filters, activities fetch) into the one set
+ * of state/actions the page needs, and owns the coordination between them
+ * (e.g. applying filters resets the page and refetches; selecting a staff
+ * option updates the filter and closes the dropdown in one action).
+ *
+ * Used by:
+ * - DailyActivityPage.
+ */
 export const useDailyActivityData = () => {
-  const [filters, setFilters] = useState<Filters>({
-    date: '2026-04-25',
-    startTime: '',
-    endTime: '',
-    staff: 1,
-    type: 1,
-  });
-  const [activityTypeFilter, setActivityTypeFilter] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showStaffDropdown, setShowStaffDropdown] = useState(false);
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const [completedActivities, setCompletedActivities] = useState<number[]>([]);
-  const rowsPerPage = DEFAULT_ROWS_PER_PAGE;
-
-  const filteredActivities = useMemo(() => {
-    let filtered = [...sampleActivities];
-
-    if (filters.staff !== 1) {
-      const staff = staffList.find(s => s.id === filters.staff);
-      if (staff) filtered = filtered.filter(a => a.user === staff.name);
-    }
-
-    if (activityTypeFilter !== 1) {
-      const type = activityTypes.find(t => t.id === activityTypeFilter);
-      if (type) filtered = filtered.filter(a => a.type === type.name);
-    }
-
-    if (filters.date) {
-      filtered = filtered.filter(a => a.timestamp.startsWith(filters.date));
-    }
-
-    if (filters.startTime) {
-      filtered = filtered.filter(a => {
-        const time = a.timestamp.split(' ')[1] ?? '';
-        return time >= filters.startTime;
-      });
-    }
-
-    if (filters.endTime) {
-      filtered = filtered.filter(a => {
-        const time = a.timestamp.split(' ')[1] ?? '';
-        return time <= filters.endTime;
-      });
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(a =>
-        a.relatedLead.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return filtered;
-  }, [filters, activityTypeFilter, searchQuery]);
-
-  const totalActivities = filteredActivities.length;
-  const totalPages = Math.ceil(totalActivities / rowsPerPage);
-  const paginatedActivities = filteredActivities.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
+  const toast = useToast();
+  const onError = useCallback(
+    (message: string) => toast.showToastMessage(message, 'error'),
+    [toast.showToastMessage],
   );
 
-  const handleFilterChange = (field: keyof Filters, value: string | number) => {
-    setFilters({ ...filters, [field]: value });
-  };
+  const { staffOptions } = useStaffOptions(onError);
+  const staffSearch = useSearchFilter(staffOptions, STAFF_SEARCH_FIELDS);
+  const staffDropdown = useStaffDropdown();
+  const activityFilters = useActivityFilters();
+  const { activities, pagination, fetchActivities } = useActivitiesFetch(onError);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const handleReset = () => {
-    setFilters({ date: '2026-04-25', startTime: '', endTime: '', staff: 1, type: 1 });
-    setActivityTypeFilter(1);
-    setSearchQuery('');
+  useEffect(() => {
+    fetchActivities(1, DEFAULT_FILTERS, '');
+  }, [fetchActivities]);
+
+  const handleApply = useCallback(() => {
+    const { appliedFilters, appliedActivityType } = activityFilters.applyFilters();
     setCurrentPage(1);
-  };
+    fetchActivities(1, appliedFilters, appliedActivityType);
+  }, [activityFilters, fetchActivities]);
 
-  const handleMarkComplete = (activityId: number) => {
-    if (!completedActivities.includes(activityId)) {
-      setCompletedActivities([...completedActivities, activityId]);
-    }
-  };
+  const handleReset = useCallback(() => {
+    const { appliedFilters, appliedActivityType } = activityFilters.resetFilters();
+    setCurrentPage(1);
+    fetchActivities(1, appliedFilters, appliedActivityType);
+  }, [activityFilters, fetchActivities]);
 
-  const selectedStaffName = staffList.find(s => s.id === filters.staff)?.name || 'All Staff';
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    fetchActivities(page, activityFilters.appliedFilters, activityFilters.appliedActivityType);
+  }, [activityFilters.appliedFilters, activityFilters.appliedActivityType, fetchActivities]);
 
-  const getPageNumbers = () => {
-    const pages: number[] = [];
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-    return pages;
-  };
+  const handleStaffSelect = useCallback((staffId: string) => {
+    activityFilters.handleFilterChange('staff', staffId);
+    staffDropdown.setIsOpen(false);
+  }, [activityFilters.handleFilterChange, staffDropdown.setIsOpen]);
+
+  const totalActivities = pagination?.total ?? 0;
+  const totalPages = pagination?.total_pages ?? 1;
+
+  const selectedStaffName = useMemo(
+    () => staffOptions.find((s) => s.id === activityFilters.filters.staff)?.name || 'All Staff',
+    [staffOptions, activityFilters.filters.staff],
+  );
+
+  const pageNumbers = useMemo(
+    () => computePageNumbers(currentPage, totalPages, PAGE_WINDOW),
+    [currentPage, totalPages],
+  );
 
   return {
-    filters,
-    setFilters,
-    activityTypeFilter,
-    setActivityTypeFilter,
-    searchQuery,
-    setSearchQuery,
+    filters: activityFilters.filters,
+    activityTypeFilter: activityFilters.activityTypeFilter,
+    setActivityTypeFilter: activityFilters.setActivityTypeFilter,
     currentPage,
-    setCurrentPage,
-    showStaffDropdown,
-    setShowStaffDropdown,
-    localSearchQuery,
-    setLocalSearchQuery,
-    completedActivities,
-    rowsPerPage,
-    filteredActivities,
+    showStaffDropdown: staffDropdown.isOpen,
+    setShowStaffDropdown: staffDropdown.setIsOpen,
+    staffSearchQuery: staffSearch.query,
+    setStaffSearchQuery: staffSearch.setQuery,
     totalActivities,
     totalPages,
-    paginatedActivities,
+    paginatedActivities: activities,
     selectedStaffName,
-    handleFilterChange,
+    staffOptions: staffSearch.filteredData,
+    pageNumbers,
+    handleFilterChange: activityFilters.handleFilterChange,
+    handleStaffSelect,
+    handleApply,
     handleReset,
-    handleMarkComplete,
-    getPageNumbers,
+    handlePageChange,
+    toast,
   };
 };

@@ -5,7 +5,6 @@
 .page-header-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
 .page-header-text {
@@ -39,16 +38,30 @@
   gap: 0.5rem;
   background: #f1414f;
   color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  padding: calc(0.5rem - 1px) calc(1rem - 1px);
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .page-header-action .btn:hover {
   background: #e0323e;
+  color: #fff;
+}
+
+.page-header-action .btn.active {
+  background: #fff;
+  color: #f1414f;
+  border-color: #f1414f;
+}
+
+.page-header-action .btn.active:hover {
+  background: #fef2f2;
+  color: #e0323e;
+  border-color: #e0323e;
 }
 
 .page-breadcrumb {
@@ -75,4 +88,25 @@
 .breadcrumb-item.active {
   color: var(--text-main);
   font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .page-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .page-title {
+    font-size: 1rem;
+    padding-left: 0.5rem;
+  }
+
+  .page-description {
+    font-size: 0.8125rem;
+  }
 }

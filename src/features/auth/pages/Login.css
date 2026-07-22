@@ -248,6 +248,18 @@
   border: 1px solid #fecaca;
 }
 
+.auth-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auth-form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+}
+
 .input-wrapper-with-icon {
   position: relative;
   display: flex;
