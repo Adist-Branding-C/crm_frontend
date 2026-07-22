@@ -1,4 +1,4 @@
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Pencil, X } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import { FIELD_TYPE_OPTIONS } from '../../../../shared/constants/fieldTypes';
 import DropdownValuesField from './DropdownValuesField';
@@ -13,11 +13,23 @@ const DealAdditionalFieldFormPanel = ({
   isSaving,
   error,
   onClearError,
+  onCancelEdit,
 }: AddDealAdditionalFieldFormPanelProps) => (
-  <div className="card">
+  <div className={`card${editingItem ? ' card--editing' : ''}`}>
     <div className="card-header">
-      <h5>{editingItem ? 'Edit Field' : 'Add Field'}</h5>
+      <div className="card-header-title">
+        {editingItem && <Pencil size={16} className="card-header-icon" />}
+        <h5>{editingItem ? 'Edit Field' : 'Add Field'}</h5>
+      </div>
+      {editingItem && (
+        <button type="button" className="cancel-edit-btn" onClick={onCancelEdit}>
+          <X size={14} /> Cancel
+        </button>
+      )}
     </div>
+    {editingItem && (
+      <p className="editing-subtitle">Editing: "{editingItem.field}"</p>
+    )}
     <div className="card-body">
       <ValidationAlert message={error} onClose={onClearError} />
       <Formik

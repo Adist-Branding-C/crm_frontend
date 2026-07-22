@@ -4,6 +4,11 @@ import SettingsStatusBadge from '../../../../shared/components/settings/Settings
 import { TRow, TCell } from '../../../../shared/components/table';
 import type { MeetingOutcomeRowProps } from '../types/index';
 
+/**
+ * Renders a single meeting-outcome table row; memoized since the list can re-render often while
+ * only one row's data actually changes. Purely presentational — click handling is delegated to
+ * the parent via onEdit/onDelete/onToggleDropdown.
+ */
 const MeetingOutcomeRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, onDelete }: MeetingOutcomeRowProps) => (
   <TRow>
     <TCell>{index + 1}</TCell>

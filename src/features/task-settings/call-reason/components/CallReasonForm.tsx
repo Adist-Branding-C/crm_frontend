@@ -5,6 +5,11 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import { ScrollToFirstError } from '../../../../shared/components/ScrollToFirstError';
 import type { CallReasonFormProps } from '../types/index';
 
+/**
+ * Formik-driven add/edit form for call reasons; the same component renders both modes based on
+ * the initialValues/isEditing props the parent drawer passes in. Scrolls to top on a general API
+ * error and to the first invalid field on a failed submit; knows nothing about being in a drawer.
+ */
 const CallReasonForm = ({ validationSchema, initialValues, onSubmit, onCancel, isLoading, error, isEditing, bodyRef }: CallReasonFormProps) => {
   useEffect(() => {
     if (error) {

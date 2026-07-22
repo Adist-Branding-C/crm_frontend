@@ -1,50 +1,50 @@
 import { useCallback, useRef } from 'react';
 import { Download, Plus } from 'lucide-react';
-import { useFetchCallStatus } from '../hooks/useFetchCallStatus';
-import { useCallStatusCrud } from '../hooks/useCallStatusCrud';
-import { useCallStatusDrawer } from '../hooks/useCallStatusDrawer';
-import { useCallStatusForm } from '../hooks/useCallStatusForm';
-import { useCallStatusDeleteConfirm } from '../hooks/useCallStatusDeleteConfirm';
-import { useCallStatusFormSubmit } from '../hooks/useCallStatusFormSubmit';
-import { useCallStatusRowActions } from '../hooks/useCallStatusRowActions';
+import { useFetchMeetingOutcomes } from '../hooks/useFetchMeetingOutcomes';
+import { useMeetingOutcomeCrud } from '../hooks/useMeetingOutcomeCrud';
+import { useMeetingOutcomeDrawer } from '../hooks/useMeetingOutcomeDrawer';
+import { useMeetingOutcomeForm } from '../hooks/useMeetingOutcomeForm';
+import { useMeetingOutcomeDeleteConfirm } from '../hooks/useMeetingOutcomeDeleteConfirm';
+import { useMeetingOutcomeFormSubmit } from '../hooks/useMeetingOutcomeFormSubmit';
+import { useMeetingOutcomeRowActions } from '../hooks/useMeetingOutcomeRowActions';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useToast } from '../../../../shared/hooks/useToast';
+import { useTableSearch } from '../../../../shared/hooks/useTableSearch';
 import { SETTINGS_TABS } from '../../constants/index';
-import { addCallStatusValidationSchema, editCallStatusValidationSchema } from '../validations/index';
-import { ADD_CALL_STATUS_INITIAL_VALUES, CALL_STATUS_CSV_COLUMNS } from '../constants/index';
+import { addMeetingOutcomeValidationSchema, editMeetingOutcomeValidationSchema } from '../validations/index';
+import { ADD_MEETING_OUTCOME_INITIAL_VALUES, MEETING_OUTCOME_CSV_COLUMNS } from '../constants/index';
 import { exportToCsv } from '../../../../shared/helpers/csvExport.helper';
-import CallStatusForm from '../components/CallStatusForm';
-import CallStatusRow from '../components/CallStatusRow';
+import MeetingOutcomeForm from '../components/MeetingOutcomeForm';
+import MeetingOutcomeRow from '../components/MeetingOutcomeRow';
 import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import './CallStatus.css';
-import { useTableSearch } from '../../../../shared/hooks/useTableSearch';
+import './MeetingOutcome.css';
 
 /**
- * Call-statuses settings page: composes the fetch/crud/drawer/form/delete/row-action hooks and
- * renders them through shared table, drawer, and modal primitives. Holds no business logic of
- * its own — every handler here is a single hook call or a thin event-unwrapping adapter.
+ * Meeting-outcomes settings page: composes the fetch/crud/drawer/form/delete/row-action hooks
+ * and renders them through shared table, drawer, and modal primitives. Lives at the module root
+ * rather than in a page/ subfolder like its siblings (call-reason, call-status, task-category).
  */
-const CallStatusPage = () => {
-  const fetch = useFetchCallStatus();
+const MeetingOutcomePage = () => {
+  const fetch = useFetchMeetingOutcomes();
   const toast = useToast();
-  const crud = useCallStatusCrud({ pagination: fetch, showToastMessage: toast.showToastMessage });
-  const drawer = useCallStatusDrawer();
-  const form = useCallStatusForm(drawer.editingItem);
+  const crud = useMeetingOutcomeCrud({ pagination: fetch, showToastMessage: toast.showToastMessage });
+  const drawer = useMeetingOutcomeDrawer();
+  const form = useMeetingOutcomeForm(drawer.editingItem);
   const dropdown = useDropdownMenu<number>();
-  const deleteConfirm = useCallStatusDeleteConfirm(crud.handleDeleteCallStatus);
-  const formSubmit = useCallStatusFormSubmit({
+  const deleteConfirm = useMeetingOutcomeDeleteConfirm(crud.handleDeleteMeetingOutcome);
+  const formSubmit = useMeetingOutcomeFormSubmit({
     editingItem: drawer.editingItem,
     closeAddDrawer: drawer.closeAddDrawer,
     closeEditDrawer: drawer.closeEditDrawer,
-    handleAddCallStatus: crud.handleAddCallStatus,
-    handleUpdateCallStatus: crud.handleUpdateCallStatus,
+    handleAddMeetingOutcome: crud.handleAddMeetingOutcome,
+    handleUpdateMeetingOutcome: crud.handleUpdateMeetingOutcome,
   });
-  const rowActions = useCallStatusRowActions({
+  const rowActions = useMeetingOutcomeRowActions({
     openEditDrawer: drawer.openEditDrawer,
     onDeleteClick: deleteConfirm.handleDeleteClick,
     closeDropdown: dropdown.closeDropdown,
@@ -53,8 +53,8 @@ const CallStatusPage = () => {
   const { searchValue, handleSearchInput } = useTableSearch(fetch.searchQuery, fetch.handleSearchChange);
 
   const handleExportCSV = useCallback(() => {
-    exportToCsv(fetch.callStatusList, CALL_STATUS_CSV_COLUMNS, 'call-status.csv');
-  }, [fetch.callStatusList]);
+    exportToCsv(fetch.meetingOutcomeList, MEETING_OUTCOME_CSV_COLUMNS, 'meeting-outcomes.csv');
+  }, [fetch.meetingOutcomeList]);
 
   const addDrawerBodyRef = useRef<HTMLDivElement>(null);
   const editDrawerBodyRef = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ const CallStatusPage = () => {
       <PageHeader title="Task Settings" description="Manage task configurations and settings" />
       <SettingsTabs items={SETTINGS_TABS} />
       <div className="account-content">
-        <div className="call-status-table-wrapper table-container">
+        <div className="meeting-outcome-table-wrapper table-container">
           <TableNav
             searchQuery={searchValue}
             onSearchChange={handleSearchInput}
@@ -75,7 +75,7 @@ const CallStatusPage = () => {
               <Download size={16} />Export
             </button> */}
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Plus size={16} /> Add Call Status
+              <Plus size={16} /> Add Outcome
             </button>
           </TableNav>
 
@@ -83,17 +83,17 @@ const CallStatusPage = () => {
             <THead>
               <TRow>
                 <TCell variant="th">Sl No</TCell>
-                <TCell variant="th">Name</TCell>
+                <TCell variant="th">Outcome</TCell>
                 <TCell variant="th">Status</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
-              {fetch.callStatusList.length === 0 ? (
+              {fetch.meetingOutcomeList.length === 0 ? (
                 <EmptyState colSpan={4} />
               ) : (
-                fetch.callStatusList.map((item, index) => (
-                  <CallStatusRow
+                fetch.meetingOutcomeList.map((item, index) => (
+                  <MeetingOutcomeRow
                     key={item.id}
                     item={item}
                     index={fetch.startIndex + index}
@@ -116,10 +116,10 @@ const CallStatusPage = () => {
           />
         </div>
 
-        <Drawer isOpen={drawer.showAddDrawer} onClose={drawer.closeAddDrawer} title="Add Call Status" ref={addDrawerBodyRef}>
-          <CallStatusForm
-            validationSchema={addCallStatusValidationSchema}
-            initialValues={ADD_CALL_STATUS_INITIAL_VALUES}
+        <Drawer isOpen={drawer.showAddDrawer} onClose={drawer.closeAddDrawer} title="Add Meeting Outcome" ref={addDrawerBodyRef}>
+          <MeetingOutcomeForm
+            validationSchema={addMeetingOutcomeValidationSchema}
+            initialValues={ADD_MEETING_OUTCOME_INITIAL_VALUES}
             onSubmit={formSubmit.handleSubmit}
             onCancel={drawer.closeAddDrawer}
             isLoading={fetch.isLoading}
@@ -128,9 +128,9 @@ const CallStatusPage = () => {
           />
         </Drawer>
 
-        <Drawer isOpen={drawer.showEditDrawer} onClose={drawer.closeEditDrawer} title="Edit Call Status" ref={editDrawerBodyRef}>
-          <CallStatusForm
-            validationSchema={editCallStatusValidationSchema}
+        <Drawer isOpen={drawer.showEditDrawer} onClose={drawer.closeEditDrawer} title="Edit Meeting Outcome" ref={editDrawerBodyRef}>
+          <MeetingOutcomeForm
+            validationSchema={editMeetingOutcomeValidationSchema}
             initialValues={form.editInitialValues}
             onSubmit={formSubmit.handleEditSubmit}
             onCancel={drawer.closeEditDrawer}
@@ -158,4 +158,4 @@ const CallStatusPage = () => {
   );
 };
 
-export default CallStatusPage;
+export default MeetingOutcomePage;

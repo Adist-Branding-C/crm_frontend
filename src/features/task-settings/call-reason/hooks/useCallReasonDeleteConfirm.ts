@@ -2,10 +2,7 @@ import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirm
 import type { CallReasonItem } from '../types/index';
 
 /**
- * Delete-confirmation modal state for call reasons.
- *
- * Notes:
- * - Thin wrapper around the shared useDeleteConfirmation.
+ * Thin wrapper around the shared useDeleteConfirmation, scoped to call-reason items.
  */
 export function useCallReasonDeleteConfirm(handleDeleteCallReason: (id: number) => Promise<boolean>) {
   return useDeleteConfirmation<CallReasonItem>((item) => handleDeleteCallReason(item.id));

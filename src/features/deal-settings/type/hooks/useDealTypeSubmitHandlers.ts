@@ -1,18 +1,18 @@
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
-import { dealStatusService } from '../services/dealStatus.service';
+import { dealTypeService } from '../services/dealType.service';
 import { useDrawerScroll } from '../../../task-settings/hooks/useDrawerScroll';
 import { parseApiError } from '../../../task-settings/call-reason/utils/parseApiError';
 import { applyFieldErrors } from '../../../task-settings/call-reason/utils/applyFieldErrors';
-import type { DealStatusFormData } from '../types/request';
-import type { DealStatusItem } from '../types/interface';
+import type { DealTypeFormData } from '../types/request';
+import type { DealTypeItem } from '../types/interface';
 
 interface SubmitHandlerConfig {
   onAddSuccess: () => void;
   onEditSuccess: () => void;
   onDeleteSuccess: () => void;
-  editingItem: DealStatusItem | null;
-  deletingItem: DealStatusItem | null;
+  editingItem: DealTypeItem | null;
+  deletingItem: DealTypeItem | null;
 }
 
 interface FetchHandlers {
@@ -25,12 +25,12 @@ interface ToastHandlers {
 }
 
 /**
- * Form submit + delete handlers for deal-settings/status.
+ * Form submit + delete handlers for deal-settings/type.
  *
- * Mirrors useCampaignSubmitHandlers: owns FormikHelpers, parseApiError, applyFieldErrors,
+ * Mirrors useDealStatusSubmitHandlers: owns FormikHelpers, parseApiError, applyFieldErrors,
  * scrollAndFocusError, scrollToTop, and toast calls. No UI state leaks into this hook.
  */
-export function useDealStatusSubmitHandlers(
+export function useDealTypeSubmitHandlers(
   config: SubmitHandlerConfig,
   fetch: FetchHandlers,
   toast: ToastHandlers,
@@ -38,18 +38,18 @@ export function useDealStatusSubmitHandlers(
   const { scrollAndFocusError, scrollToTop } = useDrawerScroll();
 
   const handleAddSubmit = useCallback(async (
-    values: DealStatusFormData,
-    { setSubmitting, resetForm, setFieldError }: FormikHelpers<DealStatusFormData>,
+    values: DealTypeFormData,
+    { setSubmitting, resetForm, setFieldError }: FormikHelpers<DealTypeFormData>,
   ) => {
     fetch.setError('');
 
     try {
-      const response = await dealStatusService.createDealStatus(values);
+      const response = await dealTypeService.createDealType(values);
 
       if (response.status) {
         fetch.refresh();
         resetForm();
-        toast.showToastMessage('Deal status added successfully', 'success');
+        toast.showToastMessage('Deal type added successfully', 'success');
         config.onAddSuccess();
         return true;
       }
@@ -64,7 +64,7 @@ export function useDealStatusSubmitHandlers(
       if (errorField) {
         scrollAndFocusError();
       } else {
-        fetch.setError(response.message || 'Failed to add deal status');
+        fetch.setError(response.message || 'Failed to add deal type');
         scrollToTop();
       }
       return false;
@@ -89,19 +89,19 @@ export function useDealStatusSubmitHandlers(
   }, [fetch, config, toast, scrollAndFocusError, scrollToTop]);
 
   const handleEditSubmit = useCallback(async (
-    values: DealStatusFormData,
-    { setSubmitting, setFieldError }: FormikHelpers<DealStatusFormData>,
+    values: DealTypeFormData,
+    { setSubmitting, setFieldError }: FormikHelpers<DealTypeFormData>,
   ) => {
     if (!config.editingItem) return false;
 
     fetch.setError('');
 
     try {
-      const response = await dealStatusService.updateDealStatus(config.editingItem.id, values);
+      const response = await dealTypeService.updateDealType(config.editingItem.id, values);
 
       if (response.status) {
         fetch.refresh();
-        toast.showToastMessage('Deal status updated successfully', 'success');
+        toast.showToastMessage('Deal type updated successfully', 'success');
         config.onEditSuccess();
         return true;
       }
@@ -116,7 +116,7 @@ export function useDealStatusSubmitHandlers(
       if (errorField) {
         scrollAndFocusError();
       } else {
-        fetch.setError(response.message || 'Failed to update deal status');
+        fetch.setError(response.message || 'Failed to update deal type');
         scrollToTop();
       }
       return false;
@@ -144,13 +144,13 @@ export function useDealStatusSubmitHandlers(
     if (!config.deletingItem) return;
 
     try {
-      const response = await dealStatusService.deleteDealStatus(config.deletingItem.id);
+      const response = await dealTypeService.deleteDealType(config.deletingItem.id);
 
       if (response.status) {
         fetch.refresh();
         config.onDeleteSuccess();
       } else {
-        toast.showToastMessage(response.message || 'Failed to delete deal status', 'error');
+        toast.showToastMessage(response.message || 'Failed to delete deal type', 'error');
       }
     } catch (err: unknown) {
       const parsed = parseApiError(err);
