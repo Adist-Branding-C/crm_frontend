@@ -279,8 +279,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
                 </div>
                 <h2 className="leaddrawer-name">{lead.name}</h2>
                 <div className="leaddrawer-badges">
-                  <span className={`leaddrawer-badge ${getTypeBadgeClass(lead.type)}`}>{lead.type}</span>
-                  <span className={`leaddrawer-badge ${lead.status?.toLowerCase()}`}>{lead.status}</span>
+                  <span className={`leaddrawer-badge ${getTypeBadgeClass(lead.type?.type)}`}>{lead.type?.type}</span>
+                  <span className={`leaddrawer-badge ${lead.status?.status?.toLowerCase()}`}>{lead.status?.status}</span>
                 </div>
               </div>
 
