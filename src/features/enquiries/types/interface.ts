@@ -24,6 +24,8 @@ export interface Lead {
   updatedAt: string;
   nextFollowUp: string;
   additionalFields: LeadAdditionalField[];
+  deletedAt?: string;
+  deletedBy?: string;
 }
 
 export interface Filters {

@@ -35,6 +35,8 @@ export interface LeadApiItem {
   updatedAt: string | null;
   nextFollowUpDate: string | null;
   additionalFields?: LeadAdditionalField[];
+  deletedAt?: string | null;
+  deletedByName?: string | null;
 }
 
 export interface PaginationInfo {
