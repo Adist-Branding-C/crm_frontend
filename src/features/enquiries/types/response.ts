@@ -11,10 +11,11 @@ export interface LeadApiItem {
   address: string | null;
   agent: string | null;
   assignedTo: string | null;
-  purpose: string | null;
-  type: string | null;
-  status: string | null;
-  source: string | null;
+  assignedStaff: { staff_id: string; name: string } | null;
+  purpose: { purposeId: string; purpose: string } | null;
+  type: { typeId: string; type: string } | null;
+  status: { statusId: string; status: string; color?: string; conversion?: boolean } | null;
+  source: { sourceId: string; source: string } | null;
   createdAt: string | null;
   updatedAt: string | null;
   nextFollowUpDate: string | null;
