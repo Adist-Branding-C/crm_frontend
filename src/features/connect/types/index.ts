@@ -1,10 +1,9 @@
-export interface Integration {
+export interface ConnectOption {
   id: string;
   name: string;
   subtitle: string;
   category: string;
   description: string;
-  icon: string;
   configFields: string[];
   hasViewLeads?: boolean;
 }

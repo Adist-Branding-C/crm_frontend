@@ -8,5 +8,5 @@ export const settingsItems = [
   { id: 'custom-pipeline', title: 'Custom Pipeline', description: 'Define custom pipeline structures and grouping for leads, deals, and tasks', link: '/settings/custom-pipeline', icon: <Kanban size={24} /> },
   { id: 'automation', title: 'Automation Rules', description: 'Automate lead assignment, tasks, notifications, and webhooks', link: '/automation-rules', icon: <Workflow size={24} /> },
   { id: 'subscriptions', title: 'Subscriptions', description: 'View, modify, or cancel your active services and memberships', link: '/user/payment-plans', icon: <CreditCard size={24} /> },
-  { id: 'glconnect', title: 'GL Connect', description: 'Connect your third party integration to Getlead CRM', link: '/user/gl-connect', icon: <LinkIcon size={24} /> },
+  { id: 'connect', title: 'Connect', description: 'Connect your third-party integrations to Leadist', link: '/user/connect', icon: <LinkIcon size={24} /> },
 ];

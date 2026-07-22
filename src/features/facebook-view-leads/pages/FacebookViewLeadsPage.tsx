@@ -18,7 +18,7 @@ const FacebookViewLeadsPage: React.FC = () => {
         title="Facebook Lead Requests"
         description="View and manage Facebook lead form submissions"
         breadcrumb={[
-          { label: 'GL Connect', link: '/user/gl-connect' },
+          { label: 'Connect', link: '/user/connect' },
           { label: 'Facebook Integration', link: '/facebook/workflows' },
           { label: 'View Leads' }
         ]}

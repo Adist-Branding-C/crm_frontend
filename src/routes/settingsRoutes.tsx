@@ -10,6 +10,9 @@ import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/
 import CustomPipelinePage from '../features/pipeline-settings/pages/CustomPipelinePage';
 import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
 import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
+import ConnectPage from '../features/connect/pages/ConnectPage';
+import ConnectApiPage from '../features/connect-api/pages/ConnectApiPage';
+import UserLayout from '../features/task-settings/components/UserLayout';
 import IntegrationsPage from '../features/integrations/pages/IntegrationsPage';
 import LeadGenerationAPIPage from '../features/lead-generation-api/pages/LeadGenerationAPIPage';
 import CallStatusPage from '../features/task-settings/call-status/page/CallStatus';
@@ -28,6 +31,14 @@ export default (
     <Route path="settings/custom-pipeline" element={<ErrorBoundary><CustomPipelinePage /></ErrorBoundary>} />
     <Route path="user/notifications-users" element={<NotificationSettingsPage />} />
     <Route path="user/payment-plans" element={<PaymentPlansPage />} />
+    <Route path="user/connect" element={<ConnectPage />} />
+    <Route path="user/connect/api" element={<ConnectApiPage />} />
+    <Route path="user" element={<UserLayout />}>
+      <Route path="call_status" element={<CallStatusPage />} />
+      <Route path="call_reasons" element={<CallReasonPage />} />
+      <Route path="meeting_outcome" element={<MeetingOutcomePage />} />
+      <Route path="task_categories" element={<TaskCategoryPage />} />
+    </Route>
     <Route path="user/gl-connect" element={<IntegrationsPage />} />
     <Route path="user/gl-connect/lead-api" element={<LeadGenerationAPIPage />} />
     <Route path="user/call_status" element={<ErrorBoundary><CallStatusPage /></ErrorBoundary>} />
