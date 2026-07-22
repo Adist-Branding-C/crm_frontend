@@ -1,4 +1,6 @@
 import React from 'react';
+import FilterSelect from '../../../shared/components/filters/FilterSelect';
+import DateRangeFilter from '../../../shared/components/filters/DateRangeFilter';
 import {
   ACTION_FILTER,
   ACTION_CLEAR,
@@ -24,106 +26,46 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
       </div>
     )}
     <div className="filter-row">
-      <div className="filter-group">
-        <label htmlFor="followup-filter-type">Type</label>
-        <select
-          id="followup-filter-type"
-          value={filters.type}
-          onChange={(e) => onFilterChange({ ...filters, type: e.target.value })}
-          disabled={isLoadingFilterOptions}
-        >
-          <option value="">All</option>
-          {typeOptions.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="filter-group">
-        <label htmlFor="followup-filter-status">Status</label>
-        <select
-          id="followup-filter-status"
-          value={filters.status}
-          onChange={(e) =>
-            onFilterChange({ ...filters, status: e.target.value })
-          }
-          disabled={isLoadingFilterOptions}
-        >
-          <option value="">All</option>
-          {statusOptions.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="filter-group">
-        <label htmlFor="followup-filter-source">Source</label>
-        <select
-          id="followup-filter-source"
-          value={filters.source}
-          onChange={(e) =>
-            onFilterChange({ ...filters, source: e.target.value })
-          }
-          disabled={isLoadingFilterOptions}
-        >
-          <option value="">All</option>
-          {sourceOptions.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="filter-group">
-        <label htmlFor="followup-filter-assigned-to">Assigned To</label>
-        <select
-          id="followup-filter-assigned-to"
-          value={filters.assignedTo}
-          onChange={(e) =>
-            onFilterChange({ ...filters, assignedTo: e.target.value })
-          }
-          disabled={isLoadingFilterOptions}
-        >
-          <option value="">All</option>
-          {staffOptions.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FilterSelect
+        id="followup-filter-type"
+        label="Type"
+        value={filters.type}
+        options={typeOptions}
+        disabled={isLoadingFilterOptions}
+        onChange={(value) => onFilterChange({ ...filters, type: value })}
+      />
+      <FilterSelect
+        id="followup-filter-status"
+        label="Status"
+        value={filters.status}
+        options={statusOptions}
+        disabled={isLoadingFilterOptions}
+        onChange={(value) => onFilterChange({ ...filters, status: value })}
+      />
+      <FilterSelect
+        id="followup-filter-source"
+        label="Source"
+        value={filters.source}
+        options={sourceOptions}
+        disabled={isLoadingFilterOptions}
+        onChange={(value) => onFilterChange({ ...filters, source: value })}
+      />
+      <FilterSelect
+        id="followup-filter-assigned-to"
+        label="Assigned To"
+        value={filters.assignedTo}
+        options={staffOptions}
+        disabled={isLoadingFilterOptions}
+        onChange={(value) => onFilterChange({ ...filters, assignedTo: value })}
+      />
     </div>
     <div className="filter-row">
-      <div className="filter-group">
-        <label id="followup-filter-date-range-label">Date Range</label>
-        <div className="date-range-input" role="group" aria-labelledby="followup-filter-date-range-label">
-          <input
-            type="date"
-            aria-label="Start date"
-            value={filters.dateRange.start}
-            onChange={(e) =>
-              onFilterChange({
-                ...filters,
-                dateRange: { ...filters.dateRange, start: e.target.value },
-              })
-            }
-          />
-          <span>to</span>
-          <input
-            type="date"
-            aria-label="End date"
-            value={filters.dateRange.end}
-            onChange={(e) =>
-              onFilterChange({
-                ...filters,
-                dateRange: { ...filters.dateRange, end: e.target.value },
-              })
-            }
-          />
-        </div>
-      </div>
+      <DateRangeFilter
+        label="Date Range"
+        idPrefix="followup-filter-date-range"
+        value={filters.dateRange}
+        onChange={(dateRange) => onFilterChange({ ...filters, dateRange })}
+      />
       <div className="filter-actions">
         <button className="btn btn-primary" onClick={onApply}>
           {ACTION_FILTER}

@@ -33,11 +33,11 @@ const DealCard: React.FC<DealCardProps> = ({ deal, statusId }) => {
         <div className="deal-contact">
           <div
             className="contact-avatar"
-            style={{ background: hashStringToColor(deal.agent) }}
+            style={{ background: hashStringToColor(deal.agent || 'Unassigned') }}
           >
-            {deal.agent.charAt(0)}
+            {(deal.agent || 'U').charAt(0)}
           </div>
-          <span>{deal.agent}</span>
+          <span>{deal.agent || 'Unassigned'}</span>
         </div>
         {typeof deal.probability === 'number' && (
           <div

@@ -23,16 +23,6 @@ export function calculateTimeAgo(createdAt: string): string {
   return `${days} day${days === 1 ? '' : 's'} ago`;
 }
 
-export function formatRelatedLead(
-  entityId: string,
-  name: string | null,
-  phone: string | null,
-): string {
-  if (phone && name) return `${phone} | ${name}`;
-  if (phone) return phone;
-  return name ?? entityId;
-}
-
 export function formatTimestamp(isoString: string): string {
   const d = new Date(isoString);
   if (isNaN(d.getTime())) return 'Unknown time';
@@ -48,12 +38,43 @@ export function getBadge(entityType: string): string {
   return entityType.charAt(0).toUpperCase() + entityType.slice(1);
 }
 
+// Mirrors the backend's LEAD_FIELD_LABELS / DEAL_FIELD_LABELS - field names
+// are shared/unambiguous across both entities (e.g. only one of them ever
+// changes at once), so a single map covers the activity feed regardless of
+// which entity the change belongs to.
+const CHANGE_FIELD_LABELS: Record<string, string> = {
+  name: 'Name',
+  dealName: 'Deal name',
+  phone: 'Phone',
+  email: 'Email',
+  agentId: 'Assigned agent',
+  purposeId: 'Purpose',
+  typeId: 'Type',
+  statusId: 'Status',
+  sourceId: 'Source',
+  location: 'Location',
+  address: 'Address',
+  notes: 'Notes',
+  note: 'Note',
+  nextFollowUpDate: 'Next follow-up date',
+  amount: 'Amount',
+  currency: 'Currency',
+  mobile: 'Mobile',
+  startDate: 'Start date',
+  endDate: 'End date',
+  leadId: 'Lead',
+};
+
+export function getChangeFieldLabel(fieldName: string): string {
+  return CHANGE_FIELD_LABELS[fieldName] ?? fieldName;
+}
+
 /**
  * Computes a windowed page-number sequence with 'ellipsis' gap markers, e.g.
  * [1, 'ellipsis', 4, 5, 6, 'ellipsis', 20] for a large page count.
  *
  * Used by:
- * - useDailyActivityData (feeds ActivityPagination's numbered page buttons).
+ * - DailyActivityPage (feeds ActivityPagination's numbered page buttons).
  *
  * Notes:
  * - Always includes page 1 and the last page, plus `window` pages on either

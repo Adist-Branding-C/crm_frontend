@@ -1,13 +1,39 @@
-import React from 'react';
 import { Search, Filter, ChevronDown } from 'lucide-react';
 import {
   ACTION_FILTER,
   ACTION_SEARCH,
-} from '../../../shared/constants/actionLabels';
-import { SORT_OPTIONS } from '../constants';
-import type { FollowupToolbarProps } from '../types';
+} from '../../constants/actionLabels';
+import type { SortConfig } from '../../types/sort';
 
-const FollowupToolbar: React.FC<FollowupToolbarProps> = ({
+export interface SortOption {
+  key: string;
+  label: string;
+}
+
+interface ListToolbarProps {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  showFilters: boolean;
+  onToggleFilters: () => void;
+  sortConfig: SortConfig;
+  onSort: (key: string) => void;
+  showSortDropdown: boolean;
+  onToggleSortDropdown: () => void;
+  sortOptions: SortOption[];
+}
+
+/**
+ * Search + filter-toggle + sort-dropdown toolbar for a sortable/filterable
+ * list page. The same search/filter/sort markup (the `enquiries-toolbar` CSS
+ * class) is also hand-rolled today in SpotlightToolbar, DealsToolbar, and
+ * CompaniesToolbar; this is the shared version any of those can move to.
+ *
+ * Used by:
+ * - features/followup-required/pages/FollowupRequiredPage directly
+ *   (sortOptions is the only feature-specific bit - a plain constant, not
+ *   worth its own wrapper component).
+ */
+const ListToolbar = ({
   searchQuery,
   onSearchChange,
   showFilters,
@@ -16,7 +42,8 @@ const FollowupToolbar: React.FC<FollowupToolbarProps> = ({
   onSort,
   showSortDropdown,
   onToggleSortDropdown,
-}) => (
+  sortOptions,
+}: ListToolbarProps) => (
   <div className="enquiries-toolbar">
     <div className="toolbar-left">
       <div className="search-box">
@@ -52,7 +79,7 @@ const FollowupToolbar: React.FC<FollowupToolbarProps> = ({
         </button>
         {showSortDropdown && (
           <div className="sort-dropdown">
-            {SORT_OPTIONS.map((option) => (
+            {sortOptions.map((option) => (
               <button key={option.key} onClick={() => onSort(option.key)}>
                 {option.label}{' '}
                 {sortConfig.key === option.key &&
@@ -66,4 +93,4 @@ const FollowupToolbar: React.FC<FollowupToolbarProps> = ({
   </div>
 );
 
-export default FollowupToolbar;
+export default ListToolbar;

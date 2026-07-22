@@ -1,7 +1,7 @@
 export interface GetActivitiesParams {
   pageNumber: number;
   limit: number;
-  tzOffsetMinutes: number;
+  timezoneOffsetMinutes: number;
   date?: string;
   startTime?: string;
   endTime?: string;
