@@ -3,6 +3,7 @@ import type { DealItem, DealFormData, DealStatusFilters } from './interface';
 import type { SortConfig } from '../../../shared/types/sort';
 import type { LabelValuePair } from '../../../shared/types/common';
 import type { DealAdditionalFieldDef } from './interface';
+import type { ToastType } from '../../../shared/types/toast.types';
 
 export interface UseDealListReturn {
   dealList: DealItem[];
@@ -22,6 +23,7 @@ export interface UseDealCrudParams {
     setIsLoading: (loading: boolean) => void;
     refresh: () => void;
   };
+  showToastMessage: (message: string, type: ToastType) => void;
 }
 
 export interface UseDealCrudReturn {
@@ -94,3 +96,5 @@ export interface UseDealRowActionsReturn {
   handleDeleteFromRow: (deal: DealItem) => void;
   handleDeleteFromDrawer: (deal: DealItem) => void;
 }
+
+

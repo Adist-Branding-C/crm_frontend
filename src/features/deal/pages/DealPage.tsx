@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
 import { ChevronUp, ChevronDown, Filter, Plus } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
@@ -42,22 +42,29 @@ const DealPage = () => {
 
   const rowsPerPageRef = useRef(10);
   const searchQueryRef = useRef('');
+  const resetPageRef = useRef<() => void>(() => {});
+  const resetPage = useCallback(() => resetPageRef.current(), []);
 
-  const filtersHook = useDealFilters(list.fetchDeals, searchQueryRef, rowsPerPageRef);
+  const filtersHook = useDealFilters(list.fetchDeals, searchQueryRef, rowsPerPageRef, resetPage);
   const { activeFiltersRef } = filtersHook;
 
-  const sortHook = useDealSort(list.fetchDeals, activeFiltersRef, searchQueryRef, rowsPerPageRef);
+  const sortHook = useDealSort(list.fetchDeals, activeFiltersRef, searchQueryRef, rowsPerPageRef, resetPage);
 
-  const pagination = useDealPagination(list.fetchDeals, activeFiltersRef, searchQueryRef, list.totalCount);
+  const pagination = useDealPagination(list.fetchDeals, activeFiltersRef, searchQueryRef, list.totalCount, list.totalPages);
 
   const dealSearch = useDealSearch(list.fetchDeals, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
 
   useEffect(() => {
     rowsPerPageRef.current = pagination.rowsPerPage;
     searchQueryRef.current = dealSearch.searchQuery;
+    resetPageRef.current = pagination.resetPage;
   });
 
-  const crud = useDealCrud({ pagination: { setError: list.setError, setIsLoading: list.setIsLoading, refresh: list.refreshCurrentPage } });
+  const [formError, setFormError] = useState('');
+  const crud = useDealCrud({
+    pagination: { setError: setFormError, setIsLoading: list.setIsLoading, refresh: list.refreshCurrentPage },
+    showToastMessage: toast.showToastMessage,
+  });
   const drawer = useDealDrawer();
   const deleteConfirm = useDealDeleteConfirm(crud.handleDeleteDeal);
   const actionMenu = useDealActionMenu();
@@ -137,7 +144,7 @@ const DealPage = () => {
 
   const clearFilters = useDealClearFilters(filtersHook, dealSearch, pagination, sortHook, list.fetchDeals, rowsPerPageRef);
 
-  const { handleExportCSV } = useDealExport(list.dealList);
+  const { isExporting, handleExportCSV } = useDealExport(toast.showToastMessage);
 
   const columns = useMemo(() => getDealColumns(list.dealList), [list.dealList]);
 
@@ -184,7 +191,7 @@ const DealPage = () => {
         description="Track sales opportunities, aiding management and conversion of potential customers."
       />
 
-      {list.error && (
+      {list.error && !drawer.showDrawer && (
         <div className="error-banner">
           <span>{list.error}</span>
           <button className="btn btn-sm btn-secondary" onClick={() => list.fetchDeals(pagination.currentPage, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current)}>Retry</button>
@@ -212,8 +219,12 @@ const DealPage = () => {
             }}
           />
 
-          <button className="btn btn-secondary" onClick={handleExportCSV}>
-            Export
+          <button
+            className="btn btn-secondary"
+            onClick={() => handleExportCSV(dealSearch.searchQuery, activeFiltersRef.current)}
+            disabled={isExporting}
+          >
+            {isExporting ? 'Exporting...' : 'Export'}
           </button>
 
           <button className="btn btn-primary" onClick={() => { filtersHook.setShowFilters(false); drawer.openAddDrawer(); }}>
@@ -249,7 +260,9 @@ const DealPage = () => {
             </TRow>
           </THead>
           <TBody>
-            {list.dealList.length === 0 && !list.isLoading ? (
+            {list.error && !list.isLoading ? (
+              <EmptyState colSpan={columns.length} message={list.error} />
+            ) : list.dealList.length === 0 && !list.isLoading ? (
               <EmptyState colSpan={columns.length} message={LABEL_NO_DATA} />
             ) : (
               list.dealList.map(deal => (
@@ -295,7 +308,7 @@ const DealPage = () => {
           initialValues={editInitialValues}
           onSubmit={drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleAddSubmit}
           isLoading={list.isLoading}
-          error={list.error}
+          error={formError}
           onCancel={drawer.closeDrawer}
           scrollContainerRef={formBodyRef}
         />

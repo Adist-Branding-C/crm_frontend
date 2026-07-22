@@ -32,13 +32,23 @@ interface DealOriginalDates {
  *   when a date still equals the original value passed in via
  *   `original` (i.e. an existing deal's pre-filled date that the user
  *   hasn't touched during this edit).
+ * - `amount` stays a string (matches `DealFormData.amount: string`) but is
+ *   validated as a number strictly greater than 0 via `.test()`, mirroring the
+ *   `mobileNumber` pattern below, rather than switching to `yup.number()` —
+ *   a number schema would silently cast an empty string to `0` and pass
+ *   `required()`, letting a blank field slip through.
  * - Dynamic `additionalField_<fieldKey>` rules are built from the company's
  *   configured Deal additional fields so the schema stays in sync with them;
  *   frontend validates required-ness only, the backend owns dropdown/type checks.
  */
 function getBaseValidationShape(original?: DealOriginalDates) {
   return {
-    dealName: yup.string().trim().required('Deal name is required'),
+    dealName: yup
+      .string()
+      .trim()
+      .required('Deal name is required')
+      .min(2, 'Deal name must be at least 2 characters')
+      .max(100, 'Deal name must not exceed 100 characters'),
     lead: yup.string().notRequired(),
     leadId: yup.string().required('Lead is required'),
     mobileCountryCode: yup.string().required('Country code is required'),
@@ -52,7 +62,20 @@ function getBaseValidationShape(original?: DealOriginalDates) {
         if (isValidPhoneForCountry(value, mobileCountryCode)) return true;
         return this.createError({ message: getPhoneLengthErrorMessage(mobileCountryCode) });
       }),
-    amount: yup.string().trim().required('Amount is required'),
+    amount: yup
+      .string()
+      .trim()
+      .required('Amount is required')
+      .test('valid-amount', function (value) {
+        if (!value) return true;
+        if (!/^-?\d+(\.\d+)?$/.test(value)) {
+          return this.createError({ message: 'Amount must be a valid number' });
+        }
+        if (Number(value) <= 0) {
+          return this.createError({ message: 'Amount must be greater than 0.' });
+        }
+        return true;
+      }),
     statusId: yup.string().required('Status is required'),
     typeId: yup.string().required('Type is required'),
     startDate: yup
@@ -71,7 +94,7 @@ function getBaseValidationShape(original?: DealOriginalDates) {
         if (original?.endDate && value === original.endDate) return true;
         return !isPastDate(value);
       })
-      .test('is-after-start', 'End date must be after start date', function (value) {
+      .test('is-after-start', 'End date must be on or after start date', function (value) {
         const { startDate } = this.parent;
         if (!startDate || !value) return true;
         return new Date(value) >= new Date(startDate);

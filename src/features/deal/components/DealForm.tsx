@@ -57,7 +57,7 @@ const DealForm = ({
         validationSchema={validationSchema}
         onSubmit={onSubmit}
       >
-        {({ errors, touched, dirty, submitCount, isSubmitting, values, setFieldValue, setFieldTouched, handleChange, handleBlur }) => {
+        {({ errors, touched, dirty, submitCount, isSubmitting, values, setFieldValue, setFieldTouched, setValues, handleChange, handleBlur }) => {
           if (submitCount > prevSubmitCountRef.current) {
             prevSubmitCountRef.current = submitCount;
             if (Object.keys(errors).length > 0) {
@@ -109,19 +109,32 @@ const DealForm = ({
             }
           };
 
+          // Both the id and the display-name fields are updated together via a single
+          // setValues() call (rather than two sequential setFieldValue() calls) so the
+          // validation that follows runs against one fully up-to-date snapshot. Two
+          // separate setFieldValue() calls each validate against the values captured at
+          // the start of this handler, so the second call's validation would see the
+          // *stale* (pre-selection) id and could re-flash the "required" error right
+          // after a valid selection.
           const handleLeadChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
             const match = leads.find(l => String(l.value) === String(value));
-            setFieldValue('leadId', match ? match.value : '');
-            setFieldValue('lead', match?.label ?? '');
+            setValues(prev => ({
+              ...prev,
+              leadId: match ? match.value : '',
+              lead: match?.label ?? '',
+            }));
             setFieldTouched('leadId', true, false);
           };
 
           const handleAgentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
             const match = staff.find(s => String(s.value) === String(value));
-            setFieldValue('agentId', match ? match.value : '');
-            setFieldValue('assignAgent', match?.label ?? '');
+            setValues(prev => ({
+              ...prev,
+              agentId: match ? match.value : '',
+              assignAgent: match?.label ?? '',
+            }));
             setFieldTouched('agentId', true, false);
           };
 
