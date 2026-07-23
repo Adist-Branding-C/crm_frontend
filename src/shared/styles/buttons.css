@@ -46,3 +46,14 @@
   background: transparent;
   color: var(--primary-hover);
 }
+
+.btn-ghost {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}

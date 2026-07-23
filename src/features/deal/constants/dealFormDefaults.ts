@@ -1,4 +1,5 @@
 import type { DealFormData } from '../../../shared/types/drawers';
+import { DEFAULT_COUNTRY_CODE } from '../../../shared/constants/countryCodes';
 
 /**
  * Blank Formik initial values for the Add/Edit Deal form's fixed fields.
@@ -12,6 +13,8 @@ export const DEAL_FORM_DEFAULT_VALUES: DealFormData = {
   lead: '',
   leadId: '',
   mobile: '',
+  mobileCountryCode: DEFAULT_COUNTRY_CODE,
+  mobileNumber: '',
   amount: '',
   status: '',
   statusId: '',

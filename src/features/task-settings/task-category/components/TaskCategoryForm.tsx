@@ -5,6 +5,10 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import { ScrollToFirstError } from '../../../../shared/components/ScrollToFirstError';
 import type { TaskCategoryFormProps } from '../types/index';
 
+/**
+ * Formik-driven add/edit form for task categories; the same component renders both modes based
+ * on the initialValues/isEditing props the parent drawer passes in.
+ */
 const TaskCategoryForm = ({ validationSchema, initialValues, onSubmit, onCancel, isLoading, error, isEditing, bodyRef }: TaskCategoryFormProps) => {
   useEffect(() => {
     if (error) {
@@ -35,13 +39,13 @@ const TaskCategoryForm = ({ validationSchema, initialValues, onSubmit, onCancel,
             </div>
 
             <div className="form-group">
-              <label>Action <span className="text-danger">*</span></label>
-              <Field as="select" name="action" className={fieldClass('action')}>
-                <option value="">Select action</option>
+              <label>Status <span className="text-danger">*</span></label>
+              <Field as="select" name="status" className={fieldClass('status')}>
+                <option value="">Select status</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </Field>
-              <FormikError name="action" component="small" className="field-error-text" />
+              <FormikError name="status" component="small" className="field-error-text" />
             </div>
 
             <div className="form-actions">

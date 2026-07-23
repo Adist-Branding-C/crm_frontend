@@ -2,10 +2,7 @@ import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirm
 import type { TaskCategoryItem } from '../types/index';
 
 /**
- * Delete-confirmation modal state for task categories.
- *
- * Notes:
- * - Thin wrapper around the shared useDeleteConfirmation.
+ * Thin wrapper around the shared useDeleteConfirmation, scoped to task-category items.
  */
 export function useTaskCategoryDeleteConfirm(handleDeleteTaskCategory: (id: number) => Promise<boolean>) {
   return useDeleteConfirmation<TaskCategoryItem>((item) => handleDeleteTaskCategory(item.id));

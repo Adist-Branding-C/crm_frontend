@@ -9,4 +9,5 @@ export interface AddDealAdditionalFieldFormPanelProps {
   isSaving: boolean;
   error: string;
   onClearError: () => void;
+  onCancelEdit: () => void;
 }

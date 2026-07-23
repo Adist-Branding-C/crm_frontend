@@ -3,4 +3,5 @@
  */
 export enum LEAD_API_ENDPOINTS {
   LEADS = '/leads',
+  LEADS_DELETED = '/leads/deleted',
 }

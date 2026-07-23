@@ -6,11 +6,9 @@ import { CALL_REASON_FIELD_MAP, CALL_REASON_FIELD_ERROR_FALLBACKS } from '../con
 import type { CallReasonFormData, UseCallReasonCrudParams } from '../types/index';
 
 /**
- * Call-reason create/update/delete API orchestration.
- *
- * Notes:
- * - Takes the list/pagination setters it needs to drive and a toast trigger as narrow
- *   dependencies, rather than owning or re-exporting the pagination or toast hooks themselves.
+ * Create/update/delete API orchestration for call reasons. Adding resets the page to 1 and
+ * clears any active search before refreshing the list; updating just refreshes in place. Delete
+ * errors are parsed inline rather than going through the shared submit-error handler.
  */
 export function useCallReasonCrud({ pagination, showToastMessage }: UseCallReasonCrudParams) {
   const submitError = useSubmitErrorHandler({

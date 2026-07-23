@@ -1,4 +1,5 @@
 import { buildQueryParams } from '../../../../shared/utils/queryParams.util';
+import { formatAddedBy } from '../../../../shared/utils/addedBy.util';
 import { normalizeFieldType, denormalizeFieldType } from '../utils/fieldType';
 import type { DealAdditionalFieldFormData, DealAdditionalFieldPayload, DealAdditionalFieldQueryParams } from '../types/request';
 import type { ApiDealAdditionalField, DealAdditionalField } from '../types/interface';
@@ -11,7 +12,8 @@ export class DealAdditionalFieldMapper {
 
   static toEntity(raw: ApiDealAdditionalField): DealAdditionalField {
     return {
-      id: raw.id,
+      id: raw.fieldId,
+      addedBy: formatAddedBy(raw.createdByName, raw.createdByType),
       field: raw.fieldName,
       type: raw.fieldType,
       inFilter: raw.showInFilter,

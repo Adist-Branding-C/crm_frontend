@@ -1,118 +1,197 @@
-import React from 'react';
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, RotateCcw } from 'lucide-react';
+import React, { useRef, useEffect, useMemo } from 'react';
+import { ChevronUp, ChevronDown, Filter, RotateCcw } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
-import ActionDropdownPortal from '../../../components/ActionDropdownPortal';
-import LeadDetailDrawer from '../../../components/LeadDetailDrawer';
-import AdminPagination from '../../../shared/components/crud/AdminPagination';
-import { useDeletedLeadsData } from '../hooks/useDeletedLeadsData';
-import DeletedLeadsToolbar from '../components/DeletedLeadsToolbar';
-import DeletedLeadsFilters from '../components/DeletedLeadsFilters';
+import AdminConfirmationModal from '../../../shared/components/crud/AdminConfirmationModal';
+import Toast from '../../../shared/components/Toast';
+import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useTableSelection } from '../../../shared/hooks/useTableSelection';
+import { useLeadPagination } from '../../enquiries/hooks/useLeadPagination';
+import { useLeadSearch } from '../../enquiries/hooks/useLeadSearch';
+import { useLeadSort } from '../../enquiries/hooks/useLeadSort';
+import { useLeadFilters } from '../../enquiries/hooks/useLeadFilters';
+import { useLeadActionMenu } from '../../enquiries/hooks/useLeadActionMenu';
+import { useLeadClearFilters } from '../../enquiries/hooks/useLeadClearFilters';
+import { useDeletedLeadListData } from '../hooks/useDeletedLeadListData';
+import { useLeadRestoreConfirm } from '../hooks/useLeadRestoreConfirm';
+import { useLeadRestoreRowAction } from '../hooks/useLeadRestoreRowAction';
+import { useLeadBulkRestore } from '../hooks/useLeadBulkRestore';
+import { getLeadIds } from '../../enquiries/utils/leadMapper';
+import { DELETED_LEAD_COLUMNS } from '../constants';
+import { LABEL_NO_DATA } from '../../../shared/constants/labels';
+import EnquiriesFilters from '../../enquiries/components/EnquiriesFilters';
+import LeadSortDropdown from '../../enquiries/components/LeadSortDropdown';
+import DeletedLeadRow from '../components/DeletedLeadRow';
+import '../../enquiries/pages/EnquiriesPage.css';
 import './ReportsSubPages.css';
 
 const LeadDeletedLeadsReport = () => {
-  const d = useDeletedLeadsData();
+  const toast = useToast();
+  const crud = useDeletedLeadListData(toast.showToastMessage);
+
+  const rowsPerPageRef = useRef(10);
+  const searchQueryRef = useRef('');
+
+  const filtersHook = useLeadFilters(crud.fetchLeads, searchQueryRef, rowsPerPageRef);
+  const { activeFiltersRef } = filtersHook;
+
+  const sortHook = useLeadSort(crud.fetchLeads, activeFiltersRef, searchQueryRef, rowsPerPageRef);
+
+  const pagination = useLeadPagination(crud.fetchLeads, activeFiltersRef, searchQueryRef, crud.total);
+
+  const leadSearch = useLeadSearch(crud.fetchLeads, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
+
+  useEffect(() => {
+    rowsPerPageRef.current = pagination.rowsPerPage;
+    searchQueryRef.current = leadSearch.searchQuery;
+  });
+
+  const selection = useTableSelection<string>();
+
+  const actionMenu = useLeadActionMenu();
+
+  const restoreConfirm = useLeadRestoreConfirm(crud.restoreLead);
+  const rowActions = useLeadRestoreRowAction(actionMenu, restoreConfirm);
+
+  const initialFetchDone = useRef(false);
+  useEffect(() => {
+    if (initialFetchDone.current) return;
+    initialFetchDone.current = true;
+    crud.fetchLeads(1, 10, '', {});
+  }, []);
+
+  const paginatedIds = useMemo(() => getLeadIds(crud.leads), [crud.leads]);
+
+  const clearFilters = useLeadClearFilters(filtersHook, leadSearch, pagination, sortHook, crud.fetchLeads, rowsPerPageRef);
+
+  const bulkRestore = useLeadBulkRestore({
+    selectedIds: selection.selectedIds,
+    onRefresh: crud.refreshCurrentPage,
+    onShowToast: toast.showToastMessage,
+    onClearSelection: selection.setSelectedIds,
+  });
 
   return (
     <div className="report-content-wrapper with-sidebar">
-      <PageHeader title="Deleted Leads" description="View and restore previously deleted leads" />
-
-      <DeletedLeadsToolbar
-        searchQuery={d.searchQuery}
-        onSearchChange={d.setSearchQuery}
-        showFilters={d.showFilters}
-        onToggleFilters={() => d.setShowFilters(!d.showFilters)}
-        sortConfig={d.sortConfig}
-        showSortDropdown={d.showSortDropdown}
-        sortDropdownClosing={d.sortDropdownClosing}
-        sortDropdownRef={d.sortDropdownRef}
-        onSetShowSortDropdown={d.setShowSortDropdown}
-        onCloseSortDropdown={d.closeSortDropdown}
-        onSortDesc={d.handleSortDesc}
-        onSortAsc={d.handleSortAsc}
-        selectedCount={d.selectedIds.length}
-        onRecoverAll={d.handleRecoverAll}
-      />
-
-      {d.showFilters && (
-        <DeletedLeadsFilters
-          filters={d.filters}
-          onFilterChange={d.setFilters}
-          onClearFilters={d.clearFilters}
-          onClose={() => d.setShowFilters(false)}
-        />
-      )}
+      <PageHeader title="Deleted Leads" description="View and restore previously deleted leads" breadcrumb={false} />
 
       <div className="table-container">
-        <table className="enquiries-table">
-          <thead>
-            <tr>
-              <th><input type="checkbox" checked={d.paginatedData.length > 0 && d.selectedIds.length === d.paginatedData.length}
-                onChange={(e) => d.handleSelectAll(d.paginatedData.map(x => x.id), e.target.checked)} /></th>
-              <th>Action</th>
-              <th onClick={() => d.handleSort('name')} className="sortable">Name {d.sortConfig.key === 'name' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('phone')} className="sortable">Phone {d.sortConfig.key === 'phone' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('location')} className="sortable">Location {d.sortConfig.key === 'location' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('assignedTo')} className="sortable">Assigned To {d.sortConfig.key === 'assignedTo' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('purpose')} className="sortable">Purpose {d.sortConfig.key === 'purpose' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('type')} className="sortable">Type {d.sortConfig.key === 'type' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('status')} className="sortable">Status {d.sortConfig.key === 'status' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('source')} className="sortable">Source {d.sortConfig.key === 'source' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('createdAt')} className="sortable">Created At {d.sortConfig.key === 'createdAt' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th onClick={() => d.handleSort('deletedAt')} className="sortable">Deleted At {d.sortConfig.key === 'deletedAt' && (d.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}</th>
-              <th>Delete Reason</th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.paginatedData.map(row => (
-              <tr key={row.id} className={d.selectedIds.includes(row.id) ? 'selected' : ''}>
-                <td><input type="checkbox" checked={d.selectedIds.includes(row.id)} onChange={() => d.handleSelectRow(row.id)} /></td>
-                <td className="action-cell">
-                  <div className="action-menu-container">
-                    <button className="action-btn" onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      if (d.actionMenuOpen === row.id) { d.setActionMenuOpen(null); d.setActionMenuButtonRect(null); }
-                      else { d.setActionMenuOpen(row.id); d.setActionMenuButtonRect(rect); }
-                    }}>
-                      <MoreHorizontal size={16} />
-                    </button>
-                    {d.actionMenuOpen === row.id && d.actionMenuButtonRect && (
-                      <ActionDropdownPortal isOpen={d.actionMenuOpen === row.id} buttonRect={d.actionMenuButtonRect}
-                        onClose={() => { d.setActionMenuOpen(null); d.setActionMenuButtonRect(null); }}>
-                        <button onClick={() => { d.handleRecoverLead(row.id); d.setActionMenuOpen(null); d.setActionMenuButtonRect(null); }}>
-                          <RotateCcw size={14} /> Recover
-                        </button>
-                      </ActionDropdownPortal>
-                    )}
-                  </div>
-                </td>
-                <td className="lead-name-cell" onClick={() => d.setSelectedLead(row)}>{row.name}</td>
-                <td>{row.phone}</td>
-                <td>{row.location}</td>
-                <td>{row.assignedTo}</td>
-                <td>{row.purpose}</td>
-                <td><span className={`badge badge-${row.type.toLowerCase().replace(' ', '-')}`}>{row.type}</span></td>
-                <td><span className={`badge badge-${row.status.toLowerCase()}`}>{row.status}</span></td>
-                <td>{row.source}</td>
-                <td>{row.createdAt}</td>
-                <td>{row.deletedAt}</td>
-                <td>{row.deleteReason}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TableNav
+          searchQuery={leadSearch.searchQuery}
+          onSearchChange={leadSearch.setSearchQuery}
+          searchPlaceholder="Search deleted leads..."
+          rowsPerPage={pagination.rowsPerPage}
+          onRowsPerPageChange={pagination.handleRowsPerPageChange}
+        >
+          <button className="btn btn-secondary" onClick={() => filtersHook.setShowFilters(!filtersHook.showFilters)}>
+            <Filter size={16} /> Filter <ChevronDown size={14} className={filtersHook.showFilters ? 'rotate' : ''} />
+          </button>
+
+          <LeadSortDropdown
+            sortConfig={sortHook.sortConfig}
+            onSortDesc={sortHook.handleSortDesc}
+            onSortAsc={sortHook.handleSortAsc}
+          />
+
+          <button className="btn btn-primary" onClick={bulkRestore.handleRestoreSelectedClick}>
+            <RotateCcw size={16} /> Recover Selected{selection.selectedIds.length > 0 ? ` (${selection.selectedIds.length})` : ''}
+          </button>
+        </TableNav>
+
+        {filtersHook.showFilters && (
+          <EnquiriesFilters
+            filters={filtersHook.filters}
+            onFilterChange={filtersHook.setFilters}
+            onApplyFilters={filtersHook.handleApplyFilters}
+            onClearFilters={clearFilters}
+          />
+        )}
+
+        <Table wrapperClassName="table-scroll" className="enquiries-table">
+          <THead>
+            <TRow>
+              {DELETED_LEAD_COLUMNS.map(col => (
+                <TCell
+                  key={col.key}
+                  variant="th"
+                  className={col.sortable ? 'sortable' : ''}
+                  onClick={col.sortable ? () => sortHook.handleSort(col.key) : undefined}
+                >
+                  {col.key === 'checkbox' ? (
+                    <input
+                      type="checkbox"
+                      checked={crud.leads.length > 0 && crud.leads.every(row => selection.selectedIds.includes(row.leadId))}
+                      onChange={(e) => selection.handleSelectAll(paginatedIds, e.target.checked)}
+                    />
+                  ) : (
+                    <>
+                      {col.label}
+                      {col.sortable && sortHook.sortConfig.key === col.key && (
+                        sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                      )}
+                    </>
+                  )}
+                </TCell>
+              ))}
+            </TRow>
+          </THead>
+          <TBody>
+            {crud.leads.length === 0 ? (
+              <EmptyState colSpan={DELETED_LEAD_COLUMNS.length} message={LABEL_NO_DATA} />
+            ) : (
+              crud.leads.map(lead => (
+                <DeletedLeadRow
+                  key={lead.leadId}
+                  lead={lead}
+                  columns={DELETED_LEAD_COLUMNS}
+                  isSelected={selection.selectedIds.includes(lead.leadId)}
+                  onSelectRow={selection.handleSelectRow}
+                  actionMenu={{
+                    isOpen: actionMenu.openId === lead.leadId,
+                    buttonRect: actionMenu.openId === lead.leadId ? actionMenu.buttonRect : null,
+                    onOpen: actionMenu.open,
+                    onClose: actionMenu.close,
+                  }}
+                  onRecoverLead={rowActions.handleRestoreFromRow}
+                />
+              ))
+            )}
+          </TBody>
+        </Table>
+
+        {crud.isLoading && <div className="table-loading">Loading...</div>}
+
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={crud.totalPages}
+          totalItems={pagination.totalItems}
+          rowsPerPage={pagination.rowsPerPage}
+          onPageChange={pagination.handleSetCurrentPage}
+        />
       </div>
 
-      <AdminPagination
-        currentPage={d.currentPage}
-        totalPages={d.totalPages}
-        startIndex={d.startIndex}
-        rowsPerPage={d.rowsPerPage}
-        totalItems={d.filteredData.length}
-        onPageChange={d.setCurrentPage}
-        onRowsPerPageChange={d.handleRowsPerPageChange}
+      <Toast message={toast.toastMessage} type={toast.toastType} isVisible={toast.showToast} onClose={() => toast.setShowToast(false)} />
+
+      <AdminConfirmationModal
+        isOpen={!!restoreConfirm.deletingItem}
+        title="Recover Lead"
+        message={`Are you sure you want to recover ${restoreConfirm.deletingItem?.name ?? 'this lead'}?`}
+        confirmText="Recover"
+        confirmButtonVariant="primary"
+        onConfirm={restoreConfirm.handleConfirmDelete}
+        onCancel={restoreConfirm.closeDeleteModal}
       />
 
-      <LeadDetailDrawer lead={d.selectedLead} isOpen={!!d.selectedLead} onClose={() => d.setSelectedLead(null)} />
+      <AdminConfirmationModal
+        isOpen={bulkRestore.showRestoreSelectedModal}
+        title="Recover Selected Leads"
+        message={`Are you sure you want to recover ${selection.selectedIds.length} selected lead(s)?`}
+        confirmText="Recover Selected"
+        confirmButtonVariant="primary"
+        isLoading={bulkRestore.isProcessingSelected}
+        onConfirm={bulkRestore.handleConfirmRestoreSelected}
+        onCancel={() => bulkRestore.setShowRestoreSelectedModal(false)}
+      />
     </div>
   );
 };

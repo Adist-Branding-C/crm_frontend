@@ -16,7 +16,7 @@ export class TaskCategoryMapper {
     return {
       id: raw.id,
       category: raw.category || raw.taskCategory || '',
-      action: raw.action || '',
+      status: raw.status || '',
     };
   }
 }

@@ -1,0 +1,31 @@
+@import '../../../shared/styles/tables.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/badges.css';
+@import '../../../shared/styles/pagination.css';
+@import '../../../shared/styles/modals.css';
+@import '../../../shared/styles/filters.css';
+@import '../../../shared/styles/dropdowns.css';
+
+.automation-rules-page {
+  padding: 1.5rem;
+}
+
+.automation-empty-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.automation-empty-page h3 {
+  color: var(--text-main);
+  margin-top: 0.5rem;
+}
+
+.automation-empty-page .btn {
+  margin-top: 0.75rem;
+}

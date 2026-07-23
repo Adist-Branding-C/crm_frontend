@@ -4,6 +4,11 @@ import SettingsStatusBadge from '../../../../shared/components/settings/Settings
 import { TRow, TCell } from '../../../../shared/components/table';
 import type { CallStatusRowProps } from '../types/index';
 
+/**
+ * Renders a single call-status table row; memoized since the list can re-render often while
+ * only one row's data actually changes. Purely presentational — click handling is delegated to
+ * the parent via onEdit/onDelete/onToggleDropdown.
+ */
 const CallStatusRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, onDelete }: CallStatusRowProps) => (
   <TRow>
     <TCell>{index + 1}</TCell>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, MessageCircle, Home, LayoutDashboard, Flame, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building } from 'lucide-react';
+import { CheckCircle, MessageCircle, Home, LayoutDashboard, Flame, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building, Workflow } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 
@@ -16,6 +16,7 @@ const Sidebar = () => {
     { icon: Calendar, label: 'Calendar', path: '/calendar' },
     { icon: Activity, label: 'Daily Activity', path: '/daily-activity' },
     { icon: Megaphone, label: 'Campaigns', path: '/campaigns' },
+    { icon: Workflow, label: 'Automation', path: '/automation-rules' },
     { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: BarChart3, label: 'Staff Performance', path: '/staff-performance' },
     { icon: Building, label: 'Companies', path: '/companies' },

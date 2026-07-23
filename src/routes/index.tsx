@@ -10,6 +10,7 @@ import adminRoutes from './adminRoutes';
 import salesRoutes from './salesRoutes';
 import reportsRoutes from './reportsRoutes';
 import taskRoutes from './taskRoutes';
+import automationRoutes from './automationRoutes';
 
 const AppRoutes = () => (
   <BrowserRouter>
@@ -30,6 +31,7 @@ const AppRoutes = () => (
         {salesRoutes}
         {reportsRoutes}
         {taskRoutes}
+        {automationRoutes}
       </Route>
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

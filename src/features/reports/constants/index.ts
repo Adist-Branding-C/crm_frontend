@@ -1,27 +1,50 @@
 import { Users, DollarSign, ListChecks, Phone, ClipboardList, Clock } from 'lucide-react';
 import type { ReportCategory, ReportOption } from '../types';
+import type { Column } from '../../../shared/types/table';
 import type { DailyActivityRow, GLAPIRow, DeletedLead, DealStageStat, DealAgentStat, LeadConversionDeal, TaskWiseRow, LeadChangeRow, TaskWorkRow, GLDialerCall, GLDialerAgentStat, CallFeedbackEntry, CheckinRow, AttendanceRow } from '../types';
 
 export const reportCategories: ReportCategory[] = [
   { id: 'lead', title: 'Lead Reports', path: '/reports/lead', icon: Users },
-  { id: 'deal', title: 'Deal Reports', path: '/reports/deal', icon: DollarSign },
-  { id: 'task', title: 'Task Reports', path: '/reports/task', icon: ListChecks },
-  { id: 'call', title: 'Call Reports', path: '/reports/call', icon: Phone },
-  { id: 'checkin', title: 'Check-in & Check-out', path: '/reports/checkin', icon: ClipboardList },
-  { id: 'attendance', title: 'Attendance Report', path: '/reports/attendance', icon: Clock },
+  // { id: 'deal', title: 'Deal Reports', path: '/reports/deal', icon: DollarSign },
+  // { id: 'task', title: 'Task Reports', path: '/reports/task', icon: ListChecks },
+  // { id: 'call', title: 'Call Reports', path: '/reports/call', icon: Phone },
+  // { id: 'checkin', title: 'Check-in & Check-out', path: '/reports/checkin', icon: ClipboardList },
+  // { id: 'attendance', title: 'Attendance Report', path: '/reports/attendance', icon: Clock },
 ];
 
 export const leadReportOptions: ReportOption[] = [
-  { id: 'daily', title: 'Daily Activity Report', description: "A compact overview of your team's sales progress", path: '/reports/lead/daily' },
-  { id: 'status-wise', title: 'Status Wise Report', description: 'Track performance and progress segmented by various statuses for precise insights', path: '/reports/lead/status-wise' },
-  { id: 'status-change', title: 'Status Change Report', description: 'An overview of key updates, tracking shifts in status for enhanced decision-making', path: '/reports/lead/status-change' },
-  { id: 'source-wise', title: 'Source Wise Report', description: 'Evaluate the effectiveness of different lead sources with comprehensive data insights', path: '/reports/lead/source-wise' },
-  { id: 'checkout', title: 'Check Out Summary report', description: 'Track employee engagement and activity with detailed check-in data', path: '/reports/lead/checkout' },
-  { id: 'export', title: 'Export', description: 'Quickly download and share vital data for deeper offline analysis', path: '/reports/lead/export' },
+  // { id: 'daily', title: 'Daily Activity Report', description: "A compact overview of your team's sales progress", path: '/reports/lead/daily' },
+  // { id: 'status-wise', title: 'Status Wise Report', description: 'Track performance and progress segmented by various statuses for precise insights', path: '/reports/lead/status-wise' },
+  // { id: 'status-change', title: 'Status Change Report', description: 'An overview of key updates, tracking shifts in status for enhanced decision-making', path: '/reports/lead/status-change' },
+  // { id: 'source-wise', title: 'Source Wise Report', description: 'Evaluate the effectiveness of different lead sources with comprehensive data insights', path: '/reports/lead/source-wise' },
+  // { id: 'checkout', title: 'Check Out Summary report', description: 'Track employee engagement and activity with detailed check-in data', path: '/reports/lead/checkout' },
+  // { id: 'export', title: 'Export', description: 'Quickly download and share vital data for deeper offline analysis', path: '/reports/lead/export' },
   { id: 'export-history', title: 'Export History', description: 'Track all your past lead data exports for complete transparency', path: '/reports/lead/export-history' },
   { id: 'import-history', title: 'Import History', description: 'Track all your past lead data imports for complete transparency', path: '/reports/lead/import-history' },
   { id: 'gl-api', title: 'GL API History', description: 'Track all your past lead data api for complete transparency', path: '/reports/lead/gl-api' },
   { id: 'deleted', title: 'Deleted Leads', description: '', path: '/reports/lead/deleted' },
+];
+
+/**
+ * Column definitions for the Deleted Leads report table - mirrors the main leads
+ * table's COLUMNS (crm_ui/src/features/enquiries/constants/index.ts) plus
+ * Deleted At / Deleted By, and without the sortable flag on fields the backend's
+ * LEAD_SORT_FIELD_MAP doesn't support sorting by.
+ */
+export const DELETED_LEAD_COLUMNS: Column[] = [
+  { key: 'checkbox', label: '' },
+  { key: 'action', label: 'Action' },
+  { key: 'name', label: 'Name', sortable: true },
+  { key: 'phone', label: 'Phone' },
+  { key: 'location', label: 'Location' },
+  { key: 'assignedTo', label: 'Assigned To' },
+  { key: 'purpose', label: 'Purpose' },
+  { key: 'type', label: 'Type' },
+  { key: 'status', label: 'Status' },
+  { key: 'source', label: 'Source' },
+  { key: 'createdAt', label: 'Created At', sortable: true },
+  { key: 'deletedAt', label: 'Deleted At' },
+  { key: 'deletedBy', label: 'Deleted By' },
 ];
 
 export const dealReportOptions: ReportOption[] = [

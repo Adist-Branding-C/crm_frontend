@@ -6,4 +6,5 @@ export const DEAL_API_ENDPOINTS = {
   DELETE: (dealId: string) => `/deals/${dealId}`,
   GET_STAGES: '/deals/stages',
   GET_DROPDOWN: '/deals/dropdown',
+  EXPORT: '/deals/export',
 };

@@ -10,6 +10,7 @@ export interface ActivityFiltersProps {
   staffSearchQuery: string;
   selectedStaffName: string;
   staffList: StaffOption[];
+  isLoading: boolean;
   onFilterChange: (field: keyof Filters, value: string) => void;
   onStaffSelect: (staffId: string) => void;
   onApply: () => void;
@@ -27,11 +28,13 @@ export interface ActivityStaffDropdownItemProps {
 export interface ActivityTypeFilterProps {
   activityTypeFilter: string;
   activityTypes: ActivityTypeOption[];
+  isLoading: boolean;
   onChange: (value: string) => void;
 }
 
 export interface ActivityTimelineProps {
   activities: Activity[];
+  isLoading: boolean;
 }
 
 export interface ActivityTimelineCardProps {
@@ -43,5 +46,6 @@ export interface ActivityPaginationProps {
   totalPages: number;
   totalActivities: number;
   pageNumbers: PageNumberEntry[];
+  isLoading: boolean;
   onPageChange: (page: number) => void;
 }

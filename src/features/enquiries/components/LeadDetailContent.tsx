@@ -45,8 +45,6 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
   const [showTaskDrawer, setShowTaskDrawer] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [newRemarkText, setNewRemarkText] = useState('');
-  const [editingRemarkId, setEditingRemarkId] = useState<number | null>(null);
-  const [editingRemarkText, setEditingRemarkText] = useState('');
   const [showDeleteRemarkModal, setShowDeleteRemarkModal] = useState(false);
   const [remarkToDelete, setRemarkToDelete] = useState<Remark | null>(null);
   const [toastMessage, setToastMessage] = useState('');
@@ -64,10 +62,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     isLoading: isLoadingRemarks,
     error: errorRemarks,
     isAdding: isAddingRemark,
-    isUpdating: isUpdatingRemark,
     isDeleting: isDeletingRemark,
     addRemark,
-    updateRemark,
     deleteRemark,
   } = useLeadRemarks(lead.id, true, activeTab);
 
@@ -236,38 +232,6 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
       onLeadUpdated?.();
     } catch {
       showToastMessage(ERROR_MESSAGES.ADD_REMARK, 'error');
-    }
-  };
-
-  const startEditRemark = (remark: Remark) => {
-    setEditingRemarkId(remark.id);
-    setEditingRemarkText(remark.remarkNote);
-  };
-
-  const cancelEditRemark = () => {
-    setEditingRemarkId(null);
-    setEditingRemarkText('');
-  };
-
-  const handleSaveEdit = async () => {
-    const trimmed = editingRemarkText.trim();
-    const original = remarks.find((r: Remark) => r.id === editingRemarkId);
-    if (!trimmed) {
-      cancelEditRemark();
-      return;
-    }
-    if (trimmed === original?.remarkNote) {
-      cancelEditRemark();
-      return;
-    }
-    if (editingRemarkId == null) return;
-    try {
-      await updateRemark(editingRemarkId, trimmed);
-      setEditingRemarkId(null);
-      setEditingRemarkText('');
-      showToastMessage(SUCCESS_MESSAGES.REMARK_UPDATED, 'success');
-    } catch {
-      showToastMessage(ERROR_MESSAGES.UPDATE_REMARK, 'error');
     }
   };
 
@@ -498,20 +462,25 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   </div>
                 ) : (
                   <div className="leaddrawer-activity-list">
-                    {apiActivities.map((item: any) => (
-                      <div className="leaddrawer-activity-card" key={item.id}>
-                        <div className="leaddrawer-activity-avatar">
-                          {(item.actorName || '?').charAt(0).toUpperCase()}
-                        </div>
-                        <div className="leaddrawer-activity-content">
-                          <div className="leaddrawer-activity-header">
-                            <span className="leaddrawer-activity-user">{item.actorName}</span>
+                    {apiActivities.map((item: any) => {
+                      // The activities API returns raw rows only (no actor-name
+                      // enrichment), so fall back to the actor's id/type.
+                      const actorLabel = item.actorName || item.actorId || item.actorType || 'Unknown';
+                      return (
+                        <div className="leaddrawer-activity-card" key={item.id}>
+                          <div className="leaddrawer-activity-avatar">
+                            {actorLabel.charAt(0).toUpperCase()}
                           </div>
-                          <span className="leaddrawer-activity-time">{formatDateTime(item.createdAt)}</span>
-                          <p className="leaddrawer-activity-desc">{item.description}</p>
+                          <div className="leaddrawer-activity-content">
+                            <div className="leaddrawer-activity-header">
+                              <span className="leaddrawer-activity-user">{actorLabel}</span>
+                            </div>
+                            <span className="leaddrawer-activity-time">{formatDateTime(item.createdAt)}</span>
+                            <p className="leaddrawer-activity-desc">{item.description}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -573,38 +542,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                             <span className="leaddrawer-note-user">{remark.agentName}</span>
                             <span className="leaddrawer-note-time">{formatDateTime(remark.createdAt)}</span>
                           </div>
-                          {editingRemarkId === remark.id ? (
-                            <div>
-                              <textarea
-                                className="leaddrawer-remark-edit-textarea"
-                                value={editingRemarkText}
-                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditingRemarkText(e.target.value)}
-                                disabled={isUpdatingRemark}
-                              />
-                              <div className="leaddrawer-note-edit-actions">
-                                <button
-                                  className="btn btn-primary btn-sm"
-                                  onClick={handleSaveEdit}
-                                  disabled={isUpdatingRemark || !editingRemarkText.trim()}
-                                >
-                                  {isUpdatingRemark ? <><Loader2 size={14} className="spin" /> Saving...</> : 'Save'}
-                                </button>
-                                <button
-                                  className="btn btn-secondary btn-sm"
-                                  onClick={cancelEditRemark}
-                                  disabled={isUpdatingRemark}
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="leaddrawer-note-text">{remark.remarkNote}</p>
-                          )}
+                          <p className="leaddrawer-note-text">{remark.remarkNote}</p>
                           <div className="leaddrawer-note-actions">
-                            <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
-                              <Edit2 size={14} />
-                            </button>
                             <button className="leaddrawer-note-action" onClick={() => handleDeleteClick(remark)}>
                               <Trash2 size={14} />
                             </button>

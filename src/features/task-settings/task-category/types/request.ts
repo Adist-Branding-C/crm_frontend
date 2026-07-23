@@ -1,6 +1,6 @@
 export interface TaskCategoryFormData {
   category: string;
-  action: string;
+  status: string;
 }
 
 export interface FetchTaskCategoriesParams {
