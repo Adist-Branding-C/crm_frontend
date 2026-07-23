@@ -49,6 +49,8 @@ export interface DealFormData {
   lead: string;
   leadId?: string | number;
   mobile: string;
+  mobileCountryCode?: string;
+  mobileNumber?: string;
   amount: string;
   status: string;
   statusId?: string | number;

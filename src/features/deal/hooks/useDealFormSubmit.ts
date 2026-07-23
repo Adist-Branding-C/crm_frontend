@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import { buildAdditionalFieldsPayload } from '../utils/additionalFields';
+import { combineMobileValue } from '../utils/mobileFormat';
 import type { DealFormData as DealDrawerFormData } from '../../../shared/types/drawers';
 import type { DealFormData } from '../types/interface';
 import type { UseDealFormSubmitParams, UseDealFormSubmitReturn } from '../types/hook.types';
@@ -19,7 +20,7 @@ export function useDealFormSubmit({ editingItem, closeDrawer, handleAddDeal, han
       assignAgent: values.agentId,
       statusId: values.statusId,
       typeId: values.typeId,
-      mobile: values.mobile,
+      mobile: combineMobileValue(values.mobileCountryCode, values.mobileNumber),
       amount: values.amount,
       startDate: values.startDate,
       endDate: values.endDate,
@@ -51,7 +52,7 @@ export function useDealFormSubmit({ editingItem, closeDrawer, handleAddDeal, han
       assignAgent: values.agentId,
       statusId: values.statusId,
       typeId: values.typeId,
-      mobile: values.mobile,
+      mobile: combineMobileValue(values.mobileCountryCode, values.mobileNumber),
       amount: values.amount,
       startDate: values.startDate,
       endDate: values.endDate,

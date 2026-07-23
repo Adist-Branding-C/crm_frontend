@@ -9,6 +9,7 @@ export function useDealSort(
   activeFiltersRef: React.MutableRefObject<Record<string, string | number>>,
   searchQueryRef: React.MutableRefObject<string>,
   rowsPerPageRef: React.MutableRefObject<number>,
+  resetPage: () => void,
 ): UseDealSortReturn {
   const [sortConfig, setSortConfig] = useState(DEFAULT_SORT);
   const sortConfigRef = useRef(sortConfig);
@@ -24,22 +25,25 @@ export function useDealSort(
     const newConfig = { key, direction };
     setSortConfig(newConfig);
     activeFiltersRef.current = { ...activeFiltersRef.current, sortBy: key, sortOrder: direction };
+    resetPage();
     onFetch(1, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
-  }, [onFetch, activeFiltersRef, rowsPerPageRef, searchQueryRef]);
+  }, [onFetch, activeFiltersRef, rowsPerPageRef, searchQueryRef, resetPage]);
 
   const handleSortDesc = useCallback((key: string) => {
     const newConfig = { key, direction: SortDirection.DESC };
     setSortConfig(newConfig);
     activeFiltersRef.current = { ...activeFiltersRef.current, sortBy: key, sortOrder: 'DESC' };
+    resetPage();
     onFetch(1, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
-  }, [onFetch, activeFiltersRef, rowsPerPageRef, searchQueryRef]);
+  }, [onFetch, activeFiltersRef, rowsPerPageRef, searchQueryRef, resetPage]);
 
   const handleSortAsc = useCallback((key: string) => {
     const newConfig = { key, direction: SortDirection.ASC };
     setSortConfig(newConfig);
     activeFiltersRef.current = { ...activeFiltersRef.current, sortBy: key, sortOrder: 'ASC' };
+    resetPage();
     onFetch(1, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
-  }, [onFetch, activeFiltersRef, rowsPerPageRef, searchQueryRef]);
+  }, [onFetch, activeFiltersRef, rowsPerPageRef, searchQueryRef, resetPage]);
 
   const resetSort = useCallback(() => {
     setSortConfig(DEFAULT_SORT);

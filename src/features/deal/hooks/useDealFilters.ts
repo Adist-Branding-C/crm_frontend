@@ -15,6 +15,7 @@ export function useDealFilters(
   onFetch: (page: number, limit: number, search: string, extraParams: Record<string, string | number>) => void,
   searchQueryRef: React.MutableRefObject<string>,
   rowsPerPageRef: React.MutableRefObject<number>,
+  resetPage: () => void,
 ): UseDealFiltersReturn {
   const [filters, setFilters] = useState<DealStatusFilters>(INITIAL_DEAL_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
@@ -43,8 +44,9 @@ export function useDealFilters(
     }
     activeFiltersRef.current = params;
     setShowFilters(false);
+    resetPage();
     onFetch(1, rowsPerPageRef.current, searchQueryRef.current, params);
-  }, [filters, onFetch, searchQueryRef, rowsPerPageRef, dealAdditionalFieldDefs]);
+  }, [filters, onFetch, searchQueryRef, rowsPerPageRef, dealAdditionalFieldDefs, resetPage]);
 
   return {
     filters,
