@@ -1,9 +1,7 @@
-import { useCallback } from 'react';
-import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirmation';
+import { useTaskDeleteConfirm as useTaskDeleteConfirmCore } from '../../common/hooks/useTaskDeleteConfirm';
 import type { TaskItem } from '../types';
-import type { UseTaskDeleteConfirmParams } from '../types';
+import type { UseTaskDeleteConfirmParams } from '../types/hook.types';
 
 export function useTaskDeleteConfirm({ handleDeleteTask }: UseTaskDeleteConfirmParams) {
-  const deleteTask = useCallback((item: TaskItem) => handleDeleteTask(item.id), [handleDeleteTask]);
-  return useDeleteConfirmation<TaskItem>(deleteTask);
+  return useTaskDeleteConfirmCore<TaskItem>(handleDeleteTask);
 }

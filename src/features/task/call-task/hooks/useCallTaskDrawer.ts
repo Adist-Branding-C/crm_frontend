@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
-import { useEditDrawer } from '../../../../shared/hooks/useEditDrawer';
-import { ADD_CALL_TASK_INITIAL_VALUES } from '../constants/index';
-import { CallTaskMapper } from '../mappers/callTask.mapper';
-import type { CallTaskItem } from '../types/index';
-import type { UseCallTaskDrawerLookups } from '../types/useCallTaskDrawer.types';
+import { useMemo } from 'react';
+import { useTaskDrawer } from '../../common/hooks/useTaskDrawer';
+import { ADD_CALL_TASK_INITIAL_VALUES } from '../constants/addCallTask.constants';
+import { CallTaskMapper } from '../mapper/callTaskMapper';
+import type { UseCallTaskDrawerLookups } from '../types/hook.types';
 
 /**
  * Add/edit drawer state for the Call Task feature, composed with the lookup
@@ -11,29 +10,13 @@ import type { UseCallTaskDrawerLookups } from '../types/useCallTaskDrawer.types'
  *
  * Used by:
  * - CallTaskPage.
- *
- * Notes:
- * - Wraps the shared useEditDrawer's open actions so opening the drawer (add or
- *   edit) always triggers the staff/lead option loads it needs - the page just
- *   calls openAddDrawer/openEditDrawer directly, without composing them.
  */
 export function useCallTaskDrawer({ loadStaff, loadLeads }: UseCallTaskDrawerLookups) {
-  const drawer = useEditDrawer({
+  const loaders = useMemo(() => [loadStaff, loadLeads], [loadStaff, loadLeads]);
+
+  return useTaskDrawer({
     mapItemToFormData: CallTaskMapper.toFormValues,
     emptyFormData: ADD_CALL_TASK_INITIAL_VALUES,
+    loaders,
   });
-
-  const openAddDrawer = useCallback(() => {
-    loadStaff();
-    loadLeads();
-    drawer.openAddDrawer();
-  }, [loadStaff, loadLeads, drawer.openAddDrawer]);
-
-  const openEditDrawer = useCallback((item: CallTaskItem) => {
-    loadStaff();
-    loadLeads();
-    drawer.openEditDrawer(item);
-  }, [loadStaff, loadLeads, drawer.openEditDrawer]);
-
-  return { ...drawer, openAddDrawer, openEditDrawer };
 }

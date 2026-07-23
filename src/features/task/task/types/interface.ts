@@ -8,7 +8,10 @@ export interface TaskItem {
   } | null;
   scheduledDate: string;
   scheduledTime: string;
-  assignedBy: string;
+  assignedBy?: {
+    id: number;
+    name: string;
+  } | null;
   assignedTo?: {
     id: number;
     name: string;
