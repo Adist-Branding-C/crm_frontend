@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { MoreHorizontal, Eye } from 'lucide-react';
 import { TRow, TCell } from '../../../shared/components/table';
 import type { SpotlightTableRowProps } from '../types';
-import { formatDateTime, formatFollowUpDate } from '../../../shared/utils/dateUtils';
+import { formatDateTime, formatFollowUpDateOnly } from '../../../shared/utils/dateUtils';
 
 const SpotlightTableRow = memo(
   ({
@@ -61,7 +61,7 @@ const SpotlightTableRow = memo(
       <TCell>{row.source}</TCell>
       <TCell>{formatDateTime(row.createdAt)}</TCell>
       <TCell>{formatDateTime(row.updatedAt)}</TCell>
-      <TCell>{formatFollowUpDate(row.nextFollowUp)}</TCell>
+      <TCell>{formatFollowUpDateOnly(row.nextFollowUp)}</TCell>
     </TRow>
   ),
 );

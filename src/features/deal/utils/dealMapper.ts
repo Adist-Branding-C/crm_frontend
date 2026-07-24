@@ -19,7 +19,7 @@ export function mapApiToUI(item: DealApiItem): DealItem {
     assignedTo: item.assignedTo ?? '',
     agent: typeof item.agent === 'object' ? (item.agent as { name?: string })?.name ?? '' : item.agent ?? '',
     agentId: typeof item.agent === 'object' ? (item.agent as { id?: string | number })?.id ?? item.agentId ?? '' : item.agentId ?? '',
-    createdBy: item.createdBy ?? '',
+    createdBy: typeof item.createdBy === 'object' ? (item.createdBy as { name?: string } | null)?.name ?? '' : item.createdBy ?? '',
     startDate: item.startDate ?? '',
     endDate: item.endDate ?? '',
     createdAt: item.createdAt ?? '',

@@ -367,6 +367,7 @@ const DailyActivity = () => {
               value={filters.date}
               onChange={(e) => handleFilterChange('date', e.target.value)}
               className="filter-input"
+              max={new Date().toISOString().split('T')[0]}
             />
           </div>
           

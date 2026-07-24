@@ -92,3 +92,4 @@ export interface DealListResponse {
   limit: number;
   totalPages: number;
 }
+

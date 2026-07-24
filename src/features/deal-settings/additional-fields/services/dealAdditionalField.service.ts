@@ -38,7 +38,7 @@ class DealAdditionalFieldService {
     }
   }
 
-  async updateDealAdditionalField(id: number, data: DealAdditionalFieldPayload): Promise<DealAdditionalFieldResponse> {
+  async updateDealAdditionalField(id: string, data: DealAdditionalFieldPayload): Promise<DealAdditionalFieldResponse> {
     try {
       const response = await axiosInstance.patch<DealAdditionalFieldResponse>(DEAL_ADDITIONAL_FIELD_API_ENDPOINTS.UPDATE(id), data);
       return ServiceResponseUtil.successResponse({
@@ -51,7 +51,7 @@ class DealAdditionalFieldService {
     }
   }
 
-  async deleteDealAdditionalField(id: number): Promise<DeleteDealAdditionalFieldResponse> {
+  async deleteDealAdditionalField(id: string): Promise<DeleteDealAdditionalFieldResponse> {
     try {
       const response = await axiosInstance.delete<DeleteDealAdditionalFieldResponse>(DEAL_ADDITIONAL_FIELD_API_ENDPOINTS.DELETE(id));
       return ServiceResponseUtil.successResponse({

@@ -71,6 +71,7 @@ const DealAdditionalFieldPage = () => {
             isSaving={crud.isSaving}
             error={pagination.error}
             onClearError={clearError}
+            onCancelEdit={drawer.closeDrawer}
           />
         </div>
 
@@ -82,15 +83,16 @@ const DealAdditionalFieldPage = () => {
               rowsPerPage={pagination.limit}
               onRowsPerPageChange={pagination.handleRowsPerPageChange}
             >
-              <button className="btn btn-secondary" onClick={() => exportDealAdditionalFieldsToCsv(pagination.list)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              {/* <button className="btn btn-secondary" onClick={() => exportDealAdditionalFieldsToCsv(pagination.list)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Download size={16} /> Export
-              </button>
+              </button> */}
             </TableNav>
 
             <Table wrapperClassName="table-scroll" className="data-table">
               <THead>
                 <TRow>
                   <TCell variant="th">Sl.No</TCell>
+                  <TCell variant="th">Added By</TCell>
                   <TCell variant="th">Field</TCell>
                   <TCell variant="th">Type</TCell>
                   <TCell variant="th">Values</TCell>
@@ -102,15 +104,15 @@ const DealAdditionalFieldPage = () => {
               </THead>
               <TBody>
                 {pagination.list.length === 0 ? (
-                  <EmptyState colSpan={8} />
+                  <EmptyState colSpan={9} />
                 ) : (
                   pagination.list.map((item, idx) => (
                     <DealAdditionalFieldRow
                       key={item.id}
                       item={item}
                       index={idx}
-                      dropdownOpen={dropdown.dropdownOpen}
-                      onToggleDropdown={dropdown.toggleDropdown}
+                      isMenuOpen={dropdown.dropdownOpen === item.id}
+                      onToggleMenu={(open) => dropdown.toggleDropdown(open ? item.id : null)}
                       onEdit={handleEditClick}
                       onDelete={handleDeleteClick}
                     />

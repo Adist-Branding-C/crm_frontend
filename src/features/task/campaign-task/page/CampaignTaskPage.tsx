@@ -8,27 +8,27 @@ import { useCampaignTaskCrud } from '../hooks/useCampaignTaskCrud';
 import { useCampaignTaskDrawer } from '../hooks/useCampaignTaskDrawer';
 import { useCampaignTaskDeleteConfirm } from '../hooks/useCampaignTaskDeleteConfirm';
 import { useCampaignTaskFormSubmit } from '../hooks/useCampaignTaskFormSubmit';
-import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
-import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
-import { campaignTaskApiService } from '../services/index';
-import { addCampaignTaskValidationSchema, editCampaignTaskValidationSchema } from '../validations/index';
+import { useStaffOptions } from '../../common/hooks/useStaffOptions';
+import { useLeadOptions } from '../../common/hooks/useLeadOptions';
+import { campaignTaskDataService } from '../services/campaignTaskDataService';
+import { addCampaignTaskValidationSchema, editCampaignTaskValidationSchema } from '../validations/campaignTask.validation';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
 import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } from '../../../../shared/components/table';
 import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
-import GenericTaskForm from '../../shared/components/GenericTaskForm';
-import TaskItemRow from '../../shared/components/TaskItemRow';
+import GenericTaskForm from '../../common/components/GenericTaskForm';
+import TaskItemRow from '../../common/components/TaskItemRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { taskTabs } from '../../shared/taskTabs';
+import { taskTabs } from '../../common/taskTabs';
 import type { CampaignTaskItem } from '../types/index';
 import './CampaignTaskPage.css';
 
 const CampaignTaskPage = () => {
   const pagination = useTableData<CampaignTaskItem>({
     fetchFn: async (params) => {
-      const response = await campaignTaskApiService.fetchAll({ ...params, type: 'CAMPAIGN_TASK' });
+      const response = await campaignTaskDataService.fetchAll({ ...params, type: 'CAMPAIGN_TASK' });
       return ListResponseMapper.toPagedResult<CampaignTaskItem>(response);
     },
   });
@@ -63,8 +63,11 @@ const CampaignTaskPage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Title</TCell>
+                <TCell variant="th">Description</TCell>
                 <TCell variant="th">Scheduled Date</TCell>
+                <TCell variant="th">Scheduled Time</TCell>
                 <TCell variant="th">Assigned To</TCell>
+                <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
                 <TCell variant="th">Lead</TCell>
@@ -72,7 +75,7 @@ const CampaignTaskPage = () => {
               </TRow>
             </THead>
             <TBody>
-              {pagination.list.length === 0 ? <EmptyState colSpan={8} message={LABEL_NO_DATA} /> : pagination.list.map((item, idx) => (
+              {pagination.list.length === 0 ? <EmptyState colSpan={11} message={LABEL_NO_DATA} /> : pagination.list.map((item, idx) => (
                 <TaskItemRow
                   key={item.id}
                   item={item}

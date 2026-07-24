@@ -1,3 +1,9 @@
+export interface ActivityChangeItem {
+  fieldName: string;
+  oldValue?: string;
+  newValue?: string;
+}
+
 export interface Activity {
   id: number;
   type: string;
@@ -9,6 +15,7 @@ export interface Activity {
   timestamp: string;
   timeAgo: string;
   badge: string;
+  changes: ActivityChangeItem[];
 }
 
 // Staff filter options carry the real staff_id (string), not a numeric mock id.
@@ -37,16 +44,21 @@ export interface ActivityItem {
   updatedBy: string | null;
   updatedByType: string | null;
   deletedBy: string | null;
+  deletedByType: string | null;
+  // Resolved in the database via a @VirtualColumn on the entity (BaseEntity's
+  // createdByName/updatedByName, and Activity's own actorName keyed off
+  // actor_id/actor_type) - not a separate enrichment query/service.
+  createdByName: string | null;
+  updatedByName: string | null;
   companyId: string;
   actorId: string;
   actorType: string;
+  actorName: string | null;
   entityType: string;
   entityId: string;
   activityType: string;
   description: string;
-  actorName: string;
-  name: string | null;
-  phone: string | null;
+  changes?: ActivityChangeItem[];
 }
 
 // Raw staff list item shape as returned by GET /staff.

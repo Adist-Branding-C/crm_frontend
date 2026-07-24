@@ -19,6 +19,8 @@ export const SUCCESS_MESSAGES = {
   STATUS_UPDATED: (count: number) => `Status updated for ${count} lead(s)`,
   STAFF_ASSIGNED: (count: number) => `Staff assigned to ${count} lead(s)`,
   LEADS_DELETED: (count: number) => `${count} lead(s) deleted successfully`,
+  LEAD_RESTORED: 'Lead restored successfully',
+  LEADS_RESTORED: (count: number) => `${count} lead(s) restored successfully`,
   LEADS_ASSIGNED_TO_CAMPAIGN: (count: number) => `${count} lead(s) assigned to campaign`,
 } as const;
 
@@ -56,5 +58,7 @@ export const ERROR_MESSAGES = {
   PARTIAL_SUCCESS: (successCount: number, failCount: number) => `${successCount} updated, ${failCount} failed`,
   PARTIAL_ASSIGN: (successCount: number, failCount: number) => `${successCount} assigned, ${failCount} failed`,
   PARTIAL_DELETE: (successCount: number, failCount: number) => `${successCount} deleted, ${failCount} failed`,
+  RESTORE_LEAD: 'Failed to restore lead',
+  PARTIAL_RESTORE: (successCount: number, failCount: number) => `${successCount} restored, ${failCount} failed`,
   ASSIGN_CAMPAIGN_FAILED: 'Failed to assign leads to campaign. Please try again.',
 } as const;

@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
-import { useEditDrawer } from '../../../../shared/hooks/useEditDrawer';
-import { ADD_TASK_INITIAL_VALUES } from '../constants';
-import { TaskMapper } from '../mappers/task.mapper';
-import type { TaskItem } from '../types';
-import type { UseTaskDrawerLookups } from '../types';
+import { useMemo } from 'react';
+import { useTaskDrawer as useTaskDrawerCore } from '../../common/hooks/useTaskDrawer';
+import { ADD_TASK_INITIAL_VALUES } from '../constants/addTask.constants';
+import { TaskMapper } from '../mapper/taskMapper';
+import type { UseTaskDrawerLookups } from '../types/hook.types';
 
 /**
  * Add/edit drawer state for the Task feature, composed with the lookup
@@ -13,29 +12,16 @@ import type { UseTaskDrawerLookups } from '../types';
  * - TaskPage.
  *
  * Notes:
- * - Wraps the shared useEditDrawer's open actions so opening the drawer (add or
- *   edit) always triggers the staff/category/lead option loads it needs - the page just
- *   calls openAddDrawer/openEditDrawer directly, without composing them.
+ * - Task is the only sub-module that also loads categories (it's the only one
+ *   with a category field), so it passes a three-loader list where Call/Campaign/
+ *   Deal Task pass two.
  */
 export function useTaskDrawer({ loadStaff, loadCategories, loadLeads }: UseTaskDrawerLookups) {
-  const drawer = useEditDrawer({
+  const loaders = useMemo(() => [loadStaff, loadCategories, loadLeads], [loadStaff, loadCategories, loadLeads]);
+
+  return useTaskDrawerCore({
     mapItemToFormData: TaskMapper.toFormValues,
     emptyFormData: ADD_TASK_INITIAL_VALUES,
+    loaders,
   });
-
-  const openAddDrawer = useCallback(() => {
-    loadStaff();
-    loadCategories();
-    loadLeads();
-    drawer.openAddDrawer();
-  }, [loadStaff, loadCategories, loadLeads, drawer.openAddDrawer]);
-
-  const openEditDrawer = useCallback((item: TaskItem) => {
-    loadStaff();
-    loadCategories();
-    loadLeads();
-    drawer.openEditDrawer(item);
-  }, [loadStaff, loadCategories, loadLeads, drawer.openEditDrawer]);
-
-  return { ...drawer, openAddDrawer, openEditDrawer };
 }

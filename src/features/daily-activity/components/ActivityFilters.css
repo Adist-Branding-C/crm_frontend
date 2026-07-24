@@ -38,6 +38,12 @@
   background: #4f46e5 !important;
 }
 
+.filter-buttons .apply-btn:disabled,
+.filter-buttons .reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .filter-buttons .reset-btn {
   background: #ffffff !important;
   color: #64748b !important;

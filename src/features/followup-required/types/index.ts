@@ -71,17 +71,6 @@ export interface GetFollowupLeadsParams {
   sort_order?: 'ASC' | 'DESC';
 }
 
-export interface FollowupToolbarProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  showFilters: boolean;
-  onToggleFilters: () => void;
-  sortConfig: SortConfig;
-  onSort: (key: string) => void;
-  showSortDropdown: boolean;
-  onToggleSortDropdown: () => void;
-}
-
 export interface FollowupFiltersProps {
   filters: Filters;
   typeOptions: LabelValuePair[];

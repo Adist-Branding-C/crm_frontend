@@ -29,7 +29,7 @@ import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
 import CheckinReport from '../sub-pages/CheckinReport';
 import AttendanceReport from '../sub-pages/AttendanceReport';
 import AttendanceProfile from '../sub-pages/AttendanceProfile';
-import { reportCategories, callReportOptions } from '../constants';
+import { callReportOptions } from '../constants';
 import './ReportsPage.css';
 
 const ReportsPage = () => {
@@ -38,30 +38,14 @@ const ReportsPage = () => {
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
         <PageHeader title="Reports" breadcrumb={false} />
 
-        <div className="report-tabs">
-          {reportCategories.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                className={({ isActive }) => isActive ? 'report-tab active' : 'report-tab'}
-                end={item.path === '/reports'}
-              >
-                <Icon size={16} /> {item.title}
-              </NavLink>
-            );
-          })}
-        </div>
-
         <Routes>
           <Route path="lead/*" element={<LeadReportsRouter />} />
-          <Route path="deal/*" element={<DealReportsRouter />} />
-          <Route path="task/*" element={<TaskReportsRouter />} />
-          <Route path="call/*" element={<CallReportsRouter />} />
-          <Route path="checkin" element={<CheckinReport />} />
-          <Route path="attendance" element={<AttendanceReport />} />
-          <Route path="attendance/profile/:staffId" element={<AttendanceProfile />} />
+          {/* <Route path="deal/*" element={<DealReportsRouter />} /> */}
+          {/* <Route path="task/*" element={<TaskReportsRouter />} /> */}
+          {/* <Route path="call/*" element={<CallReportsRouter />} /> */}
+          {/* <Route path="checkin" element={<CheckinReport />} /> */}
+          {/* <Route path="attendance" element={<AttendanceReport />} /> */}
+          {/* <Route path="attendance/profile/:staffId" element={<AttendanceProfile />} /> */}
           <Route path="" element={<Navigate to="/reports/lead" replace />} />
           <Route path="*" element={<Navigate to="/reports/lead" replace />} />
         </Routes>
@@ -73,12 +57,12 @@ const ReportsPage = () => {
 const LeadReportsRouter = () => (
   <Routes>
     <Route path="" element={<LeadReportsLanding />} />
-    <Route path="daily" element={<LeadDailyActivityReport />} />
-    <Route path="status-wise" element={<LeadStatusWise />} />
-    <Route path="status-change" element={<LeadStatusChange />} />
-    <Route path="source-wise" element={<LeadSourceWise />} />
-    <Route path="checkout" element={<LeadCheckoutSummary />} />
-    <Route path="export" element={<LeadExport />} />
+    {/* <Route path="daily" element={<LeadDailyActivityReport />} /> */}
+    {/* <Route path="status-wise" element={<LeadStatusWise />} /> */}
+    {/* <Route path="status-change" element={<LeadStatusChange />} /> */}
+    {/* <Route path="source-wise" element={<LeadSourceWise />} /> */}
+    {/* <Route path="checkout" element={<LeadCheckoutSummary />} /> */}
+    {/* <Route path="export" element={<LeadExport />} /> */}
     <Route path="export-history" element={<LeadExportHistory />} />
     <Route path="import-history" element={<LeadImportHistory />} />
     <Route path="import-history/:id" element={<ImportHistoryDetail />} />

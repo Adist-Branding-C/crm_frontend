@@ -1,20 +1,25 @@
+import { useMemo, useRef } from 'react';
 import { Download, Plus } from 'lucide-react';
+import { useDrawer } from '../../../../shared/hooks/useDrawer';
+import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
+import { useRowActions } from '../../../../shared/hooks/useRowActions';
+import { useTableData } from '../../../../shared/hooks/useTableData';
+import { useToast } from '../../../task-settings/hooks/useToast';
+import { useDealTypeSubmitHandlers } from '../hooks';
+import { dealTypeService } from '../services/dealType.service';
+import { DealTypeMapper } from '../mappers/dealType.mapper';
+import { ADD_DEAL_TYPE_INITIAL_VALUES } from '../constants/deal-type.constants';
+import { exportNameStatusRowsToCsv } from '../../shared/helpers/exportNameStatusRows.helper';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../../shared/components/layout/PageContainer';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import { dealSettingsTabs } from '../../shared/dealSettingsTabs';
-import { useTableData } from '../../../../shared/hooks/useTableData';
-import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
-import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirmation';
-import { useRowActions } from '../../../../shared/hooks/useRowActions';
-import { useDealTypeDrawer, useDealTypeCrud } from '../hooks';
-import { dealTypeService } from '../services/dealType.service';
-import { DealTypeMapper } from '../mappers/dealType.mapper';
-import { exportNameStatusRowsToCsv } from '../../shared/helpers/exportNameStatusRows.helper';
+import Drawer from '../../../../shared/components/Drawer';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../../shared/components/table';
-import AddDealTypeDrawer from '../components/AddDealTypeDrawer';
+import DealTypeForm from '../components/DealTypeForm';
 import DeleteDealTypeModal from '../components/DeleteDealTypeModal';
 import NameStatusRow from '../../shared/components/NameStatusRow';
+import ToastNotification from '../../../task-settings/components/ToastNotification';
 import type { DealTypeItem } from '../types/interface';
 import './DealTypePage.css';
 
@@ -26,19 +31,33 @@ const DealTypePage = () => {
       return DealTypeMapper.toListResult(response);
     },
   });
-  const drawer = useDealTypeDrawer();
+  const addDrawer = useDrawer();
+  const editDrawer = useDrawer<DealTypeItem>();
+  const deleteDialog = useDrawer<DealTypeItem>();
   const dropdown = useDropdownMenu<number>();
-  const crud = useDealTypeCrud({
-    editingItem: drawer.editingItem,
-    formData: drawer.formData,
-    closeDrawer: drawer.closeDrawer,
-    setError: pagination.setError,
-    refresh: pagination.refresh,
-  });
-  const deleteConfirm = useDeleteConfirmation<DealTypeItem>(crud.handleDelete);
+  const toast = useToast();
+  const formBodyRef = useRef<HTMLDivElement>(null);
+
+  const handlers = useDealTypeSubmitHandlers(
+    {
+      onAddSuccess: addDrawer.close,
+      onEditSuccess: editDrawer.close,
+      onDeleteSuccess: deleteDialog.close,
+      editingItem: editDrawer.item,
+      deletingItem: deleteDialog.item,
+    },
+    { setError: pagination.setError, refresh: pagination.refresh },
+    toast,
+  );
+
+  const editInitialValues = useMemo(
+    () => editDrawer.item ? DealTypeMapper.toFormData(editDrawer.item) : ADD_DEAL_TYPE_INITIAL_VALUES,
+    [editDrawer.item],
+  );
+
   const { handleEditClick, handleDeleteClick } = useRowActions<DealTypeItem>({
-    onEdit: drawer.openEditDrawer,
-    onDelete: deleteConfirm.handleDeleteClick,
+    onEdit: (item) => editDrawer.open(item),
+    onDelete: (item) => deleteDialog.open(item),
     closeDropdown: dropdown.closeDropdown,
   });
 
@@ -54,10 +73,10 @@ const DealTypePage = () => {
           rowsPerPage={pagination.limit}
           onRowsPerPageChange={pagination.handleRowsPerPageChange}
         >
-          <button className="btn btn-secondary" onClick={() => exportNameStatusRowsToCsv(pagination.list, 'deal-types.csv')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* <button className="btn btn-secondary" onClick={() => exportNameStatusRowsToCsv(pagination.list, 'deal-types.csv')} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Download size={16} /> Export
-          </button>
-          <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          </button> */}
+          <button className="btn btn-primary" onClick={() => addDrawer.open()} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
             <Plus size={16} /> Add Deal Type
           </button>
         </TableNav>
@@ -100,11 +119,43 @@ const DealTypePage = () => {
         />
       </div>
 
-      <AddDealTypeDrawer isOpen={drawer.showDrawer} formData={drawer.formData}
-        onChange={drawer.handleFormChange} onSave={crud.handleSave}
-        onClose={drawer.closeDrawer} isEditing={!!drawer.editingItem} />
-      <DeleteDealTypeModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.name ?? ''}
-        onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
+      <Drawer ref={formBodyRef} isOpen={addDrawer.isOpen} onClose={addDrawer.close} title="Add Deal Type">
+        <DealTypeForm
+          editingItem={null}
+          initialValues={ADD_DEAL_TYPE_INITIAL_VALUES}
+          onSubmit={handlers.handleAddSubmit}
+          isLoading={false}
+          error={pagination.error}
+          onCancel={addDrawer.close}
+          scrollContainerRef={formBodyRef}
+        />
+      </Drawer>
+
+      <Drawer ref={formBodyRef} isOpen={editDrawer.isOpen} onClose={editDrawer.close} title="Edit Deal Type">
+        <DealTypeForm
+          editingItem={editDrawer.item}
+          initialValues={editInitialValues}
+          onSubmit={handlers.handleEditSubmit}
+          isLoading={false}
+          error={pagination.error}
+          onCancel={editDrawer.close}
+          scrollContainerRef={formBodyRef}
+        />
+      </Drawer>
+
+      <DeleteDealTypeModal
+        isOpen={deleteDialog.isOpen}
+        itemName={deleteDialog.item?.name ?? ''}
+        onConfirm={handlers.handleConfirmDelete}
+        onClose={deleteDialog.close}
+      />
+
+      <ToastNotification
+        message={toast.toastMessage}
+        type={toast.toastType}
+        visible={toast.showToast}
+        onClose={() => toast.setShowToast(false)}
+      />
     </PageContainer>
   );
 };

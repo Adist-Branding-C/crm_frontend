@@ -1,10 +1,7 @@
-import { useCallback } from 'react';
-import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirmation';
+import { useTaskDeleteConfirm } from '../../common/hooks/useTaskDeleteConfirm';
 import type { CallTaskItem } from '../types/index';
-import type { UseCallTaskDeleteConfirmParams } from '../types/useCallTaskDeleteConfirm.types';
+import type { UseCallTaskDeleteConfirmParams } from '../types/hook.types';
 
 export function useCallTaskDeleteConfirm({ handleDeleteCallTask }: UseCallTaskDeleteConfirmParams) {
-  const deleteCallTask = useCallback((item: CallTaskItem) => handleDeleteCallTask(item.id), [handleDeleteCallTask]);
-
-  return useDeleteConfirmation<CallTaskItem>(deleteCallTask);
+  return useTaskDeleteConfirm<CallTaskItem>(handleDeleteCallTask);
 }

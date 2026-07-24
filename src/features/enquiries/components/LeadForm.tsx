@@ -234,7 +234,21 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
       onSubmit={handleSubmit}
       enableReinitialize
     >
-      {({ errors, touched, isSubmitting, values, handleChange, handleBlur, submitForm, setFieldValue }) => {
+      {({ errors, touched, isSubmitting, values, handleChange, handleBlur, submitForm, setFieldValue, setFieldTouched }) => {
+        const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const digitsOnly = e.target.value.replace(/\D/g, '');
+          setFieldValue('phone', digitsOnly);
+        };
+
+        const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+          const value = e.target.value;
+          setFieldValue('countryCode', value);
+          setFieldTouched('countryCode', true, false);
+          if (values.phone) {
+            setFieldTouched('phone', true, false);
+          }
+        };
+
         const filteredFieldDefs = additionalFieldDefs.filter((f) => {
           if (!f.connectWithLeadPurpose || !f.purposeId) return true;
           return f.purposeId === activePurposeId;
@@ -288,7 +302,7 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
                     <select
                       name="countryCode"
                       value={values.countryCode}
-                      onChange={handleChange}
+                      onChange={handleCountryCodeChange}
                       onBlur={handleBlur}
                       className={`phone-country-code${errors.countryCode && touched.countryCode ? ' error' : ''}`}
                     >
@@ -297,11 +311,17 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
                       ))}
                     </select>
                     <input
-                      type="tel"
-                      name="phone"
+                      type="text"
+                      inputMode="numeric"
+                      name="lead-phone-field-no-autofill"
+                      id="lead-phone-field-no-autofill"
+                      autoComplete="do-not-autofill-phone"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck="false"
                       placeholder="Enter phone number"
                       value={values.phone}
-                      onChange={handleChange}
+                      onChange={handlePhoneChange}
                       onBlur={handleBlur}
                       className={errors.phone && touched.phone ? 'error' : ''}
                     />

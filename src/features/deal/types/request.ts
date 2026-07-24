@@ -13,6 +13,13 @@ export interface GetDealsParams {
   additionalFieldFilters?: string;
 }
 
+/**
+ * Params for the dedicated Deal export endpoint — the same filter/search/sort
+ * fields as `GetDealsParams` minus `pageNumber`/`limit`, since export always
+ * returns the full filtered dataset rather than a single page.
+ */
+export type GetDealsExportParams = Omit<GetDealsParams, 'pageNumber' | 'limit'>;
+
 export interface CreateDealPayload {
   dealName: string;
   leadId: string | number;

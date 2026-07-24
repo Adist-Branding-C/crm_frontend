@@ -52,6 +52,26 @@ class LeadDataService {
       data: response.data.data,
     });
   }
+
+  async getDeletedLeads(params: GetLeadsParams): Promise<ApiResponse<LeadListData>> {
+    const response = await axiosInstance.get<ApiResponse<LeadListData>>(LEAD_API_ENDPOINTS.LEADS_DELETED, {
+      params: QueryMapper.toQuery(params),
+    });
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async restoreLead(leadId: string): Promise<ApiResponse<null>> {
+    const response = await axiosInstance.patch<ApiResponse<null>>(`${LEAD_API_ENDPOINTS.LEADS}/${leadId}/restore`);
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
 }
 
 export const leadDataService = new LeadDataService();

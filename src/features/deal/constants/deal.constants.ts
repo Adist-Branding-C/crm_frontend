@@ -30,3 +30,5 @@ export const DEAL_CSV_COLUMNS: CsvColumn<DealItem>[] = [
   { header: 'Created At', value: (d) => d.createdAt ?? '' },
 ];
 
+
+export const DEFAULT_EXPORT_FILENAME = 'Deals.xlsx';
