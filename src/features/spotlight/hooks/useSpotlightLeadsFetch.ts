@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { spotlightService } from '../services/SpotlightService';
-import { SpotlightLeadMapper } from '../mappers/spotlightLead.mapper';
+
 import { getErrorMessage } from '../../../shared/utils/error';
 import type { SpotlightLead, SpotlightRequestParams } from '../types';
 
@@ -21,7 +21,7 @@ export function useSpotlightLeadsFetch() {
         const response = await spotlightService.getLeads(params);
         if (requestId !== latestRequestId.current) return;
         if (response.status && response.data) {
-          setData(SpotlightLeadMapper.toDisplayList(response.data.items));
+          setData(response.data.items);
           setTotalRecords(response.data.pagination.total);
           setTotalPages(response.data.pagination.total_pages);
         } else {

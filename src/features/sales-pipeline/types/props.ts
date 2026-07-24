@@ -35,6 +35,7 @@ export interface PipelineToolbarProps {
 }
 
 export interface PipelineFiltersProps {
+  activeView?: ActiveView;
   showDateFilter: boolean;
   setShowDateFilter: (show: boolean) => void;
   dateFrom: string;

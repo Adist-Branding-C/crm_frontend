@@ -3,6 +3,7 @@ import { Filter, ChevronRight, ChevronDown, X } from 'lucide-react';
 import type { PipelineFiltersProps } from '../types';
 
 const PipelineFilters: React.FC<PipelineFiltersProps> = ({
+  activeView,
   showDateFilter,
   setShowDateFilter,
   dateFrom,

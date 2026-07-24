@@ -44,24 +44,24 @@ const SpotlightTableRow = memo(
         {row.name}
       </TCell>
       <TCell>{row.phone}</TCell>
-      <TCell>{row.assignedTo}</TCell>
-      <TCell>{row.purpose}</TCell>
+      <TCell>{row.assignedStaff?.name || 'Unassigned'}</TCell>
+      <TCell>{row.purpose?.purpose || 'N/A'}</TCell>
       <TCell>
         <span
-          className={`badge badge-${(row.type || '').toLowerCase().replace(' ', '-')}`}
+          className={`badge badge-${(row.type?.type || '').toLowerCase().replace(' ', '-')}`}
         >
-          {row.type || 'N/A'}
+          {row.type?.type || 'N/A'}
         </span>
       </TCell>
       <TCell>
-        <span className={`badge badge-${(row.status || '').toLowerCase()}`}>
-          {row.status || 'N/A'}
+        <span className={`badge badge-${(row.status?.status || '').toLowerCase()}`}>
+          {row.status?.status || 'N/A'}
         </span>
       </TCell>
-      <TCell>{row.source}</TCell>
+      <TCell>{row.source?.source || 'N/A'}</TCell>
       <TCell>{formatDateTime(row.createdAt)}</TCell>
       <TCell>{formatDateTime(row.updatedAt)}</TCell>
-      <TCell>{formatFollowUpDateOnly(row.nextFollowUp)}</TCell>
+      <TCell>{formatFollowUpDateOnly(row.nextFollowUpDate)}</TCell>
     </TRow>
   ),
 );
