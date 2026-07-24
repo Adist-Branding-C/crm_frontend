@@ -1,3 +1,4 @@
+import type { PaginationMeta } from '../../../shared/types/common';
 import type {
   Lead,
   PipelineDeal,
@@ -12,10 +13,8 @@ export interface PipelineDealsResponseData {
 }
 
 export interface StatusDealsResponseData {
-  statusId: number;
-  status: string;
-  count: number;
   items: PipelineDeal[];
+  pagination: PaginationMeta;
 }
 
 export interface PipelineLeadsResponseData {
@@ -23,10 +22,8 @@ export interface PipelineLeadsResponseData {
 }
 
 export interface StatusLeadsResponseData {
-  statusId: string;
-  status: string;
-  count: number;
   items: Lead[];
+  pagination: PaginationMeta;
 }
 
 export interface TasksResponseData {
@@ -34,8 +31,6 @@ export interface TasksResponseData {
 }
 
 export interface StatusTasksResponseData {
-  statusId: string;
-  status: string;
-  count: number;
   items: Task[];
+  pagination: PaginationMeta;
 }

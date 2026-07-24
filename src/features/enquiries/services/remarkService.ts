@@ -13,8 +13,10 @@ import type { CreateRemarkPayload, UpdateRemarkPayload } from '../types/request'
  *   LeadDetailDrawer).
  */
 class RemarkService {
-  async getRemarks(params: { referenceId: string; entityType: string }): Promise<ApiResponse<RemarkListData>> {
-    const response = await axiosInstance.get<ApiResponse<RemarkListData>>('/remarks', { params });
+  async getRemarks(params: { referenceId: string; entityType: string; page?: number; limit?: number }): Promise<ApiResponse<RemarkListData>> {
+    const { page, ...rest } = params;
+    const queryParams = { ...rest, ...(page !== undefined && { pageNumber: page }) };
+    const response = await axiosInstance.get<ApiResponse<RemarkListData>>('/remarks', { params: queryParams });
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,
@@ -31,7 +33,7 @@ class RemarkService {
     });
   }
 
-  async updateRemark(id: number, payload: UpdateRemarkPayload): Promise<ApiResponse<Remark>> {
+  async updateRemark(id: number | string, payload: UpdateRemarkPayload): Promise<ApiResponse<Remark>> {
     const response = await axiosInstance.patch<ApiResponse<Remark>>(`/remarks/${id}`, payload);
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
@@ -40,7 +42,7 @@ class RemarkService {
     });
   }
 
-  async deleteRemark(id: number): Promise<ApiResponse<null>> {
+  async deleteRemark(id: number | string): Promise<ApiResponse<null>> {
     const response = await axiosInstance.delete<ApiResponse<null>>(`/remarks/${id}`);
     return ServiceResponseUtil.successResponse({
       status: response.data.status,

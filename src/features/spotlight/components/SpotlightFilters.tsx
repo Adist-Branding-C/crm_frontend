@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DATE_FILTER_OPTIONS } from '../constants';
 import type { SpotlightFiltersProps } from '../types';
 
@@ -9,7 +9,32 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
   onFilterChange,
   onClearFilters,
   onClose,
-}) => (
+}) => {
+  const [localLocation, setLocalLocation] = useState(filters.location || '');
+  const [localRemarks, setLocalRemarks] = useState(filters.remarks || '');
+
+  useEffect(() => {
+    setLocalLocation(filters.location || '');
+  }, [filters.location]);
+
+  useEffect(() => {
+    setLocalRemarks(filters.remarks || '');
+  }, [filters.remarks]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localLocation !== (filters.location || '') || localRemarks !== (filters.remarks || '')) {
+        onFilterChange({
+          ...filters,
+          location: localLocation,
+          remarks: localRemarks,
+        });
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localLocation, localRemarks, filters, onFilterChange]);
+
+  return (
   <div className="filters-panel">
     <div className="filter-row">
       <div className="filter-group">
@@ -157,10 +182,8 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
           id="spotlight-filter-location"
           type="text"
           placeholder="Enter location"
-          value={filters.location}
-          onChange={(e) =>
-            onFilterChange({ ...filters, location: e.target.value })
-          }
+          value={localLocation}
+          onChange={(e) => setLocalLocation(e.target.value)}
         />
       </div>
     </div>
@@ -171,10 +194,8 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
           id="spotlight-filter-remarks"
           type="text"
           placeholder="Enter remarks"
-          value={filters.remarks}
-          onChange={(e) =>
-            onFilterChange({ ...filters, remarks: e.target.value })
-          }
+          value={localRemarks}
+          onChange={(e) => setLocalRemarks(e.target.value)}
         />
       </div>
       <div className="filter-actions">
@@ -187,6 +208,7 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default SpotlightFilters;
