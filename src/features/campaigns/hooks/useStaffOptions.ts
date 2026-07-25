@@ -15,9 +15,16 @@ function mapAgent(a: AgentItem): Agent {
   return agent;
 }
 
-export async function fetchAllAgents(): Promise<Agent[]> {
-  const all: Agent[] = [];
-  let pageNumber = 1;
+let agentCachePromise: Promise<Agent[]> | null = null;
+
+export async function fetchAllAgents(forceRefresh = false): Promise<Agent[]> {
+  if (agentCachePromise && !forceRefresh) {
+    return agentCachePromise;
+  }
+
+  agentCachePromise = (async () => {
+    const all: Agent[] = [];
+    let pageNumber = 1;
 
   while (all.length < MAX_AGENTS) {
     const res = await agentService.getAllAgents({ pageNumber, limit: PAGE_SIZE });
@@ -33,7 +40,15 @@ export async function fetchAllAgents(): Promise<Agent[]> {
     pageNumber += 1;
   }
 
-  return all;
+    return all;
+  })();
+
+  try {
+    return await agentCachePromise;
+  } catch (err) {
+    agentCachePromise = null;
+    throw err;
+  }
 }
 
 export function useStaffOptions() {

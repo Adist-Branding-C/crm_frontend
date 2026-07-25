@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDown, ArrowUp, ArrowUpDown, Download, Filter, Loader2, Plus } from 'lucide-react';
 import { useDrawer } from '../../../shared/hooks/useDrawer';
@@ -36,7 +36,7 @@ const CampaignsPage = () => {
   const deleteDialog = useDrawer<Campaign>();
   const dropdown = useRowDropdown();
   const toast = useToast();
-  const { handleExportCSV, isExporting, exportError } = useCampaignExport(fetch.searchQuery);
+  const { handleExportCSV, isExporting, exportError } = useCampaignExport(fetch.searchQuery, fetch.filters);
   const { agents: agentOptions, isLoading: agentOptionsLoading } = useAgentFilterOptions();
   const [showFilters, setShowFilters] = useState(false);
   const formBodyRef = useRef<HTMLDivElement>(null);
@@ -54,10 +54,6 @@ const CampaignsPage = () => {
   );
 
   const { searchValue, handleSearchChange } = useDebouncedSearch(fetch.handleSearchChange);
-
-  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    fetch.handleRowsPerPageChange(Number(e.target.value));
-  }, [fetch.handleRowsPerPageChange]);
 
   const editInitialValues = useMemo(
     () => CampaignMapper.toFormValues(editDrawer.item),
@@ -95,7 +91,7 @@ const CampaignsPage = () => {
           searchQuery={searchValue}
           onSearchChange={handleSearchChange}
           rowsPerPage={fetch.limit}
-          onRowsPerPageChange={handleRowsPerPageChange}
+          onRowsPerPageChange={fetch.handleRowsPerPageChange}
         >
           <button className="btn btn-secondary" onClick={() => setShowFilters((prev) => !prev)}>
             <Filter size={16} /> {ACTION_FILTER}
