@@ -53,3 +53,22 @@ export interface DesignationOption {
   label: string;
   value: string;
 }
+
+export interface StaffAutomationReference {
+  id: number;
+  automationRuleId: number;
+  ruleName: string;
+  actionType: string;
+}
+
+export interface StaffDeletionDependencies {
+  leadCount: number;
+  taskCount: number;
+  automationActions: StaffAutomationReference[];
+}
+
+export interface StaffDeletionDependenciesResponse {
+  status: boolean;
+  message?: string;
+  data?: StaffDeletionDependencies;
+}

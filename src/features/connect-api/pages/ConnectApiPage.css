@@ -129,6 +129,29 @@
   color: #16a34a;
 }
 
+.status-badge {
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.status-success {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.status-badge.status-failed {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.status-badge.status-pending {
+  background: #fffbeb;
+  color: #b45309;
+}
+
 .token-reveal {
   display: flex;
   gap: 0.5rem;
@@ -196,4 +219,41 @@
 @keyframes connect-api-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.request-log-row {
+  cursor: pointer;
+}
+
+.request-log-row:hover {
+  background: var(--bg-main);
+}
+
+.request-log-detail-row td {
+  background: var(--bg-main);
+  padding: 1rem;
+}
+
+.request-log-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.request-log-detail h4 {
+  margin: 0 0 0.5rem;
+}
+
+.request-log-detail .code-block {
+  margin: 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.request-log-pagination {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
 }

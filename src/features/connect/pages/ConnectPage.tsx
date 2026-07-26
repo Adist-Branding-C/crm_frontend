@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Copy, RefreshCw, ExternalLink, Network, Webhook, Terminal, X, Check } from 'lucide-react';
+import { ExternalLink, Network, Webhook, Terminal, X } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { connectOptions } from '../constants';
 import { useConnectData } from '../hooks/useConnectData';
@@ -20,9 +20,7 @@ const iconByOptionId: Record<string, ReactNode> = {
 
 const ConnectPage = () => {
   const {
-    showTokenModal, setShowTokenModal,
     showConfigModal, setShowConfigModal, configuringOption, configForm, setConfigForm,
-    apiToken, copied, handleGenerateToken, handleCopyToken,
     handleConfigClick, handleViewLeads,
   } = useConnectData();
 
@@ -37,11 +35,9 @@ const ConnectPage = () => {
             <h2>Connect your lead sources</h2>
             <p>Leadist connects with tools like Facebook and other useful platforms to improve your sales workflow.</p>
             <p>By connecting a webhook, you can receive leads inside Leadist automatically. Alternatively, you can use the Lead Generation API. Only one primary ingestion method should be active at a time to avoid duplicate leads.</p>
-            <p className="connect-hero-note">Update APIs and Add Note APIs can still work alongside webhook integrations.</p>
           </div>
           <div className="connect-hero-side">
             <div className="connect-hero-icon"><Network size={40} /></div>
-            <button className="btn btn-primary" onClick={() => setShowTokenModal(true)}>Generate API Token</button>
           </div>
         </div>
 
@@ -65,33 +61,6 @@ const ConnectPage = () => {
           ))}
         </div>
       </div>
-
-      {showTokenModal && (
-        <div className="modal-overlay" onClick={() => setShowTokenModal(false)}>
-          <div className="modal-content token-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>API Token</h3>
-              <button className="modal-close" onClick={() => setShowTokenModal(false)}><X size={20} /></button>
-            </div>
-            <div className="modal-body">
-              <div className="token-display">
-                <label>Your API Token</label>
-                <div className="token-input-group">
-                  <input type="text" value={apiToken} readOnly className="form-control" />
-                  <button className="copy-btn" onClick={handleCopyToken}>
-                    {copied ? <Check size={18} /> : <Copy size={18} />}
-                  </button>
-                </div>
-              </div>
-              <button className="btn btn-outline regenerate-btn" onClick={handleGenerateToken}>
-                <RefreshCw size={16} /> Regenerate Token
-              </button>
-              <p className="token-note">Last generated: {new Date().toLocaleDateString()}</p>
-              <div className="token-warning"><strong>Warning:</strong> Keep your API token secure. Do not share it publicly.</div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showConfigModal && configuringOption && (
         <div className="modal-overlay" onClick={() => setShowConfigModal(false)}>

@@ -3,7 +3,14 @@ import { AGENT_API_ENDPOINTS } from '../constants/agentApiEndpoints';
 import { buildQueryParams } from '../../../../shared/utils/queryParams.util';
 import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { sanitizePhoneDigits } from '../../../../shared/utils/phone.util';
-import type { AgentFormData, AgentResponse, GetAllAgentsParams, GetAllAgentsResponse, AgentListData } from '../types/agent.types';
+import type {
+  AgentFormData,
+  AgentResponse,
+  GetAllAgentsParams,
+  GetAllAgentsResponse,
+  AgentListData,
+  StaffDeletionDependenciesResponse,
+} from '../types/agent.types';
 
 class AgentService {
   async getAllAgents(params: GetAllAgentsParams = {}): Promise<GetAllAgentsResponse> {
@@ -60,6 +67,31 @@ class AgentService {
 
   async deleteAgent(staffId: string): Promise<Pick<AgentResponse, 'status' | 'message'>> {
     const response = await axiosInstance.delete<AgentResponse>(AGENT_API_ENDPOINTS.DELETE(staffId));
+    return ServiceResponseUtil.normalize({
+      status: response.data.status,
+      message: response.data.message,
+    });
+  }
+
+  async getDeletionDependencies(staffId: string): Promise<StaffDeletionDependenciesResponse> {
+    const response = await axiosInstance.get<StaffDeletionDependenciesResponse>(AGENT_API_ENDPOINTS.DELETION_DEPENDENCIES(staffId));
+    return ServiceResponseUtil.normalize({
+      status: response.data.status,
+      message: response.data.message ?? '',
+      data: response.data.data,
+    });
+  }
+
+  async reassignLeads(staffId: string, toStaffId: string): Promise<Pick<AgentResponse, 'status' | 'message'>> {
+    const response = await axiosInstance.post<AgentResponse>(AGENT_API_ENDPOINTS.REASSIGN_LEADS(staffId), { toStaffId });
+    return ServiceResponseUtil.normalize({
+      status: response.data.status,
+      message: response.data.message,
+    });
+  }
+
+  async resolveTasks(staffId: string, action: 'delete' | 'reassign', toStaffId?: string): Promise<Pick<AgentResponse, 'status' | 'message'>> {
+    const response = await axiosInstance.post<AgentResponse>(AGENT_API_ENDPOINTS.RESOLVE_TASKS(staffId), { action, toStaffId });
     return ServiceResponseUtil.normalize({
       status: response.data.status,
       message: response.data.message,

@@ -258,6 +258,62 @@ export interface LeadImportHistoryModalProps {
   onClose: () => void;
 }
 
+export type ImportHistoryStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type ImportEntryStatus = 'pending' | 'success' | 'failed';
+
+export interface ImportHistoryApiItem {
+  importId: string;
+  importType: string;
+  fileName: string;
+  totalRows: number;
+  cursorRow: number;
+  status: ImportHistoryStatus;
+  successCount: number;
+  failedCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ImportPaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+export interface ImportHistoryListData {
+  items: ImportHistoryApiItem[];
+  pagination: ImportPaginationInfo;
+}
+
+export interface ImportEntryApiItem {
+  id: number;
+  importId: string;
+  rowNumber: number | null;
+  status: ImportEntryStatus;
+  name: string | null;
+  phone: string | null;
+  source: string | null;
+  purpose: string | null;
+  errorMessage: string | null;
+  leadId: number | null;
+  assignedTo: string | null;
+  createdAt: string;
+}
+
+export interface ImportEntriesListData {
+  items: ImportEntryApiItem[];
+  pagination: ImportPaginationInfo;
+}
+
+export interface UploadImportResult {
+  importId: string;
+  totalRows: number;
+  status: ImportHistoryStatus;
+}
+
 export interface LeadExportFilters {
   createdAt: { from: string; to: string };
   updatedAt: { from: string; to: string };

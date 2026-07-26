@@ -1,6 +1,6 @@
 import axiosInstance from '../../../api/axiosInstance';
 import { CONNECT_API_ENDPOINTS } from '../constants/connectApiEndpoints';
-import type { ApiTokenData } from '../types';
+import type { ApiTokenData, ApiRequestLogData } from '../types';
 import { ServiceResponseUtil } from '../../../shared/utils/serviceResponse.util';
 import type { ServiceResponseShape } from '../../../shared/types/serviceResponse.types';
 
@@ -8,6 +8,14 @@ class ConnectApiService {
   async getApiToken(): Promise<ServiceResponseShape<ApiTokenData>> {
     const response = await axiosInstance.get<ServiceResponseShape<ApiTokenData>>(
       CONNECT_API_ENDPOINTS.GET_TOKEN
+    );
+    return ServiceResponseUtil.normalize(response.data);
+  }
+
+  async getApiRequestLog(page = 1, limit = 10): Promise<ServiceResponseShape<ApiRequestLogData>> {
+    const response = await axiosInstance.get<ServiceResponseShape<ApiRequestLogData>>(
+      CONNECT_API_ENDPOINTS.GET_REQUEST_LOG,
+      { params: { pageNumber: page, limit } }
     );
     return ServiceResponseUtil.normalize(response.data);
   }

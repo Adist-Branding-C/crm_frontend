@@ -6,7 +6,7 @@ import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useAgentCrud, useAgentDesignationOptions, useAgentDrawer, useAgentDeleteConfirm, useAgentFormSubmit } from '../hooks';
 import { agentService } from '../services/agent.service';
 import AddAgentDrawer from '../components/AddAgentDrawer';
-import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
+import StaffDeletionModal from '../components/StaffDeletionModal';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import { SettingsTableLayout } from '../../../../shared/components/settings';
 import { AGENT_TABLE_COLUMNS } from '../constants/agentTableColumns';
@@ -51,6 +51,12 @@ const AgentPage = () => {
     dropdown.closeDropdown();
   }, [deleteConfirm.handleDeleteClick, dropdown.closeDropdown]);
 
+  const handleConfirmedDelete = useCallback(async (staffId: string) => {
+    const success = await crud.handleDeleteAgent(staffId);
+    if (success) deleteConfirm.closeDeleteModal();
+    return success;
+  }, [crud.handleDeleteAgent, deleteConfirm.closeDeleteModal]);
+
   const { handleRowsPerPageChange: setRowsPerPage } = pagination;
   const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
     setRowsPerPage(Number(e.target.value));
@@ -88,10 +94,10 @@ const AgentPage = () => {
         status={{ isLoading: pagination.isLoading, error: pagination.error }}
         designation={{ options: designation.designationOptions, onFetch: designation.fetchDesignations }}
       />
-      <AdminDeleteModal
+      <StaffDeletionModal
         isOpen={!!deleteConfirm.deletingItem}
-        itemName={deleteConfirm.deletingItem?.fullName || deleteConfirm.deletingItem?.name || ''}
-        onConfirm={deleteConfirm.handleConfirmDelete}
+        staff={deleteConfirm.deletingItem}
+        onDelete={handleConfirmedDelete}
         onClose={deleteConfirm.closeDeleteModal}
       />
       <ToastNotification

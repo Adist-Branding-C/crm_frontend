@@ -1,72 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  RefreshCw, Search, ChevronDown, ChevronLeft, ChevronRight, Eye,
-  CheckCircle, XCircle, AlertCircle
+  RefreshCw, ChevronLeft, ChevronRight,
+  CheckCircle, XCircle
 } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import './ReportsSubPages.css';
-import {
-  importedData, duplicateData, failedData, statsData,
-  importDetailColumns as columns
-} from '../constants/historyReports.data';
+import { importDetailColumns as columns } from '../constants/historyReports.data';
 import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
-import type { DetailRow } from '../constants/historyReports.data';
+import { useImportHistoryDetail } from '../hooks/useImportHistoryDetail';
+import type { ImportEntryStatus } from '../types';
+
+type DetailTab = 'imported' | 'failed';
+
+const TAB_TO_STATUS: Record<DetailTab, ImportEntryStatus> = {
+  imported: 'success',
+  failed: 'failed',
+};
 
 const ImportHistoryDetail: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState('imported');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const { id: importId } = useParams<{ id: string }>();
+  const [activeTab, setActiveTab] = useState<DetailTab>('imported');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'name', direction: 'asc' });
 
-  const getTableData = (): DetailRow[] => {
-    switch (activeTab) {
-      case 'imported': return importedData;
-      case 'duplicates': return duplicateData;
-      case 'failed': return failedData;
-      default: return importedData;
-    }
-  };
+  const { importHistory, entries, total, totalPages, isLoading, fetchDetail, fetchEntries } = useImportHistoryDetail();
 
-  const filteredData = React.useMemo(() => {
-    let data = getTableData();
-    if (searchQuery) {
-      data = data.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.email ?? '').toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    if (sortConfig.key) {
-      data.sort((a, b) => {
-        const aVal = a[sortConfig.key] || '';
-        const bVal = b[sortConfig.key] || '';
-        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return data;
-  }, [activeTab, searchQuery, sortConfig]);
+  useEffect(() => {
+    if (!importId) return;
+    fetchDetail(importId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importId]);
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+  useEffect(() => {
+    if (!importId) return;
+    fetchEntries(importId, TAB_TO_STATUS[activeTab], currentPage, rowsPerPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importId, activeTab, currentPage, rowsPerPage]);
 
-  const handleSort = (key: string) => {
-    setSortConfig(prev => ({ key, direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc' }));
-  };
+  // Same reasoning as the list page: the worker finishes async, so poll
+  // while this import is still pending/processing instead of leaving the
+  // stats/tabs stuck showing 0 until someone clicks Refresh.
+  useEffect(() => {
+    if (!importId || !importHistory) return;
+    if (importHistory.status !== 'pending' && importHistory.status !== 'processing') return;
+    const timer = setTimeout(() => {
+      fetchDetail(importId);
+      fetchEntries(importId, TAB_TO_STATUS[activeTab], currentPage, rowsPerPage);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [importId, importHistory, activeTab, currentPage, rowsPerPage, fetchDetail, fetchEntries]);
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) { setSelectedRows(paginatedData.map(item => item.id)); }
-    else { setSelectedRows([]); }
-  };
-
-  const handleSelectRow = (id: number) => {
-    setSelectedRows(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  const handleTabChange = (tab: DetailTab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
   };
 
   const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -74,67 +60,52 @@ const ImportHistoryDetail: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handleRefresh = () => {
+    if (!importId) return;
+    fetchDetail(importId);
+    fetchEntries(importId, TAB_TO_STATUS[activeTab], currentPage, rowsPerPage);
+  };
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+
   return (
     <div className="enquiries-page">
       <div className="report-page-header-simple">
-        <h1 className="header-title-simple">contacts_import_25Jan.csv</h1>
+        <h1 className="header-title-simple">{importHistory?.fileName ?? 'Import details'}</h1>
       </div>
 
       <div className="stats-card-row">
         <div className="stat-card">
-          <span className="stat-number">{statsData.total}</span>
+          <span className="stat-number">{importHistory?.totalRows ?? 0}</span>
           <span className="stat-label">Total Records</span>
         </div>
         <div className="stat-card stat-card-success">
           <CheckCircle size={24} className="stat-icon" />
-          <span className="stat-number">{statsData.imported}</span>
+          <span className="stat-number">{importHistory?.successCount ?? 0}</span>
           <span className="stat-label">Imported</span>
-        </div>
-        <div className="stat-card stat-card-warning">
-          <AlertCircle size={24} className="stat-icon" />
-          <span className="stat-number">{statsData.duplicates}</span>
-          <span className="stat-label">Duplicates</span>
         </div>
         <div className="stat-card stat-card-danger">
           <XCircle size={24} className="stat-icon" />
-          <span className="stat-number">{statsData.failed}</span>
+          <span className="stat-number">{importHistory?.failedCount ?? 0}</span>
           <span className="stat-label">Failed</span>
         </div>
       </div>
 
       <div className="tabs-container">
-        <button
-          className={`tab-btn ${activeTab === 'imported' ? 'active' : ''}`}
-          onClick={() => setActiveTab('imported')}
-        >
-          Imported ({statsData.imported})
+        <button className={`tab-btn ${activeTab === 'imported' ? 'active' : ''}`} onClick={() => handleTabChange('imported')}>
+          Imported ({importHistory?.successCount ?? 0})
         </button>
-        <button
-          className={`tab-btn ${activeTab === 'duplicates' ? 'active' : ''}`}
-          onClick={() => setActiveTab('duplicates')}
-        >
-          Duplicates ({statsData.duplicates})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'failed' ? 'active' : ''}`}
-          onClick={() => setActiveTab('failed')}
-        >
-          Failed ({statsData.failed})
+        <button className={`tab-btn ${activeTab === 'failed' ? 'active' : ''}`} onClick={() => handleTabChange('failed')}>
+          Failed ({importHistory?.failedCount ?? 0})
         </button>
       </div>
 
       <div className="enquiries-toolbar">
         <div className="toolbar-left">
-          <button className="btn btn-secondary">
+          <button className="btn btn-secondary" onClick={handleRefresh}>
             <RefreshCw size={16} />
             Refresh
           </button>
-        </div>
-        <div className="toolbar-right">
-          <div className="search-box">
-            <Search size={16} className="search-icon" />
-            <input type="text" placeholder="Search..." value={searchQuery} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} className="search-input" />
-          </div>
         </div>
       </div>
 
@@ -143,30 +114,26 @@ const ImportHistoryDetail: React.FC = () => {
           <thead>
             <tr>
               {columns.map(col => (
-                <th key={col.key} className={col.sortable ? 'sortable' : ''} onClick={col.sortable ? () => handleSort(col.key) : undefined}>
-                  {col.key === 'checkbox' ? (
-                    <input type="checkbox" checked={paginatedData.length > 0 && selectedRows.length === paginatedData.length} onChange={handleSelectAll} />
-                  ) : (
-                    <>
-                      {col.label}
-                      {col.sortable && sortConfig.key === col.key && (sortConfig.direction === 'asc' ? <ChevronDown size={14} /> : <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} />)}
-                    </>
-                  )}
-                </th>
+                <th key={col.key}>{col.key === 'checkbox' ? null : col.label}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row, index) => (
+            {isLoading ? (
+              <tr><td colSpan={columns.length} style={{ textAlign: 'center', padding: '2rem' }}>Loading…</td></tr>
+            ) : entries.length === 0 ? (
+              <tr><td colSpan={columns.length} style={{ textAlign: 'center', padding: '2rem' }}>No records</td></tr>
+            ) : entries.map((row, index) => (
               <tr key={row.id}>
-                <td><input type="checkbox" checked={selectedRows.includes(row.id)} onChange={() => handleSelectRow(row.id)} /></td>
+                <td></td>
                 <td>{startIndex + index + 1}</td>
-                <td className="lead-name-cell">{row.name}</td>
-                <td>{row.phone}</td>
-                <td>{row.email || '-'}</td>
-                <td>{row.reason || '-'}</td>
-                <td>{row.createdAt}</td>
-                <td className="meta-cell">{row.meta}</td>
+                <td className="lead-name-cell">{row.name ?? '-'}</td>
+                <td>{row.phone ?? '-'}</td>
+                <td>{row.source ?? '-'}</td>
+                <td>{row.purpose ?? '-'}</td>
+                <td>{row.assignedTo ?? '-'}</td>
+                <td>{row.errorMessage ?? '-'}</td>
+                <td>{new Date(row.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
               </tr>
             ))}
           </tbody>
@@ -179,7 +146,7 @@ const ImportHistoryDetail: React.FC = () => {
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
             {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
-          <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
+          <span className="pagination-info">Showing {total === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + rowsPerPage, total)} of {total}</span>
         </div>
         <div className="pagination-right">
           <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(1)}>First</button>

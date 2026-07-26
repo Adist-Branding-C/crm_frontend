@@ -20,4 +20,5 @@ export const tabs: Tab[] = [
   { id: 'parameters', label: 'Parameters' },
   { id: 'example', label: 'Example' },
   { id: 'response', label: 'Response' },
+  { id: 'request-log', label: 'Request Log' },
 ];
