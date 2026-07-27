@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 // import { taskService } from '../../task/shared/services/taskService';
+// import { taskDataService } from '../../task/task/services/taskDataService';
 import type { LeadTaskItem, LeadTaskFormData } from '../types';
 import { ERROR_MESSAGES } from '../constants/messages';
 import { TaskDataService, taskDataService } from '../../task/task/services/taskDataService';
@@ -17,10 +18,9 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
     setIsLoading(true);
     setError(null);
     try {
-      const response = await taskService.getTasks({ entityType: 'lead', entityId: leadId });
+      const response = await taskDataService.getAll({ pageNumber: 1, limit: 100, leadId: String(leadId) });
       if (response.status) {
-        const data = (response.data as Record<string, unknown>) || {};
-        const items = (data.items as LeadTaskItem[]) || [];
+        const items = (response.data as unknown as LeadTaskItem[]) || [];
         setTasks(Array.isArray(items) ? items : []);
 
       } else {
@@ -46,7 +46,7 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
   const addTask = useCallback(async (data: LeadTaskFormData): Promise<boolean> => {
     setError(null);
     try {
-      const response = await taskService.createTask({ ...data, entityType: 'lead', entityId: leadId });
+      const response = await taskDataService.create({ ...data, entityType: 'lead', entityId: leadId } as any);
       if (response.status) {
         await fetchTasks();
         return true;
@@ -63,7 +63,7 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
   const updateTask = useCallback(async (id: number, data: LeadTaskFormData): Promise<boolean> => {
     setError(null);
     try {
-      const response = await taskService.updateTask(id, data);
+      const response = await taskDataService.update(id, data as any);
       if (response.status) {
         await fetchTasks();
         return true;
@@ -79,7 +79,7 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
 
   const deleteTask = useCallback(async (id: number): Promise<boolean> => {
     try {
-      const response = await taskService.deleteTask(id);
+      const response = await taskDataService.delete(id);
       if (response.status) {
         await fetchTasks();
         return true;

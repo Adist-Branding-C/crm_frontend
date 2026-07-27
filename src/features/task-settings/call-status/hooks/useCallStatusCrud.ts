@@ -8,7 +8,8 @@ import type { CallStatusFormData, UseCallStatusCrudParams } from '../types/index
 /**
  * Create/update/delete API orchestration for call statuses. Adding resets the page to 1 and
  * clears any active search before refreshing the list; updating just refreshes in place. Delete
- * errors are parsed inline rather than going through the shared submit-error handler.
+ * errors are parsed inline and surfaced via toast rather than going through the shared
+ * submit-error handler, since the delete confirmation modal has no inline error slot.
  */
 export function useCallStatusCrud({ pagination, showToastMessage }: UseCallStatusCrudParams) {
   const submitError = useSubmitErrorHandler({
@@ -78,8 +79,6 @@ export function useCallStatusCrud({ pagination, showToastMessage }: UseCallStatu
   }, [submitError, showToastMessage, pagination]);
 
   const handleDeleteCallStatus = useCallback(async (id: number) => {
-    pagination.setError('');
-
     try {
       const response = await callStatusApiService.delete(id);
 
@@ -87,20 +86,20 @@ export function useCallStatusCrud({ pagination, showToastMessage }: UseCallStatu
         pagination.refresh();
         return true;
       }
-      pagination.setError(response.message || 'Failed to delete call status');
+      showToastMessage(response.message || 'Failed to delete call status', 'error');
       return false;
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete call status');
+        showToastMessage(axiosErr.response?.data?.message || 'Failed to delete call status', 'error');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        pagination.setError((err as { message: string }).message);
+        showToastMessage((err as { message: string }).message, 'error');
       } else {
-        pagination.setError('Network error. Please try again.');
+        showToastMessage('Network error. Please try again.', 'error');
       }
       return false;
     }
-  }, [pagination]);
+  }, [pagination, showToastMessage]);
 
   return { handleAddCallStatus, handleUpdateCallStatus, handleDeleteCallStatus };
 }

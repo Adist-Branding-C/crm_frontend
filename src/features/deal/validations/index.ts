@@ -1,8 +1,8 @@
 import * as yup from 'yup';
 import type { DealAdditionalFieldDef } from '../types/interface';
 import { isPastDate } from '../utils/dealDateValidation';
+import { getPhoneLengthErrorMessage, isValidPhoneForCountry } from '../constants/phoneValidation';
 // import { isValidPhoneForCountry, getPhoneLengthErrorMessage } from '../../enquiries/constants/phoneValidation';
-
 
 /**
  * Original Start/End Date values a Deal had when the edit drawer opened.

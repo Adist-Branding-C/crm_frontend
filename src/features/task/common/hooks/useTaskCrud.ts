@@ -113,8 +113,15 @@ export function useTaskCrud<TFormData, TItem>({ pagination, showToastMessage, da
       }
       showToastMessage(response.message || messages.deleteFailed, 'error');
       return false;
-    } catch {
-      showToastMessage(messages.deleteFailed, 'error');
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        showToastMessage(axiosErr.response?.data?.message || messages.deleteFailed, 'error');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        showToastMessage((err as { message: string }).message, 'error');
+      } else {
+        showToastMessage('Network error. Please try again.', 'error');
+      }
       return false;
     }
   }, [pagination, showToastMessage, dataService, messages]);

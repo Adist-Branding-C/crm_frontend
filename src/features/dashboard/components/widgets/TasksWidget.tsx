@@ -1,36 +1,61 @@
 import React from 'react';
 import './TasksWidget.css';
+import './WidgetStyles.css';
+import { useTasksStatistics } from '../../hooks/useTasksStatistics';
+import type { DashboardPeriod } from '../../types';
 
-const TasksWidget = () => {
+interface TasksWidgetProps {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+const TasksWidget = ({ period, from, to }: TasksWidgetProps) => {
+  const { total, pending, overdue, pendingPercent, overduePercent, isLoading, isError } = useTasksStatistics(
+    period,
+    from,
+    to,
+  );
+
   return (
     <div className="card widget-base tasks-widget">
       <h3 className="widget-title">Tasks</h3>
-      
-      <div className="tasks-overall">
-        <span className="tasks-big-number">146</span>
-      </div>
 
-      <div className="tasks-stats">
-        <div className="task-stat-item">
-          <div className="task-stat-header">
-            <span className="task-stat-label">Pending</span>
-            <span className="task-stat-value">54</span>
+      {isLoading ? (
+        <div className="widget-status-text">Loading...</div>
+      ) : isError ? (
+        <div className="widget-status-text">Failed to load tasks</div>
+      ) : total === 0 ? (
+        <div className="widget-status-text">No tasks found</div>
+      ) : (
+        <>
+          <div className="tasks-overall">
+            <span className="tasks-big-number">{total}</span>
           </div>
-          <div className="task-bar-bg">
-            <div className="task-bar-fill" style={{ width: '40%', backgroundColor: '#f97316' }}></div>
-          </div>
-        </div>
 
-        <div className="task-stat-item">
-          <div className="task-stat-header">
-            <span className="task-stat-label">Overdue</span>
-            <span className="task-stat-value">80</span>
+          <div className="tasks-stats">
+            <div className="task-stat-item">
+              <div className="task-stat-header">
+                <span className="task-stat-label">Pending</span>
+                <span className="task-stat-value">{pending}</span>
+              </div>
+              <div className="task-bar-bg">
+                <div className="task-bar-fill" style={{ width: `${pendingPercent}%`, backgroundColor: '#f97316' }}></div>
+              </div>
+            </div>
+
+            <div className="task-stat-item">
+              <div className="task-stat-header">
+                <span className="task-stat-label">Overdue</span>
+                <span className="task-stat-value">{overdue}</span>
+              </div>
+              <div className="task-bar-bg">
+                <div className="task-bar-fill" style={{ width: `${overduePercent}%`, backgroundColor: '#8b5cf6' }}></div>
+              </div>
+            </div>
           </div>
-          <div className="task-bar-bg">
-            <div className="task-bar-fill" style={{ width: '60%', backgroundColor: '#8b5cf6' }}></div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

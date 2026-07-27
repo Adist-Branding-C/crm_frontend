@@ -21,9 +21,13 @@ const GenericTaskForm = ({
   leadOptions,
   leadLoading,
   categoryOptions,
+  categoryLoading,
   hideCategory = false,
   children,
 }: GenericTaskFormProps) => {
+  const staffEmpty = !staffLoading && staffOptions.length === 0;
+  const leadEmpty = !leadLoading && (leadOptions ?? []).length === 0;
+  const categoryEmpty = !categoryLoading && (categoryOptions ?? []).length === 0;
   const drawerBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,13 +71,24 @@ const GenericTaskForm = ({
               {!hideCategory && categoryOptions && (
                 <div className="form-group">
                   <label>Category <span className="text-danger">*</span></label>
-                  <Field as="select" name="categoryId" className={fieldClass('categoryId')}>
-                    <option value="">Select a category</option>
+                  <Field
+                    as="select"
+                    name="categoryId"
+                    className={fieldClass('categoryId')}
+                    disabled={categoryLoading || categoryEmpty}
+                  >
+                    <option value="">{categoryLoading ? 'Loading...' : 'Select a category'}</option>
                     {categoryOptions.map(cat => (
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                   </Field>
-                  <FormikError name="categoryId" component="small" className="field-error-text" />
+                  {categoryEmpty ? (
+                    <small className="field-error-text">
+                      No task categories available. Please create a category first.
+                    </small>
+                  ) : (
+                    <FormikError name="categoryId" component="small" className="field-error-text" />
+                  )}
                 </div>
               )}
 
@@ -94,24 +109,46 @@ const GenericTaskForm = ({
 
               <div className="form-group">
                 <label>Assigned To <span className="text-danger">*</span></label>
-                <Field as="select" name="assignedTo" className={fieldClass('assignedTo')}>
+                <Field
+                  as="select"
+                  name="assignedTo"
+                  className={fieldClass('assignedTo')}
+                  disabled={staffLoading || staffEmpty}
+                >
                   <option value="">{staffLoading ? 'Loading staff...' : 'Select a staff member'}</option>
                   {staffOptions.map(staff => (
                     <option key={staff.value} value={staff.value}>{staff.label}</option>
                   ))}
                 </Field>
-                <FormikError name="assignedTo" component="small" className="field-error-text" />
+                {staffEmpty ? (
+                  <small className="field-error-text">
+                    No staff members available. Please add a staff member first.
+                  </small>
+                ) : (
+                  <FormikError name="assignedTo" component="small" className="field-error-text" />
+                )}
               </div>
 
               <div className="form-group">
                 <label>Lead <span className="text-danger">*</span></label>
-                <Field as="select" name="leadId" className={fieldClass('leadId')}>
+                <Field
+                  as="select"
+                  name="leadId"
+                  className={fieldClass('leadId')}
+                  disabled={leadLoading || leadEmpty}
+                >
                   <option value="">{leadLoading ? 'Loading leads...' : 'Select a lead'}</option>
                   {(leadOptions ?? []).map(lead => (
                     <option key={lead.value} value={lead.value}>{lead.label}</option>
                   ))}
                 </Field>
-                <FormikError name="leadId" component="small" className="field-error-text" />
+                {leadEmpty ? (
+                  <small className="field-error-text">
+                    No leads available. Please create a lead first.
+                  </small>
+                ) : (
+                  <FormikError name="leadId" component="small" className="field-error-text" />
+                )}
               </div>
 
               <div className="form-group">

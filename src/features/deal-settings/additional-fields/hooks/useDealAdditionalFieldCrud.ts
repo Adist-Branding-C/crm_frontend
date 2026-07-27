@@ -23,7 +23,7 @@ interface PendingSave {
  *   Splitting them would just require threading the pending values through an extra hook for no
  *   separation-of-concerns benefit.
  */
-export function useDealAdditionalFieldCrud({ editingItem, closeDrawer, refresh, setError }: UseDealAdditionalFieldCrudParams) {
+export function useDealAdditionalFieldCrud({ editingItem, closeDrawer, refresh, setError, showToastMessage }: UseDealAdditionalFieldCrudParams) {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [saveConfirmMode, setSaveConfirmMode] = useState<'create' | 'update'>('create');
   const [isSaving, setIsSaving] = useState(false);
@@ -56,36 +56,49 @@ export function useDealAdditionalFieldCrud({ editingItem, closeDrawer, refresh, 
         : await dealAdditionalFieldService.createDealAdditionalField(payload);
 
       if (!response.status) {
-        setError(response.message || (editingItem ? 'Failed to update field' : 'Failed to add field'));
+        const message = response.message || (editingItem ? 'Failed to update field' : 'Failed to add field');
+        setError(message);
+        showToastMessage(message, 'error');
         return;
       }
 
       closeDrawer();
       refresh();
       pending.helpers.resetForm();
+      showToastMessage(
+        editingItem ? 'Additional field updated successfully' : 'Additional field added successfully',
+        'success',
+      );
     } catch (err) {
-      setError(getErrorMessage(err, 'Network error. Please try again.'));
+      const message = getErrorMessage(err, 'Network error. Please try again.');
+      setError(message);
+      showToastMessage(message, 'error');
     } finally {
       pending.helpers.setSubmitting(false);
       setIsSaving(false);
       pendingRef.current = null;
     }
-  }, [editingItem, closeDrawer, refresh, setError]);
+  }, [editingItem, closeDrawer, refresh, setError, showToastMessage]);
 
   const handleDelete = useCallback(async (item: DealAdditionalField) => {
     try {
       const response = await dealAdditionalFieldService.deleteDealAdditionalField(item.id);
       if (!response.status) {
-        setError(response.message || 'Failed to delete field');
+        const message = response.message || 'Failed to delete field';
+        setError(message);
+        showToastMessage(message, 'error');
         return false;
       }
       refresh();
+      showToastMessage('Additional field deleted successfully', 'success');
       return true;
     } catch (err) {
-      setError(getErrorMessage(err, 'Network error. Failed to delete field.'));
+      const message = getErrorMessage(err, 'Network error. Failed to delete field.');
+      setError(message);
+      showToastMessage(message, 'error');
       return false;
     }
-  }, [refresh, setError]);
+  }, [refresh, setError, showToastMessage]);
 
   return { showSaveConfirm, saveConfirmMode, isSaving, requestSave, confirmSave, cancelSave, handleDelete };
 }

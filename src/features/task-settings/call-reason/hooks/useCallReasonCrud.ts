@@ -8,7 +8,8 @@ import type { CallReasonFormData, UseCallReasonCrudParams } from '../types/index
 /**
  * Create/update/delete API orchestration for call reasons. Adding resets the page to 1 and
  * clears any active search before refreshing the list; updating just refreshes in place. Delete
- * errors are parsed inline rather than going through the shared submit-error handler.
+ * errors are parsed inline and surfaced via toast rather than going through the shared
+ * submit-error handler, since the delete confirmation modal has no inline error slot.
  */
 export function useCallReasonCrud({ pagination, showToastMessage }: UseCallReasonCrudParams) {
   const submitError = useSubmitErrorHandler({
@@ -78,8 +79,6 @@ export function useCallReasonCrud({ pagination, showToastMessage }: UseCallReaso
   }, [submitError, showToastMessage, pagination]);
 
   const handleDeleteCallReason = useCallback(async (id: number) => {
-    pagination.setError('');
-
     try {
       const response = await callReasonApiService.delete(id);
 
@@ -87,20 +86,20 @@ export function useCallReasonCrud({ pagination, showToastMessage }: UseCallReaso
         pagination.refresh();
         return true;
       }
-      pagination.setError(response.message || 'Failed to delete call reason');
+      showToastMessage(response.message || 'Failed to delete call reason', 'error');
       return false;
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
-        pagination.setError(axiosErr.response?.data?.message || 'Failed to delete call reason');
+        showToastMessage(axiosErr.response?.data?.message || 'Failed to delete call reason', 'error');
       } else if (err && typeof err === 'object' && 'message' in err) {
-        pagination.setError((err as { message: string }).message);
+        showToastMessage((err as { message: string }).message, 'error');
       } else {
-        pagination.setError('Network error. Please try again.');
+        showToastMessage('Network error. Please try again.', 'error');
       }
       return false;
     }
-  }, [pagination]);
+  }, [pagination, showToastMessage]);
 
   return { handleAddCallReason, handleUpdateCallReason, handleDeleteCallReason };
 }

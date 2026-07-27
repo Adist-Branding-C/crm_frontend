@@ -84,13 +84,14 @@ const CallReasonPage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Reason</TCell>
+                <TCell variant="th">Created By</TCell>
                 <TCell variant="th">Status</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
               {fetch.callReasonList.length === 0 ? (
-                <EmptyState colSpan={4} />
+                <EmptyState colSpan={5} />
               ) : (
                 fetch.callReasonList.map((item, index) => (
                   <CallReasonRow
