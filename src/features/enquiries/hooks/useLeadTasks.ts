@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { taskService } from '../../task/shared/services/taskService';
+// import { taskService } from '../../task/shared/services/taskService';
 import type { LeadTaskItem, LeadTaskFormData } from '../types';
 import { ERROR_MESSAGES } from '../constants/messages';
+import { TaskDataService, taskDataService } from '../../task/task/services/taskDataService';
+
+const taskService = new TaskDataService()
 
 export function useLeadTasks(leadId: number | undefined, isOpen: boolean, activeTab: string) {
   const [tasks, setTasks] = useState<LeadTaskItem[]>([]);
