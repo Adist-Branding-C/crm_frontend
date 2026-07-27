@@ -5,10 +5,9 @@ import { TASK_API } from '../constants/taskApiEndpoints';
 import type { TaskCategory, StaffMember, LeadMember } from '../types/lookupResponses';
 
 export class TaskLookupService {
-  async getTaskCategories(): Promise<ApiResponse<{ items: TaskCategory[] }>> {
-    const response = await axiosInstance.get<ApiResponse<{ items: TaskCategory[] }>>(
-      TASK_API.CATEGORY,
-      { params: { pageNumber: 1, limit: 10 } },
+  async getTaskCategories(): Promise<ApiResponse<TaskCategory[]>> {
+    const response = await axiosInstance.get<ApiResponse<TaskCategory[]>>(
+      TASK_API.CATEGORY_DROPDOWN,
     );
     return ServiceResponseUtil.successResponse({
       status: response.data.status,

@@ -12,6 +12,8 @@ export interface TaskCategoryRawItem {
   category?: string;
   taskCategory?: string;
   status?: string;
+  createdBy?: string | null | undefined;
+  createdByName?: string | null | undefined;
 }
 
 export interface TaskCategoryListResponse {

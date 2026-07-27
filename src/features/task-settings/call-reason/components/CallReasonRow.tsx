@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import CallReasonActions from './CallReasonActions';
+import CreatedByCell from '../../components/CreatedByCell';
 import SettingsStatusBadge from '../../../../shared/components/settings/SettingsStatusBadge';
 import { TRow, TCell } from '../../../../shared/components/table';
 import type { CallReasonRowProps } from '../types/index';
@@ -13,6 +14,7 @@ const CallReasonRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, on
   <TRow>
     <TCell>{index + 1}</TCell>
     <TCell>{item.name || '-'}</TCell>
+    <CreatedByCell createdByName={item.createdByName} />
     <TCell>
       <SettingsStatusBadge status={item.status} />
     </TCell>

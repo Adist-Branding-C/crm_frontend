@@ -84,13 +84,14 @@ const CallStatusPage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Name</TCell>
+                <TCell variant="th">Created By</TCell>
                 <TCell variant="th">Status</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
               {fetch.callStatusList.length === 0 ? (
-                <EmptyState colSpan={4} />
+                <EmptyState colSpan={5} />
               ) : (
                 fetch.callStatusList.map((item, index) => (
                   <CallStatusRow

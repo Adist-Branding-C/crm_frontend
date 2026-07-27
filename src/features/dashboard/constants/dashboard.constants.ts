@@ -29,13 +29,6 @@ export const LEAD_SOURCE_DATA = [
   { label: 'Other', value: '100', color: '#cbd5e1' },
 ];
 
-export const DEAL_BY_STAGE_DATA = [
-  { label: 'New', value: '08', color: '#f472b6' },
-  { label: 'Follow up', value: '50', color: '#3b82f6' },
-  { label: 'Partially interested', value: '100', color: '#fbbf24' },
-  { label: 'Interested', value: '08', color: '#10b981' },
-];
-
 export const CAMPAIGNS_DATA = [
   { name: 'Group A', value: 45, color: '#fbbf24' },
   { name: 'Group B', value: 55, color: '#e0323e' },

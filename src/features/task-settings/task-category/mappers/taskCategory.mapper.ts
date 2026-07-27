@@ -17,6 +17,8 @@ export class TaskCategoryMapper {
       id: raw.id,
       category: raw.category || raw.taskCategory || '',
       status: raw.status || '',
+      createdBy: raw.createdBy,
+      createdByName: raw.createdByName,
     };
   }
 }

@@ -6,7 +6,7 @@
  *   consumed by useCategoryOptions/useStaffOptions/useLeadOptions.
  */
 export const TASK_API = {
-  CATEGORY: '/task-category',
+  CATEGORY_DROPDOWN: '/task-category/dropdown',
   STAFF: '/staff',
   LEAD: '/leads',
 };

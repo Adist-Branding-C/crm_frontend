@@ -11,11 +11,15 @@ import TasksWidget from '../components/widgets/TasksWidget';
 import CampaignsWidget from '../components/widgets/CampaignsWidget';
 import ActivitiesWidget from '../components/widgets/ActivitiesWidget';
 import { StatCard, KpiCard } from '../components/widgets/Cards';
+import WonDealsCard from '../components/widgets/WonDealsCard';
+import LostDealsCard from '../components/widgets/LostDealsCard';
+import InProgressDealsCard from '../components/widgets/InProgressDealsCard';
 import { DASHBOARD_KPI_CARDS } from '../constants/dashboard.constants';
+import type { DashboardPeriod } from '../types';
 
 const DashboardPage = () => {
 //   const [branch, setBranch] = useState<string>('calicut');
-  const [period, setPeriod] = useState<string>('today');
+  const [period, setPeriod] = useState<DashboardPeriod>('today');
   const [customFrom, setCustomFrom] = useState<string>('');
   const [customTo, setCustomTo] = useState<string>('');
   const [showCustom, setShowCustom] = useState<boolean>(false);
@@ -100,20 +104,21 @@ const DashboardPage = () => {
       </div>
 
       <div className="widgets-grid middle-cards-grid">
-        <KpiCard title="Won Deals" value="12" />
-        <KpiCard title="Lost Deals" value="3" />
+        <WonDealsCard period={period} from={customFrom} to={customTo} />
+        <LostDealsCard period={period} from={customFrom} to={customTo} />
+        <InProgressDealsCard period={period} from={customFrom} to={customTo} />
       </div>
 
       <div className="widgets-grid middle-cards-grid">
         <LeadStatusWidget />
         <LeadSourceWidget />
         <LeadPurposeWidget />
-        <DealPipelineWidget />
+        <DealPipelineWidget period={period} from={customFrom} to={customTo} />
       </div>
 
       <div className="widgets-grid bottom-cards-grid">
-        <DealByStageWidget />
-        <TasksWidget />
+        <DealByStageWidget period={period} from={customFrom} to={customTo} />
+        <TasksWidget period={period} from={customFrom} to={customTo} />
         <CampaignsWidget />
         <ActivitiesWidget />
       </div>
