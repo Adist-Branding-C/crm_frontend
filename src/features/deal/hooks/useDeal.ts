@@ -4,6 +4,7 @@ import { dealService } from '../services/deal.service';
 import { addDealValidationSchema, editDealValidationSchema } from '../validations/deal.validation';
 import { ADD_DEAL_INITIAL_VALUES } from '../constants/deal.constants';
 import type { DealItem, DealFormData } from '../types';
+import type { GetDealsParams } from '../types/request';
 
 export function useDeal() {
   const [dealList, setDealList] = useState<DealItem[]>([]);
@@ -39,7 +40,7 @@ export function useDeal() {
     setError('');
 
     try {
-      const params: Record<string, string | number | undefined> = { pageNumber, limit };
+      const params: GetDealsParams = { pageNumber, limit };
       if (searchQuery) params.search = searchQuery;
       if (sortBy) params.sortBy = sortBy;
       if (sortOrder) params.sortOrder = sortOrder;
