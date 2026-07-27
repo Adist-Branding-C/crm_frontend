@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import { PRIORITY_OPTIONS } from '../features/task/shared/constants/priorityOptions';
-import { STATUS_OPTIONS } from '../features/task/shared/constants/statusOptions';
+import { PRIORITY_OPTIONS } from '../features/task/common/constants/priorityOptions';
+import { STATUS_OPTIONS } from '../features/task/common/constants/statusOptions';
 import './AddLeadDrawer.css';
 
 const AddLeadTaskDrawer = ({ isOpen, onClose, onSubmit, task, isLoading, error, categoryOptions, staffOptions, isLoadingCategories, isLoadingStaff, categoriesError, staffError }) => {

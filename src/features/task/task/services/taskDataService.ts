@@ -35,7 +35,7 @@ export class TaskDataService {
     });
   }
 
-  async update(id: number, data: TaskFormData): Promise<ApiResponse<TaskItem>> {
+  async update(id: number, data: Partial<TaskFormData>): Promise<ApiResponse<TaskItem>> {
     const response = await axiosInstance.patch<ApiResponse<TaskItem>>(TASK_API_ENDPOINTS.UPDATE(id), data);
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
