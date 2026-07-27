@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import MeetingOutcomeActions from './MeetingOutcomeActions';
+import CreatedByCell from '../../components/CreatedByCell';
 import SettingsStatusBadge from '../../../../shared/components/settings/SettingsStatusBadge';
 import { TRow, TCell } from '../../../../shared/components/table';
 import type { MeetingOutcomeRowProps } from '../types/index';
@@ -13,6 +14,7 @@ const MeetingOutcomeRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit
   <TRow>
     <TCell>{index + 1}</TCell>
     <TCell>{item.name || '-'}</TCell>
+    <CreatedByCell createdByName={item.createdByName} />
     <TCell>
       <SettingsStatusBadge status={item.status} />
     </TCell>

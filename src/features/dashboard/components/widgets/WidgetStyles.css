@@ -49,6 +49,11 @@
   padding-right: 0.5rem;
 }
 
+.widget-status-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* Widget accent colors */
 .middle-cards-grid .widget-base:nth-child(1) { border-top-color: var(--chart-blue); }
 .middle-cards-grid .widget-base:nth-child(2) { border-top-color: var(--chart-green); }

@@ -27,6 +27,7 @@ export interface GenericTaskFormProps {
   leadOptions?: LeadOption[];
   leadLoading?: boolean;
   categoryOptions?: CategoryOption[];
+  categoryLoading?: boolean;
   hideCategory?: boolean;
   children?: ReactNode;
 }
