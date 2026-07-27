@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { FormikHelpers } from 'formik';
 import type { DealItem, DealFormData } from '../types';
-import type { UseDealActionsParams } from '../types';
+import type { UseDealActionsParams } from '../types/hook.types';
 
 export function useDealActions({ deal, drawer }: UseDealActionsParams) {
   const [deletingItem, setDeletingItem] = useState<DealItem | null>(null);
