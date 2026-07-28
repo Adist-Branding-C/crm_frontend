@@ -21,13 +21,18 @@ function getAvatarColor(name: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-const AgentMultiSelect = ({ agents, selected, onChange, isLoading, error }: AgentMultiSelectProps) => {
+let instanceCounter = 0;
+
+const AgentMultiSelect = ({ agents, selected, onChange, isLoading, error, labelledBy }: AgentMultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
+  const instanceId = useRef(`agent-multi-select-${++instanceCounter}`).current;
+  const listboxId = `${instanceId}-listbox`;
+  const optionId = (agentId: string) => `${instanceId}-option-${agentId}`;
 
   const filtered = useMemo(() => {
     if (!search.trim()) return agents;
@@ -134,6 +139,9 @@ const AgentMultiSelect = ({ agents, selected, onChange, isLoading, error }: Agen
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
+        aria-controls={listboxId}
+        aria-labelledby={labelledBy}
+        aria-activedescendant={isOpen && highlightedIndex >= 0 ? optionId(filtered[highlightedIndex]?.id ?? '') : undefined}
       >
         <div className="multi-select-trigger-inner">
           {selectedAgents.length === 0 ? (
@@ -166,8 +174,10 @@ const AgentMultiSelect = ({ agents, selected, onChange, isLoading, error }: Agen
         <div className="multi-select-dropdown">
           <div className="multi-select-search">
             <Search size={16} className="multi-select-search-icon" />
+            <label htmlFor={`${instanceId}-search`} className="sr-only">Search agents</label>
             <input
               ref={searchInputRef}
+              id={`${instanceId}-search`}
               type="text"
               placeholder="Search by name, ID, or phone..."
               value={search}
@@ -176,7 +186,7 @@ const AgentMultiSelect = ({ agents, selected, onChange, isLoading, error }: Agen
             />
           </div>
 
-          <div className="multi-select-options" ref={optionsRef} role="listbox">
+          <div className="multi-select-options" ref={optionsRef} role="listbox" id={listboxId}>
             {isLoading ? (
               <div className="multi-select-empty">
                 <Loader2 size={20} className="spin" />
@@ -193,6 +203,7 @@ const AgentMultiSelect = ({ agents, selected, onChange, isLoading, error }: Agen
                 return (
                   <div
                     key={agent.id}
+                    id={optionId(agent.id)}
                     className={`multi-select-option${isItemSelected ? ' multi-select-option--selected' : ''}${isHighlighted ? ' multi-select-option--highlighted' : ''}`}
                     onClick={() => toggleAgent(agent.id)}
                     onMouseEnter={() => setHighlightedIndex(index)}

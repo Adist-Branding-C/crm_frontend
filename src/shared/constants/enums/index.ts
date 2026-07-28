@@ -8,3 +8,4 @@ export { DrawerType } from './drawerType';
 export { FacebookLeadStatus } from './facebookLeadStatus';
 export { ImportExportStatus } from './importExportStatus';
 export { CouponDiscountType } from './couponDiscountType';
+export { CampaignLeadStatus } from './campaignLeadStatus';

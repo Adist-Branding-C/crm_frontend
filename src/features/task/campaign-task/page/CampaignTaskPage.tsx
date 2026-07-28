@@ -55,7 +55,7 @@ const CampaignTaskPage = () => {
       <div className="account-content">
         <div className="table-container">
           <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
-            <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
               <Plus size={16} /> Add Campaign Task
             </button>
           </TableNav>

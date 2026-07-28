@@ -4,6 +4,7 @@ export interface EnquiriesBulkActionCallbacks {
   onExportSelected: () => void;
   onChangeStatus: () => void;
   onAssignStaff: () => void;
+  onAssignCampaign: () => void;
   onDuplicateLead: () => void;
   onDeleteSelected: () => void;
 }

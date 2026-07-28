@@ -1,19 +1,23 @@
-import { useCallback, useMemo, useRef } from 'react';
-import type { ChangeEvent } from 'react';
-import { Download, Plus } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, Filter, Loader2, Plus } from 'lucide-react';
 import { useDrawer } from '../../../shared/hooks/useDrawer';
 import { useRowDropdown } from '../../../shared/hooks/useRowDropdown';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useFetchCampaigns } from '../hooks/useFetchCampaigns';
 import { useCampaignSubmitHandlers } from '../hooks/useCampaignSubmitHandlers';
 import { useCampaignExport } from '../hooks/useCampaignExport';
+import { useAgentFilterOptions } from '../hooks/useAgentFilterOptions';
 import { useToast } from '../../task-settings/hooks/useToast';
 import { CampaignMapper } from '../mappers/campaign.mapper';
 import { campaignValidationSchema } from '../validations/index';
 import { ADD_CAMPAIGN_INITIAL_VALUES } from '../constants/index';
 import { LABEL_NO_DATA } from '../../../shared/constants/labels';
+import { ACTION_FILTER } from '../../../shared/constants/actionLabels';
 import CampaignForm from '../components/CampaignForm';
 import CampaignRow from '../components/CampaignRow';
+import CampaignFilters from '../components/CampaignFilters';
 import DeleteCampaignDialog from '../components/DeleteCampaignDialog';
 import ToastNotification from '../../task-settings/components/ToastNotification';
 import PageHeader from '../../../shared/components/layout/PageHeader';
@@ -21,17 +25,20 @@ import PageContainer from '../../../shared/components/layout/PageContainer';
 import Drawer from '../../../shared/components/Drawer';
 import Modal from '../../../shared/components/Modal';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
-import type { Campaign } from '../types';
+import type { Campaign, CampaignSortField } from '../types';
 import './CampaignsPage.css';
 
 const CampaignsPage = () => {
+  const navigate = useNavigate();
   const fetch = useFetchCampaigns();
   const addDrawer = useDrawer();
   const editDrawer = useDrawer<Campaign>();
   const deleteDialog = useDrawer<Campaign>();
   const dropdown = useRowDropdown();
   const toast = useToast();
-  const { handleExportCSV } = useCampaignExport(fetch.campaignList);
+  const { handleExportCSV, isExporting, exportError } = useCampaignExport(fetch.searchQuery, fetch.filters);
+  const { agents: agentOptions, isLoading: agentOptionsLoading } = useAgentFilterOptions();
+  const [showFilters, setShowFilters] = useState(false);
   const formBodyRef = useRef<HTMLDivElement>(null);
 
   const handlers = useCampaignSubmitHandlers(
@@ -48,17 +55,32 @@ const CampaignsPage = () => {
 
   const { searchValue, handleSearchChange } = useDebouncedSearch(fetch.handleSearchChange);
 
-  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    fetch.handleRowsPerPageChange(Number(e.target.value));
-  }, [fetch.handleRowsPerPageChange]);
-
   const editInitialValues = useMemo(
     () => CampaignMapper.toFormValues(editDrawer.item),
     [editDrawer.item],
   );
 
-  const handleView = useCallback((_campaign: Campaign) => {}, []);
-  const handleAssignClick = useCallback((_campaign: Campaign) => {}, []);
+  useEffect(() => {
+    if (exportError) {
+      toast.showToastMessage(exportError, 'error');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exportError]);
+
+  const handleViewLeads = useCallback((campaign: Campaign) => {
+    navigate(`/campaigns/${campaign.id}/leads`);
+  }, [navigate]);
+
+  const renderSortableHeader = (label: string, field: CampaignSortField): ReactNode => {
+    const isActive = fetch.sortBy === field;
+    const Icon = isActive ? (fetch.sortOrder === 'ASC' ? ArrowUp : ArrowDown) : ArrowUpDown;
+    return (
+      <button type="button" className="sortable-column-header" onClick={() => fetch.onSortChange(field)}>
+        {label}
+        <Icon size={14} />
+      </button>
+    );
+  };
 
   return (
     <PageContainer>
@@ -69,25 +91,39 @@ const CampaignsPage = () => {
           searchQuery={searchValue}
           onSearchChange={handleSearchChange}
           rowsPerPage={fetch.limit}
-          onRowsPerPageChange={handleRowsPerPageChange}
+          onRowsPerPageChange={fetch.handleRowsPerPageChange}
         >
-          <button className="btn btn-secondary" onClick={handleExportCSV} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Download size={16} />Export
+          <button className="btn btn-secondary" onClick={() => setShowFilters((prev) => !prev)}>
+            <Filter size={16} /> {ACTION_FILTER}
           </button>
-          <button className="btn btn-primary" onClick={() => addDrawer.open()} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-secondary" onClick={handleExportCSV} disabled={isExporting}>
+            {isExporting ? <Loader2 size={16} className="spin" /> : <Download size={16} />}Export
+          </button>
+          <button className="btn btn-primary" onClick={() => addDrawer.open()}>
             <Plus size={16} /> Campaign
           </button>
         </TableNav>
+
+        {showFilters && (
+          <CampaignFilters
+            filters={fetch.filters}
+            onFilterChange={fetch.setFilter}
+            onClearFilters={fetch.clearFilters}
+            onClose={() => setShowFilters(false)}
+            agentOptions={agentOptions}
+            agentOptionsLoading={agentOptionsLoading}
+          />
+        )}
 
         <Table wrapperClassName="table-scroll" className="data-table">
           <THead>
             <TRow>
               <TCell variant="th">Sl No</TCell>
-              <TCell variant="th">Name</TCell>
+              <TCell variant="th">{renderSortableHeader('Name', 'name')}</TCell>
               <TCell variant="th">Type</TCell>
               <TCell variant="th">Total Tasks</TCell>
               <TCell variant="th">Completed Tasks</TCell>
-              <TCell variant="th">Completed %</TCell>
+              <TCell variant="th">{renderSortableHeader('Completed %', 'progress')}</TCell>
               <TCell variant="th">Created By</TCell>
               <TCell variant="th">Pool Agents</TCell>
               <TCell variant="th">Created At</TCell>
@@ -95,7 +131,9 @@ const CampaignsPage = () => {
             </TRow>
           </THead>
           <TBody>
-            {fetch.campaignList.length === 0 ? (
+            {fetch.isLoading ? (
+              <EmptyState colSpan={10} message="Loading campaigns..." />
+            ) : fetch.campaignList.length === 0 ? (
               <EmptyState colSpan={10} message={LABEL_NO_DATA} />
             ) : (
               fetch.campaignList.map((campaign) => (
@@ -104,9 +142,8 @@ const CampaignsPage = () => {
                   campaign={campaign}
                   dropdownOpen={dropdown.dropdownOpen}
                   onToggleDropdown={dropdown.toggleDropdown}
-                  onView={handleView}
+                  onView={handleViewLeads}
                   onEdit={editDrawer.open}
-                  onAssign={handleAssignClick}
                   onDelete={deleteDialog.open}
                 />
               ))
@@ -154,6 +191,8 @@ const CampaignsPage = () => {
           itemName={deleteDialog.item?.name || ''}
           onConfirm={handlers.handleConfirmDelete}
           onCancel={deleteDialog.close}
+          isDeleting={handlers.isDeleting}
+          error={handlers.deleteError}
         />
       </Modal>
 
