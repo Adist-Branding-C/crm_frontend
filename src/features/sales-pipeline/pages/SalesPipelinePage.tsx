@@ -118,6 +118,7 @@ const SalesPipelinePage: React.FC = () => {
             onViewTasks={handleViewTasks}
           />
           <PipelineFilters
+            activeView={activeView}
             showDateFilter={filters.showDateFilter}
             setShowDateFilter={filters.setShowDateFilter}
             dateFrom={filters.dateFrom}

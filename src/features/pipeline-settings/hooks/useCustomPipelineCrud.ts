@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { FormikHelpers } from 'formik';
 import { customPipelineService } from '../services';
 import { getErrorMessage } from '../../../shared/utils/error';
@@ -18,6 +18,7 @@ const ERROR_MESSAGES = {
 
 
 export function useCustomPipelineCrud({ table }: UseCustomPipelineCrudParams) {
+  const [isDeleting, setIsDeleting] = useState(false);
   const submitError = useSubmitErrorHandler({
     fieldMap: CUSTOM_PIPELINE_FIELD_MAP,
     fieldFallbacks: CUSTOM_PIPELINE_FIELD_ERROR_FALLBACKS,
@@ -43,7 +44,6 @@ export function useCustomPipelineCrud({ table }: UseCustomPipelineCrudParams) {
         });
         if (response.status) {
           table.setPageNumber(1);
-          table.refresh(1);
           resetForm();
           return true;
         }
@@ -110,6 +110,7 @@ export function useCustomPipelineCrud({ table }: UseCustomPipelineCrudParams) {
   const handleDeleteCustomPipeline = useCallback(
     async (id: string) => {
       table.setError('');
+      setIsDeleting(true);
       try {
         const response = await customPipelineService.deleteCustomPipeline(id);
         if (response.status) {
@@ -121,12 +122,15 @@ export function useCustomPipelineCrud({ table }: UseCustomPipelineCrudParams) {
       } catch (err: unknown) {
         table.setError(getErrorMessage(err, ERROR_MESSAGES.DELETE));
         return false;
+      } finally {
+        setIsDeleting(false);
       }
     },
     [table],
   );
 
   return {
+    isDeleting,
     handleCreateCustomPipeline,
     handleUpdateCustomPipeline,
     handleDeleteCustomPipeline,

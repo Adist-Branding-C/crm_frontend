@@ -25,7 +25,7 @@ export function useSpotlightData() {
   const fetch = useSpotlightLeadsFetch();
   const exportHook = useSpotlightExport(fetch.setError);
   const dropdown = useDropdownMenu<number>();
-  const { selectedIds, handleSelectAll, handleSelectRow } =
+  const { selectedIds, handleSelectAll, handleSelectRow, setSelectedIds } =
     useTableSelection<number>();
   const {
     typeOptions,
@@ -72,8 +72,9 @@ export function useSpotlightData() {
 
   useEffect(() => {
     fetch.fetchLeads(requestParams);
+    setSelectedIds([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestParams]);
+  }, [requestParams, setSelectedIds]);
 
   const refetch = useCallback(() => {
     fetch.fetchLeads(requestParams);

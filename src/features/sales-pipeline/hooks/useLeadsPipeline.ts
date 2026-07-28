@@ -44,7 +44,8 @@ export function useLeadsPipeline(onError: (message: string) => void) {
         );
 
         if (response.status && response.data) {
-          const { items, count } = response.data;
+          const items = response.data.items;
+          const count = response.data.pagination?.totalItems ?? response.data.count;
           setLeadGroups((prevGroups) =>
             prevGroups.map((group) => {
               if (group.statusId !== statusId) return group;

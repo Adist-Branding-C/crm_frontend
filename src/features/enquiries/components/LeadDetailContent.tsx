@@ -65,6 +65,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     isDeleting: isDeletingRemark,
     addRemark,
     deleteRemark,
+    hasMore,
+    loadMore,
   } = useLeadRemarks(lead.id, true, activeTab);
 
   const {
@@ -551,6 +553,13 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                         </div>
                       </div>
                     ))}
+                    {hasMore && (
+                      <div className="leaddrawer-load-more" style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        <button className="btn btn-secondary btn-sm" onClick={loadMore} disabled={isLoadingRemarks}>
+                          {isLoadingRemarks ? <><Loader2 size={14} className="spin" /> Loading...</> : 'Load More'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
                 <AdminDeleteModal

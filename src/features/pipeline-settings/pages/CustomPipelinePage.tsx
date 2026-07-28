@@ -103,7 +103,7 @@ const CustomPipelinePage = () => {
             searchQuery={search.searchValue}
             onSearchChange={search.handleSearchChange}
             rowsPerPage={table.limit}
-            onRowsPerPageChange={actions.handleRowsPerPageChange}
+            onRowsPerPageChange={table.handleRowsPerPageChange}
           >
             <SortToggleButton
               sortOrder={table.sortOrder}
@@ -190,6 +190,7 @@ const CustomPipelinePage = () => {
         itemName={deleteConfirm.deletingItem?.name}
         itemType="pipeline"
         error={table.error}
+        isDeleting={crud.isDeleting}
         onConfirm={deleteConfirm.handleConfirmDelete}
         onClose={deleteConfirm.closeDeleteModal}
       />

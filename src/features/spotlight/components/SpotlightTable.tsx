@@ -65,7 +65,7 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
                     type="checkbox"
                     aria-label="Select all rows"
                     checked={
-                      data.length > 0 && selectedIds.length === data.length
+                      paginatedIds.length > 0 && paginatedIds.every((id) => selectedIds.includes(id))
                     }
                     onChange={(e) =>
                       onSelectAll(paginatedIds, e.target.checked)

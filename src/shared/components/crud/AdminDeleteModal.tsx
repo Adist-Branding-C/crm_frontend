@@ -5,7 +5,7 @@ import { LABEL_CONFIRM_DELETE } from '../../constants/labels';
 import type { AdminDeleteModalProps } from '../../types/crud';
 import ValidationAlert from '../ValidationAlert';
 
-const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, error, onConfirm, onClose }) => {
+const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, error, onConfirm, onClose, isDeleting }) => {
   if (!isOpen) return null;
 
   return (
@@ -26,8 +26,12 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
           </p>
         </div>
         <div className="modal-footer">
-          <button type="button" className="btn btn-danger" onClick={onConfirm}>{ACTION_CONFIRM}</button>
-          <button type="button" className="btn btn-secondary" onClick={onClose}>{ACTION_CANCEL}</button>
+          <button type="button" className="btn btn-danger" onClick={onConfirm} disabled={isDeleting}>
+            {isDeleting ? 'Deleting...' : ACTION_CONFIRM}
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isDeleting}>
+            {ACTION_CANCEL}
+          </button>
         </div>
       </div>
     </div>
