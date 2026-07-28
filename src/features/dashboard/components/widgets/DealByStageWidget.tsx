@@ -1,6 +1,7 @@
 import React from 'react';
 import './WidgetStyles.css';
 import { useDealByStage } from '../../hooks/useDealByStage';
+import { ListRowsSkeleton } from './WidgetSkeletons';
 import type { DashboardPeriod } from '../../types';
 
 interface DealByStageWidgetProps {
@@ -16,7 +17,7 @@ const DealByStageWidget = ({ period, from, to }: DealByStageWidgetProps) => {
     <div className="card widget-base">
       <h3 className="widget-title">Deal by stage</h3>
       {isLoading ? (
-        <div className="widget-status-text">Loading...</div>
+        <ListRowsSkeleton rows={3} />
       ) : isError ? (
         <div className="widget-status-text">Failed to load deal by stage</div>
       ) : data.length === 0 ? (

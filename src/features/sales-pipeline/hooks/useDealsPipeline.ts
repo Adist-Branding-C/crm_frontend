@@ -43,7 +43,7 @@ export function useDealsPipeline(onError: (message: string) => void) {
 
         if (response.status && response.data) {
           const items = response.data.items;
-          const count = response.data.pagination?.totalItems ?? response.data.count;
+          const count = response.data.pagination?.total ?? response.data.count;
           setStatusGroups((prevGroups) =>
             prevGroups.map((group) => {
               if (group.statusId !== statusId) return group;

@@ -15,7 +15,12 @@ export function useDealByStage(period: DashboardPeriod, from?: string, to?: stri
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    if (period === 'custom' && (!from || !to)) return;
+    if (period === 'custom' && (!from || !to)) {
+      setData([]);
+      setIsLoading(false);
+      setIsError(false);
+      return;
+    }
 
     let cancelled = false;
     setIsLoading(true);

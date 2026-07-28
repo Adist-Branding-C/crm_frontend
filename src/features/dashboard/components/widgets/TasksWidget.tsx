@@ -2,6 +2,8 @@ import React from 'react';
 import './TasksWidget.css';
 import './WidgetStyles.css';
 import { useTasksStatistics } from '../../hooks/useTasksStatistics';
+import { Skeleton } from '../../../../shared/components/Skeleton';
+import { BarRowsSkeleton } from './WidgetSkeletons';
 import type { DashboardPeriod } from '../../types';
 
 interface TasksWidgetProps {
@@ -22,7 +24,12 @@ const TasksWidget = ({ period, from, to }: TasksWidgetProps) => {
       <h3 className="widget-title">Tasks</h3>
 
       {isLoading ? (
-        <div className="widget-status-text">Loading...</div>
+        <>
+          <div className="tasks-overall">
+            <Skeleton width="3rem" height="2rem" />
+          </div>
+          <BarRowsSkeleton rows={2} />
+        </>
       ) : isError ? (
         <div className="widget-status-text">Failed to load tasks</div>
       ) : total === 0 ? (

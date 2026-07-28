@@ -45,7 +45,7 @@ export function useTasksPipeline(onError: (message: string) => void) {
 
         if (response.status && response.data) {
           const items = response.data.items;
-          const count = response.data.pagination?.totalItems ?? response.data.count;
+          const count = response.data.pagination.total;
           setTaskGroups((prevGroups) =>
             prevGroups.map((group) => {
               if (group.status !== status) return group;

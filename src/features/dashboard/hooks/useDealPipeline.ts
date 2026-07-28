@@ -22,7 +22,12 @@ export function useDealPipeline(period: DashboardPeriod, from?: string, to?: str
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    if (period === 'custom' && (!from || !to)) return;
+    if (period === 'custom' && (!from || !to)) {
+      setData([]);
+      setIsLoading(false);
+      setIsError(false);
+      return;
+    }
 
     let cancelled = false;
     setIsLoading(true);

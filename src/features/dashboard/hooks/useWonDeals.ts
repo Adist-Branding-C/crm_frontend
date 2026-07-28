@@ -8,7 +8,12 @@ export function useWonDeals(period: DashboardPeriod, from?: string, to?: string)
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    if (period === 'custom' && (!from || !to)) return;
+    if (period === 'custom' && (!from || !to)) {
+      setCount(null);
+      setIsLoading(false);
+      setIsError(false);
+      return;
+    }
 
     let cancelled = false;
     setIsLoading(true);
