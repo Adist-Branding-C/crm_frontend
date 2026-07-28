@@ -18,6 +18,7 @@ import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } fr
 import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import GenericTaskForm from '../../common/components/GenericTaskForm';
+import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
 import TaskRow from '../components/TaskRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
@@ -78,7 +79,11 @@ const TaskPage = () => {
               </TRow>
             </THead>
             <TBody>
-              {pagination.list.length === 0 ? <EmptyState colSpan={12} message={LABEL_NO_DATA} /> : pagination.list.map((item, idx) => (
+              {pagination.isLoading && pagination.list.length === 0 ? (
+                <TaskListLoadingRow colSpan={12} />
+              ) : !pagination.isLoading && pagination.list.length === 0 ? (
+                <EmptyState colSpan={12} message={LABEL_NO_DATA} />
+              ) : pagination.list.map((item, idx) => (
                 <TaskRow
                   key={item.id}
                   item={item}
@@ -108,6 +113,7 @@ const TaskPage = () => {
             error={pagination.error}
             isEditing={!!drawer.editingItem}
             categoryOptions={categories.categoryOptions}
+            categoryLoading={categories.categoryLoading}
             staffOptions={staff.staffOptions}
             staffLoading={staff.staffLoading}
             leadOptions={leads.leadOptions}

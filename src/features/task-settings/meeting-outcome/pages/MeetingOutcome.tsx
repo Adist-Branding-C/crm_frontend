@@ -84,13 +84,14 @@ const MeetingOutcomePage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Outcome</TCell>
+                <TCell variant="th">Created By</TCell>
                 <TCell variant="th">Status</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
               {fetch.meetingOutcomeList.length === 0 ? (
-                <EmptyState colSpan={4} />
+                <EmptyState colSpan={5} />
               ) : (
                 fetch.meetingOutcomeList.map((item, index) => (
                   <MeetingOutcomeRow

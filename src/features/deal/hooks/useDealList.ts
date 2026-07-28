@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import type { AxiosError } from 'axios';
 import { dealService } from '../services/deal.service';
 import { mapApiToUI } from '../utils/dealMapper';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages';
@@ -45,12 +46,15 @@ export function useDealList(onShowToast?: (message: string, type: 'success' | 'e
         setTotalPages(1);
         setError(response.message || ERROR_MESSAGES.FETCH_DEALS);
       }
-    } catch {
+    } catch (err) {
       if (requestSeq !== requestSeqRef.current) return;
       setDealList([]);
       setTotalCount(0);
       setTotalPages(1);
-      setError(ERROR_MESSAGES.FETCH_DEALS);
+      setError(
+        (err as AxiosError<{ message?: string }>)?.response?.data?.message ||
+        ERROR_MESSAGES.FETCH_DEALS,
+      );
     } finally {
       setIsLoading(false);
     }

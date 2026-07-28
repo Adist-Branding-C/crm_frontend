@@ -9,7 +9,7 @@ import {
 } from '@dnd-kit/core';
 import { dealService } from '../../deal/services/deal.service';
 import { leadService } from '../../deal/services/lead.service';
-import { taskDataService as taskApiService } from '../../task/task/services/taskDataService';
+import { taskDataService } from '../../task/task/services/taskDataService';
 import type {
   PipelineDeal,
   PipelineStatusGroup,
@@ -19,6 +19,7 @@ import type {
   TaskStatusGroup,
   DragPayload,
 } from '../types';
+// import { taskDataService } from '../../task/task/services/taskDataService';
 
 function moveDeal(
   groups: PipelineStatusGroup[],
@@ -191,8 +192,8 @@ export function usePipelineDragDrop(
 
         setTaskGroups((prev) => moveTask(prev, task, fromStatus, targetStatus));
 
-        taskApiService
-          .update(task.id, { status: targetStatus } as any)
+        taskDataService
+          .update(task.id, { status: targetStatus })
           .catch(() => {
             setTaskGroups((prev) =>
               moveTask(

@@ -5,4 +5,5 @@ export interface UseDealAdditionalFieldCrudParams {
   closeDrawer: () => void;
   setError: (message: string) => void;
   refresh: () => void;
+  showToastMessage: (message: string, type: 'success' | 'error') => void;
 }

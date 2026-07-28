@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import TaskCategoryActions from './TaskCategoryActions';
+import CreatedByCell from '../../components/CreatedByCell';
 import { TRow, TCell } from '../../../../shared/components/table';
 import type { TaskCategoryRowProps } from '../types/index';
 
@@ -12,6 +13,7 @@ const TaskCategoryRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, 
   <TRow>
     <TCell>{index + 1}</TCell>
     <TCell>{item.category || '-'}</TCell>
+    <CreatedByCell createdByName={item.createdByName} />
     <TCell>{item.status || '-'}</TCell>
     <TCell>
       <TaskCategoryActions

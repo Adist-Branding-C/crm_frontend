@@ -4,7 +4,7 @@ import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { TASK_API_ENDPOINTS } from '../constants/taskApiEndpoints';
 import type { ApiResponse } from '../../../../shared/types/common';
 import type { TaskListParams } from '../../common/types/listParams';
-import type { TaskItem, TaskFormData } from '../types';
+import type { TaskItem, TaskFormData, TaskFormDataUpdate } from '../types';
 
 /**
  * HTTP client for the Task API - communicates with the backend only.
@@ -14,6 +14,7 @@ import type { TaskItem, TaskFormData } from '../types';
  *   and TaskPage (list fetch).
  */
 export class TaskDataService {
+  
   async getAll(params: TaskListParams): Promise<ApiResponse<TaskItem[]>> {
     const response = await axiosInstance.get<ApiResponse<TaskItem[]>>(
       TASK_API_ENDPOINTS.GET_ALL,
@@ -35,7 +36,7 @@ export class TaskDataService {
     });
   }
 
-  async update(id: number, data: TaskFormData): Promise<ApiResponse<TaskItem>> {
+  async update(id: number, data: Partial<TaskFormData>): Promise<ApiResponse<TaskItem>> {
     const response = await axiosInstance.patch<ApiResponse<TaskItem>>(TASK_API_ENDPOINTS.UPDATE(id), data);
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
