@@ -15,6 +15,24 @@ import type {
   DealByStageResponseData,
   GetTasksStatisticsParams,
   TasksStatisticsResponseData,
+  GetActivitiesStatisticsParams,
+  ActivitiesStatisticsResponseData,
+  GetCampaignsStatisticsParams,
+  CampaignsStatisticsResponseData,
+  GetLeadStatusStatisticsParams,
+  LeadStatusStatisticsResponseData,
+  GetLeadSourceStatisticsParams,
+  LeadSourceStatisticsResponseData,
+  GetLeadPurposeStatisticsParams,
+  LeadPurposeStatisticsResponseData,
+  GetLeadOverviewStatisticsParams,
+  LeadOverviewStatisticsResponseData,
+  GetPipelineAmountParams,
+  PipelineAmountResponseData,
+  GetFollowupCountParams,
+  FollowupCountResponseData,
+  GetCallLogsCountParams,
+  CallLogsCountResponseData,
 } from '../types';
 
 /**
@@ -24,7 +42,8 @@ import type {
  * - dashboardService singleton, consumed by useWonDeals (Won Deals tile),
  *   useLostDeals (Lost Deals tile), useInProgressDeals (In Progress Deals tile),
  *   useDealPipeline (Deal Pipeline chart), useDealByStage (Deal by stage card),
- *   and useTasksStatistics (Tasks card).
+ *   useTasksStatistics (Tasks card), useActivitiesStatistics (Activities
+ *   statistics widget), and useCampaignsStatistics (Campaigns widget).
  */
 class DashboardService {
   async getWonDeals(params: GetWonDealsParams): Promise<ApiResponse<WonDealsResponseData>> {
@@ -90,6 +109,132 @@ class DashboardService {
   async getTasksStatistics(params: GetTasksStatisticsParams): Promise<ApiResponse<TasksStatisticsResponseData>> {
     const response = await axiosInstance.get<ApiResponse<TasksStatisticsResponseData>>(
       DASHBOARD_API_ENDPOINTS.TASKS_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getActivitiesStatistics(
+    params: GetActivitiesStatisticsParams,
+  ): Promise<ApiResponse<ActivitiesStatisticsResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<ActivitiesStatisticsResponseData>>(
+      DASHBOARD_API_ENDPOINTS.ACTIVITIES_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getCampaignsStatistics(
+    params: GetCampaignsStatisticsParams,
+  ): Promise<ApiResponse<CampaignsStatisticsResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<CampaignsStatisticsResponseData>>(
+      DASHBOARD_API_ENDPOINTS.CAMPAIGNS_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getLeadStatusStatistics(
+    params: GetLeadStatusStatisticsParams,
+  ): Promise<ApiResponse<LeadStatusStatisticsResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<LeadStatusStatisticsResponseData>>(
+      DASHBOARD_API_ENDPOINTS.LEAD_STATUS_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getLeadSourceStatistics(
+    params: GetLeadSourceStatisticsParams,
+  ): Promise<ApiResponse<LeadSourceStatisticsResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<LeadSourceStatisticsResponseData>>(
+      DASHBOARD_API_ENDPOINTS.LEAD_SOURCE_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getLeadPurposeStatistics(
+    params: GetLeadPurposeStatisticsParams,
+  ): Promise<ApiResponse<LeadPurposeStatisticsResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<LeadPurposeStatisticsResponseData>>(
+      DASHBOARD_API_ENDPOINTS.LEAD_PURPOSE_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getLeadOverviewStatistics(
+    params: GetLeadOverviewStatisticsParams,
+  ): Promise<ApiResponse<LeadOverviewStatisticsResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<LeadOverviewStatisticsResponseData>>(
+      DASHBOARD_API_ENDPOINTS.LEAD_OVERVIEW_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getPipelineAmountStatistics(
+    params: GetPipelineAmountParams,
+  ): Promise<ApiResponse<PipelineAmountResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<PipelineAmountResponseData>>(
+      DASHBOARD_API_ENDPOINTS.DEALS_PIPELINE_AMOUNT,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getFollowupCount(
+    params: GetFollowupCountParams,
+  ): Promise<ApiResponse<FollowupCountResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<FollowupCountResponseData>>(
+      DASHBOARD_API_ENDPOINTS.FOLLOWUP_LEADS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getCallLogsCount(
+    params: GetCallLogsCountParams,
+  ): Promise<ApiResponse<CallLogsCountResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<CallLogsCountResponseData>>(
+      DASHBOARD_API_ENDPOINTS.CALL_LOGS,
       { params },
     );
     return ServiceResponseUtil.successResponse({

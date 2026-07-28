@@ -12,9 +12,9 @@ interface WonDealsCardProps {
 const WonDealsCard = ({ period, from, to }: WonDealsCardProps) => {
   const { count, isLoading, isError } = useWonDeals(period, from, to);
 
-  const value = isLoading ? 'Loading...' : isError ? 'No data' : String(count ?? 0);
+  const value = isError ? 'No data' : String(count ?? 0);
 
-  return <KpiCard title="Won Deals" value={value} />;
+  return <KpiCard title="Won Deals" value={value} isLoading={isLoading} />;
 };
 
 export default WonDealsCard;

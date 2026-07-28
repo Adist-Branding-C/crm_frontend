@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { pipelineService } from '../services/PipelineService';
 import { getErrorMessage } from '../../../shared/utils/error';
 import { PIPELINE_PAGINATION_LIMIT } from '../constants';
+import { mapPipelineLead, mapLeadStatusGroup } from '../utils/leadPipelineMapper';
 import type { LeadStatusGroup, GetPipelineParams } from '../types';
 
 
@@ -18,7 +19,7 @@ export function useLeadsPipeline(onError: (message: string) => void) {
       try {
         const response = await pipelineService.getLeads(params);
         if (response.status && response.data) {
-          setLeadGroups(response.data.items);
+          setLeadGroups(response.data.items.map(mapLeadStatusGroup));
         }
       } catch (err: unknown) {
         onError(getErrorMessage(err, 'Failed to fetch leads'));
@@ -44,13 +45,13 @@ export function useLeadsPipeline(onError: (message: string) => void) {
         );
 
         if (response.status && response.data) {
-          const items = response.data.items;
-          const count = response.data.pagination?.totalItems ?? response.data.count;
+          const { items, count } = response.data;
+          const mappedItems = items.map(mapPipelineLead);
           setLeadGroups((prevGroups) =>
             prevGroups.map((group) => {
               if (group.statusId !== statusId) return group;
               const existingIds = new Set(group.leads.map((d) => d.id));
-              const newLeads = items.filter((d) => !existingIds.has(d.id));
+              const newLeads = mappedItems.filter((d) => !existingIds.has(d.id));
               return { ...group, leads: [...group.leads, ...newLeads], count };
             }),
           );

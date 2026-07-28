@@ -26,12 +26,18 @@ export function calculateTimeAgo(createdAt: string): string {
 export function formatTimestamp(isoString: string): string {
   const d = new Date(isoString);
   if (isNaN(d.getTime())) return 'Unknown time';
+  
+  const month = d.toLocaleString('en-US', { month: 'short' });
+  const day = d.getDate();
+  const year = d.getFullYear();
+  
   let hours = d.getHours();
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12;
-  return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+  
+  return `${month} ${day}, ${year}, ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
 }
 
 export function getBadge(entityType: string): string {

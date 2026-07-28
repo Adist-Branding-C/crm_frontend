@@ -1,3 +1,7 @@
+export function todayDateString(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function formatDateTime(dateStr: string | null | undefined): string {
   if (!dateStr) return '-';
   const date = new Date(dateStr);
