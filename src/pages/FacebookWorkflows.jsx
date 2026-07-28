@@ -4,7 +4,7 @@ import { Search, Plus, MoreVertical, Edit2, Trash2, ChevronLeft, X, Check, Alert
 import PageHeader from '../components/PageHeader';
 import ToastNotification from '../shared/components/ToastNotification';
 import { useToast } from '../shared/hooks/useToast';
-import { facebookLogin, fetchFacebookProfile } from '../shared/utils/facebookSdk';
+import { facebookLogin } from '../shared/utils/facebookSdk';
 import './FacebookWorkflows.css';
 
 const facebookPages = [
@@ -79,10 +79,11 @@ const useFacebookConnect = () => {
   const connect = async () => {
     setConnecting(true);
     try {
-      await facebookLogin('public_profile,email,pages_show_list,leads_retrieval');
-      const profile = await fetchFacebookProfile();
-      setFbUser(profile);
-      toast.showToastMessage(`Connected to Facebook as ${profile.name}`, 'success');
+      // await facebookLogin('public_profile,email,pages_show_list,leads_retrieval');
+      await facebookLogin();
+      // const profile = await fetchFacebookProfile();
+      // setFbUser(profile);
+      toast.showToastMessage(`Connected to Facebook`, 'success');
     } catch (error) {
       toast.showToastMessage(error.message || 'Facebook connection failed', 'error');
     } finally {

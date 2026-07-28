@@ -1,7 +1,8 @@
 import * as yup from 'yup';
 import type { DealAdditionalFieldDef } from '../types/interface';
 import { isPastDate } from '../utils/dealDateValidation';
-import { isValidPhoneForCountry, getPhoneLengthErrorMessage } from '../../enquiries/constants/phoneValidation';
+import { getPhoneLengthErrorMessage, isValidPhoneForCountry } from '../constants/phoneValidation';
+// import { isValidPhoneForCountry, getPhoneLengthErrorMessage } from '../../enquiries/constants/phoneValidation';
 
 /**
  * Original Start/End Date values a Deal had when the edit drawer opened.
@@ -55,13 +56,13 @@ function getBaseValidationShape(original?: DealOriginalDates) {
     mobileNumber: yup
       .string()
       .trim()
-      .required('Mobile is required')
-      .test('valid-mobile-format', function (value) {
-        if (!value) return true;
-        const { mobileCountryCode } = this.parent;
-        if (isValidPhoneForCountry(value, mobileCountryCode)) return true;
-        return this.createError({ message: getPhoneLengthErrorMessage(mobileCountryCode) });
-      }),
+      .required('Mobile is required'),
+      // .test('valid-mobile-format', function (value) {
+      //   if (!value) return true;
+      //   const { mobileCountryCode } = this.parent;
+      //   if (isValidPhoneForCountry(value, mobileCountryCode)) return true;
+      //   return this.createError({ message: getPhoneLengthErrorMessage(mobileCountryCode) });
+      // }),
     amount: yup
       .string()
       .trim()

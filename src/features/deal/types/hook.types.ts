@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react';
+import type { FormikHelpers } from 'formik';
 import type { DealItem, DealFormData, DealStatusFilters } from './interface';
 import type { SortConfig } from '../../../shared/types/sort';
 import type { LabelValuePair } from '../../../shared/types/common';
@@ -15,6 +16,18 @@ export interface UseDealListReturn {
   totalPages: number;
   fetchDeals: (page: number, limit: number, search: string, extraParams?: Record<string, string | number>) => Promise<void>;
   refreshCurrentPage: () => void;
+}
+
+export interface UseDealActionsParams {
+  deal: {
+    handleAddDeal: (values: DealFormData, helpers: FormikHelpers<DealFormData>) => Promise<boolean>;
+    handleUpdateDeal: (dealId: string, values: DealFormData, helpers: FormikHelpers<DealFormData>) => Promise<boolean>;
+    handleDeleteDeal: (dealId: string) => Promise<boolean>;
+  };
+  drawer: {
+    editingItem: DealItem | null;
+    closeDrawer: () => void;
+  };
 }
 
 export interface UseDealCrudParams {

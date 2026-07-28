@@ -38,7 +38,7 @@ const DealAdditionalFieldFormPanel = ({
         validationSchema={dealAdditionalFieldValidationSchema}
         onSubmit={onSubmit}
       >
-        {({ values, isSubmitting }) => (
+        {({ values }) => (
           <Form>
             <div className="checkbox-group">
               <label className="checkbox-item">
@@ -68,8 +68,8 @@ const DealAdditionalFieldFormPanel = ({
               <FormikError name="fieldType" component="small" className="field-error-text" />
             </div>
             {values.fieldType === 'Dropdown' && <DropdownValuesField />}
-            <button type="submit" className="btn btn-primary" disabled={isSaving || isSubmitting}>
-              {isSaving || isSubmitting ? (
+            <button type="submit" className="btn btn-primary" disabled={isSaving}>
+              {isSaving ? (
                 <><Loader2 size={16} className="spin" /> Saving...</>
               ) : (
                 <><Plus size={16} /> {editingItem ? 'Update' : 'Add Field'}</>
