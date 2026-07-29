@@ -1,11 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-// import { taskService } from '../../task/shared/services/taskService';
-// import { taskDataService } from '../../task/task/services/taskDataService';
 import type { LeadTaskItem, LeadTaskFormData } from '../types';
 import { ERROR_MESSAGES } from '../constants/messages';
-import { TaskDataService, taskDataService } from '../../task/task/services/taskDataService';
-
-const taskService = new TaskDataService()
+import { taskDataService } from '../../task/task/services/taskDataService';
+import { toTaskCreatePayload, toTaskUpdatePayload } from '../utils/leadMapper';
 
 export function useLeadTasks(leadId: number | undefined, isOpen: boolean, activeTab: string) {
   const [tasks, setTasks] = useState<LeadTaskItem[]>([]);
@@ -44,9 +41,10 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
   }, [isOpen, activeTab, leadId, fetchTasks]);
 
   const addTask = useCallback(async (data: LeadTaskFormData): Promise<boolean> => {
+    if (!leadId) return false;
     setError(null);
     try {
-      const response = await taskDataService.create({ ...data, entityType: 'lead', entityId: leadId } as any);
+      const response = await taskDataService.create(toTaskCreatePayload(data, leadId));
       if (response.status) {
         await fetchTasks();
         return true;
@@ -63,7 +61,7 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
   const updateTask = useCallback(async (id: number, data: LeadTaskFormData): Promise<boolean> => {
     setError(null);
     try {
-      const response = await taskDataService.update(id, data as any);
+      const response = await taskDataService.update(id, toTaskUpdatePayload(data));
       if (response.status) {
         await fetchTasks();
         return true;

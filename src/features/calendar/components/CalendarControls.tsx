@@ -1,18 +1,18 @@
 import React, { useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Search, User, ChevronDown } from 'lucide-react';
-import { AGENTS, MONTH_NAMES } from '../constants';
+import { MONTH_NAMES } from '../constants';
 import type { CalendarControlsProps } from '../types';
 
 const CalendarControls: React.FC<CalendarControlsProps> = ({
   viewMode, onViewModeChange,
   currentDate, onPrevMonth, onNextMonth, onTodayClick,
-  selectedAgent, onAgentChange, selectedAgentName,
+  agents, selectedAgent, onAgentChange, selectedAgentName,
   showAgentDropdown, onSetShowAgentDropdown,
   searchQuery, onSearchChange,
 }) => {
   const filteredAgents = useMemo(() =>
-    AGENTS.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [searchQuery]
+    agents.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase())),
+    [agents, searchQuery]
   );
 
   return (

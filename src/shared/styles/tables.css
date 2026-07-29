@@ -71,6 +71,7 @@
   color: var(--primary);
   cursor: pointer;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .lead-name-cell:hover {
