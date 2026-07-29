@@ -109,6 +109,17 @@
   border-color: var(--primary);
 }
 
+.sp-status {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+.sp-status-error {
+  color: #dc2626;
+}
+
 .staff-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
