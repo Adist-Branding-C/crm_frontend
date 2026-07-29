@@ -1,7 +1,6 @@
 import { Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageContainer from '../../../shared/components/layout/PageContainer';
-import { STAFF_DATA } from '../constants';
 import { useStaffPerformanceData } from '../hooks/useStaffPerformanceData';
 import StaffDetailView from '../components/StaffDetailView';
 import StaffListHeader from '../components/StaffListHeader';
@@ -22,6 +21,8 @@ const StaffPerformancePage = () => {
     filterRef,
     filteredStaff,
     clearFilters,
+    loading,
+    error,
   } = useStaffPerformanceData();
 
   if (id && staff) {
@@ -72,31 +73,36 @@ const StaffPerformancePage = () => {
         </div>
       </div>
 
-      <div className="staff-grid">
-        {filteredStaff.map(s => (
-          <Link key={s.id} to={`/staff-performance/${s.id}`} className="staff-card">
-            <div className="staff-card-avatar">{s.name.charAt(0)}</div>
-            <div className="staff-card-info">
-              <div className="staff-card-name">{s.name}</div>
-              <div className="staff-card-role">{s.role}</div>
-            </div>
-            <div className="staff-card-stats">
-              <div className="staff-stat">
-                <span>{s.totalLeads}</span>
-                <label>Leads</label>
+      {loading && <div className="sp-status">Loading staff performance...</div>}
+      {error && <div className="sp-status sp-status-error">{error}</div>}
+
+      {!loading && !error && (
+        <div className="staff-grid">
+          {filteredStaff.map(s => (
+            <Link key={s.staffId} to={`/staff-performance/${s.staffId}`} className="staff-card">
+              <div className="staff-card-avatar">{s.name.charAt(0)}</div>
+              <div className="staff-card-info">
+                <div className="staff-card-name">{s.name}</div>
+                <div className="staff-card-role">{s.designation ?? 'Not assigned'}</div>
               </div>
-              <div className="staff-stat">
-                <span>{s.converted}</span>
-                <label>Converted</label>
+              <div className="staff-card-stats">
+                <div className="staff-stat">
+                  <span>{s.totalLeadsAssigned}</span>
+                  <label>Leads</label>
+                </div>
+                <div className="staff-stat">
+                  <span>{s.convertedLeads}</span>
+                  <label>Converted</label>
+                </div>
+                <div className="staff-stat">
+                  <span>{s.conversionRate}%</span>
+                  <label>Conversion Rate</label>
+                </div>
               </div>
-              <div className="staff-stat">
-                <span>{s.rating}</span>
-                <label>Rating</label>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </PageContainer>
   );
 };

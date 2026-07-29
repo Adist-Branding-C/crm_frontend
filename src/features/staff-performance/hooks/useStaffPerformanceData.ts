@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { STAFF_DATA } from '../constants';
-import type { StaffMember } from '../types';
+import { staffPerformanceService } from '../services/staffPerformance.service';
+import type { StaffPerformanceItem } from '../types';
 
 export const useStaffPerformanceData = () => {
   const { id } = useParams();
@@ -9,6 +9,9 @@ export const useStaffPerformanceData = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [staffList, setStaffList] = useState<StaffPerformanceItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const filterRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -21,17 +24,35 @@ export const useStaffPerformanceData = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const staff: StaffMember | null = (() => {
-    if (!id) return null;
-    const staffId = parseInt(id, 10);
-    return !isNaN(staffId) && staffId > 0 ? STAFF_DATA.find(s => s.id === staffId) ?? null : null;
-  })();
+  const fetchStaffPerformance = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await staffPerformanceService.getStaffPerformance(
+        dateFrom || undefined,
+        dateTo || undefined,
+      );
+      setStaffList(response.data ?? []);
+    } catch {
+      setError('Failed to load staff performance data');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateFrom, dateTo]);
 
-  const filteredStaff = STAFF_DATA.filter(s => {
-    const matchesSearch = searchQuery === '' ||
+  useEffect(() => {
+    fetchStaffPerformance();
+  }, [fetchStaffPerformance]);
+
+  const staff: StaffPerformanceItem | null = id
+    ? staffList.find((s) => s.staffId === id) ?? null
+    : null;
+
+  const filteredStaff = staffList.filter((s) => {
+    const matchesSearch =
+      searchQuery === '' ||
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.department.toLowerCase().includes(searchQuery.toLowerCase());
+      (s.designation ?? '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
@@ -55,5 +76,7 @@ export const useStaffPerformanceData = () => {
     filterRef,
     filteredStaff,
     clearFilters,
+    loading,
+    error,
   };
 };
