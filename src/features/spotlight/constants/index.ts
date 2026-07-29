@@ -5,9 +5,9 @@ import type { SpotlightLeadApi } from '../types';
 export const INITIAL_FILTERS = {
   dateRange: { start: '', end: '' },
   filterByDate: '',
-  enquirySource: '',
-  enquiryPurpose: '',
-  leadStatusId: '',
+  sourceId: '',
+  purposeId: '',
+  statusId: '',
   assignedTo: '',
   leadTypeId: '',
   location: '',

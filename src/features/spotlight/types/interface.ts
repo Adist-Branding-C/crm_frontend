@@ -36,9 +36,9 @@ export type SpotlightLeadApi = SpotlightLead;
 export interface SpotlightFilters {
   dateRange: DateRange;
   filterByDate: string;
-  enquirySource: string;
-  enquiryPurpose: string;
-  leadStatusId: string;
+  sourceId: string;
+  purposeId: string;
+  statusId: string;
   assignedTo: string;
   leadTypeId: string;
   location: string;

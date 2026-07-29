@@ -88,10 +88,10 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
         <label htmlFor="spotlight-filter-source">Enquiry Source</label>
         <select
           id="spotlight-filter-source"
-          value={filters.enquirySource}
+          value={filters.sourceId}
           disabled={isLoading}
           onChange={(e) =>
-            onFilterChange({ ...filters, enquirySource: e.target.value })
+            onFilterChange({ ...filters, sourceId: e.target.value })
           }
         >
           <option value="">Select</option>
@@ -106,10 +106,10 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
         <label htmlFor="spotlight-filter-purpose">Enquiry Purpose</label>
         <select
           id="spotlight-filter-purpose"
-          value={filters.enquiryPurpose}
+          value={filters.purposeId}
           disabled={isLoading}
           onChange={(e) =>
-            onFilterChange({ ...filters, enquiryPurpose: e.target.value })
+            onFilterChange({ ...filters, purposeId: e.target.value })
           }
         >
           <option value="">Select</option>
@@ -126,10 +126,10 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
         <label htmlFor="spotlight-filter-status">Lead Status</label>
         <select
           id="spotlight-filter-status"
-          value={filters.leadStatusId}
+          value={filters.statusId}
           disabled={isLoading}
           onChange={(e) =>
-            onFilterChange({ ...filters, leadStatusId: e.target.value })
+            onFilterChange({ ...filters, statusId: e.target.value })
           }
         >
           <option value="">Select</option>

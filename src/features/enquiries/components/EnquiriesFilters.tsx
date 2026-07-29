@@ -10,8 +10,8 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
   const { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, additionalFields, isLoading } = useLeadFilterOptions();
 
   const visibleAdditionalFields = useMemo(
-    () => getVisibleAdditionalFields(additionalFields, filters.enquiryPurpose),
-    [additionalFields, filters.enquiryPurpose],
+    () => getVisibleAdditionalFields(additionalFields, filters.purposeId),
+    [additionalFields, filters.purposeId],
   );
 
   const handleAdditionalFieldChange = (fieldId: string, value: string) => {
@@ -68,7 +68,7 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
         </div>
         <div className="filter-group">
           <label>Enquiry Source</label>
-          <select value={filters.enquirySource} onChange={(e) => onFilterChange({ ...filters, enquirySource: e.target.value })} disabled={isLoading}>
+          <select value={filters.sourceId} onChange={(e) => onFilterChange({ ...filters, sourceId: e.target.value })} disabled={isLoading}>
             <option value="">Select</option>
             {sourceOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
@@ -77,7 +77,7 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
       <div className="filter-row">
         <div className="filter-group">
           <label>Enquiry Purpose</label>
-          <select value={filters.enquiryPurpose} onChange={(e) => onFilterChange({ ...filters, enquiryPurpose: e.target.value })} disabled={isLoading}>
+          <select value={filters.purposeId} onChange={(e) => onFilterChange({ ...filters, purposeId: e.target.value })} disabled={isLoading}>
             <option value="">Select</option>
             {purposeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
@@ -108,7 +108,7 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
         </div>
         <div className="filter-group">
           <label>Lead Type</label>
-          <select value={filters.leadType} onChange={(e) => onFilterChange({ ...filters, leadType: e.target.value })} disabled={isLoading}>
+          <select value={filters.typeId} onChange={(e) => onFilterChange({ ...filters, typeId: e.target.value })} disabled={isLoading}>
             <option value="">Select</option>
             {typeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
