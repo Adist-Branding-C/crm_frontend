@@ -11,32 +11,26 @@ const SummaryCards: React.FC<SummaryCardsProps> = React.memo(({ stats }) => (
     </div>
     <div className="summary-card green">
       <div className="summary-content">
-        <span className="summary-title">Success Records</span>
-        <span className="summary-value">{stats.success}</span>
+        <span className="summary-title">Processed</span>
+        <span className="summary-value">{stats.processed}</span>
       </div>
     </div>
     <div className="summary-card red">
       <div className="summary-content">
-        <span className="summary-title">Failed Records</span>
+        <span className="summary-title">Failed</span>
         <span className="summary-value">{stats.failed}</span>
-      </div>
-    </div>
-    <div className="summary-card green">
-      <div className="summary-content">
-        <span className="summary-title">New Records</span>
-        <span className="summary-value">{stats.new}</span>
-      </div>
-    </div>
-    <div className="summary-card teal">
-      <div className="summary-content">
-        <span className="summary-title">Duplicate Records</span>
-        <span className="summary-value">{stats.duplicate}</span>
       </div>
     </div>
     <div className="summary-card yellow">
       <div className="summary-content">
-        <span className="summary-title">Pending Records</span>
-        <span className="summary-value">{stats.pending}</span>
+        <span className="summary-title">Processing</span>
+        <span className="summary-value">{stats.processing}</span>
+      </div>
+    </div>
+    <div className="summary-card teal">
+      <div className="summary-content">
+        <span className="summary-title">Received</span>
+        <span className="summary-value">{stats.received}</span>
       </div>
     </div>
   </div>

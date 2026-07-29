@@ -7,8 +7,11 @@ import SalesPipelinePage from '../features/sales-pipeline/pages/SalesPipelinePag
 import SpotlightPage from '../features/spotlight/pages/SpotlightPage';
 import CompaniesPage from '../features/companies/pages/CompaniesPage';
 import CompanySubscriptionPage from '../features/companies/subscription/pages/CompanySubscriptionPage';
-import FacebookWorkflows from '../pages/FacebookWorkflows';
 import FacebookViewLeadsPage from '../features/facebook-view-leads/pages/FacebookViewLeadsPage';
+import FacebookConnectionsPage from '../features/facebook-connect/pages/FacebookConnectionsPage';
+import FacebookWorkflowsListPage from '../features/facebook-connect/pages/FacebookWorkflowsListPage';
+import CreateWorkflowPage from '../features/facebook-connect/pages/CreateWorkflowPage';
+import EditWorkflowPage from '../features/facebook-connect/pages/EditWorkflowPage';
 
 export default (
   <>
@@ -20,7 +23,10 @@ export default (
     <Route path="spotlight" element={<SpotlightPage />} />
     <Route path="companies" element={<CompaniesPage />} />
     <Route path="companies/:companyId/subscription" element={<CompanySubscriptionPage />} />
-    <Route path="facebook/workflows/*" element={<FacebookWorkflows />} />
+    <Route path="facebook/connections" element={<FacebookConnectionsPage />} />
+    <Route path="facebook/workflows" element={<FacebookWorkflowsListPage />} />
+    <Route path="facebook/workflows/create" element={<CreateWorkflowPage />} />
+    <Route path="facebook/workflows/:id/edit" element={<EditWorkflowPage />} />
     <Route path="facebook/view-leads" element={<FacebookViewLeadsPage />} />
   </>
 );
