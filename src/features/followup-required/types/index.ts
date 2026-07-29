@@ -57,6 +57,8 @@ export interface FollowupLeadsData {
   pagination: FollowupPaginationMeta;
 }
 
+export type FollowupBucket = 'overdue' | 'due_today' | 'upcoming';
+
 export interface GetFollowupLeadsParams {
   pageNumber: number;
   limit: number;
@@ -67,8 +69,24 @@ export interface GetFollowupLeadsParams {
   assignedTo?: string;
   startDate?: string;
   endDate?: string;
+  bucket?: FollowupBucket;
   sort_by?: 'name' | 'createdAt' | 'nextFollowUp';
   sort_order?: 'ASC' | 'DESC';
+}
+
+
+export interface FollowupStatistics {
+  total: number;
+  overdue: number;
+  dueToday: number;
+  upcoming: number;
+}
+
+export interface FollowupStatCardsProps {
+  statistics: FollowupStatistics | null;
+  isLoading: boolean;
+  activeBucket: FollowupBucket | null;
+  onBucketClick: (bucket: FollowupBucket) => void;
 }
 
 export interface FollowupFiltersProps {

@@ -2,8 +2,12 @@ import type { SelectOption } from '../../../shared/types/common';
 
 export type Agent = SelectOption;
 
+
+export type CalendarTaskOrigin = 'task' | 'followup';
+
 export interface CalendarTask {
   id: number;
+  origin: CalendarTaskOrigin;
   title: string;
   category: string;
   description: string;
@@ -24,10 +28,11 @@ export interface DayDrawerProps {
   selectedDate: Date | null;
   tasks: CalendarTask[];
   onClose: () => void;
+  onAddTask: () => void;
   onDragStartTask: (e: React.DragEvent, task: CalendarTask) => void;
   onDragOverTask: (e: React.DragEvent) => void;
   onDropTask: (e: React.DragEvent, hour: number) => void;
-  onDeleteTask: (taskId: number, e: React.MouseEvent) => void;
+  onDeleteTask: (task: CalendarTask, e: React.MouseEvent) => void;
 }
 
 export interface MonthViewProps {
@@ -54,6 +59,35 @@ export interface DayViewProps {
   tasks: CalendarTask[];
 }
 
+// GET /calendar response shapes - see CalendarTaskItem/CalendarFollowupItem/
+// CalendarDateItem in crm_backend's calendar.dto.ts.
+export interface CalendarApiTaskItem {
+  id: number;
+  title: string;
+  time: string | null;
+  status: string;
+  priority: string;
+  category: number | string | null;
+  leadId?: string | number | null;
+  description?: string;
+  assignedTo: string | number | null;
+}
+
+export interface CalendarApiFollowupItem {
+  id: number;
+  leadId: string;
+  name: string;
+  phone: string;
+  nextFollowUpDate: string;
+  assignedTo: string | number | null;
+}
+
+export interface CalendarApiDateItem {
+  date: string;
+  tasks: CalendarApiTaskItem[];
+  followups: CalendarApiFollowupItem[];
+}
+
 export interface CalendarControlsProps {
   viewMode: 'day' | 'week' | 'month';
   onViewModeChange: (mode: 'day' | 'week' | 'month') => void;
@@ -61,6 +95,7 @@ export interface CalendarControlsProps {
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onTodayClick: () => void;
+  agents: Agent[];
   selectedAgent: number;
   onAgentChange: (id: number) => void;
   selectedAgentName: string;

@@ -38,7 +38,7 @@ const WeekView: React.FC<WeekViewProps> = ({ currentDate, getAgentsFilteredTasks
           <div key={i} className="week-day-column">
             {tasks.length === 0 ? <div className="no-tasks">-</div> : (
               tasks.map(task => (
-                <div key={task.id} className={`week-task-item ${task.priority}`}>
+                <div key={task.id} className={`week-task-item ${(task.priority || '').toLowerCase()}`}>
                   <span className="week-task-time">{task.dueTime}</span>
                   <span className="week-task-title">{task.title}</span>
                 </div>
