@@ -15,6 +15,7 @@ export interface ResetPasswordFormData {
 export interface LoginRequest {
   phone: string
   password: string
+   is_limited?: boolean;
 }
 
 export interface AuthUser {
