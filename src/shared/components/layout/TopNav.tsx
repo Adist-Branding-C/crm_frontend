@@ -1,8 +1,12 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, FileText, Phone, UserCircle, Settings, Users, CreditCard, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout, Link as LinkIcon } from 'lucide-react';
+import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, UserCircle, Settings, Users, CreditCard, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout, Link as LinkIcon, Clock } from 'lucide-react';
 import type { NotificationIconInfo, TopNavProps } from '../../types/layout';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
+import { useDebouncedSearch } from '../../hooks/useDebouncedSearch';
+import { useRecentSearches } from '../../hooks/useRecentSearches';
+import { useGlobalLeadSearch } from '../../../features/enquiries/hooks/useGlobalLeadSearch';
+import type { LeadSearchApiItem } from '../../../features/enquiries/types/response';
 import './TopNav.css';
 
 const addOptions = [
@@ -36,31 +40,14 @@ const getNotificationIcon = (type: string): NotificationIconInfo => {
   return notificationIcons[type] || { icon: Bell, color: '#64748b' };
 };
 
-const searchCategories = [
-  { id: 'lead', name: 'Leads', icon: User, color: '#3b82f6' },
-  { id: 'deal', name: 'Deals', icon: DollarSign, color: '#10b981' },
-  { id: 'task', name: 'Tasks', icon: ListChecks, color: '#f59e0b' },
-  { id: 'campaign', name: 'Campaigns', icon: Megaphone, color: '#8b5cf6' },
-  { id: 'enquiry', name: 'Enquiries', icon: FileText, color: '#ec4899' },
-  { id: 'call', name: 'Calls', icon: Phone, color: '#14b8a6' },
-];
-
-const searchResults = [
-  { id: 1, category: 'lead', name: 'Rahul Sharma', phone: '9876543210', description: 'New Lead - Hotel' },
-  { id: 2, category: 'lead', name: 'Priya Patel', phone: '9876543211', description: 'Hot Lead - Real Estate' },
-  { id: 3, category: 'deal', name: 'Website Development', phone: 'DL001', description: 'Deal - ₹1,50,000' },
-  { id: 4, category: 'deal', name: 'CRM Implementation', phone: 'DL002', description: 'Deal - ₹2,00,000' },
-  { id: 5, category: 'task', name: 'Follow up with Rahul', phone: 'Task-001', description: 'Call Task' },
-  { id: 6, category: 'campaign', name: 'Summer Sale 2026', phone: 'Campaign-001', description: 'Active Campaign' },
-  { id: 7, category: 'enquiry', name: 'John Doe', phone: '9876543212', description: 'Enquiry - Demo' },
-  { id: 8, category: 'call', name: 'Call Log - Priya', phone: 'Call-001', description: 'Incoming Call' },
-];
-
 const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [notifications, setNotifications] = useState(initialNotifications);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [committedQuery, setCommittedQuery] = useState('');
+  const { searchValue: searchQuery, handleSearchChange: setSearchQuery, resetSearch } = useDebouncedSearch(setCommittedQuery);
+  const { results: searchResults, isLoading: isSearchLoading } = useGlobalLeadSearch(committedQuery);
+  const { recent: recentSearches, addRecent } = useRecentSearches();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [currentOptionIndex, setCurrentOptionIndex] = useState(0);
@@ -70,6 +57,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const [showNotificationsDrawer, setShowNotificationsDrawer] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLButtonElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -87,6 +75,9 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setShowNotificationsDrawer(false);
+      }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -108,7 +99,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   }
 
   const handleNotificationClick = (notification: NotificationItem) => {
-    setNotifications((prev: NotificationItem[]) => prev.map(n => 
+    setNotifications((prev: NotificationItem[]) => prev.map(n =>
       n.id === notification.id ? { ...n, isRead: true } : n
     ));
     if (notification.link) {
@@ -128,45 +119,33 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
     return () => clearInterval(interval);
   }, []);
 
-  const filteredResults = useMemo(() => {
-    if (!searchQuery || searchQuery.length < 2) return [];
-    const query = searchQuery.toLowerCase();
-    return searchResults.filter(item =>
-      item.name.toLowerCase().includes(query) ||
-      item.phone.toLowerCase().includes(query) ||
-      item.description.toLowerCase().includes(query)
-    ).slice(0, 8);
-  }, [searchQuery]);
-
   const currentOption = addOptions[currentOptionIndex]!;
+
+  const navigateToLead = (phone: string) => {
+    navigate(`/leads?search=${encodeURIComponent(phone)}`);
+  };
+
+  const handleResultClick = (result: LeadSearchApiItem) => {
+    addRecent({ id: result.id, name: result.name, phone: result.phone });
+    setSearchQuery('');
+    resetSearch();
+    setShowSuggestions(false);
+    navigateToLead(result.phone);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, filteredResults.length - 1));
+      setSelectedIndex(prev => Math.min(prev + 1, searchResults.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex(prev => Math.max(prev - 1, 0));
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
       e.preventDefault();
-      if (filteredResults[selectedIndex]) handleResultClick(filteredResults[selectedIndex]);
+      if (searchResults[selectedIndex]) handleResultClick(searchResults[selectedIndex]);
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
     }
-  };
-
-  interface SearchResult {
-    id: number;
-    category: string;
-    name: string;
-    phone: string;
-    description: string;
-  }
-
-  const handleResultClick = (result: SearchResult) => {
-    console.log('Navigate to:', result.category, result);
-    setSearchQuery('');
-    setShowSuggestions(false);
   };
 
   interface AddOption {
@@ -182,23 +161,14 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
     setShowAddDropdown(false);
   };
 
-  const getCategoryIcon = (categoryId: string) => {
-    const cat = searchCategories.find(c => c.id === categoryId);
-    if (cat) {
-      const Icon = cat.icon;
-      return <Icon size={14} style={{ color: cat.color }} />;
-    }
-    return null;
-  };
-
   return (
     <div className="topnav">
-      <div className="search-container">
+      <div className="search-container" ref={searchContainerRef}>
         <div className="search-bar">
           <Search size={18} className="search-icon" />
           <input
             type="text"
-            placeholder="Search leads, deals, tasks..."
+            placeholder="Search leads..."
             className="search-input dashboard-search-input"
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); setSelectedIndex(-1); }}
@@ -214,33 +184,56 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
 
         {showSuggestions && searchQuery.length >= 2 && (
           <div className="search-suggestions">
-            {filteredResults.length > 0 ? (
+            {isSearchLoading ? (
+              <div className="no-results">Searching...</div>
+            ) : searchResults.length > 0 ? (
               <>
                 <div className="suggestion-category">
-                  Search Results ({filteredResults.length})
+                  Leads ({searchResults.length})
                 </div>
-                {filteredResults.map((result, index) => (
+                {searchResults.map((result, index) => (
                   <div
                     key={result.id}
                     className={`suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
                     onClick={() => handleResultClick(result)}
                   >
                     <div className="suggestion-icon">
-                      {getCategoryIcon(result.category)}
+                      <User size={14} style={{ color: '#3b82f6' }} />
                     </div>
                     <div className="suggestion-content">
                       <div className="suggestion-name">{result.name}</div>
-                      <div className="suggestion-desc">{result.description}</div>
+                      <div className="suggestion-desc">{result.phone}{result.source ? ` • ${result.source}` : ''}</div>
                     </div>
-                    <div className="suggestion-category-label">
-                      {searchCategories.find(c => c.id === result.category)?.name}
-                    </div>
+                    {result.status && (
+                      <div className="suggestion-category-label">{result.status}</div>
+                    )}
                   </div>
                 ))}
               </>
             ) : (
               <div className="no-results">No results found</div>
             )}
+          </div>
+        )}
+
+        {showSuggestions && searchQuery.length < 2 && recentSearches.length > 0 && (
+          <div className="search-suggestions">
+            <div className="suggestion-category">Recent</div>
+            {recentSearches.map((entry) => (
+              <div
+                key={entry.id}
+                className="suggestion-item"
+                onClick={() => { setShowSuggestions(false); navigateToLead(entry.phone); }}
+              >
+                <div className="suggestion-icon">
+                  <Clock size={14} style={{ color: '#6b7280' }} />
+                </div>
+                <div className="suggestion-content">
+                  <div className="suggestion-name">{entry.name}</div>
+                  <div className="suggestion-desc">{entry.phone}</div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -275,9 +268,9 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
           )}
         </div>
 
-<div className="icon-btn-container">
-          <button 
-            className="icon-btn notification-btn" 
+        <div className="icon-btn-container">
+          <button
+            className="icon-btn notification-btn"
             ref={notificationsRef}
             onClick={() => setShowNotificationsDrawer(!showNotificationsDrawer)}
           >

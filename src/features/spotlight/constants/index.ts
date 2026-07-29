@@ -23,7 +23,6 @@ export const DATE_FILTER_OPTIONS = [
 
 
 export const COLUMNS = [
-  { key: 'checkbox', label: '' },
   { key: 'action', label: 'Action' },
   { key: 'name', label: 'Name', sortable: true },
   { key: 'phone', label: 'Phone', sortable: false },
@@ -41,11 +40,11 @@ export const COLUMNS = [
 export const SPOTLIGHT_CSV_COLUMNS: CsvColumn<SpotlightLeadApi>[] = [
   { header: 'Name', value: (l) => l.name },
   { header: 'Phone', value: (l) => l.phone },
-  { header: 'Assigned To', value: (l) => l.agentName ?? '' },
-  { header: 'Purpose', value: (l) => l.purpose ?? '' },
-  { header: 'Type', value: (l) => l.type ?? '' },
-  { header: 'Status', value: (l) => l.status ?? '' },
-  { header: 'Source', value: (l) => l.source ?? '' },
+  { header: 'Assigned To', value: (l) => l.assignedStaff?.name ?? '' },
+  { header: 'Purpose', value: (l) => l.purpose?.purpose ?? '' },
+  { header: 'Type', value: (l) => l.type?.type ?? '' },
+  { header: 'Status', value: (l) => l.status?.status ?? '' },
+  { header: 'Source', value: (l) => l.source?.source ?? '' },
   { header: 'Location', value: (l) => l.location ?? '' },
   { header: 'Created At', value: (l) => l.createdAt },
   { header: 'Updated At', value: (l) => l.updatedAt },

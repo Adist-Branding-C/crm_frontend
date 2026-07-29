@@ -1,5 +1,6 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { MoreHorizontal, Eye } from 'lucide-react';
+import ActionDropdownPortal from '../../../components/ActionDropdownPortal';
 import { TRow, TCell } from '../../../shared/components/table';
 import type { SpotlightTableRowProps } from '../types';
 import { formatDateTime, formatFollowUpDateOnly } from '../../../shared/utils/dateUtils';
@@ -12,34 +13,38 @@ const SpotlightTableRow = memo(
     onSelectRow,
     onToggleMenu,
     onViewLead,
-  }: SpotlightTableRowProps) => (
-    <TRow className={isSelected ? 'selected' : ''}>
-      <TCell>
-        <input
-          type="checkbox"
-          aria-label={`Select ${row.name}`}
-          checked={isSelected}
-          onChange={() => onSelectRow(row.id)}
-        />
-      </TCell>
-      <TCell className="action-cell">
-        <div className="action-menu-container">
-          <button
-            className="action-btn"
-            aria-label={`Actions for ${row.name}`}
-            onClick={() => onToggleMenu(!isMenuOpen)}
-          >
-            <MoreHorizontal size={16} />
-          </button>
-          {isMenuOpen && (
-            <div className="action-dropdown">
-              <button onClick={() => onViewLead(row)}>
-                <Eye size={14} /> View
-              </button>
-            </div>
-          )}
-        </div>
-      </TCell>
+  }: SpotlightTableRowProps) => {
+    const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
+
+    return (
+      <TRow className={isSelected ? 'selected' : ''}>
+        <TCell className="action-cell">
+          <div className="action-menu-container">
+            <button
+              className="action-btn"
+              aria-label={`Actions for ${row.name}`}
+              onClick={(e) => {
+                if (!isMenuOpen) {
+                  setButtonRect(e.currentTarget.getBoundingClientRect());
+                }
+                onToggleMenu(!isMenuOpen);
+              }}
+            >
+              <MoreHorizontal size={16} />
+            </button>
+            {isMenuOpen && buttonRect && (
+              <ActionDropdownPortal
+                isOpen={isMenuOpen}
+                buttonRect={buttonRect}
+                onClose={() => onToggleMenu(false)}
+              >
+                <button onClick={() => { onViewLead(row); onToggleMenu(false); }} className="whatsapp">
+                  <Eye size={14} /> View Details
+                </button>
+              </ActionDropdownPortal>
+            )}
+          </div>
+        </TCell>
       <TCell className="lead-name-cell" onClick={() => onViewLead(row)}>
         {row.name}
       </TCell>
@@ -62,8 +67,9 @@ const SpotlightTableRow = memo(
       <TCell>{formatDateTime(row.createdAt)}</TCell>
       <TCell>{formatDateTime(row.updatedAt)}</TCell>
       <TCell>{formatFollowUpDateOnly(row.nextFollowUpDate)}</TCell>
-    </TRow>
-  ),
+      </TRow>
+    );
+  },
 );
 
 SpotlightTableRow.displayName = 'SpotlightTableRow';

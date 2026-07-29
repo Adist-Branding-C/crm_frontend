@@ -51,6 +51,19 @@ export interface LeadListData {
   pagination: PaginationInfo;
 }
 
+
+export interface LeadSearchApiItem {
+  id: string;
+  name: string;
+  phone: string;
+  status: string | null;
+  source: string | null;
+}
+
+export interface LeadSearchData {
+  items: LeadSearchApiItem[];
+}
+
 export interface CreateLeadData {
   leadId: string;
 }

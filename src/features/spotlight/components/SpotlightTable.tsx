@@ -36,8 +36,7 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
   };
 
   return (
-    <div className="table-container">
-      <Table className="enquiries-table">
+    <Table wrapperClassName="table-scroll" className="enquiries-table">
         <THead>
           <TRow>
             {columns.map((col) => (
@@ -107,8 +106,7 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
             ))
           )}
         </TBody>
-      </Table>
-    </div>
+    </Table>
   );
 };
 

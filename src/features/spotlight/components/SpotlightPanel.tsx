@@ -14,6 +14,7 @@ const SpotlightPanel = () => {
 
   return (
     <>
+      <div className="table-container">
       <SpotlightToolbar
         searchQuery={spotlightData.searchQuery}
         onSearchChange={spotlightData.setSearchQuery}
@@ -81,9 +82,22 @@ const SpotlightPanel = () => {
         onPageChange={spotlightData.setCurrentPage}
         onRowsPerPageChange={spotlightData.handleRowsPerPageChange}
       />
+      </div>
 
       <LeadDetailDrawer
-        lead={spotlightData.selectedLead}
+        lead={
+          spotlightData.selectedLead
+            ? {
+                ...spotlightData.selectedLead,
+                leadId: String(spotlightData.selectedLead.id),
+                type: spotlightData.selectedLead.type?.type || '',
+                status: spotlightData.selectedLead.status?.status || '',
+                source: spotlightData.selectedLead.source?.source || '',
+                purpose: spotlightData.selectedLead.purpose?.purpose || '',
+                assignedTo: spotlightData.selectedLead.assignedStaff?.name || '',
+              }
+            : null
+        }
         isOpen={!!spotlightData.selectedLead}
         onClose={spotlightData.closeLeadDetail}
         onLeadUpdated={spotlightData.refetch}

@@ -3,7 +3,7 @@ import type { AxiosError } from 'axios';
 import { followupService } from '../services/followupService';
 import { mapApiItemToFollowupLead } from '../mappers/followupLead.mapper';
 import { SortDirection } from '../../../shared/constants/enums/sortDirection';
-import type { FollowupLead, Filters, SortConfig, GetFollowupLeadsParams } from '../types';
+import type { FollowupBucket, FollowupLead, Filters, SortConfig, GetFollowupLeadsParams } from '../types';
 
 const SORT_KEY_TO_API: Record<string, GetFollowupLeadsParams['sort_by']> = {
   name: 'name',
@@ -27,6 +27,7 @@ export function useFollowupFetch() {
       search: string,
       filters: Filters,
       sortConfig: SortConfig,
+      bucket?: FollowupBucket | null,
     ) => {
       const requestSeq = ++requestSeqRef.current;
       setIsLoading(true);
@@ -43,6 +44,7 @@ export function useFollowupFetch() {
         if (filters.assignedTo) params.assignedTo = filters.assignedTo;
         if (filters.dateRange.start) params.startDate = filters.dateRange.start;
         if (filters.dateRange.end) params.endDate = filters.dateRange.end;
+        if (bucket) params.bucket = bucket;
         const sortBy = sortConfig.key ? SORT_KEY_TO_API[sortConfig.key] : undefined;
         if (sortBy) {
           params.sort_by = sortBy;

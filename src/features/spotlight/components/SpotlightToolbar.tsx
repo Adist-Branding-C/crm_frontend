@@ -26,7 +26,7 @@ const SpotlightToolbar: React.FC<SpotlightToolbarProps> = ({
   isExporting,
 }) => {
   return (
-    <div className="enquiries-toolbar">
+    <div className="table-header-controls">
       <div className="toolbar-left">
         <div className="search-box">
           <Search size={16} className="search-icon" aria-hidden="true" />

@@ -180,6 +180,30 @@
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  position: relative;
+}
+
+.calendar-error-banner {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 14px;
+}
+
+.calendar-loading-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 0.5rem 1rem;
+  font-size: 13px;
+  text-align: center;
+  z-index: 1;
 }
 
 .month-view-header {
@@ -1296,6 +1320,10 @@
 
 .timeline-task:active {
   cursor: grabbing;
+}
+
+.timeline-task.readonly {
+  cursor: default;
 }
 
 .time-slot.drag-over {

@@ -8,7 +8,6 @@ const Sidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: MessageCircle, label: 'Leads', path: '/leads' },
     // { icon: UserCircle, label: 'Enquiries', path: '/enquiries' },
-    { icon: Bell, label: 'Followup Required', path: '/followup-required' },
     { icon: DollarSign, label: 'Deals', path: '/user/deals' },
     { icon: Kanban, label: 'Sales Pipeline', path: '/sales-pipeline' },
     { icon: ListChecks, label: 'Tasks', path: '/user/tasks' },
