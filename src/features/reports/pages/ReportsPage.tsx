@@ -62,7 +62,7 @@ const LeadReportsRouter = () => (
     {/* <Route path="status-change" element={<LeadStatusChange />} /> */}
     {/* <Route path="source-wise" element={<LeadSourceWise />} /> */}
     {/* <Route path="checkout" element={<LeadCheckoutSummary />} /> */}
-    {/* <Route path="export" element={<LeadExport />} /> */}
+    <Route path="export" element={<LeadExport />} />
     <Route path="export-history" element={<LeadExportHistory />} />
     <Route path="import-history" element={<LeadImportHistory />} />
     <Route path="import-history/:id" element={<ImportHistoryDetail />} />
