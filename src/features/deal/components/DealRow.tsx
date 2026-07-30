@@ -1,8 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { MoreHorizontal, Edit2, Trash2, Phone, MessageSquare } from 'lucide-react';
 import ActionMenuPortal from '../../../shared/components/ActionMenuPortal';
+import WhatsappTemplatePickerOverlay from '../../../shared/components/WhatsappTemplatePickerOverlay';
 import { DEAL_STATUS_LABEL_MAP, DEAL_TYPE_LABEL_MAP } from '../../../shared/constants/dealOptions';
+import { substituteTemplateVariables } from '../../../shared/utils/whatsappMessage.util';
 import type { DealRowProps } from '../types/component.types';
+import type { WhatsappTemplateItem } from '../../account-settings/whatsapp-template/types/whatsapp-template.types';
 
 const getStatusBadge = (status: string) => {
   const colorMap: Record<string, string> = { win: '#10b981', lost: '#ef4444', pending: '#f59e0b', invoice: '#3b82f6' };
@@ -24,10 +27,31 @@ const DealRow: React.FC<DealRowProps> = ({
   actionMenu,
   onEditDeal,
   onDeleteDeal,
-  onWhatsApp,
+  onSendWhatsapp,
   onMessage,
+  hasWhatsappTemplates,
+  whatsappTemplatesLoading,
+  whatsappTemplatesError,
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const [showWhatsappTemplatePicker, setShowWhatsappTemplatePicker] = useState(false);
+
+  const handleWhatsappClick = () => {
+    actionMenu.onClose();
+    // Fail-open: no templates loaded/available/errored -> today's plain send.
+    if (whatsappTemplatesError || (!whatsappTemplatesLoading && !hasWhatsappTemplates)) {
+      onSendWhatsapp(deal);
+      return;
+    }
+    setShowWhatsappTemplatePicker(true);
+  };
+
+  const handleSelectWhatsappTemplate = (template: WhatsappTemplateItem) => {
+    const message = substituteTemplateVariables(template.message || template.content || '', {
+      name: deal.lead,
+    });
+    onSendWhatsapp(deal, message);
+  };
 
   return (
     <tr>
@@ -52,7 +76,7 @@ const DealRow: React.FC<DealRowProps> = ({
             <button type="button" onClick={() => { onEditDeal(deal); actionMenu.onClose(); }}>
               <Edit2 size={14} /> Edit Deal
             </button>
-            <button type="button" onClick={() => { onWhatsApp(deal); actionMenu.onClose(); }}>
+            <button type="button" onClick={handleWhatsappClick}>
               <Phone size={14} /> WhatsApp
             </button>
             <button type="button" onClick={() => { onMessage(deal); actionMenu.onClose(); }}>
@@ -63,6 +87,13 @@ const DealRow: React.FC<DealRowProps> = ({
             </button>
           </div>
         </ActionMenuPortal>
+        {showWhatsappTemplatePicker && (
+          <WhatsappTemplatePickerOverlay
+            onClose={() => setShowWhatsappTemplatePicker(false)}
+            onSelectTemplate={handleSelectWhatsappTemplate}
+            onSendWithoutTemplate={() => onSendWhatsapp(deal)}
+          />
+        )}
       </td>
       <td className="lead-name-cell">{deal.dealName}</td>
       <td>{deal.lead}</td>

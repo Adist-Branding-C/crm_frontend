@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import CalendarPage from '../features/calendar/pages/CalendarPage';
 import DailyActivityPage from '../features/daily-activity/pages/DailyActivityPage';
@@ -8,6 +8,7 @@ import StaffPerformancePage from '../features/staff-performance/pages/StaffPerfo
 
 export default (
   <>
+    <Route index element={<Navigate to="/dashboard" replace />} />
     <Route path="dashboard" element={<DashboardPage />} />
     <Route path="calendar" element={<CalendarPage />} />
     <Route path="daily-activity" element={<DailyActivityPage />} />
