@@ -259,20 +259,70 @@ export interface LeadImportHistoryModalProps {
 }
 
 export interface LeadExportFilters {
-  createdAt: { from: string; to: string };
-  updatedAt: { from: string; to: string };
-  assignedAt: { from: string; to: string };
-  enquirySource: string;
-  enquiryPurpose: string;
-  enquiryStatus: string;
-  createdBy: string;
+  dateRange: DateRange;
+  filterByDate: string;
+  sourceId: string;
+  purposeId: string;
+  statusId: string;
+  followUpAdded: string;
   assignedTo: string;
-  leadType: string;
-  campaign: string;
-  did: string;
+  typeId: string;
   location: string;
-  remarks: string;
-  dateRange: string;
-  sortBy: string;
+}
+
+export type LeadExportStatus = 'pending' | 'processing' | 'success' | 'failed';
+
+export interface LeadExportHistoryItem {
+  exportId: string;
+  exportType: string;
   fileName: string;
+  totalRows: number;
+  status: LeadExportStatus;
+  attemptCount: number;
+  lastError: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeadExportHistoryPagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+export interface LeadExportHistoryResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    items: LeadExportHistoryItem[];
+    pagination: LeadExportHistoryPagination;
+  };
+}
+
+export interface CreateLeadExportPayload {
+  dateFrom?: string;
+  dateTo?: string;
+  dateFilterBy?: string;
+  sourceId?: string;
+  purposeId?: string;
+  statusId?: string;
+  followUpAdded?: string;
+  assignedTo?: string;
+  typeId?: string;
+  location?: string;
+  columns: string[];
+}
+
+export interface CreateLeadExportResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    exportId: string;
+    totalRows: number;
+    status: LeadExportStatus;
+  };
 }
