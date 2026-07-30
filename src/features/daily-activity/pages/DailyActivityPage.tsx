@@ -47,6 +47,13 @@ const DailyActivityPage = () => {
     fetchActivities(1, appliedFilters, appliedActivityType);
   }, [activityFilters, fetchActivities]);
 
+  const handleActivityTypeChange = useCallback((value: string) => {
+    activityFilters.setActivityTypeFilter(value);
+    activityFilters.setAppliedActivityType(value);
+    setCurrentPage(1);
+    fetchActivities(1, activityFilters.appliedFilters, value);
+  }, [activityFilters, fetchActivities]);
+
   const handleReset = useCallback(() => {
     const { appliedFilters, appliedActivityType } = activityFilters.resetFilters();
     setCurrentPage(1);
@@ -112,7 +119,7 @@ const DailyActivityPage = () => {
         activityTypeFilter={activityFilters.activityTypeFilter}
         activityTypes={activityTypes}
         isLoading={isLoading}
-        onChange={activityFilters.setActivityTypeFilter}
+        onChange={handleActivityTypeChange}
       />
 
       <ActivityTimeline

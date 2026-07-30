@@ -21,6 +21,8 @@ import { useDealDrawer } from '../hooks/useDealDrawer';
 import { useDealFormSubmit } from '../hooks/useDealFormSubmit';
 import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
 import { useDealExport } from '../hooks/useDealExport';
+import { useActiveWhatsappTemplates } from '../../../shared/hooks/useActiveWhatsappTemplates';
+import { buildWhatsappUrl } from '../../../shared/utils/whatsappMessage.util';
 import { getDealColumns } from '../utils/dealColumns';
 import { getDealIds } from '../utils/dealMapper';
 import { getFieldKey, getInitialValues } from '../utils/additionalFields';
@@ -158,21 +160,14 @@ const DealPage = () => {
     return [...names];
   }, [list.dealList]);
 
-  const handleWhatsApp = (item: DealItem) => {
+  const { hasTemplates: hasWhatsappTemplates, isLoading: whatsappTemplatesLoading, hasError: whatsappTemplatesError } = useActiveWhatsappTemplates();
+
+  const handleSendWhatsapp = (item: DealItem, message?: string) => {
     if (!item.mobile) {
       toast.showToastMessage('Phone number is not available.', 'error');
       return;
     }
-    const digits = item.mobile.replace(/[^0-9]/g, '');
-    let number: string;
-    if (digits.length === 10) {
-      number = `91${digits}`;
-    } else if (digits.length === 12 && digits.startsWith('91')) {
-      number = digits;
-    } else {
-      number = digits;
-    }
-    window.open(`https://wa.me/${number}`, '_blank');
+    window.open(buildWhatsappUrl(item.mobile, message), '_blank');
   };
 
   const handleMessage = (item: DealItem) => {
@@ -281,8 +276,11 @@ const DealPage = () => {
                   }}
                   onEditDeal={drawer.openEditDrawer}
                   onDeleteDeal={rowActions.handleDeleteFromRow}
-                  onWhatsApp={handleWhatsApp}
+                  onSendWhatsapp={handleSendWhatsapp}
                   onMessage={handleMessage}
+                  hasWhatsappTemplates={hasWhatsappTemplates}
+                  whatsappTemplatesLoading={whatsappTemplatesLoading}
+                  whatsappTemplatesError={whatsappTemplatesError}
                 />
               ))
             )}

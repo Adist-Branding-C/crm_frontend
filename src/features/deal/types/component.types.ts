@@ -70,6 +70,9 @@ export interface DealRowProps {
   };
   onEditDeal: (item: DealItem) => void;
   onDeleteDeal: (deal: DealItem) => void;
-  onWhatsApp: (item: DealItem) => void;
+  onSendWhatsapp: (item: DealItem, message?: string) => void;
   onMessage: (item: DealItem) => void;
+  hasWhatsappTemplates: boolean;
+  whatsappTemplatesLoading: boolean;
+  whatsappTemplatesError: boolean;
 }
