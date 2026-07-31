@@ -1,56 +1,16 @@
-@import '../../../shared/styles/tables.css';
-@import '../../../shared/styles/buttons.css';
-@import '../../../shared/styles/badges.css';
-@import '../../../shared/styles/pagination.css';
-@import '../../../shared/styles/drawers.css';
-@import '../../../shared/styles/forms.css';
-@import '../../../shared/styles/modals.css';
-@import '../../../shared/styles/tabs.css';
-@import '../../../shared/styles/sidebar-layout.css';
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/pagination.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/tabs.css';
+@import '../../../../shared/styles/sidebar-layout.css';
 
 .modal-content {
   width: 100%;
   max-width: 450px;
-}
-
-/* Credit Cards */
-.credit-cards {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.credit-card {
-  flex: 1;
-  padding: 1rem 1.25rem;
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
-}
-
-.credit-card p {
-  margin: 0 0 0.25rem 0;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-}
-
-.credit-card h5 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-.credit-total {
-  border-left: 4px solid #6366f1;
-}
-
-.credit-used {
-  border-left: 4px solid #f59e0b;
-}
-
-.credit-balance {
-  border-left: 4px solid #10b981;
 }
 
 /* Plan Details */
@@ -355,6 +315,22 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.profile-fetch-error {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.profile-fetch-error span {
+  flex: 1;
 }
 
 .btn .spin {
