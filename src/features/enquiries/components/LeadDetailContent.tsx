@@ -12,6 +12,8 @@ import Toast from '../../../shared/components/Toast';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import { useLeadRemarks } from '../hooks/useLeadRemarks';
 import { useLeadTasks } from '../hooks/useLeadTasks';
+import ActivityTimelineCard from '../../daily-activity/components/ActivityTimelineCard';
+import { ActivityMapper } from '../../daily-activity/mappers/activity.mapper';
 import { useLeadTaskDropdowns } from '../hooks/useLeadTaskDropdowns';
 import { useLeadFormOptions } from '../hooks/useLeadFormOptions';
 import { useLeadDeals } from '../hooks/useLeadDeals';
@@ -489,23 +491,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                 ) : (
                   <div className="leaddrawer-activity-list">
                     {apiActivities.map((item: any) => {
-                      // The activities API returns raw rows only (no actor-name
-                      // enrichment), so fall back to the actor's id/type.
-                      const actorLabel = item.actorName || item.actorId || item.actorType || 'Unknown';
-                      return (
-                        <div className="leaddrawer-activity-card" key={item.id}>
-                          <div className="leaddrawer-activity-avatar">
-                            {actorLabel.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="leaddrawer-activity-content">
-                            <div className="leaddrawer-activity-header">
-                              <span className="leaddrawer-activity-user">{actorLabel}</span>
-                            </div>
-                            <span className="leaddrawer-activity-time">{formatDateTime(item.createdAt)}</span>
-                            <p className="leaddrawer-activity-desc">{item.description}</p>
-                          </div>
-                        </div>
-                      );
+                      const activity = ActivityMapper.toEntity(item);
+                      return <ActivityTimelineCard key={item.id} activity={activity} />;
                     })}
                   </div>
                 )}
