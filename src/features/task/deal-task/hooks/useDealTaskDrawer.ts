@@ -11,8 +11,8 @@ import type { UseDealTaskDrawerLookups } from '../types/hook.types';
  * Used by:
  * - DealTaskPage.
  */
-export function useDealTaskDrawer({ loadStaff, loadLeads }: UseDealTaskDrawerLookups) {
-  const loaders = useMemo(() => [loadStaff, loadLeads], [loadStaff, loadLeads]);
+export function useDealTaskDrawer({ loadStaff, loadDeals }: UseDealTaskDrawerLookups) {
+  const loaders = useMemo(() => [loadStaff, loadDeals], [loadStaff, loadDeals]);
 
   return useTaskDrawer({
     mapItemToFormData: DealTaskMapper.toFormValues,

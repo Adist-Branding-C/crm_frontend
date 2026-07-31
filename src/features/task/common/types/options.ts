@@ -11,3 +11,13 @@ export interface LeadOption {
   value: number;
   label: string;
 }
+
+export interface DealOption {
+  value: number;
+  label: string;
+}
+
+export interface CampaignOption {
+  value: number;
+  label: string;
+}

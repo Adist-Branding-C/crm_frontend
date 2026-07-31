@@ -14,7 +14,7 @@ export const ADD_CAMPAIGN_TASK_INITIAL_VALUES: CampaignTaskFormData = {
   scheduledDate: '',
   scheduledTime: '',
   assignedTo: '',
-  leadId: '',
+  campaignId: '',
   priority: '',
   status: '',
 };
