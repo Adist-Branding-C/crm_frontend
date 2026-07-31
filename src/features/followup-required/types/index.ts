@@ -86,7 +86,7 @@ export interface FollowupStatCardsProps {
   statistics: FollowupStatistics | null;
   isLoading: boolean;
   activeBucket: FollowupBucket | null;
-  onBucketClick: (bucket: FollowupBucket) => void;
+  onBucketClick: (bucket: FollowupBucket | null) => void;
 }
 
 export interface FollowupFiltersProps {

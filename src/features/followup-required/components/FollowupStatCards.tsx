@@ -32,14 +32,18 @@ const FollowupStatCards: React.FC<FollowupStatCardsProps> = ({
           <div className="followup-stat-label">{label}</div>
         </button>
       ))}
-      <div className="followup-stat-card followup-stat-card--total">
+      <button
+        type="button"
+        className={`followup-stat-card followup-stat-card--total ${activeBucket === null ? 'active' : ''}`}
+        onClick={() => onBucketClick(null)}
+      >
         {isLoading ? (
           <Skeleton width="3rem" height="1.5rem" />
         ) : (
           <div className="followup-stat-value">{statistics?.total ?? 0}</div>
         )}
         <div className="followup-stat-label">Total</div>
-      </div>
+      </button>
     </div>
   );
 };

@@ -23,7 +23,7 @@ import type { ActiveView } from '../types';
 import './SalesPipelinePage.css';
 
 const SalesPipelinePage: React.FC = () => {
-  const [activeView, setActiveView] = useState<ActiveView>('deals');
+  const [activeView, setActiveView] = useState<ActiveView>('leads');
   const [committedSearch, setCommittedSearch] = useState('');
   const activeViewRef = useRef(activeView);
   activeViewRef.current = activeView;

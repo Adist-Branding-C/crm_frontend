@@ -37,7 +37,7 @@ const FollowupPanel = () => {
   const { data, total, totalPages, isLoading, error, fetchFollowupLeads } = useFollowupFetch();
   const statistics = useFollowupStatistics();
 
-  const handleBucketClick = useCallback((bucket: FollowupBucket) => {
+  const handleBucketClick = useCallback((bucket: FollowupBucket | null) => {
     setActiveBucket((prev) => (prev === bucket ? null : bucket));
     setCurrentPage(1);
   }, []);

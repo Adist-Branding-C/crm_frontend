@@ -16,14 +16,12 @@ import WonDealsCard from '../components/widgets/WonDealsCard';
 import LostDealsCard from '../components/widgets/LostDealsCard';
 import InProgressDealsCard from '../components/widgets/InProgressDealsCard';
 import {
-  DASHBOARD_KPI_CARDS_HARDCODED,
-  PIPELINE_LEADS_HARDCODED,
   CALL_LOGGED_ACTIVITY_TYPE,
   HOT_LEAD_TYPE_NAME,
 } from '../constants/dashboard.constants';
 import { useLeadOverviewStatistics } from '../hooks/useLeadOverviewStatistics';
 import { usePipelineAmount } from '../hooks/usePipelineAmount';
-import { useFollowupCount } from '../hooks/useFollowupCount';
+import { useFollowupStatistics } from '../../followup-required/hooks/useFollowupStatistics';
 import { useActivitiesStatistics } from '../hooks/useActivitiesStatistics';
 import { useCallLogsCount } from '../hooks/useCallLogsCount';
 import type { DashboardPeriod } from '../types';
@@ -44,7 +42,7 @@ const DashboardPage = () => {
 
   const leadOverview = useLeadOverviewStatistics(period, effectiveFrom, effectiveTo);
   const pipelineAmount = usePipelineAmount(period, effectiveFrom, effectiveTo);
-  const followupCount = useFollowupCount();
+  const followupStats = useFollowupStatistics();
   const outboundCallsCount = useCallLogsCount(period, effectiveFrom, effectiveTo);
   const todaysActivities = useActivitiesStatistics('today');
   const callsToday =
@@ -122,14 +120,7 @@ const DashboardPage = () => {
           isPrimary={true}
           isLoading={leadOverview.isLoading}
         />
-        {DASHBOARD_KPI_CARDS_HARDCODED.map((card, index) => (
-          <KpiCard
-            key={index}
-            title={card.title}
-            value={card.value}
-            isPrimary={card.isPrimary}
-          />
-        ))}
+
         <KpiCard
           title="Conversion Rate"
           value={`${leadOverview.conversionRate}%`}
@@ -137,32 +128,21 @@ const DashboardPage = () => {
           isHighlight={true}
           isLoading={leadOverview.isLoading}
         />
-      </div>
 
-      <div className="widgets-grid middle-cards-grid">
         <KpiCard
           title="Leads This Month"
           value={String(leadOverview.leadsThisMonth)}
           isPrimary={true}
           isLoading={leadOverview.isLoading}
         />
-        <KpiCard title={PIPELINE_LEADS_HARDCODED.title} value={PIPELINE_LEADS_HARDCODED.value} isPrimary={true} />
+
         <KpiCard
           title="Total Leads"
           value={String(leadOverview.totalLeads)}
           isPrimary={true}
           isLoading={leadOverview.isLoading}
         />
-        <KpiCard
-          title="Today's Followups"
-          value={String(followupCount.total)}
-          isPrimary={true}
-          isLoading={followupCount.isLoading}
-        />
-      </div>
 
-
-      <div className="widgets-grid middle-cards-grid">
         <KpiCard
           title="My Leads"
           value={String(leadOverview.myLeads)}
@@ -184,9 +164,32 @@ const DashboardPage = () => {
           value={String(outboundCallsCount.total)}
           isLoading={outboundCallsCount.isLoading}
         />
-      </div>
 
-      <div className="widgets-grid middle-cards-grid">
+        <KpiCard
+          title="Overdue Followups"
+          value={String(followupStats.data?.overdue ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+        <KpiCard
+          title="Due Today Followups"
+          value={String(followupStats.data?.dueToday ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+        <KpiCard
+          title="Upcoming Followups"
+          value={String(followupStats.data?.upcoming ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+        <KpiCard
+          title="Total Followups"
+          value={String(followupStats.data?.total ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+
         <WonDealsCard period={period} from={effectiveFrom} to={effectiveTo} />
         <LostDealsCard period={period} from={effectiveFrom} to={effectiveTo} />
         <InProgressDealsCard period={period} from={effectiveFrom} to={effectiveTo} />
