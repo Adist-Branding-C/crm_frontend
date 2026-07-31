@@ -20,13 +20,22 @@ const GenericTaskForm = ({
   staffLoading,
   leadOptions,
   leadLoading,
+  associationOptions,
+  associationLoading,
+  associationFieldName = 'leadId',
+  associationLabel = 'Lead',
+  associationPlaceholder = 'Select a lead',
+  associationLoadingLabel = 'Loading leads...',
+  associationEmptyMessage = 'No leads available. Please create a lead first.',
   categoryOptions,
   categoryLoading,
   hideCategory = false,
   children,
 }: GenericTaskFormProps) => {
   const staffEmpty = !staffLoading && staffOptions.length === 0;
-  const leadEmpty = !leadLoading && (leadOptions ?? []).length === 0;
+  const resolvedAssociationOptions = associationOptions ?? leadOptions ?? [];
+  const resolvedAssociationLoading = associationLoading ?? leadLoading ?? false;
+  const associationEmpty = !resolvedAssociationLoading && resolvedAssociationOptions.length === 0;
   const categoryEmpty = !categoryLoading && (categoryOptions ?? []).length === 0;
   const drawerBodyRef = useRef<HTMLDivElement>(null);
 
@@ -130,24 +139,22 @@ const GenericTaskForm = ({
               </div>
 
               <div className="form-group">
-                <label>Lead <span className="text-danger">*</span></label>
+                <label>{associationLabel} <span className="text-danger">*</span></label>
                 <Field
                   as="select"
-                  name="leadId"
-                  className={fieldClass('leadId')}
-                  disabled={leadLoading || leadEmpty}
+                  name={associationFieldName}
+                  className={fieldClass(associationFieldName)}
+                  disabled={resolvedAssociationLoading || associationEmpty}
                 >
-                  <option value="">{leadLoading ? 'Loading leads...' : 'Select a lead'}</option>
-                  {(leadOptions ?? []).map(lead => (
-                    <option key={lead.value} value={lead.value}>{lead.label}</option>
+                  <option value="">{resolvedAssociationLoading ? associationLoadingLabel : associationPlaceholder}</option>
+                  {resolvedAssociationOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </Field>
-                {leadEmpty ? (
-                  <small className="field-error-text">
-                    No leads available. Please create a lead first.
-                  </small>
+                {associationEmpty ? (
+                  <small className="field-error-text">{associationEmptyMessage}</small>
                 ) : (
-                  <FormikError name="leadId" component="small" className="field-error-text" />
+                  <FormikError name={associationFieldName} component="small" className="field-error-text" />
                 )}
               </div>
 

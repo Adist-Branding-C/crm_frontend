@@ -9,7 +9,7 @@ import { useCampaignTaskDrawer } from '../hooks/useCampaignTaskDrawer';
 import { useCampaignTaskDeleteConfirm } from '../hooks/useCampaignTaskDeleteConfirm';
 import { useCampaignTaskFormSubmit } from '../hooks/useCampaignTaskFormSubmit';
 import { useStaffOptions } from '../../common/hooks/useStaffOptions';
-import { useLeadOptions } from '../../common/hooks/useLeadOptions';
+import { useCampaignOptions } from '../../common/hooks/useCampaignOptions';
 import { campaignTaskDataService } from '../services/campaignTaskDataService';
 import { addCampaignTaskValidationSchema, editCampaignTaskValidationSchema } from '../validations/campaignTask.validation';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
@@ -36,8 +36,8 @@ const CampaignTaskPage = () => {
   const toast = useToast();
   const crud = useCampaignTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
   const staff = useStaffOptions();
-  const leads = useLeadOptions();
-  const drawer = useCampaignTaskDrawer({ loadStaff: staff.loadStaff, loadLeads: leads.loadLeads });
+  const campaigns = useCampaignOptions();
+  const drawer = useCampaignTaskDrawer({ loadStaff: staff.loadStaff, loadCampaigns: campaigns.loadCampaigns });
   const dropdown = useDropdownMenu<number>();
   const deleteConfirm = useCampaignTaskDeleteConfirm({ handleDeleteCampaignTask: crud.handleDeleteCampaignTask });
   const formSubmit = useCampaignTaskFormSubmit({
@@ -111,8 +111,13 @@ const CampaignTaskPage = () => {
             isEditing={!!drawer.editingItem}
             staffOptions={staff.staffOptions}
             staffLoading={staff.staffLoading}
-            leadOptions={leads.leadOptions}
-            leadLoading={leads.leadLoading}
+            associationOptions={campaigns.campaignOptions}
+            associationLoading={campaigns.campaignLoading}
+            associationFieldName="campaignId"
+            associationLabel="Campaign"
+            associationPlaceholder="Select a campaign"
+            associationLoadingLabel="Loading campaigns..."
+            associationEmptyMessage="No campaigns available. Please create a campaign first."
             hideCategory
           />
         </Drawer>

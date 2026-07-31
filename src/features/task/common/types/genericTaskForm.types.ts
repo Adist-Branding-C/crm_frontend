@@ -26,6 +26,14 @@ export interface GenericTaskFormProps {
   staffLoading?: boolean;
   leadOptions?: LeadOption[];
   leadLoading?: boolean;
+  /** Overrides the association dropdown's option source; falls back to leadOptions/leadLoading when omitted. */
+  associationOptions?: LeadOption[];
+  associationLoading?: boolean;
+  associationFieldName?: string;
+  associationLabel?: string;
+  associationPlaceholder?: string;
+  associationLoadingLabel?: string;
+  associationEmptyMessage?: string;
   categoryOptions?: CategoryOption[];
   categoryLoading?: boolean;
   hideCategory?: boolean;
