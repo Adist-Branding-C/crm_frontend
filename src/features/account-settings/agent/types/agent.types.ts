@@ -11,6 +11,8 @@ export interface AgentItem {
   designationId?: string;
   designation_id?: number | string;
   designation?: string;
+  departmentId?: string;
+  department_id?: number | string;
   status: string;
 }
 
@@ -21,6 +23,7 @@ export interface AgentFormData {
   password: string;
   confirmPassword: string;
   designationId: string;
+  departmentId: string;
   status: string;
 }
 
@@ -50,6 +53,11 @@ export interface GetAllAgentsResponse {
 }
 
 export interface DesignationOption {
+  label: string;
+  value: string;
+}
+
+export interface DepartmentOption {
   label: string;
   value: string;
 }

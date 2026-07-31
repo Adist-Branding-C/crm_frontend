@@ -27,6 +27,7 @@ export interface LeadApiItem {
   address: string | null;
   agentId: string | null;
   assignedStaff: LeadApiAssignedStaff | null;
+  createdByName: string | null;
   purpose: { purposeId: string | null; purpose: string | null } | null;
   type: { typeId: string | null; type: string | null } | null;
   status: LeadApiStatusLookup | null;

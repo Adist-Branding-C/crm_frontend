@@ -3,7 +3,7 @@ import type { ChangeEvent } from 'react';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
-import { useAgentCrud, useAgentDesignationOptions, useAgentDrawer, useAgentDeleteConfirm, useAgentFormSubmit } from '../hooks';
+import { useAgentCrud, useAgentDesignationOptions, useAgentDepartmentOptions, useAgentDrawer, useAgentDeleteConfirm, useAgentFormSubmit } from '../hooks';
 import { agentService } from '../services/agent.service';
 import AddAgentDrawer from '../components/AddAgentDrawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
@@ -28,6 +28,7 @@ const AgentPage = () => {
   const toast = useToast();
   const crud = useAgentCrud({ pagination, showToastMessage: toast.showToastMessage });
   const designation = useAgentDesignationOptions();
+  const department = useAgentDepartmentOptions();
   const drawer = useAgentDrawer();
   const dropdown = useDropdownMenu<number>();
   const deleteConfirm = useAgentDeleteConfirm({ handleDeleteAgent: crud.handleDeleteAgent });
@@ -87,6 +88,7 @@ const AgentPage = () => {
         }}
         status={{ isLoading: pagination.isLoading, error: pagination.error }}
         designation={{ options: designation.designationOptions, onFetch: designation.fetchDesignations }}
+        department={{ options: department.departmentOptions, onFetch: department.fetchDepartments }}
       />
       <AdminDeleteModal
         isOpen={!!deleteConfirm.deletingItem}

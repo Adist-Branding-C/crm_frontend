@@ -135,6 +135,7 @@ export interface LeadDetailDrawerProps {
     location?: string;
     address?: string;
     assignedTo: string;
+    createdByName?: string;
     purpose: string;
     type: string;
     status: string;

@@ -43,10 +43,10 @@ const getCellContent = (row: Lead, colKey: string, onViewLead: (lead: Lead) => v
   if (colKey === 'createdAt' || colKey === 'updatedAt') {
     return { children: formatRelativeDate((row as unknown as Record<string, string>)[colKey]) };
   }
-  if (colKey === 'nextFollowUp') {
-    return { children: formatFollowUpDate((row as unknown as Record<string, string>)[colKey]) };
+  if (colKey === 'nextFollowUpDate') {
+    return { children: formatFollowUpDate(row.nextFollowUp) };
   }
-  if (colKey === 'assignedTo') {
+  if (colKey === 'agentId') {
     return { children: row.assignedTo || LABEL_NOT_ASSIGNED };
   }
   if (LEAD_PROPERTY_KEYS.has(colKey)) {

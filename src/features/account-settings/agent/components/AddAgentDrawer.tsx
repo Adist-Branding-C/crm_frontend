@@ -7,19 +7,21 @@ import { sanitizePhoneDigits } from '../../../../shared/utils/phone.util';
 import { scrollToFirstError } from '../../../../shared/utils/scrollToError.util';
 import type { AddAgentDrawerProps } from '../types/add-agent-drawer.types';
 
-const AddAgentDrawer = ({ visibility, form, status, designation }: AddAgentDrawerProps) => {
+const AddAgentDrawer = ({ visibility, form, status, designation, department }: AddAgentDrawerProps) => {
   const { isOpen, onClose } = visibility;
   const { validationSchema, initialValues, onSubmit, isEditing } = form;
   const { isLoading, error } = status;
   const { options: designationOptions, onFetch: onFetchDesignations } = designation;
+  const { options: departmentOptions, onFetch: onFetchDepartments } = department;
   const drawerBodyRef = useRef<HTMLDivElement>(null);
   const prevSubmitCountRef = useRef(0);
 
   useEffect(() => {
     if (isOpen) {
       onFetchDesignations();
+      onFetchDepartments();
     }
-  }, [isOpen, onFetchDesignations]);
+  }, [isOpen, onFetchDesignations, onFetchDepartments]);
 
   useEffect(() => {
     if (error) {
@@ -128,6 +130,17 @@ const AddAgentDrawer = ({ visibility, form, status, designation }: AddAgentDrawe
                   ))}
                 </Field>
                 {showError('designationId') && errors.designationId && <small className="field-error-text">{errors.designationId}</small>}
+              </div>
+
+              <div className="form-group">
+                <label>Department <span className="text-danger">*</span></label>
+                <Field as="select" name="departmentId" className={fieldClass('departmentId')}>
+                  <option value="">Select department</option>
+                  {departmentOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </Field>
+                {showError('departmentId') && errors.departmentId && <small className="field-error-text">{errors.departmentId}</small>}
               </div>
 
               <div className="form-group">
