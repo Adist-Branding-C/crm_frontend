@@ -37,7 +37,8 @@ export function useCompanyStatistics() {
       } else {
         setStats(EMPTY_STATS);
       }
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch company statistics', err);
       setStats(EMPTY_STATS);
     } finally {
       setIsLoading(false);

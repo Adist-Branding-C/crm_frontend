@@ -5,6 +5,7 @@ import { DATE_FILTER_OPTIONS } from '../../../shared/constants/dateFilterOptions
 import { useLeadFilterOptions } from '../hooks/useLeadFilterOptions';
 import { getVisibleAdditionalFields } from '../utils/leadFilterFields';
 import AdditionalFieldControl from './AdditionalFieldControl';
+import DateRangePicker from '../../../shared/components/filters/DateRangePicker';
 
 const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterChange, onApplyFilters, onClearFilters }) => {
   const { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, additionalFields, isLoading } = useLeadFilterOptions();
@@ -51,14 +52,11 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
   return (
     <div className="filters-panel">
       <div className="filter-row">
-        <div className="filter-group">
-          <label>Date Range</label>
-          <div className="date-range-input">
-            <input type="date" value={filters.dateRange.start} onChange={(e) => onFilterChange({ ...filters, dateRange: { ...filters.dateRange, start: e.target.value } })} placeholder="Start" />
-            <span>to</span>
-            <input type="date" value={filters.dateRange.end} onChange={(e) => onFilterChange({ ...filters, dateRange: { ...filters.dateRange, end: e.target.value } })} placeholder="End" />
-          </div>
-        </div>
+        <DateRangePicker
+          label="Date Range"
+          value={filters.dateRange}
+          onChange={(dateRange) => onFilterChange({ ...filters, dateRange })}
+        />
         <div className="filter-group">
           <label>Filter by Date</label>
           <select value={filters.filterByDate} onChange={(e) => onFilterChange({ ...filters, filterByDate: e.target.value })}>

@@ -319,7 +319,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   <div className="leaddrawer-info-icon"><User size={14} /></div>
                   <div className="leaddrawer-info-content">
                     <span className="leaddrawer-info-label">Created By</span>
-                    <span className="leaddrawer-info-value">{lead.assignedTo || '-'}</span>
+                    <span className="leaddrawer-info-value">{lead.createdByName || '-'}</span>
                   </div>
                 </div>
                 <div className="leaddrawer-info-item">
