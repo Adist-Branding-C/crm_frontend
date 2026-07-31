@@ -23,7 +23,7 @@ const Sidebar = () => {
     <div className="sidebar">
       <div className="sidebar-logo">
         <div className="logo-circle">
-          <CheckCircle size={20} color="#fff" />
+          <img src="/favicon.png" alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
         </div>
       </div>
       <div className="sidebar-nav">
