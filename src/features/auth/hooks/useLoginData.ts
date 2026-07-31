@@ -42,6 +42,7 @@ export function useLoginData() {
           staffId: response.data.staffId,
           companyId: response.data.companyId,
           isAdmin: response.data.isAdmin,
+          isSuperAdmin: response.data.isSuperAdmin,
         }));
         navigate(AUTH_ROUTES.DASHBOARD);
       } else {
