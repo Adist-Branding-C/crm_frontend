@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FormikHelpers } from 'formik';
 import { profileService } from '../services/profile.service';
-import { INITIAL_PROFILE_FORM, INITIAL_PROFILE_DATA } from '../constants';
-import type { ProfileFormData } from '../types';
+import { INITIAL_PROFILE_FORM, INITIAL_PROFILE_DATA, INITIAL_PROFILE_PLAN } from '../constants';
+import type { ProfileFormData, ProfilePlan } from '../types';
 
 function getErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'response' in err) {
@@ -19,7 +19,9 @@ export function useProfileData() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>(INITIAL_PROFILE_FORM);
   const [profileData, setProfileData] = useState(INITIAL_PROFILE_DATA);
+  const [planDetails, setPlanDetails] = useState<ProfilePlan>(INITIAL_PROFILE_PLAN);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [showToast, setShowToast] = useState(false);
@@ -33,17 +35,28 @@ export function useProfileData() {
 
   const fetchProfile = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await profileService.getProfile();
-      const { companyId, companyName, email, phone, address, gstNumber } = response.data;
-      setFormData({ name: companyName || '', email: email || '', mobile: phone || '', address: address || '', gstNumber: gstNumber || '' });
-      setProfileData((prev) => ({ ...prev, customerId: companyId || '', firstLetter: (companyName || '').charAt(0).toUpperCase() }));
+      const { staff, plan } = response.data;
+      setFormData({
+        name: staff.name || '',
+        email: staff.email || '',
+        mobile: staff.phoneNumber || '',
+      });
+      setProfileData({
+        customerId: staff.staffId || '',
+        dateOfRegistration: staff.dateOfRegistration || '',
+        accountStatus: staff.status || '-',
+        firstLetter: (staff.name || '').charAt(0).toUpperCase(),
+      });
+      setPlanDetails(plan);
     } catch (err) {
-      showToastMessage(getErrorMessage(err, 'Failed to load profile'), 'error');
+      setError(getErrorMessage(err, 'Failed to load profile'));
     } finally {
       setIsLoading(false);
     }
-  }, [showToastMessage]);
+  }, []);
 
   useEffect(() => {
     fetchProfile();
@@ -53,10 +66,9 @@ export function useProfileData() {
     try {
       const response = await profileService.updateProfile(values);
       if (response.status) {
-        setFormData(values);
-        setProfileData((prev) => ({ ...prev, firstLetter: values.name.charAt(0).toUpperCase() }));
         showToastMessage(response.message || 'Profile updated successfully', 'success');
         setShowForm(false);
+        await fetchProfile();
       } else {
         showToastMessage(response.message || 'Failed to update profile', 'error');
       }
@@ -65,11 +77,12 @@ export function useProfileData() {
     } finally {
       helpers.setSubmitting(false);
     }
-  }, [showToastMessage]);
+  }, [showToastMessage, fetchProfile]);
 
   return {
-    showForm, setShowForm, formData, profileData,
-    isLoading, toastMessage, toastType, showToast, setShowToast,
+    showForm, setShowForm, formData, profileData, planDetails,
+    isLoading, error, retryFetchProfile: fetchProfile,
+    toastMessage, toastType, showToast, setShowToast,
     handleSubmit,
   };
 }
