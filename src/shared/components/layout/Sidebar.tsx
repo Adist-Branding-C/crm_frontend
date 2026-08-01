@@ -1,9 +1,12 @@
 import React from 'react';
 import { CheckCircle, MessageCircle, Home, LayoutDashboard, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import './Sidebar.css';
 
 const Sidebar = () => {
+  const { user } = useAuth();
+
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: MessageCircle, label: 'Leads', path: '/leads' },
@@ -16,14 +19,14 @@ const Sidebar = () => {
     { icon: Megaphone, label: 'Campaigns', path: '/campaigns' },
     { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: BarChart3, label: 'Staff Performance', path: '/staff-performance' },
-    { icon: Building, label: 'Companies', path: '/companies' },
+    ...(user?.isSuperAdmin ? [{ icon: Building, label: 'Companies', path: '/companies' }] : []),
   ];
 
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
         <div className="logo-circle">
-          <CheckCircle size={20} color="#fff" />
+          <img src="/favicon.png" alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
         </div>
       </div>
       <div className="sidebar-nav">

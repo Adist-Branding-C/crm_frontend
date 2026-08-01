@@ -13,3 +13,13 @@ export interface LeadMember {
   id: number;
   name: string;
 }
+
+export interface DealMember {
+  id: number;
+  dealName: string;
+}
+
+export interface CampaignMember {
+  id: number;
+  name: string;
+}

@@ -30,9 +30,9 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, password, designationId, status } = values;
+      const { fullName, email, password, designationId, departmentId, status } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, status };
+      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, departmentId, status };
 
       const response = await agentService.createAgent(requestData);
 
@@ -65,9 +65,9 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, designationId, status } = values;
+      const { fullName, email, designationId, departmentId, status } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, designationId, status };
+      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, designationId, departmentId, status };
 
       const response = await agentService.updateAgent(staffId, requestData);
 

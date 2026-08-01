@@ -8,6 +8,8 @@ import { useDebouncedSearch } from '../../hooks/useDebouncedSearch';
 import { useRecentSearches } from '../../hooks/useRecentSearches';
 import { useGlobalLeadSearch } from '../../../features/enquiries/hooks/useGlobalLeadSearch';
 import type { LeadSearchApiItem } from '../../../features/enquiries/types/response';
+import { useNotifications } from '../../../features/notifications/hooks/useNotifications';
+import { NotificationType } from '../../../features/notifications/types';
 import './TopNav.css';
 
 const addOptions = [
@@ -17,24 +19,13 @@ const addOptions = [
   { id: 'campaign', name: 'Campaign', icon: Megaphone },
 ];
 
-const initialNotifications = [
-  { id: 1, type: 'lead', title: 'New lead assigned', message: 'Rahul Sharma has been assigned to you', time: '2 mins ago', isRead: false, link: '/leads' },
-  { id: 2, type: 'reminder', title: 'Follow-up reminder', message: 'Call Priya Patel today at 4:30 PM', time: '10 mins ago', isRead: false, link: '/user/tasks' },
-  { id: 3, type: 'task', title: 'Task completed', message: 'John Doe completed Sales Report task', time: 'Today, 11:20 AM', isRead: false, link: '/user/tasks' },
-  { id: 4, type: 'payment', title: 'Payment received', message: 'Subscription payment of ₹5,000 successful', time: 'Yesterday', isRead: true, link: '/user/payment-plans' },
-  { id: 5, type: 'call', title: 'Missed call', message: 'You missed a call from +91 98765 43210', time: 'Yesterday, 3:45 PM', isRead: true, link: '/leads' },
-  { id: 6, type: 'system', title: 'System update', message: 'CRM dashboard will be under maintenance tonight', time: '2 days ago', isRead: true, link: '/settings' },
-  { id: 7, type: 'deal', title: 'Deal won', message: 'Website Development deal has been marked as won', time: '3 days ago', isRead: true, link: '/user/deals' },
-];
-
 const notificationIcons: Record<string, NotificationIconInfo> = {
-  lead: { icon: User, color: '#3b82f6' },
-  task: { icon: ListChecks, color: '#f59e0b' },
-  reminder: { icon: Calendar, color: '#8b5cf6' },
-  payment: { icon: CreditCard, color: '#10b981' },
-  call: { icon: PhoneCall, color: '#14b8a6' },
-  system: { icon: Info, color: '#64748b' },
-  deal: { icon: DollarSign, color: '#10b981' },
+  [NotificationType.NEW_LEAD_ASSIGNED]: { icon: User, color: '#3b82f6' },
+  [NotificationType.TASK_ASSIGNED]: { icon: ListChecks, color: '#f59e0b' },
+  [NotificationType.FOLLOWUP_REMINDER]: { icon: Calendar, color: '#8b5cf6' },
+  [NotificationType.DEAL_WON]: { icon: DollarSign, color: '#10b981' },
+  [NotificationType.DEAL_LOST]: { icon: AlertCircle, color: '#ef4444' },
+  [NotificationType.AUTOMATION_DIGEST]: { icon: Info, color: '#64748b' },
 };
 
 const getNotificationIcon = (type: string): NotificationIconInfo => {
@@ -46,6 +37,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const { logout } = useAuth();
   const { currentStaff, isLoading: isStaffLoading, clearCurrentStaff } = useCurrentStaff();
   const [notifications, setNotifications] = useState(initialNotifications);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [committedQuery, setCommittedQuery] = useState('');
   const { searchValue: searchQuery, handleSearchChange: setSearchQuery, resetSearch } = useDebouncedSearch(setCommittedQuery);
   const { results: searchResults, isLoading: isSearchLoading } = useGlobalLeadSearch(committedQuery);
@@ -59,9 +51,9 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const [showNotificationsDrawer, setShowNotificationsDrawer] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLButtonElement>(null);
+  const notificationsDrawerRef = useRef<HTMLDivElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const currentUser = {
     name: currentStaff?.name ?? '',
@@ -81,7 +73,12 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setShowProfileDropdown(false);
       }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+      if (
+        notificationsRef.current && 
+        !notificationsRef.current.contains(event.target as Node) &&
+        notificationsDrawerRef.current &&
+        !notificationsDrawerRef.current.contains(event.target as Node)
+      ) {
         setShowNotificationsDrawer(false);
       }
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -93,25 +90,35 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   }, []);
 
   const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    markAllAsRead();
   };
 
-  interface NotificationItem {
-    id: number;
-    type: string;
-    title: string;
-    message: string;
-    time: string;
-    isRead: boolean;
-    link: string;
-  }
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.isRead) {
+      markAsRead([notification.id]);
+    }
+    
+    let link = notification.link;
+    if (!link) {
+      switch (notification.type) {
+        case NotificationType.NEW_LEAD_ASSIGNED:
+        case NotificationType.FOLLOWUP_REMINDER:
+          link = '/leads';
+          break;
+        case NotificationType.TASK_ASSIGNED:
+          link = '/tasks';
+          break;
+        case NotificationType.DEAL_WON:
+        case NotificationType.DEAL_LOST:
+          link = '/deals';
+          break;
+        default:
+          break;
+      }
+    }
 
-  const handleNotificationClick = (notification: NotificationItem) => {
-    setNotifications((prev: NotificationItem[]) => prev.map(n =>
-      n.id === notification.id ? { ...n, isRead: true } : n
-    ));
-    if (notification.link) {
-      navigate(notification.link);
+    if (link) {
+      navigate(link);
       setShowNotificationsDrawer(false);
     }
   };
@@ -294,7 +301,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
         {showNotificationsDrawer && (
           <div className="notifications-drawer">
             <div className="notifications-backdrop" onClick={() => setShowNotificationsDrawer(false)} />
-            <div className="notifications-panel">
+            <div className="notifications-panel" ref={notificationsDrawerRef}>
               <div className="notifications-header">
                 <h3>Notifications</h3>
                 <div className="notifications-header-actions">
@@ -324,8 +331,8 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                       </div>
                       <div className="notification-content">
                         <div className="notification-title">{notification.title}</div>
-                        <div className="notification-message">{notification.message}</div>
-                        <div className="notification-time">{notification.time}</div>
+                        <div className="notification-message">{notification.notification}</div>
+                        <div className="notification-time">{notification.time ? new Date(notification.time).toLocaleString() : ''}</div>
                       </div>
                       {!notification.isRead && <div className="notification-dot" />}
                     </div>

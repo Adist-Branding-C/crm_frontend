@@ -45,11 +45,13 @@ export const useAuth = () => {
   if (claims?.staffId && user) {
     const companyId = claims.companyId ?? user.companyId;
     const isAdmin = claims.isAdmin !== undefined ? claims.isAdmin : user.isAdmin;
+    const isSuperAdmin = claims.isSuperAdmin !== undefined ? claims.isSuperAdmin : user.isSuperAdmin;
     user = {
       ...user,
       staffId: claims.staffId,
       ...(companyId !== undefined ? { companyId } : {}),
       ...(isAdmin !== undefined ? { isAdmin } : {}),
+      ...(isSuperAdmin !== undefined ? { isSuperAdmin } : {}),
     };
   }
 

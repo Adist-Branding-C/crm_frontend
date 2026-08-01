@@ -31,9 +31,7 @@ const LeadActionsDropdown = ({ selectedCount, bulkActions }: LeadActionsDropdown
       }
     >
       <div className="dropdown-header">Actions {selectedCount > 0 && `(${selectedCount} selected)`}</div>
-      <button className="dropdown-item" onClick={() => { bulkActions.onExportSelected(); dropdown.close(); }}>
-        <Download size={16} /> <span>Export Selected</span>
-      </button>
+
       <button className="dropdown-item" onClick={() => { bulkActions.onChangeStatus(); dropdown.close(); }}>
         <RotateCcw size={16} /> <span>Change Status</span>
       </button>
@@ -43,9 +41,7 @@ const LeadActionsDropdown = ({ selectedCount, bulkActions }: LeadActionsDropdown
       <button className="dropdown-item" onClick={() => { bulkActions.onAssignCampaign(); dropdown.close(); }}>
         <Megaphone size={16} /> <span>Add to Campaign</span>
       </button>
-      <button className="dropdown-item" onClick={() => { bulkActions.onDuplicateLead(); dropdown.close(); }}>
-        <Copy size={16} /> <span>Duplicate Lead</span>
-      </button>
+
       <div className="dropdown-divider"></div>
       <button className="dropdown-item danger" onClick={() => { bulkActions.onDeleteSelected(); dropdown.close(); }}>
         <Trash2 size={16} /> <span>Delete Selected</span>

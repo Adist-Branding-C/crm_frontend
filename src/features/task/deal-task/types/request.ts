@@ -4,7 +4,7 @@ export interface DealTaskFormData {
   scheduledDate: string;
   scheduledTime: string;
   assignedTo: string;
-  leadId: string;
+  dealId: string;
   priority: string;
   status: string;
 }

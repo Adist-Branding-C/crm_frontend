@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
 import { companyDataService } from '../services/companyDataService';
 import { addCompanyValidationSchema } from '../validations/addCompany.validation';
@@ -25,9 +25,12 @@ const BASE_INITIAL_VALUES: NewCompany = {
   gstNumber: '',
   dateOfRegistration: '',
   status: CompanyStatus.ACTIVE,
+  adminPassword: '',
 };
 
 const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onClose }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   if (!isOpen) return null;
 
   const isEditing = !!editingCompany;
@@ -41,6 +44,7 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
         gstNumber: editingCompany.gstNumber,
         dateOfRegistration: editingCompany.dateOfRegistration?.slice(0, 10) ?? '',
         status: editingCompany.status,
+        adminPassword: '',
       }
     : BASE_INITIAL_VALUES;
 
@@ -56,6 +60,7 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
     if (values.address.trim()) payload.address = values.address.trim();
     if (values.gstNumber.trim()) payload.gstNumber = values.gstNumber.trim();
     if (values.dateOfRegistration) payload.dateOfRegistration = values.dateOfRegistration;
+    if (!isEditing) payload.adminPassword = values.adminPassword.trim();
     try {
       if (isEditing && editingCompany) {
         await companyDataService.updateCompany(editingCompany.companyId, payload);
@@ -76,7 +81,7 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
           <h2>{isEditing ? 'Edit Company' : 'Add New Company'}</h2>
           <button className="modal-close" onClick={onClose}><X size={20} /></button>
         </div>
-        <Formik initialValues={initialValues} validationSchema={addCompanyValidationSchema} onSubmit={handleSubmit}>
+        <Formik initialValues={initialValues} validationSchema={addCompanyValidationSchema(isEditing)} onSubmit={handleSubmit}>
           {({ errors, touched, isSubmitting, values, handleChange, handleBlur, submitForm, status }) => (
             <>
               <div className="modal-body">
@@ -134,6 +139,35 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
                     />
                     {errors.phoneNumber && touched.phoneNumber && <div className="error-text">{errors.phoneNumber}</div>}
                   </div>
+                  {!isEditing && (
+                    <div className="form-group">
+                      <label>Admin Password <span className="required">*</span></label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          name="adminPassword"
+                          placeholder="Enter password for the company admin login"
+                          value={values.adminPassword}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          className={errors.adminPassword && touched.adminPassword ? 'error' : ''}
+                          style={{ width: '100%', paddingRight: '2.25rem' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                          style={{
+                            position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
+                            background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: '#6b7280',
+                          }}
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                      {errors.adminPassword && touched.adminPassword && <div className="error-text">{errors.adminPassword}</div>}
+                    </div>
+                  )}
                   <div className="form-group">
                     <label>Address</label>
                     <input

@@ -37,6 +37,8 @@ export interface NewCompany {
   gstNumber: string;
   dateOfRegistration: string;
   status: string;
+  /** Only collected/required when creating a company - sets the auto-created admin staff's login password. */
+  adminPassword: string;
 }
 
 export interface CompaniesFiltersProps {

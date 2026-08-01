@@ -14,7 +14,7 @@ export const ADD_DEAL_TASK_INITIAL_VALUES: DealTaskFormData = {
   scheduledDate: '',
   scheduledTime: '',
   assignedTo: '',
-  leadId: '',
+  dealId: '',
   priority: '',
   status: '',
 };

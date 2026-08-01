@@ -12,6 +12,7 @@ interface AccessTokenClaims {
   staffId?: string;
   companyId?: string;
   isAdmin?: boolean;
+  isSuperAdmin?: boolean;
   exp?: number;
 }
 

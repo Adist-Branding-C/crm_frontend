@@ -11,6 +11,7 @@
 @import '../../../shared/styles/stat-cards.css';
 @import '../../../shared/styles/dropdowns.css';
 @import '../../../shared/styles/empty-state.css';
+@import '../../../shared/styles/date-range-picker.css';
 .modal-content {
   width: 100%;
   max-width: 450px;

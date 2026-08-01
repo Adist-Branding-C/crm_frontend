@@ -25,6 +25,7 @@ export interface AuthUser {
   staffId?: string
   companyId?: string
   isAdmin?: boolean
+  isSuperAdmin?: boolean
 }
 
 export interface LoginResponseData {
@@ -34,6 +35,7 @@ export interface LoginResponseData {
   staffId: string
   companyId: string
   isAdmin: boolean
+  isSuperAdmin: boolean
   accessToken: string
   refreshToken: string
 }
