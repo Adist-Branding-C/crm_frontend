@@ -3,7 +3,7 @@ import { AGENT_API_ENDPOINTS } from '../constants/agentApiEndpoints';
 import { buildQueryParams } from '../../../../shared/utils/queryParams.util';
 import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { sanitizePhoneDigits } from '../../../../shared/utils/phone.util';
-import type { AgentFormData, AgentResponse, GetAllAgentsParams, GetAllAgentsResponse, AgentListData } from '../types/agent.types';
+import type { AgentFormData, AgentResponse, GetAllAgentsParams, GetAllAgentsResponse, AgentListData, GetStaffMeResponse } from '../types/agent.types';
 
 class AgentService {
   async getAllAgents(params: GetAllAgentsParams = {}): Promise<GetAllAgentsResponse> {
@@ -64,6 +64,11 @@ class AgentService {
       status: response.data.status,
       message: response.data.message,
     });
+  }
+
+  async getMe(): Promise<GetStaffMeResponse> {
+    const response = await axiosInstance.get<GetStaffMeResponse>(AGENT_API_ENDPOINTS.ME);
+    return response.data;
   }
 }
 

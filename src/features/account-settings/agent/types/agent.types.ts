@@ -53,3 +53,20 @@ export interface DesignationOption {
   label: string;
   value: string;
 }
+
+export interface StaffProfile {
+  staffId?: string;
+  companyId?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role?: string;
+  isAdmin?: boolean;
+  isSuperAdmin?: boolean;
+}
+
+export interface GetStaffMeResponse {
+  status: boolean;
+  message: string;
+  data: StaffProfile;
+}

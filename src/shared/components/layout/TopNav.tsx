@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, UserCircle, Settings, Users, CreditCard, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout, Link as LinkIcon, Clock } from 'lucide-react';
 import type { NotificationIconInfo, TopNavProps } from '../../types/layout';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
+import { useCurrentStaff } from '../../../features/account-settings/agent/hooks/useCurrentStaff';
 import { useDebouncedSearch } from '../../hooks/useDebouncedSearch';
 import { useRecentSearches } from '../../hooks/useRecentSearches';
 import { useGlobalLeadSearch } from '../../../features/enquiries/hooks/useGlobalLeadSearch';
@@ -43,6 +44,7 @@ const getNotificationIcon = (type: string): NotificationIconInfo => {
 const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { currentStaff, isLoading: isStaffLoading, clearCurrentStaff } = useCurrentStaff();
   const [notifications, setNotifications] = useState(initialNotifications);
   const [committedQuery, setCommittedQuery] = useState('');
   const { searchValue: searchQuery, handleSearchChange: setSearchQuery, resetSearch } = useDebouncedSearch(setCommittedQuery);
@@ -62,10 +64,16 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const currentUser = {
-    name: 'Sharun das',
-    email: 'sharun@company.com',
-    role: 'Admin',
-    avatar: null
+    name: currentStaff?.name ?? '',
+    email: currentStaff?.email ?? '',
+    role: currentStaff?.isSuperAdmin ? 'SUPER ADMIN' : currentStaff?.isAdmin ? 'ADMIN' : 'STAFF',
+    avatar: null,
+    initial: currentStaff?.name ? currentStaff.name.charAt(0).toUpperCase() : '',
+  };
+
+  const handleLogout = () => {
+    clearCurrentStaff();
+    logout();
   };
 
   useEffect(() => {
@@ -338,14 +346,25 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
             className="user-profile-trigger"
             onClick={() => setShowProfileDropdown(!showProfileDropdown)}
           >
-            <div className="avatar">
-              {currentUser.avatar ? (
-                <img src={currentUser.avatar} alt={currentUser.name} />
-              ) : (
-                <UserIcon />
-              )}
-            </div>
-            <span className="user-name">{currentUser.name}</span>
+            {isStaffLoading ? (
+              <>
+                <div className="avatar avatar-skeleton" />
+                <span className="user-name user-name-skeleton" />
+              </>
+            ) : (
+              <>
+                <div className="avatar">
+                  {currentUser.avatar ? (
+                    <img src={currentUser.avatar} alt={currentUser.name} />
+                  ) : currentUser.initial ? (
+                    <span className="avatar-initial">{currentUser.initial}</span>
+                  ) : (
+                    <UserIcon />
+                  )}
+                </div>
+                <span className="user-name">{currentUser.name}</span>
+              </>
+            )}
             <ChevronDown size={14} className="dropdown-icon" />
           </div>
 
@@ -353,7 +372,11 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
             <div className="profile-dropdown">
               <div className="profile-dropdown-header">
                 <div className="profile-avatar-large">
-                  <UserIcon />
+                  {currentUser.initial ? (
+                    <span className="avatar-initial">{currentUser.initial}</span>
+                  ) : (
+                    <UserIcon />
+                  )}
                 </div>
                 <div className="profile-info">
                   <div className="profile-name">{currentUser.name}</div>
@@ -373,26 +396,26 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                   <Settings size={16} />
                   <span>Account Settings</span>
                 </div>
-                <div className="profile-dropdown-item" onClick={() => navigate('/setup')}>
+                {/* <div className="profile-dropdown-item" onClick={() => navigate('/setup')}>
                   <Layout size={16} />
                   <span>Setup</span>
-                </div>
-                <div className="profile-dropdown-item" onClick={() => navigate('/user/connect')}>
+                </div> */}
+                {/* <div className="profile-dropdown-item" onClick={() => navigate('/user/connect')}>
                   <LinkIcon size={16} />
                   <span>Connect</span>
-                </div>
-                <div className="profile-dropdown-item" onClick={() => navigate('/settings/staff')}>
+                </div> */}
+                {/* <div className="profile-dropdown-item" onClick={() => navigate('/settings/staff')}>
                   <Users size={16} />
                   <span>Team Management</span>
-                </div>
-                <div className="profile-dropdown-item" onClick={() => navigate('/settings/notifications')}>
+                </div> */}
+                {/* <div className="profile-dropdown-item" onClick={() => navigate('/settings/notifications')}>
                   <Bell size={16} />
                   <span>Notifications</span>
-                </div>
-                <div className="profile-dropdown-item" onClick={() => navigate('/settings/billing')}>
+                </div> */}
+                {/* <div className="profile-dropdown-item" onClick={() => navigate('/settings/billing')}>
                   <CreditCard size={16} />
                   <span>Billing</span>
-                </div>
+                </div> */}
                 <div className="profile-dropdown-item" onClick={() => navigate('/settings/help')}>
                   <HelpCircle size={16} />
                   <span>Help Center</span>
@@ -402,7 +425,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
               <div className="profile-dropdown-divider" />
 
               <div className="profile-dropdown-footer">
-                <div className="profile-dropdown-item logout-item" onClick={() => logout()}>
+                <div className="profile-dropdown-item logout-item" onClick={handleLogout}>
                   <LogOut size={16} />
                   <span>Logout</span>
                 </div>
