@@ -4,4 +4,5 @@ export const AGENT_API_ENDPOINTS = {
   CREATE: '/staff',
   UPDATE: (staffId: string) => `/staff/${staffId}`,
   DELETE: (staffId: string) => `/staff/${staffId}`,
+  ME: '/staff/me',
 };
