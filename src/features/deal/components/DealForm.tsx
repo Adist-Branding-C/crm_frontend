@@ -9,7 +9,7 @@ import { useDealFormOptions } from '../hooks/useDealFormOptions';
 import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
 import DealDynamicAdditionalFields from './DealDynamicAdditionalFields';
 import { getTodayDateString } from '../utils/dealDateValidation';
-import { COUNTRY_CODES } from '../../../shared/constants/countryCodes';
+import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from '../../../shared/constants/countryCodes';
 import type { DealFormProps } from '../types';
 import '../../../shared/components/drawers/AddLeadDrawer.css';
 
@@ -36,6 +36,11 @@ const DealForm = ({
   scrollContainerRef,
 }: DealFormProps) => {
   const prevSubmitCountRef = useRef(0);
+  // Once the user manually edits Mobile or Assign Agent, lead-selection auto-fill
+  // stops overwriting that field — switching leads again should never clobber an
+  // edit the user already made on purpose.
+  const mobileEditedRef = useRef(false);
+  const agentEditedRef = useRef(false);
   const {
     leads, staff, statuses, types,
     isLoadingLeads, isLoadingStaff, isLoadingStatuses, isLoadingTypes,
@@ -93,6 +98,7 @@ const DealForm = ({
           // errors.mobileNumber / touched.mobileNumber keep working as expected.
           const handleMobileNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const digitsOnly = e.target.value.replace(/\D/g, '');
+            mobileEditedRef.current = true;
             setFieldValue('mobileNumber', digitsOnly);
           };
 
@@ -102,6 +108,7 @@ const DealForm = ({
 
           const handleMobileCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
+            mobileEditedRef.current = true;
             setFieldValue('mobileCountryCode', value);
             setFieldTouched('mobileCountryCode', true, false);
             if (values.mobileNumber) {
@@ -119,17 +126,42 @@ const DealForm = ({
           const handleLeadChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
             const match = leads.find(l => String(l.value) === String(value));
-            setValues(prev => ({
-              ...prev,
-              leadId: match ? match.value : '',
-              lead: match?.label ?? '',
-            }));
+            setValues(prev => {
+              const next = {
+                ...prev,
+                leadId: match ? match.value : '',
+                lead: match?.label ?? '',
+              };
+
+              // Convenience pre-fill only — skip a field entirely once the user has
+              // manually touched it, so re-selecting a lead never overwrites their edit.
+              if (!mobileEditedRef.current) {
+                if (match?.phone) {
+                  next.mobileNumber = match.phone.replace(/\D/g, '');
+                  next.mobileCountryCode = match.countryCode || DEFAULT_COUNTRY_CODE;
+                } else {
+                  next.mobileNumber = '';
+                  next.mobileCountryCode = DEFAULT_COUNTRY_CODE;
+                }
+              }
+
+              if (!agentEditedRef.current) {
+                const agentMatch = match?.agentId
+                  ? staff.find(s => String(s.value) === String(match.agentId))
+                  : undefined;
+                next.agentId = agentMatch ? agentMatch.value : '';
+                next.assignAgent = agentMatch?.label ?? '';
+              }
+
+              return next;
+            });
             setFieldTouched('leadId', true, false);
           };
 
           const handleAgentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
             const match = staff.find(s => String(s.value) === String(value));
+            agentEditedRef.current = true;
             setValues(prev => ({
               ...prev,
               agentId: match ? match.value : '',
