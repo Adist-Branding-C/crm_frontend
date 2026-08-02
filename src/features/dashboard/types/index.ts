@@ -170,6 +170,12 @@ export interface CampaignsWidgetProps {
   to?: string;
 }
 
+export interface ActivitiesWidgetProps {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
 export interface GetLeadStatusStatisticsParams {
   period: DashboardPeriod;
   fromDate?: string;

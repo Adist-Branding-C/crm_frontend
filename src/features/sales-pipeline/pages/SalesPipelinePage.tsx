@@ -58,13 +58,7 @@ const SalesPipelinePage: React.FC = () => {
     [committedSearch, filters.dateFrom, filters.dateTo, filters.selectedAgent],
   );
 
-  const isInitialMount = useRef(true);
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      deals.fetchDeals(filterParams);
-      return;
-    }
     const view = activeViewRef.current;
     if (view === 'deals') deals.fetchDeals(filterParams);
     else if (view === 'leads') leads.fetchLeads(filterParams);

@@ -7,4 +7,7 @@ export interface GetActivitiesParams {
   endTime?: string;
   actorId?: string;
   activityType?: string;
+  period?: 'today' | 'week' | 'month' | 'custom';
+  from?: string;
+  to?: string;
 }

@@ -69,9 +69,18 @@ export interface CreateLeadData {
   leadId: string;
 }
 
+export interface RemarkPaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
 export interface RemarkListData {
   items: Remark[];
-  pagination: Record<string, unknown>;
+  pagination: RemarkPaginationInfo;
 }
 
 export interface ActivityListData {

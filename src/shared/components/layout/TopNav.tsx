@@ -331,7 +331,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                 })}
               </div>
               <div className="notifications-footer">
-                <button className="view-all-btn" onClick={() => navigate('/notifications')}>
+                <button className="view-all-btn" onClick={() => navigate('/user/notifications-users')}>
                   View All Notifications
                 </button>
               </div>
@@ -391,7 +391,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                   <Users size={16} />
                   <span>Team Management</span>
                 </div>
-                <div className="profile-dropdown-item" onClick={() => navigate('/settings/notifications')}>
+                <div className="profile-dropdown-item" onClick={() => navigate('/user/notifications-users')}>
                   <Bell size={16} />
                   <span>Notifications</span>
                 </div>

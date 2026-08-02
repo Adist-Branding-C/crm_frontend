@@ -29,9 +29,8 @@
 }
 
 .logo-circle {
-  width: 32px;
-  height: 32px;
-  background-color: var(--primary);
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -80,6 +79,19 @@
 
 .nav-item.active .nav-icon {
   color: var(--primary);
+}
+
+.nav-tooltip {
+  position: fixed;
+  transform: translateY(-50%);
+  background: #1a1d24;
+  color: #fff;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
 }
 
 @media (max-width: 768px) {

@@ -2,9 +2,10 @@ import React from 'react';
 import './ActivitiesWidget.css';
 import { useRecentActivities } from '../../hooks/useRecentActivities';
 import { Skeleton } from '../../../../shared/components/Skeleton';
+import type { ActivitiesWidgetProps } from '../../types';
 
-const ActivitiesWidget = () => {
-  const { activities, isLoading } = useRecentActivities();
+const ActivitiesWidget = ({ period, from, to }: ActivitiesWidgetProps) => {
+  const { activities, isLoading } = useRecentActivities(period, from, to);
 
   return (
     <div className="card widget-base activities-widget">

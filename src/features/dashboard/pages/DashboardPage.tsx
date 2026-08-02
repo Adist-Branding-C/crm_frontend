@@ -44,7 +44,7 @@ const DashboardPage = () => {
   const pipelineAmount = usePipelineAmount(period, effectiveFrom, effectiveTo);
   const followupStats = useFollowupStatistics();
   const outboundCallsCount = useCallLogsCount(period, effectiveFrom, effectiveTo);
-  const todaysActivities = useActivitiesStatistics('today');
+  const todaysActivities = useActivitiesStatistics(period, effectiveFrom, effectiveTo);
   const callsToday =
     todaysActivities.byType?.find((item) => item.activityType === CALL_LOGGED_ACTIVITY_TYPE)?.count ?? 0;
   const hotLeads = leadOverview.leadsByType?.find((type) => type.type === HOT_LEAD_TYPE_NAME)?.count ?? 0;
@@ -206,7 +206,7 @@ const DashboardPage = () => {
         <DealByStageWidget period={period} from={effectiveFrom} to={effectiveTo} />
         <TasksWidget period={period} from={effectiveFrom} to={effectiveTo} />
         <CampaignsWidget period={period} from={effectiveFrom} to={effectiveTo} />
-        <ActivitiesWidget />
+        <ActivitiesWidget period={period} from={effectiveFrom} to={effectiveTo} />
       </div>
 
       <div className="widgets-grid bottom-cards-grid">

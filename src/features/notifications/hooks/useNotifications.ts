@@ -11,9 +11,7 @@ export const useNotifications = () => {
     try {
       setIsLoading(true);
       setError(null);
-      console.log('Fetching notifications...');
       const data = await notificationService.getNotifications(params);
-      console.log('Notifications API response:', data);
       setNotifications(data?.data?.items || []);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch notifications');
