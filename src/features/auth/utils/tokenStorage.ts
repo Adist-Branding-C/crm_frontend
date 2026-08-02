@@ -79,4 +79,5 @@ export function clearAuthTokens(): void {
   Cookies.remove(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
   localStorage.removeItem(AUTH_STORAGE_KEYS.USER);
   localStorage.removeItem(REMEMBER_ME_KEY);
+  localStorage.removeItem(AUTH_STORAGE_KEYS.STAFF_PROFILE);
 }

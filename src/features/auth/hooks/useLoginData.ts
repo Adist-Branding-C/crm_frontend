@@ -6,6 +6,7 @@ import { authService } from '../services/AuthService';
 import type { LoginFormData } from '../types/auth.types';
 import { loginValidationSchema } from '../validations/login.schema';
 import { setAuthTokens } from '../utils/tokenStorage';
+import { agentService } from '../../account-settings/agent/services/agent.service';
 
 const loginInitialValues: LoginFormData = { phone: '', password: '' };
 
@@ -42,8 +43,17 @@ export function useLoginData() {
           staffId: response.data.staffId,
           companyId: response.data.companyId,
           isAdmin: response.data.isAdmin,
-          isSuperAdmin: response.data.isSuperAdmin,
         }));
+
+        try {
+          const staffResponse = await agentService.getMe();
+          if (staffResponse.status && staffResponse.data) {
+            localStorage.setItem(AUTH_STORAGE_KEYS.STAFF_PROFILE, JSON.stringify(staffResponse.data));
+          }
+        } catch {
+          // Best-effort; useCurrentStaff retries this fetch on next mount if this failed.
+        }
+
         navigate(AUTH_ROUTES.DASHBOARD);
       } else {
         setError(response.message || 'Login failed');

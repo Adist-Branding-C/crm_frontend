@@ -21,6 +21,7 @@ export const AUTH_STORAGE_KEYS = {
   ACCESS_TOKEN: 'accessToken',
   REFRESH_TOKEN: 'refreshToken',
   USER: 'crm_user',
+  STAFF_PROFILE: 'staffProfile',
 }
 
 export const MIN_SWIPE_DISTANCE = 50;
