@@ -61,8 +61,11 @@ export class CampaignMapper {
     return {
       type: item.type || '',
       name: item.name || '',
-      startDate: item.startDate || '',
-      endDate: item.endDate || '',
+      // Backend sends a full ISO timestamp (e.g. "2026-08-05T00:00:00.000Z");
+      // <input type="date"> only accepts "YYYY-MM-DD" and silently renders
+      // blank otherwise.
+      startDate: item.startDate ? item.startDate.slice(0, 10) : '',
+      endDate: item.endDate ? item.endDate.slice(0, 10) : '',
       description: item.description || '',
       poolName: item.poolName || (item.type === CAMPAIGN_TYPES.DATA_POOL ? item.name : '') || '',
       poolAgents: dataPoolAgents,

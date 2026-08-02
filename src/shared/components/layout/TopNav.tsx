@@ -37,7 +37,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const { logout } = useAuth();
   const { currentStaff, isLoading: isStaffLoading, clearCurrentStaff } = useCurrentStaff();
   // const [notifications, setNotifications] = useState(initialNotifications);
-  const {  unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [committedQuery, setCommittedQuery] = useState('');
   const { searchValue: searchQuery, handleSearchChange: setSearchQuery, resetSearch } = useDebouncedSearch(setCommittedQuery);
   const { results: searchResults, isLoading: isSearchLoading } = useGlobalLeadSearch(committedQuery);
@@ -74,7 +74,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
         setShowProfileDropdown(false);
       }
       if (
-        notificationsRef.current && 
+        notificationsRef.current &&
         !notificationsRef.current.contains(event.target as Node) &&
         notificationsDrawerRef.current &&
         !notificationsDrawerRef.current.contains(event.target as Node)
@@ -97,7 +97,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
     if (!notification.isRead) {
       markAsRead([notification.id]);
     }
-    
+
     let link = notification.link;
     if (!link) {
       switch (notification.type) {
@@ -340,7 +340,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                 })}
               </div> */}
               <div className="notifications-footer">
-                <button className="view-all-btn" onClick={() => navigate('/notifications')}>
+                <button className="view-all-btn" onClick={() => navigate('/user/notifications-users')}>
                   View All Notifications
                 </button>
               </div>

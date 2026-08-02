@@ -11,7 +11,7 @@ import { useCampaignExport } from '../hooks/useCampaignExport';
 import { useAgentFilterOptions } from '../hooks/useAgentFilterOptions';
 import { useToast } from '../../task-settings/hooks/useToast';
 import { CampaignMapper } from '../mappers/campaign.mapper';
-import { campaignValidationSchema } from '../validations/index';
+import { getCampaignValidationSchema } from '../validations/index';
 import { ADD_CAMPAIGN_INITIAL_VALUES } from '../constants/index';
 import { LABEL_NO_DATA } from '../../../shared/constants/labels';
 import { ACTION_FILTER } from '../../../shared/constants/actionLabels';
@@ -163,7 +163,7 @@ const CampaignsPage = () => {
       <Drawer ref={formBodyRef} isOpen={addDrawer.isOpen} onClose={addDrawer.close} title="Add Campaign">
         <CampaignForm
           editingItem={null}
-          validationSchema={campaignValidationSchema}
+          validationSchema={getCampaignValidationSchema(false)}
           initialValues={ADD_CAMPAIGN_INITIAL_VALUES}
           onSubmit={handlers.handleAddSubmit}
           isLoading={fetch.isLoading}
@@ -176,7 +176,7 @@ const CampaignsPage = () => {
       <Drawer ref={formBodyRef} isOpen={editDrawer.isOpen} onClose={editDrawer.close} title="Edit Campaign">
         <CampaignForm
           editingItem={editDrawer.item}
-          validationSchema={campaignValidationSchema}
+          validationSchema={getCampaignValidationSchema(true)}
           initialValues={editInitialValues}
           onSubmit={handlers.handleEditSubmit}
           isLoading={fetch.isLoading}

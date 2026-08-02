@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle, MessageCircle, Home, LayoutDashboard, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
 import './Sidebar.css';
 
+interface TooltipState {
+  label: string;
+  top: number;
+  left: number;
+}
+
 const Sidebar = () => {
   const { user } = useAuth();
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+
+  const showTooltip = (label: string) => (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltip({ label, top: rect.top + rect.height / 2, left: rect.right + 10 });
+  };
+  const hideTooltip = () => setTooltip(null);
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -26,23 +39,44 @@ const Sidebar = () => {
     <div className="sidebar">
       <div className="sidebar-logo">
         <div className="logo-circle">
-          <img src="/favicon.png" alt="Logo" style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
+          <img src="/favicon.png" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
         </div>
       </div>
       <div className="sidebar-nav">
         {menuItems.map((item, index) => {
           const Icon = item.icon;
           return (
-            <NavLink key={index} to={item.path} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title={item.label} end={item.path === '/home'}>
+            <NavLink
+              key={index}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              aria-label={item.label}
+              end={item.path === '/home'}
+              onMouseEnter={showTooltip(item.label)}
+              onMouseLeave={hideTooltip}
+            >
               <Icon size={20} className="nav-icon" />
             </NavLink>
           );
         })}
 
-        <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} title="Settings" end>
+        <NavLink
+          to="/settings"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          aria-label="Settings"
+          end
+          onMouseEnter={showTooltip('Settings')}
+          onMouseLeave={hideTooltip}
+        >
           <Settings size={20} className="nav-icon" />
         </NavLink>
       </div>
+
+      {tooltip && (
+        <div className="nav-tooltip" style={{ top: tooltip.top, left: tooltip.left }}>
+          {tooltip.label}
+        </div>
+      )}
     </div>
   );
 };

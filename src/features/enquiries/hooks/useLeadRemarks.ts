@@ -43,7 +43,7 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
               return [...prev, ...deduplicated];
             });
           }
-          const totalPages = response?.data?.pagination?.totalPages || 1;
+          const totalPages = response?.data?.pagination?.total_pages || 1;
           setHasMore(page < totalPages);
           fetchedRef.current = true;
         }

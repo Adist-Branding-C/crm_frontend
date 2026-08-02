@@ -17,6 +17,8 @@ import { useLeadPagination } from '../hooks/useLeadPagination';
 import { useLeadSearch } from '../hooks/useLeadSearch';
 import { useLeadSort } from '../hooks/useLeadSort';
 import { useLeadFilters } from '../hooks/useLeadFilters';
+import { useLeadFilterOptions } from '../hooks/useLeadFilterOptions';
+import { leadDataService } from '../services/leadDataService';
 import { useLeadBulkActions } from '../hooks/useLeadBulkActions';
 import { useLeadDeleteConfirm } from '../hooks/useLeadDeleteConfirm';
 import { useLeadActionMenu } from '../hooks/useLeadActionMenu';
@@ -35,6 +37,7 @@ import AssignCampaignModal from '../components/AssignCampaignModal';
 import SpotlightPanel from '../../spotlight/components/SpotlightPanel';
 import FollowupPanel from '../../followup-required/components/FollowupPanel';
 import type { Lead } from '../../../features/enquiries/types';
+import type { UpdateLeadPayload } from '../types/request';
 import './EnquiriesPage.css';
 
 type EnquiriesView = 'leads' | 'spotlight' | 'followups';
@@ -104,6 +107,23 @@ const EnquiriesPage = () => {
   });
 
   const columns = useMemo(() => getLeadColumns(crud.leads), [crud.leads]);
+
+  const fieldOptions = useLeadFilterOptions();
+
+  const handleFieldSave = async (leadId: string, payload: UpdateLeadPayload) => {
+    try {
+      const res = await leadDataService.updateLead(leadId, payload);
+      if (res.status) {
+        crud.refreshCurrentPage();
+        return true;
+      }
+      toast.showToastMessage(res.message || 'Failed to update lead', 'error');
+      return false;
+    } catch {
+      toast.showToastMessage('Failed to update lead', 'error');
+      return false;
+    }
+  };
 
   return (
     <PageContainer>
@@ -232,6 +252,8 @@ const EnquiriesPage = () => {
                       }}
                       onViewLead={detailDrawer.open}
                       onDeleteLead={rowActions.handleDeleteFromRow}
+                      fieldOptions={fieldOptions}
+                      onFieldSave={handleFieldSave}
                     />
                   ))
                 )}
