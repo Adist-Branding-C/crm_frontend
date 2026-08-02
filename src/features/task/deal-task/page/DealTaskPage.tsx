@@ -18,7 +18,7 @@ import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import GenericTaskForm from '../../common/components/GenericTaskForm';
 import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
-import TaskItemRow from '../../common/components/TaskItemRow';
+import DealTaskRow from '../components/DealTaskRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
@@ -71,7 +71,7 @@ const DealTaskPage = () => {
                 <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
-                <TCell variant="th">Lead</TCell>
+                <TCell variant="th">Deal</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
@@ -81,7 +81,7 @@ const DealTaskPage = () => {
               ) : !pagination.isLoading && pagination.list.length === 0 ? (
                 <EmptyState colSpan={11} message={LABEL_NO_DATA} />
               ) : pagination.list.map((item, idx) => (
-                <TaskItemRow
+                <DealTaskRow
                   key={item.id}
                   item={item}
                   index={pagination.startIndex + idx + 1}

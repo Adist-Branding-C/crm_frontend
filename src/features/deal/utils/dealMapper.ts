@@ -18,7 +18,7 @@ export function mapApiToUI(item: DealApiItem): DealItem {
     priority: item.priority ?? '',
     assignedTo: item.assignedTo ?? '',
     agent: typeof item.agent === 'object' ? (item.agent as { name?: string })?.name ?? '' : item.agent ?? '',
-    agentId: typeof item.agent === 'object' ? (item.agent as { id?: string | number })?.id ?? item.agentId ?? '' : item.agentId ?? '',
+    agentId: typeof item.agent === 'object' ? (item.agent as { staff_id?: string; id?: string | number })?.staff_id ?? (item.agent as { id?: string | number })?.id ?? item.agentId ?? '' : item.agentId ?? '',
     createdBy: typeof item.createdBy === 'object' ? (item.createdBy as { name?: string } | null)?.name ?? '' : item.createdBy ?? '',
     startDate: item.startDate ?? '',
     endDate: item.endDate ?? '',

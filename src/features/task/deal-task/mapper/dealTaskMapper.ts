@@ -17,7 +17,7 @@ export class DealTaskMapper {
       scheduledDate: item.scheduledDate || '',
       scheduledTime: toHHmm(item.scheduledTime),
       assignedTo: toIdString(item.assignedTo),
-      dealId: toIdString(item.leadId),
+      dealId: toIdString(item.dealId),
       priority: item.priority || '',
       status: item.status || '',
     };
