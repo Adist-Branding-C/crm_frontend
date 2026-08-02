@@ -12,9 +12,13 @@ export interface DealLeadOption extends LabelValuePair {
   agentName?: string | null;
 }
 
+export interface DealStaffOption extends LabelValuePair {
+  rawId?: string | number | null;
+}
+
 interface UseDealFormOptionsReturn {
   leads: DealLeadOption[];
-  staff: LabelValuePair[];
+  staff: DealStaffOption[];
   statuses: LabelValuePair[];
   types: LabelValuePair[];
   isLoadingLeads: boolean;
@@ -25,7 +29,7 @@ interface UseDealFormOptionsReturn {
 
 interface DealFormOptionsData {
   leads: DealLeadOption[];
-  staff: LabelValuePair[];
+  staff: DealStaffOption[];
   statuses: LabelValuePair[];
   types: LabelValuePair[];
 }
@@ -70,7 +74,7 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
     ? (() => {
       const data = staffResult.value?.data;
       const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((s: { id?: string | number; staff_id?: string; name?: string; fullName?: string; staffName?: string }) => ({ label: s.name || s.fullName || s.staffName || 'Unknown', value: s.staff_id ?? s.id ?? '' }));
+      return items.map((s: { id?: string | number; staff_id?: string; name?: string; fullName?: string; staffName?: string }) => ({ label: s.name || s.fullName || s.staffName || 'Unknown', value: s.staff_id ?? s.id ?? '', rawId: s.id ?? null }));
     })()
     : [];
 

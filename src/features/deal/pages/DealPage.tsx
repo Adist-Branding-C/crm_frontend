@@ -20,6 +20,7 @@ import { useDealCrud } from '../hooks/useDealCrud';
 import { useDealDrawer } from '../hooks/useDealDrawer';
 import { useDealFormSubmit } from '../hooks/useDealFormSubmit';
 import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
+import { useDealFormOptions } from '../hooks/useDealFormOptions';
 import { useDealExport } from '../hooks/useDealExport';
 import { useActiveWhatsappTemplates } from '../../../shared/hooks/useActiveWhatsappTemplates';
 import { buildWhatsappUrl } from '../../../shared/utils/whatsappMessage.util';
@@ -41,6 +42,7 @@ import './DealPage.css';
 const DealPage = () => {
   const toast = useToast();
   const list = useDealList(toast.showToastMessage);
+  const { staff } = useDealFormOptions();
 
   const rowsPerPageRef = useRef(10);
   const searchQueryRef = useRef('');
@@ -105,6 +107,15 @@ const DealPage = () => {
 
     const { countryCode: mobileCountryCode, number: mobileNumber } = splitMobileValue(drawer.editingItem.mobile);
 
+    // The deal's own `agent` field only carries the staff member's numeric id,
+    // not the staff_id string the Assign Agent dropdown (and the update
+    // payload) use — resolve it against the loaded staff list so the dropdown
+    // pre-selects instead of silently matching no option.
+    const rawAgentId = drawer.editingItem.agentId;
+    const agentMatch = rawAgentId
+      ? staff.find(s => String(s.value) === String(rawAgentId) || String(s.rawId) === String(rawAgentId))
+      : undefined;
+
     return {
       dealName: drawer.editingItem.dealName || '',
       lead: drawer.editingItem.lead || '',
@@ -119,11 +130,11 @@ const DealPage = () => {
       typeId: drawer.editingItem.typeId || '',
       startDate: drawer.editingItem.startDate || '',
       endDate: drawer.editingItem.endDate || '',
-      assignAgent: drawer.editingItem.agent || '',
-      agentId: drawer.editingItem.agentId || '',
+      assignAgent: agentMatch?.label ?? (drawer.editingItem.agent || ''),
+      agentId: agentMatch ? agentMatch.value : (rawAgentId || ''),
       ...additionalFieldValues,
     };
-  }, [drawer.editingItem, dealAdditionalFieldDefs]);
+  }, [drawer.editingItem, dealAdditionalFieldDefs, staff]);
 
   const formBodyRef = useRef<HTMLDivElement>(null);
 
@@ -315,8 +326,9 @@ const DealPage = () => {
       <AdminDeleteModal
         isOpen={!!deleteConfirm.deletingItem}
         itemName={deleteConfirm.deletingItem?.dealName || ''}
+        error={formError}
         onConfirm={deleteConfirm.handleConfirmDelete}
-        onClose={deleteConfirm.closeDeleteModal}
+        onClose={() => { setFormError(''); deleteConfirm.closeDeleteModal(); }}
       />
 
       <Toast

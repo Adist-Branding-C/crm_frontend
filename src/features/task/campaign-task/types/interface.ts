@@ -20,6 +20,10 @@ export interface CampaignTaskItem {
     id: number;
     name: string;
   } | null;
+  campaignId?: {
+    id: number;
+    name: string;
+  } | null;
   priority: string;
   status: string;
 }

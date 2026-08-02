@@ -20,6 +20,10 @@ export interface DealTaskItem {
     id: number;
     name: string;
   } | null;
+  dealId?: {
+    id: number;
+    title: string;
+  } | null;
   priority: string;
   status: string;
 }
