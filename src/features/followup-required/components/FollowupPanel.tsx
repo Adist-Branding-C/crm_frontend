@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import LeadDetailDrawer from '../../../components/LeadDetailDrawer';
 import ListToolbar from '../../../shared/components/table/ListToolbar';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useLeadFilterOptions } from '../../enquiries/hooks/useLeadFilterOptions';
+import { leadDataService } from '../../enquiries/services/leadDataService';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
 import { COLUMNS, SORT_OPTIONS } from '../constants';
 import { useFollowupFilters } from '../hooks/useFollowupFilters';
 import { useFollowupSort } from '../hooks/useFollowupSort';
@@ -128,6 +130,18 @@ const FollowupPanel = () => {
     statistics.refetch();
   }, [refresh, statistics]);
 
+  const handleFieldSave = useCallback(
+    async (leadId: string, payload: UpdateLeadPayload) => {
+      const res = await leadDataService.updateLead(leadId, payload);
+      if (res.status) {
+        refresh();
+        return true;
+      }
+      return false;
+    },
+    [refresh],
+  );
+
   const startIndex = (currentPage - 1) * rowsPerPage;
 
   const {
@@ -135,9 +149,15 @@ const FollowupPanel = () => {
     sourceOptions,
     staffOptions,
     statusOptions,
+    purposeOptions,
     isLoading: isLoadingFilterOptions,
     error: filterOptionsError,
   } = useLeadFilterOptions();
+
+  const fieldOptions = useMemo(
+    () => ({ typeOptions, sourceOptions, staffOptions, statusOptions, purposeOptions }),
+    [typeOptions, sourceOptions, staffOptions, statusOptions, purposeOptions],
+  );
 
   return (
     <>
@@ -187,6 +207,8 @@ const FollowupPanel = () => {
         error={error}
         onRetry={refresh}
         onViewLead={drawerState.handleViewLead}
+        fieldOptions={fieldOptions}
+        onFieldSave={handleFieldSave}
       />
 
       <FollowupPagination

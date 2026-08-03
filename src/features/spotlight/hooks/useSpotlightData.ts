@@ -3,6 +3,8 @@ import { useTableSelection } from '../../../shared/hooks/useTableSelection';
 import { useDropdownMenu } from '../../../shared/hooks/useDropdownMenu';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useLeadFilterOptions } from '../../enquiries/hooks/useLeadFilterOptions';
+import { leadDataService } from '../../enquiries/services/leadDataService';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
 import { useSpotlightFilters } from './useSpotlightFilters';
 import { useSpotlightSort } from './useSpotlightSort';
 import { useSpotlightPagination } from './useSpotlightPagination';
@@ -127,6 +129,18 @@ export function useSpotlightData() {
 
   const closeLeadDetail = useCallback(() => setSelectedLead(null), []);
 
+  const onFieldSave = useCallback(
+    async (leadId: string, payload: UpdateLeadPayload) => {
+      const res = await leadDataService.updateLead(leadId, payload);
+      if (res.status) {
+        refetch();
+        return true;
+      }
+      return false;
+    },
+    [refetch],
+  );
+
   const exportParams = useMemo(
     () =>
       SpotlightRequestMapper.toExportParams(
@@ -183,6 +197,7 @@ export function useSpotlightData() {
     loading: fetch.loading,
     error: fetch.error,
     refetch,
+    onFieldSave,
     handleExport,
     isExporting: exportHook.isExporting,
   };

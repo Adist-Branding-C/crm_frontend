@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { MoreHorizontal, Edit2, Trash2, Phone, MessageSquare } from 'lucide-react';
 import ActionMenuPortal from '../../../shared/components/ActionMenuPortal';
 import WhatsappTemplatePickerOverlay from '../../../shared/components/WhatsappTemplatePickerOverlay';
+import CellEditPopover from '../../../shared/components/CellEditPopover';
 import { DEAL_STATUS_LABEL_MAP, DEAL_TYPE_LABEL_MAP } from '../../../shared/constants/dealOptions';
 import { substituteTemplateVariables } from '../../../shared/utils/whatsappMessage.util';
 import type { DealRowProps } from '../types/component.types';
@@ -21,6 +22,8 @@ const getTypeBadge = (type: string) => {
   return <span className="type-pill" style={{ background: `${color}20`, color }}>{label}</span>;
 };
 
+type EditableField = 'agent' | 'startDate' | 'endDate';
+
 const DealRow: React.FC<DealRowProps> = ({
   deal,
   additionalFieldColumns,
@@ -32,9 +35,21 @@ const DealRow: React.FC<DealRowProps> = ({
   hasWhatsappTemplates,
   whatsappTemplatesLoading,
   whatsappTemplatesError,
+  staffOptions,
+  onFieldSave,
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [showWhatsappTemplatePicker, setShowWhatsappTemplatePicker] = useState(false);
+  const [editingField, setEditingField] = useState<{ field: EditableField; rect: DOMRect } | null>(null);
+
+  const emptyCell = (field: EditableField) => (
+    <span
+      className="lead-cell-empty"
+      onClick={(e) => setEditingField({ field, rect: e.currentTarget.getBoundingClientRect() })}
+    >
+      None
+    </span>
+  );
 
   const handleWhatsappClick = () => {
     actionMenu.onClose();
@@ -54,6 +69,7 @@ const DealRow: React.FC<DealRowProps> = ({
   };
 
   return (
+    <>
     <tr>
       <td className="action-cell">
         <button
@@ -101,15 +117,45 @@ const DealRow: React.FC<DealRowProps> = ({
       <td>{Number(deal.amount).toLocaleString()}</td>
       <td>{getStatusBadge(deal.status || '')}</td>
       <td>{getTypeBadge(deal.type || '')}</td>
-      <td>{deal.startDate}</td>
-      <td>{deal.endDate}</td>
-      <td>{deal.agent}</td>
+      <td>{deal.startDate || emptyCell('startDate')}</td>
+      <td>{deal.endDate || emptyCell('endDate')}</td>
+      <td>{deal.agent || emptyCell('agent')}</td>
       <td>{deal.createdBy}</td>
       <td>{deal.createdAt}</td>
       {additionalFieldColumns.map(name => (
         <td key={name}>{deal.additionalFields?.find(af => af.name === name)?.value ?? ''}</td>
       ))}
     </tr>
+
+    {editingField?.field === 'agent' && (
+      <CellEditPopover
+        anchorRect={editingField.rect}
+        label="Assigned To"
+        type="select"
+        options={staffOptions}
+        onSave={(value) => onFieldSave(String(deal.id), { agentId: value })}
+        onClose={() => setEditingField(null)}
+      />
+    )}
+    {editingField?.field === 'startDate' && (
+      <CellEditPopover
+        anchorRect={editingField.rect}
+        label="Start Date"
+        type="date"
+        onSave={(value) => onFieldSave(String(deal.id), { startDate: value })}
+        onClose={() => setEditingField(null)}
+      />
+    )}
+    {editingField?.field === 'endDate' && (
+      <CellEditPopover
+        anchorRect={editingField.rect}
+        label="End Date"
+        type="date"
+        onSave={(value) => onFieldSave(String(deal.id), { endDate: value })}
+        onClose={() => setEditingField(null)}
+      />
+    )}
+    </>
   );
 };
 

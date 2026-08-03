@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
 import { useToast } from '../../../../shared/hooks/useToast';
@@ -24,7 +25,7 @@ import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import { taskTabs } from '../../common/taskTabs';
-import type { TaskItem } from '../types';
+import type { TaskItem, TaskFormDataUpdate } from '../types';
 import './TaskPage.css';
 
 const TaskPage = () => {
@@ -49,6 +50,36 @@ const TaskPage = () => {
     handleUpdateTask: crud.handleUpdateTask,
   });
   const { searchValue, handleSearchChange } = useDebouncedSearch(pagination.handleSearchChange);
+
+
+  useEffect(() => {
+    staff.loadStaff();
+    categories.loadCategories();
+    leads.loadLeads();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fieldOptions = useMemo(
+    () => ({
+      staffOptions: staff.staffOptions.map((o) => ({ value: String(o.value), label: o.label })),
+      categoryOptions: categories.categoryOptions.map((o) => ({ value: String(o.value), label: o.label })),
+      leadOptions: leads.leadOptions.map((o) => ({ value: String(o.value), label: o.label })),
+    }),
+    [staff.staffOptions, categories.categoryOptions, leads.leadOptions],
+  );
+
+  const handleFieldSave = async (id: number, payload: TaskFormDataUpdate) => {
+    try {
+      const res = await taskDataService.update(id, payload);
+      if (res.status) {
+        pagination.refresh();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <div className="task-settings-page">
@@ -92,6 +123,8 @@ const TaskPage = () => {
                   onToggleDropdown={dropdown.toggleDropdown}
                   onEdit={drawer.openEditDrawer}
                   onDelete={deleteConfirm.handleDeleteClick}
+                  fieldOptions={fieldOptions}
+                  onFieldSave={handleFieldSave}
                 />
               ))}
             </TBody>

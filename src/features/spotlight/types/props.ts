@@ -2,6 +2,7 @@ import type { SortConfig } from '../../../shared/types/sort';
 import type { Column } from '../../../shared/types/table';
 import type { PaginationProps } from '../../../shared/types/pagination';
 import type { SortDirection } from '../../../shared/constants/enums/sortDirection';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
 import type {
   SpotlightLead,
   SpotlightFilters,
@@ -30,6 +31,8 @@ export interface SpotlightTableProps {
   onToggleMenu: (id: number, open: boolean) => void;
   onViewLead: (lead: SpotlightLead) => void;
   loading: boolean;
+  fieldOptions: SpotlightFilterOptions;
+  onFieldSave: (leadId: string, payload: UpdateLeadPayload) => Promise<boolean>;
 }
 
 export interface SpotlightTableRowProps {
@@ -39,6 +42,8 @@ export interface SpotlightTableRowProps {
   onSelectRow: (id: number) => void;
   onToggleMenu: (open: boolean) => void;
   onViewLead: (row: SpotlightLead) => void;
+  fieldOptions: SpotlightFilterOptions;
+  onFieldSave: (leadId: string, payload: UpdateLeadPayload) => Promise<boolean>;
 }
 
 export interface SpotlightToolbarProps {

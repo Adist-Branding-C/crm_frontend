@@ -21,6 +21,8 @@ import { useDealDrawer } from '../hooks/useDealDrawer';
 import { useDealFormSubmit } from '../hooks/useDealFormSubmit';
 import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
 import { useDealExport } from '../hooks/useDealExport';
+import { useStaffList } from '../hooks/useStaffList';
+import { dealService } from '../services/deal.service';
 import { useActiveWhatsappTemplates } from '../../../shared/hooks/useActiveWhatsappTemplates';
 import { buildWhatsappUrl } from '../../../shared/utils/whatsappMessage.util';
 import { getDealColumns } from '../utils/dealColumns';
@@ -73,6 +75,27 @@ const DealPage = () => {
   const rowActions = useDealRowActions(actionMenu, drawer, deleteConfirm);
 
   const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
+  const { staff } = useStaffList();
+  const staffOptions = useMemo(
+    () => staff.map((o) => ({ value: String(o.value), label: o.label })),
+    [staff],
+  );
+
+  const handleFieldSave = useCallback(
+    async (dealId: string, payload: { agentId?: string; startDate?: string; endDate?: string }) => {
+      try {
+        const res = await dealService.updateDeal(dealId, payload);
+        if (res.status) {
+          list.refreshCurrentPage();
+          return true;
+        }
+        return false;
+      } catch {
+        return false;
+      }
+    },
+    [list.refreshCurrentPage],
+  );
   const formSubmit = useDealFormSubmit({
     editingItem: drawer.editingItem,
     closeDrawer: drawer.closeDrawer,
@@ -281,6 +304,8 @@ const DealPage = () => {
                   hasWhatsappTemplates={hasWhatsappTemplates}
                   whatsappTemplatesLoading={whatsappTemplatesLoading}
                   whatsappTemplatesError={whatsappTemplatesError}
+                  staffOptions={staffOptions}
+                  onFieldSave={handleFieldSave}
                 />
               ))
             )}

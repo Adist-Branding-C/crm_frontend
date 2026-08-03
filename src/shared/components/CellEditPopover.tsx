@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Check, Loader2, X } from 'lucide-react';
-import type { LabelValuePair } from '../../../shared/types/common';
-import './LeadCellEditPopover.css';
+import type { LabelValuePair } from '../types/common';
+import './CellEditPopover.css';
 
-export interface LeadCellEditPopoverProps {
+export interface CellEditPopoverProps {
   anchorRect: DOMRect;
   label: string;
-  type: 'text' | 'select';
+  type: 'text' | 'select' | 'date';
   options?: LabelValuePair[];
   onSave: (value: string) => Promise<boolean>;
   onClose: () => void;
@@ -16,16 +16,17 @@ export interface LeadCellEditPopoverProps {
 const POPOVER_WIDTH = 240;
 
 /**
- * Small portal-positioned popover for setting an empty leads-table cell's
- * value inline, without opening the full lead-detail drawer. Positioning
- * follows the same fixed/viewport-clamped pattern as ActionDropdownPortal,
- * kept separate since that component's children-cloning is button-menu
- * specific and not a fit for a form input here.
+ * Small portal-positioned popover for setting an empty table cell's value
+ * inline, without opening the full record-detail drawer. Positioning follows
+ * the same fixed/viewport-clamped pattern as ActionDropdownPortal, kept
+ * separate since that component's children-cloning is button-menu specific
+ * and not a fit for a form input here.
  *
  * Used by:
- * - EnquiriesRow (opened by clicking an empty, underlined cell)
+ * - EnquiriesRow (Leads), SpotlightTableRow, FollowupTable, TaskRow, DealRow
+ *   - all for their "Assigned To" empty-cell click-to-edit affordance.
  */
-const LeadCellEditPopover = ({ anchorRect, label, type, options = [], onSave, onClose }: LeadCellEditPopoverProps) => {
+const CellEditPopover = ({ anchorRect, label, type, options = [], onSave, onClose }: CellEditPopoverProps) => {
   const [value, setValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -66,8 +67,8 @@ const LeadCellEditPopover = ({ anchorRect, label, type, options = [], onSave, on
   }, [onClose]);
 
   return ReactDOM.createPortal(
-    <div ref={popoverRef} className="lead-cell-edit-popover" style={{ top: position.top, left: position.left, width: POPOVER_WIDTH }}>
-      <div className="lead-cell-edit-popover-label">{label}</div>
+    <div ref={popoverRef} className="cell-edit-popover" style={{ top: position.top, left: position.left, width: POPOVER_WIDTH }}>
+      <div className="cell-edit-popover-label">{label}</div>
       {type === 'select' ? (
         <select autoFocus value={value} onChange={(e) => setValue(e.target.value)} disabled={isSaving}>
           <option value="">Select {label}</option>
@@ -77,15 +78,15 @@ const LeadCellEditPopover = ({ anchorRect, label, type, options = [], onSave, on
         </select>
       ) : (
         <input
-          type="text"
+          type={type === 'date' ? 'date' : 'text'}
           autoFocus
           value={value}
-          placeholder={`Enter ${label}`}
+          placeholder={type === 'date' ? undefined : `Enter ${label}`}
           onChange={(e) => setValue(e.target.value)}
           disabled={isSaving}
         />
       )}
-      <div className="lead-cell-edit-popover-actions">
+      <div className="cell-edit-popover-actions">
         <button type="button" onClick={handleSave} disabled={isSaving || !value} title="Save">
           {isSaving ? <Loader2 size={14} className="spin" /> : <Check size={14} />}
         </button>
@@ -98,4 +99,4 @@ const LeadCellEditPopover = ({ anchorRect, label, type, options = [], onSave, on
   );
 };
 
-export default LeadCellEditPopover;
+export default CellEditPopover;
