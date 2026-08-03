@@ -1,4 +1,4 @@
-.lead-cell-edit-popover {
+.cell-edit-popover {
   position: fixed;
   z-index: 9999;
   background: var(--bg-card, #fff);
@@ -11,14 +11,14 @@
   gap: 0.5rem;
 }
 
-.lead-cell-edit-popover-label {
+.cell-edit-popover-label {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-muted, #6b7280);
 }
 
-.lead-cell-edit-popover select,
-.lead-cell-edit-popover input {
+.cell-edit-popover select,
+.cell-edit-popover input {
   width: 100%;
   padding: 0.5rem 0.625rem;
   border: 1px solid var(--border-color, #e5e7eb);
@@ -28,13 +28,13 @@
   background: var(--bg-main, #fff);
 }
 
-.lead-cell-edit-popover-actions {
+.cell-edit-popover-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.375rem;
 }
 
-.lead-cell-edit-popover-actions button {
+.cell-edit-popover-actions button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,21 +47,21 @@
   cursor: pointer;
 }
 
-.lead-cell-edit-popover-actions button:first-child {
+.cell-edit-popover-actions button:first-child {
   color: #128c4a;
   border-color: #25d366;
 }
 
-.lead-cell-edit-popover-actions button:disabled {
+.cell-edit-popover-actions button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.lead-cell-edit-popover .spin {
-  animation: leadCellEditPopoverSpin 0.8s linear infinite;
+.cell-edit-popover .spin {
+  animation: cellEditPopoverSpin 0.8s linear infinite;
 }
 
-@keyframes leadCellEditPopoverSpin {
+@keyframes cellEditPopoverSpin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }

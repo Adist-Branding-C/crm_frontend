@@ -2,6 +2,7 @@ import type { SortConfig } from '../../../shared/types/sort';
 import type { DateRange, LabelValuePair } from '../../../shared/types/common';
 import type { Column } from '../../../shared/types/table';
 import type { PaginationProps } from '../../../shared/types/pagination';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
 
 export interface FollowupLead {
   id: number;
@@ -102,6 +103,14 @@ export interface FollowupFiltersProps {
   onClear: () => void;
 }
 
+export interface FollowupFieldOptions {
+  typeOptions: LabelValuePair[];
+  statusOptions: LabelValuePair[];
+  sourceOptions: LabelValuePair[];
+  purposeOptions: LabelValuePair[];
+  staffOptions: LabelValuePair[];
+}
+
 export interface FollowupTableProps {
   data: FollowupLead[];
   columns: Column[];
@@ -111,6 +120,8 @@ export interface FollowupTableProps {
   error: string | null;
   onRetry: () => void;
   onViewLead: (lead: FollowupLead) => void;
+  fieldOptions: FollowupFieldOptions;
+  onFieldSave: (leadId: string, payload: UpdateLeadPayload) => Promise<boolean>;
 }
 
 export interface FollowupPaginationProps extends PaginationProps { }

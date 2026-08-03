@@ -1,9 +1,26 @@
 import { memo, useState } from 'react';
 import { MoreHorizontal, Eye } from 'lucide-react';
 import ActionDropdownPortal from '../../../components/ActionDropdownPortal';
+import CellEditPopover from '../../../shared/components/CellEditPopover';
 import { TRow, TCell } from '../../../shared/components/table';
 import type { SpotlightTableRowProps } from '../types';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
+import type { SpotlightFilterOptions } from '../types/interface';
 import { formatDateTime, formatFollowUpDateOnly } from '../../../shared/utils/dateUtils';
+
+type EditableField = 'assignedTo' | 'purpose' | 'type' | 'status' | 'source';
+
+const EDITABLE_FIELD_CONFIG: Record<EditableField, {
+  payloadKey: keyof UpdateLeadPayload;
+  optionsKey: keyof SpotlightFilterOptions;
+  label: string;
+}> = {
+  assignedTo: { payloadKey: 'agentId', optionsKey: 'agents', label: 'Assigned To' },
+  purpose: { payloadKey: 'purposeId', optionsKey: 'purposes', label: 'Purpose' },
+  type: { payloadKey: 'typeId', optionsKey: 'leadTypes', label: 'Type' },
+  status: { payloadKey: 'statusId', optionsKey: 'statuses', label: 'Status' },
+  source: { payloadKey: 'sourceId', optionsKey: 'sources', label: 'Source' },
+};
 
 const SpotlightTableRow = memo(
   ({
@@ -13,10 +30,24 @@ const SpotlightTableRow = memo(
     onSelectRow,
     onToggleMenu,
     onViewLead,
+    fieldOptions,
+    onFieldSave,
   }: SpotlightTableRowProps) => {
     const [buttonRect, setButtonRect] = useState<DOMRect | null>(null);
+    const [editingField, setEditingField] = useState<{ field: EditableField; rect: DOMRect } | null>(null);
+    const editableConfig = editingField ? EDITABLE_FIELD_CONFIG[editingField.field] : undefined;
+
+    const emptyCell = (field: EditableField) => (
+      <span
+        className="lead-cell-empty"
+        onClick={(e) => setEditingField({ field, rect: e.currentTarget.getBoundingClientRect() })}
+      >
+        None
+      </span>
+    );
 
     return (
+      <>
       <TRow className={isSelected ? 'selected' : ''}>
         <TCell className="action-cell">
           <div className="action-menu-container">
@@ -49,25 +80,39 @@ const SpotlightTableRow = memo(
         {row.name}
       </TCell>
       <TCell>{row.phone}</TCell>
-      <TCell>{row.assignedStaff?.name || 'Unassigned'}</TCell>
-      <TCell>{row.purpose?.purpose || 'N/A'}</TCell>
+      <TCell>{row.assignedStaff?.name || emptyCell('assignedTo')}</TCell>
+      <TCell>{row.purpose?.purpose || emptyCell('purpose')}</TCell>
       <TCell>
-        <span
-          className={`badge badge-${(row.type?.type || '').toLowerCase().replace(' ', '-')}`}
-        >
-          {row.type?.type || 'N/A'}
-        </span>
+        {row.type?.type ? (
+          <span className={`badge badge-${row.type.type.toLowerCase().replace(' ', '-')}`}>
+            {row.type.type}
+          </span>
+        ) : emptyCell('type')}
       </TCell>
       <TCell>
-        <span className={`badge badge-${(row.status?.status || '').toLowerCase()}`}>
-          {row.status?.status || 'N/A'}
-        </span>
+        {row.status?.status ? (
+          <span className={`badge badge-${row.status.status.toLowerCase()}`}>
+            {row.status.status}
+          </span>
+        ) : emptyCell('status')}
       </TCell>
-      <TCell>{row.source?.source || 'N/A'}</TCell>
+      <TCell>{row.source?.source || emptyCell('source')}</TCell>
       <TCell>{formatDateTime(row.createdAt)}</TCell>
       <TCell>{formatDateTime(row.updatedAt)}</TCell>
       <TCell>{formatFollowUpDateOnly(row.nextFollowUpDate)}</TCell>
       </TRow>
+
+      {editingField && editableConfig && (
+        <CellEditPopover
+          anchorRect={editingField.rect}
+          label={editableConfig.label}
+          type="select"
+          options={fieldOptions[editableConfig.optionsKey]}
+          onSave={(value) => onFieldSave(String(row.id), { [editableConfig.payloadKey]: value })}
+          onClose={() => setEditingField(null)}
+        />
+      )}
+      </>
     );
   },
 );

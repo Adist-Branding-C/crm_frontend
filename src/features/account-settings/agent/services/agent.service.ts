@@ -20,7 +20,7 @@ class AgentService {
   }
 
   async createAgent(data: Omit<AgentFormData, 'confirmPassword'>): Promise<AgentResponse> {
-    const { fullName, email, phone, password, designationId, departmentId, status } = data;
+    const { fullName, email, phone, password, designationId, departmentId, status, isAdmin } = data;
     const payload = {
       fullName,
       email: email.trim(),
@@ -29,6 +29,7 @@ class AgentService {
       designationId,
       departmentId,
       status,
+      isAdmin,
     };
     const response = await axiosInstance.post<AgentResponse>(AGENT_API_ENDPOINTS.CREATE, payload);
     return ServiceResponseUtil.normalize({
@@ -40,8 +41,11 @@ class AgentService {
     });
   }
 
-  async updateAgent(staffId: string, data: Omit<AgentFormData, 'password' | 'confirmPassword'>): Promise<AgentResponse> {
-    const { fullName, email, phone, designationId, departmentId, status } = data;
+  async updateAgent(
+    staffId: string,
+    data: Omit<AgentFormData, 'password' | 'confirmPassword' | 'isAdmin'> & { password?: string },
+  ): Promise<AgentResponse> {
+    const { fullName, email, phone, password, designationId, departmentId, status } = data;
     const payload = {
       fullName,
       email: email.trim(),
@@ -49,6 +53,7 @@ class AgentService {
       designationId,
       departmentId,
       status,
+      ...(password ? { password } : {}),
     };
     const response = await axiosInstance.patch<AgentResponse>(AGENT_API_ENDPOINTS.UPDATE(staffId), payload);
     return ServiceResponseUtil.normalize({

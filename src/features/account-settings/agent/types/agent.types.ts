@@ -14,6 +14,7 @@ export interface AgentItem {
   departmentId?: string;
   department_id?: number | string;
   status: string;
+  isAdmin?: boolean;
 }
 
 export interface AgentFormData {
@@ -25,6 +26,7 @@ export interface AgentFormData {
   designationId: string;
   departmentId: string;
   status: string;
+  isAdmin: boolean;
 }
 
 export interface AgentResponse {
@@ -72,6 +74,8 @@ export interface GetStaffMeResponse {
   status: boolean;
   message: string;
   data: StaffProfile;
+}
+
 export interface DepartmentOption {
   label: string;
   value: string;

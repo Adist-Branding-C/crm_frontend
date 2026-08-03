@@ -20,5 +20,6 @@ export function mapAgentToFormData(item: AgentItem): AgentFormData {
     designationId: item.designationId || String(item.designation_id ?? item.designation ?? ''),
     departmentId: item.departmentId || String(item.department_id ?? ''),
     status: item.status || '',
+    isAdmin: item.isAdmin ?? false,
   };
 }

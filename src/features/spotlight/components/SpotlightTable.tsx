@@ -24,6 +24,8 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
   onToggleMenu,
   onViewLead,
   loading,
+  fieldOptions,
+  onFieldSave,
 }) => {
   const handleSortKeyDown = (
     e: React.KeyboardEvent<HTMLTableCellElement>,
@@ -102,6 +104,8 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
                 onSelectRow={onSelectRow}
                 onToggleMenu={(open) => onToggleMenu(row.id, open)}
                 onViewLead={onViewLead}
+                fieldOptions={fieldOptions}
+                onFieldSave={onFieldSave}
               />
             ))
           )}

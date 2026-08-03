@@ -30,9 +30,9 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, password, designationId, departmentId, status } = values;
+      const { fullName, email, password, designationId, departmentId, status, isAdmin } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, departmentId, status };
+      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, departmentId, status, isAdmin };
 
       const response = await agentService.createAgent(requestData);
 
@@ -65,9 +65,19 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, designationId, departmentId, status } = values;
+      const { fullName, email, password, designationId, departmentId, status } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, designationId, departmentId, status };
+      const requestData = {
+        fullName,
+        email: email.trim(),
+        phone: sanitizedPhone,
+        designationId,
+        departmentId,
+        status,
+        // Blank means "leave the current password as-is" - only send it when
+        // the admin actually typed a new one.
+        ...(password ? { password } : {}),
+      };
 
       const response = await agentService.updateAgent(staffId, requestData);
 

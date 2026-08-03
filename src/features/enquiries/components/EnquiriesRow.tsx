@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Trash2, Eye, MoreHorizontal } from 'lucide-react';
 import { TRow, TCell } from '../../../shared/components/table';
 import ActionDropdownPortal from '../../../components/ActionDropdownPortal';
-import LeadCellEditPopover from './LeadCellEditPopover';
+import CellEditPopover from '../../../shared/components/CellEditPopover';
 import { formatRelativeDate, formatFollowUpDate } from '../../../shared/utils/dateUtils';
 import { badgeClass } from '../../../shared/utils/badgeUtils';
 import { LABEL_NOT_ASSIGNED } from '../../../shared/constants/labels';
@@ -164,7 +164,7 @@ const EnquiriesRow: React.FC<EnquiriesRowProps> = ({ lead, columns, isSelected, 
       })}
 
       {editingCell && editableConfig && (
-        <LeadCellEditPopover
+        <CellEditPopover
           anchorRect={editingCell.rect}
           label={editableConfig.label}
           type={editableConfig.type}

@@ -71,6 +71,8 @@ const SpotlightPanel = () => {
         onToggleMenu={spotlightData.onToggleMenu}
         onViewLead={spotlightData.handleViewLead}
         loading={spotlightData.loading}
+        fieldOptions={spotlightData.filterOptions}
+        onFieldSave={spotlightData.onFieldSave}
       />
 
       <SpotlightPagination

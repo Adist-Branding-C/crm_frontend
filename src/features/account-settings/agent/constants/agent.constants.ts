@@ -11,6 +11,7 @@ export const ADD_AGENT_INITIAL_VALUES: AgentFormData = {
   designationId: '',
   departmentId: '',
   status: '',
+  isAdmin: false,
 };
 
 /**

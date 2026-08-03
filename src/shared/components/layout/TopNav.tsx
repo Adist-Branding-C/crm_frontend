@@ -36,8 +36,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { currentStaff, isLoading: isStaffLoading, clearCurrentStaff } = useCurrentStaff();
-  // const [notifications, setNotifications] = useState(initialNotifications);
-  const { unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [committedQuery, setCommittedQuery] = useState('');
   const { searchValue: searchQuery, handleSearchChange: setSearchQuery, resetSearch } = useDebouncedSearch(setCommittedQuery);
   const { results: searchResults, isLoading: isSearchLoading } = useGlobalLeadSearch(committedQuery);
@@ -316,29 +315,33 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                   </button>
                 </div>
               </div>
-              {/* <div className="notifications-list">
-                {notifications.map(notification => {
-                  const { icon: Icon, color } = getNotificationIcon(notification.type);
-                  return (
-                    <div
-                      key={notification.id}
-                      className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
-                      onClick={() => handleNotificationClick(notification)}
-                    >
-                      <div className="notification-indicator" style={{ backgroundColor: color }} />
-                      <div className="notification-icon" style={{ backgroundColor: `${color}15`, color }}>
-                        <Icon size={16} />
+              <div className="notifications-list">
+                {notifications.length === 0 ? (
+                  <div className="notifications-empty">No notifications</div>
+                ) : (
+                  notifications.map(notification => {
+                    const { icon: Icon, color } = getNotificationIcon(notification.type);
+                    return (
+                      <div
+                        key={notification.id}
+                        className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="notification-indicator" style={{ backgroundColor: color }} />
+                        <div className="notification-icon" style={{ backgroundColor: `${color}15`, color }}>
+                          <Icon size={16} />
+                        </div>
+                        <div className="notification-content">
+                          <div className="notification-title">{notification.title}</div>
+                          <div className="notification-message">{notification.notification}</div>
+                          <div className="notification-time">{notification.time ? new Date(notification.time).toLocaleString() : ''}</div>
+                        </div>
+                        {!notification.isRead && <div className="notification-dot" />}
                       </div>
-                      <div className="notification-content">
-                        <div className="notification-title">{notification.title}</div>
-                        <div className="notification-message">{notification.notification}</div>
-                        <div className="notification-time">{notification.time ? new Date(notification.time).toLocaleString() : ''}</div>
-                      </div>
-                      {!notification.isRead && <div className="notification-dot" />}
-                    </div>
-                  );
-                })}
-              </div> */}
+                    );
+                  })
+                )}
+              </div>
               <div className="notifications-footer">
                 <button className="view-all-btn" onClick={() => navigate('/user/notifications-users')}>
                   View All Notifications

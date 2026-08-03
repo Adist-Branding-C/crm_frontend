@@ -1,4 +1,5 @@
 import type { DealItem, DealStatusFilters, DealAdditionalFieldDef } from './interface';
+import type { LabelValuePair } from '../../../shared/types/common';
 import type { Schema } from 'yup';
 import type { FormikHelpers } from 'formik';
 
@@ -75,4 +76,6 @@ export interface DealRowProps {
   hasWhatsappTemplates: boolean;
   whatsappTemplatesLoading: boolean;
   whatsappTemplatesError: boolean;
+  staffOptions: LabelValuePair[];
+  onFieldSave: (dealId: string, payload: { agentId?: string; startDate?: string; endDate?: string }) => Promise<boolean>;
 }
