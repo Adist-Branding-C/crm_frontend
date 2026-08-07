@@ -44,7 +44,7 @@ import './DealPage.css';
 const DealPage = () => {
   const toast = useToast();
   const list = useDealList(toast.showToastMessage);
-  const { staff } = useDealFormOptions();
+  const { staff: formStaff } = useDealFormOptions();
 
   const rowsPerPageRef = useRef(10);
   const searchQueryRef = useRef('');
@@ -136,7 +136,7 @@ const DealPage = () => {
     // pre-selects instead of silently matching no option.
     const rawAgentId = drawer.editingItem.agentId;
     const agentMatch = rawAgentId
-      ? staff.find(s => String(s.value) === String(rawAgentId) || String(s.rawId) === String(rawAgentId))
+      ? formStaff.find(s => String(s.value) === String(rawAgentId) || String(s.rawId) === String(rawAgentId))
       : undefined;
 
     return {
@@ -157,7 +157,7 @@ const DealPage = () => {
       agentId: agentMatch ? agentMatch.value : (rawAgentId || ''),
       ...additionalFieldValues,
     };
-  }, [drawer.editingItem, dealAdditionalFieldDefs, staff]);
+  }, [drawer.editingItem, dealAdditionalFieldDefs, formStaff]);
 
   const formBodyRef = useRef<HTMLDivElement>(null);
 
