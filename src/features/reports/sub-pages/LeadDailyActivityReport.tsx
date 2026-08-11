@@ -3,6 +3,7 @@ import { Search, Filter, ChevronDown } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { dailyActivitySampleData } from '../constants';
 import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const logTypes = [
   { id: '', name: 'All' },
@@ -40,10 +41,7 @@ const LeadDailyActivityReport = () => {
     const csvContent = "Agent Name,Total,Attendance,Visitor,Lead Add,Task Add,Call Task Feedback,Deals Add,Task Edit,Lead Update,Note Added,Call Log Added,Status Updated,Purpose Updated,Voice Note Added,File Note Added\n" +
       dailyActivitySampleData.map(row => `${row.agentName},${row.total},${row.attendance},${row.visitor},${row.leadAdd},${row.taskAdd},${row.callTaskFeedback},${row.dealsAdd},${row.taskEdit},${row.leadUpdate},${row.noteAdd},${row.callLogAdd},${row.statusUpdated},${row.purposeUpdated},${row.voiceNoteAdd},${row.fileNoteAdd}`).join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'daily_activity_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'daily_activity_report.csv');
   };
 
   return (

@@ -3,6 +3,7 @@ import { Search, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-reac
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { taskWorkData } from '../constants';
 import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const TaskWorkReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,10 +30,7 @@ const TaskWorkReport = () => {
     const headers = ['Sl No', 'Customer Name', 'Task', 'Contact Number', 'Assigned To', 'Date', 'Created Date', 'Completed Date', 'Remark', 'Status', 'Work Start On', 'Work End On'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.slNo},${d.customerName},${d.task},${d.contactNumber},${d.assignedTo},${d.date},${d.createdDate},${d.completedDate},${d.remark},${d.status},${d.workStartOn},${d.workEndOn}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'task_work_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'task_work_report.csv');
   };
 
   return (

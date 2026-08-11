@@ -10,6 +10,7 @@ import {
 import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
 import { ACTION_SUBMIT, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 import type { LeadCheckoutSummaryFilters } from '../types';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const LeadCheckoutSummary: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -101,7 +102,7 @@ const LeadCheckoutSummary: React.FC = () => {
     const headers = ['Shop', 'Agent', 'Note', 'Date'];
     const csvContent = [headers.join(','), ...checkoutData.map(d => [d.shop, d.agent, d.note, d.date].join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'checkout_summary.csv'; link.click();
+    triggerBlobDownload(blob, 'checkout_summary.csv');
   };
 
   const handleSubmit = (e: React.FormEvent) => {

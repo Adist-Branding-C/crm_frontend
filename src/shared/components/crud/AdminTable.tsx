@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, Key } from 'lucide-react';
 import { ACTION_EDIT, ACTION_DELETE } from '../../constants/actionLabels';
 import { LABEL_SL_NO, LABEL_ACTIONS, LABEL_NO_DATA } from '../../constants/labels';
 import type { Column, AdminTableProps } from '../../types/crud';
 
 function AdminTableInner<T extends { id: number | string }>(props: AdminTableProps<T>) {
-  const { data, columns, startIndex, dropdownOpen, onToggleDropdown, onEdit, onDelete, renderActions, emptyMessage } = props;
+  const { data, columns, startIndex, dropdownOpen, onToggleDropdown, onEdit, onDelete, onUpdatePassword, renderActions, emptyMessage } = props;
 
   const [dropdownStyle, setDropdownStyle] = useState<{ top?: number; bottom?: number; right: number; openUp: boolean } | null>(null);
   const portalRef = useRef<HTMLDivElement>(null);
@@ -106,6 +106,11 @@ function AdminTableInner<T extends { id: number | string }>(props: AdminTablePro
           <button className="dropdown-item" onClick={() => { onEdit(openItem); onToggleDropdown(null); }}>
             <Edit2 size={14} /> {ACTION_EDIT}
           </button>
+          {onUpdatePassword && (
+            <button className="dropdown-item" onClick={() => { onUpdatePassword(openItem); onToggleDropdown(null); }}>
+              <Key size={14} /> Update Password
+            </button>
+          )}
           <button className="dropdown-item danger" onClick={() => { onDelete(openItem); onToggleDropdown(null); }}>
             <Trash2 size={14} /> {ACTION_DELETE}
           </button>

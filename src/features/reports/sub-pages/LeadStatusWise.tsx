@@ -14,6 +14,7 @@ import { LEAD_STATUS_OPTIONS } from '../../../shared/constants/leadStatuses';
 import { REPT_LEAD_TYPE_OPTIONS, REPT_PURPOSE_OPTIONS, REPT_SOURCE_OPTIONS } from '../constants';
 import { MOCK_STAFF_SHORT } from '../../../shared/constants/mockStaff';
 import type { LeadStatusWiseFilters } from '../types';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const LeadStatusWise: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,7 +104,7 @@ const LeadStatusWise: React.FC = () => {
     const headers = ['Agent Name', 'Total', 'New', 'Connected', 'Interested', 'Registered', 'Not Interested', 'Just Enquiry', 'Details Shared', 'Webinar Attended', 'Lost', 'DND', 'Later'];
     const csvContent = [headers.join(','), ...statusData.map(d => [d.agentName, d.total, d.new, d.connected, d.interested, d.registered, d.notInterested, d.justEnquiry, d.detailsShared, d.webinarAttended, d.lost, d.dnd, d.later].join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'lead_status_report.csv'; link.click();
+    triggerBlobDownload(blob, 'lead_status_report.csv');
   };
 
   return (

@@ -106,16 +106,20 @@ const AddAgentDrawer = ({ visibility, form, status, designation, department }: A
                 {showError('email') && errors.email && <small className="field-error-text">{errors.email}</small>}
               </div>
 
-              <div className="form-group">
-                <label>{isEditing ? 'New Password' : 'Password'} {!isEditing && <span className="text-danger">*</span>}</label>
-                <Field type="password" name="password" className={fieldClass('password')} placeholder={isEditing ? 'Leave blank to keep current password' : 'Enter password'} />
-                {showError('password') && errors.password && <small className="field-error-text">{errors.password}</small>}
-              </div>
-              <div className="form-group">
-                <label>Confirm {isEditing ? 'New ' : ''}Password {!isEditing && <span className="text-danger">*</span>}</label>
-                <Field type="password" name="confirmPassword" className={fieldClass('confirmPassword')} placeholder="Enter confirm password" />
-                {showError('confirmPassword') && errors.confirmPassword && <small className="field-error-text">{errors.confirmPassword}</small>}
-              </div>
+              {!isEditing && (
+                <>
+                  <div className="form-group">
+                    <label>Password <span className="text-danger">*</span></label>
+                    <Field type="password" name="password" className={fieldClass('password')} placeholder="Enter password" />
+                    {showError('password') && errors.password && <small className="field-error-text">{errors.password}</small>}
+                  </div>
+                  <div className="form-group">
+                    <label>Confirm Password <span className="text-danger">*</span></label>
+                    <Field type="password" name="confirmPassword" className={fieldClass('confirmPassword')} placeholder="Enter confirm password" />
+                    {showError('confirmPassword') && errors.confirmPassword && <small className="field-error-text">{errors.confirmPassword}</small>}
+                  </div>
+                </>
+              )}
 
               {!isEditing && (
                 <div className="checkbox-group">

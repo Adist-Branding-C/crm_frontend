@@ -3,6 +3,7 @@ import { Search, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-reac
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { taskWiseData } from '../constants';
 import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const TaskWiseReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,10 +24,7 @@ const TaskWiseReport = () => {
     const headers = ['Agent Name', 'Total', 'Completed', 'Pending', 'OverDue'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.agentName},${d.total},${d.completed},${d.pending},${d.overDue}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'task_wise_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'task_wise_report.csv');
   };
 
   return (

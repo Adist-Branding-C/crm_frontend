@@ -326,3 +326,66 @@ export interface CreateLeadExportResponse {
     status: LeadExportStatus;
   };
 }
+
+export interface LeadImportHistoryPagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+export interface LeadImportHistoryItem {
+  importId: string;
+  fileName: string;
+  totalRows: number;
+  status: string;
+  importedCount: number;
+  duplicateCount: number;
+  failedCount: number;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface LeadImportHistoryResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    items: LeadImportHistoryItem[];
+    pagination: LeadImportHistoryPagination;
+  };
+}
+
+export interface LeadImportHistoryDetailResponse {
+  status: boolean;
+  message: string;
+  data?: LeadImportHistoryItem;
+}
+
+export interface LeadImportEntryItem {
+  id: string;
+  rowNumber: number;
+  status: string;
+  errorReason: string | null;
+  rawData: any;
+}
+
+export interface LeadImportEntriesResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    items: LeadImportEntryItem[];
+    pagination: LeadImportHistoryPagination;
+  };
+}
+
+export interface CreateLeadImportResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    importId: string;
+    totalRows: number;
+    status: string;
+  };
+}
