@@ -3,6 +3,7 @@ import { Search, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { callFeedbackData } from '../constants';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const CallFeedbackReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,10 +48,7 @@ const CallFeedbackReport = () => {
     const headers = ['Lead Name', 'Number', 'Agent', 'Remark', 'Call Status', 'Call Time'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.leadName},${d.number},${d.agent},${d.remark},${d.callStatus},${d.callTime}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'call_feedback_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'call_feedback_report.csv');
   };
 
   return (

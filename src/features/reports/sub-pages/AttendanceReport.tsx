@@ -3,6 +3,7 @@ import { Search, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { attendanceData } from '../constants';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const AttendanceReport = () => {
   const [search, setSearch] = useState('');
@@ -24,10 +25,7 @@ const AttendanceReport = () => {
     const headers = ['Agent', 'Total Working Days', 'Leave', 'Duration'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.agent},${d.workingDays},${d.leave},${d.duration}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'attendance_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'attendance_report.csv');
   };
 
   return (

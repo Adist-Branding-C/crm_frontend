@@ -3,6 +3,7 @@ import { Search, Download, Phone, PhoneIncoming, PhoneOutgoing, PhoneMissed, Pho
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { callHistoryData, agentStatsData } from '../constants';
 import { MOCK_STAFF_OPTIONS_WITH_IDS } from '../../../shared/constants/mockStaff';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const GLDialerCallReport = () => {
   const [filters, setFilters] = useState({ dateFrom: '2024-01-01', dateTo: '2024-01-31', agent: '' });
@@ -44,10 +45,7 @@ const GLDialerCallReport = () => {
     const headers = ['Customer', 'Call Type', 'Agent Name', 'Call Time', 'Duration'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.customer},${d.callType},${d.agentName},${d.callTime},${d.duration}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'call_history_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'call_history_report.csv');
   };
 
   return (

@@ -1,15 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
-  RefreshCw, Search, ChevronDown, ChevronLeft, ChevronRight,
+  RefreshCw, Search, ChevronLeft, ChevronRight,
   Eye, Plus, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './ReportsSubPages.css';
-import { importHistoryData, importHistoryColumns as columns } from '../constants/historyReports.data';
+import { importHistoryColumns as columns } from '../constants/historyReports.data';
 import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
-import type { LeadImportHistoryModalProps } from '../types';
+import type { LeadImportHistoryModalProps, LeadImportHistoryItem } from '../types';
+import { useTableData } from '../../../shared/hooks/useTableData';
+import { leadImportService } from '../services/leadImportService';
+import { useToast } from '../../../shared/hooks/useToast';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
+import ToastNotification from '../../../shared/components/ToastNotification';
+import { getErrorMessage } from '../../../shared/utils/error';
 
-const ImportModal: React.FC<LeadImportHistoryModalProps> = ({ isOpen, onClose }) => {
+const ImportModal: React.FC<LeadImportHistoryModalProps & { onSuccess: () => void }> = ({ isOpen, onClose, onSuccess }) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
+
+  const handleDownloadSample = async () => {
+    try {
+      const { data: blob } = await leadImportService.downloadSample();
+      triggerBlobDownload(blob, 'Leads_Import_Sample.xlsx');
+    } catch (error) {
+      toast.showToastMessage(getErrorMessage(error, 'Failed to download sample file'), 'error');
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast.showToastMessage('Please select a file to upload', 'error');
+      return;
+    }
+    setUploading(true);
+    try {
+      await leadImportService.uploadFile(file);
+      toast.showToastMessage('File uploaded successfully', 'success');
+      onSuccess();
+      onClose();
+    } catch (error) {
+      toast.showToastMessage(getErrorMessage(error, 'Failed to upload file'), 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -23,8 +61,13 @@ const ImportModal: React.FC<LeadImportHistoryModalProps> = ({ isOpen, onClose })
           <div className="upload-section">
             <label>Upload File</label>
             <div className="file-input-wrapper">
-              <input type="file" accept=".csv,.xlsx,.xls" />
-              <button className="btn-link">Download Sample File</button>
+              <input 
+                type="file" 
+                accept=".xlsx" 
+                ref={fileInputRef}
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
+              <button className="btn-link" onClick={handleDownloadSample}>Download Sample File</button>
             </div>
           </div>
 
@@ -37,9 +80,9 @@ const ImportModal: React.FC<LeadImportHistoryModalProps> = ({ isOpen, onClose })
           <div className="example-section">
             <p>Example:</p>
             <pre className="example-code">
-Name,Country Code,Mobile Number,Lead Source,Email
+{`Name,Country Code,Mobile Number,Lead Source,Email
 ABC,+1,1234567890,Website,
-,+91,9876543210,Referral,,john@example.com
+,+91,9876543210,Referral,,john@example.com`}
             </pre>
           </div>
 
@@ -50,93 +93,77 @@ ABC,+1,1234567890,Website,
           </div>
 
           <div className="modal-actions">
-            <button className="btn btn-primary">Upload</button>
-            <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+            <button className="btn btn-primary" onClick={handleUpload} disabled={!file || uploading}>
+              {uploading ? 'Uploading...' : 'Upload'}
+            </button>
+            <button className="btn btn-secondary" onClick={onClose} disabled={uploading}>Cancel</button>
           </div>
         </div>
       </div>
+      <ToastNotification isVisible={toast.showToast} type={toast.toastType} message={toast.toastMessage} onDismiss={() => toast.setShowToast(false)} />
     </div>
   );
 };
 
 const LeadImportHistory: React.FC = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'dateTime', direction: 'desc' });
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
 
-  const filteredData = React.useMemo(() => {
-    let data = [...importHistoryData];
-    if (searchQuery) {
-      data = data.filter(item =>
-        item.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.status.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    if (sortConfig.key) {
-      data.sort((a, b) => {
-        const aVal = a[sortConfig.key] as string | number;
-        const bVal = b[sortConfig.key] as string | number;
-        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-    return data;
-  }, [searchQuery, sortConfig]);
+  const pagination = useTableData<LeadImportHistoryItem>({
+    fetchFn: async (params) => {
+      const response = await leadImportService.getHistory(params);
+      if (response.status) {
+        const data = response.data;
+        const items = data?.items ?? [];
+        return { items, total: data?.pagination?.total ?? items.length };
+      }
+      throw new Error(response.message || 'Failed to fetch import history');
+    },
+  });
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-
-  const handleSort = (key: string) => {
-    setSortConfig(prev => ({ key, direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc' }));
-  };
+  const totalPages = Math.ceil(pagination.totalCount / pagination.limit) || 1;
+  const startIndex = (pagination.pageNumber - 1) * pagination.limit;
+  const paginatedData = pagination.list;
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) { setSelectedRows(paginatedData.map(item => item.id)); }
+    if (e.target.checked) { setSelectedRows(paginatedData.map(item => item.importId)); }
     else { setSelectedRows([]); }
   };
 
-  const handleSelectRow = (id: number) => {
+  const handleSelectRow = (id: string) => {
     setSelectedRows(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
   const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1);
+    pagination.handleRowsPerPageChange(Number(e.target.value));
   };
 
   const getStatusBadge = (status: string) => {
     const statusClasses: Record<string, string> = {
       completed: 'badge-active',
-      generating: 'badge-pending',
-      failed: 'badge-inactive'
+      success: 'badge-active',
+      processing: 'badge-pending',
+      failed: 'badge-inactive',
+      pending: 'badge-pending'
     };
-    return statusClasses[status] || 'badge-inactive';
+    return statusClasses[status.toLowerCase()] || 'badge-inactive';
   };
 
-  const handleView = (id: number) => {
+  const handleView = (id: string) => {
     navigate(`/reports/lead/import-history/${id}`);
-  };
-
-  const handleImportClick = () => {
-    setShowModal(true);
   };
 
   return (
     <div className="enquiries-page">
-      <ImportModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <ImportModal isOpen={showModal} onClose={() => setShowModal(false)} onSuccess={() => pagination.refresh()} />
       <div className="enquiries-toolbar">
         <div className="toolbar-left">
-          <button className="btn btn-primary" onClick={handleImportClick}>
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
             <Plus size={16} />
             Import Contact
           </button>
-          <button className="btn btn-secondary">
+          <button className="btn btn-secondary" onClick={() => pagination.refresh()}>
             <RefreshCw size={16} />
             Refresh
           </button>
@@ -144,7 +171,7 @@ const LeadImportHistory: React.FC = () => {
         <div className="toolbar-right">
           <div className="search-box">
             <Search size={16} className="search-icon" />
-            <input type="text" placeholder="Search..." value={searchQuery} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)} className="search-input" />
+            <input type="text" placeholder="Search..." value={pagination.searchQuery} onChange={pagination.handleSearchChange} className="search-input" />
           </div>
         </div>
       </div>
@@ -154,14 +181,11 @@ const LeadImportHistory: React.FC = () => {
           <thead>
             <tr>
               {columns.map(col => (
-                <th key={col.key} className={col.sortable ? 'sortable' : ''} onClick={col.sortable ? () => handleSort(col.key) : undefined}>
+                <th key={col.key}>
                   {col.key === 'checkbox' ? (
                     <input type="checkbox" checked={paginatedData.length > 0 && selectedRows.length === paginatedData.length} onChange={handleSelectAll} />
                   ) : (
-                    <>
-                      {col.label}
-                      {col.sortable && sortConfig.key === col.key && (sortConfig.direction === 'asc' ? <ChevronDown size={14} /> : <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} />)}
-                    </>
+                    <>{col.label}</>
                   )}
                 </th>
               ))}
@@ -169,24 +193,24 @@ const LeadImportHistory: React.FC = () => {
           </thead>
           <tbody>
             {paginatedData.map((row, index) => (
-              <tr key={row.id}>
-                <td><input type="checkbox" checked={selectedRows.includes(row.id)} onChange={() => handleSelectRow(row.id)} /></td>
+              <tr key={row.importId}>
+                <td><input type="checkbox" checked={selectedRows.includes(row.importId)} onChange={() => handleSelectRow(row.importId)} /></td>
                 <td className="action-cell">
                   <button
                     className="action-btn"
-                    onClick={() => handleView(row.id)}
+                    onClick={() => handleView(row.importId)}
                     title="View Details"
                   >
                     <Eye size={16} />
                   </button>
                 </td>
                 <td>{startIndex + index + 1}</td>
-                <td>{row.dateTime}</td>
+                <td>{row.createdAt ? new Date(row.createdAt).toLocaleString() : '-'}</td>
                 <td className="lead-name-cell">{row.fileName}</td>
-                <td>{row.total}</td>
-                <td>{row.duplicate}</td>
-                <td>{row.invalid}</td>
-                <td><strong>{row.imported}</strong></td>
+                <td>{row.totalRows}</td>
+                <td>{row.duplicateCount}</td>
+                <td>{row.failedCount}</td>
+                <td><strong>{row.importedCount}</strong></td>
                 <td><span className={`badge ${getStatusBadge(row.status)}`}>{row.status}</span></td>
               </tr>
             ))}
@@ -197,17 +221,17 @@ const LeadImportHistory: React.FC = () => {
       <div className="pagination-container">
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
-          <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
+          <select value={pagination.limit} onChange={handleRowsPerPageChange} className="rows-select">
             {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
-          <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
+          <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + pagination.limit, pagination.totalCount)} of {pagination.totalCount}</span>
         </div>
         <div className="pagination-right">
-          <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(1)}>First</button>
-          <button className="pagination-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}><ChevronLeft size={16} /></button>
-          <span className="page-indicator">Page {currentPage} of {totalPages}</span>
-          <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}><ChevronRight size={16} /></button>
-          <button className="pagination-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)}>Last</button>
+          <button className="pagination-btn" disabled={pagination.pageNumber === 1} onClick={() => pagination.setPageNumber(1)}>First</button>
+          <button className="pagination-btn" disabled={pagination.pageNumber === 1} onClick={() => pagination.setPageNumber(prev => prev - 1)}><ChevronLeft size={16} /></button>
+          <span className="page-indicator">Page {pagination.pageNumber} of {totalPages}</span>
+          <button className="pagination-btn" disabled={pagination.pageNumber === totalPages} onClick={() => pagination.setPageNumber(prev => prev + 1)}><ChevronRight size={16} /></button>
+          <button className="pagination-btn" disabled={pagination.pageNumber === totalPages} onClick={() => pagination.setPageNumber(totalPages)}>Last</button>
         </div>
       </div>
     </div>

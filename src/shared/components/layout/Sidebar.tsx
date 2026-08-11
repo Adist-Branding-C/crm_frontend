@@ -39,7 +39,7 @@ const Sidebar = () => {
     <div className="sidebar">
       <div className="sidebar-logo">
         <div className="logo-circle">
-          <img src="/favicon.png" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
         </div>
       </div>
       <div className="sidebar-nav">

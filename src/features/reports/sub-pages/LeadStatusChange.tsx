@@ -13,6 +13,7 @@ import {
 import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
 import { ACTION_SUBMIT, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 import type { LeadStatusChangeFilters } from '../types';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const totalLeads = statusChangeData.reduce((sum, item) => sum + item.total, 0);
 
@@ -102,7 +103,7 @@ const LeadStatusChange: React.FC = () => {
     const headers = ['Agent Name', 'Total'];
     const csvContent = [headers.join(','), ...statusChangeData.map(d => [d.agentName, d.total].join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'status_change_report.csv'; link.click();
+    triggerBlobDownload(blob, 'status_change_report.csv');
   };
 
   const handleSubmit = (e: React.FormEvent) => {

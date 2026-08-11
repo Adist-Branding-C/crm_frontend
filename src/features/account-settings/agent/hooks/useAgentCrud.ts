@@ -60,6 +60,7 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
     staffId: string,
     values: AgentFormData,
     { setSubmitting, setFieldError }: FormikHelpers<AgentFormData>,
+    customSuccessMessage?: string
   ) => {
     pagination.setError('');
     pagination.setIsLoading(true);
@@ -83,6 +84,7 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
 
       if (response.status) {
         pagination.refresh();
+        showToastMessage(customSuccessMessage || 'Staff member updated successfully', 'success');
         return true;
       }
 
@@ -95,7 +97,7 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
       pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [submitError]);
+  }, [submitError, showToastMessage]);
 
   const handleDeleteAgent = useCallback(async (staffId: string) => {
     pagination.setError('');

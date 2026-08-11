@@ -22,6 +22,7 @@ interface SettingsTableLayoutProps<T extends { id: number | string }> {
   totalItems: number;
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onUpdatePassword?: (item: T) => void;
 }
 
 function SettingsTableLayoutInner<T extends { id: number | string }>(props: SettingsTableLayoutProps<T>) {
@@ -30,7 +31,7 @@ function SettingsTableLayoutInner<T extends { id: number | string }>(props: Sett
     data, columns, startIndex,
     dropdownOpen, onToggleDropdown, onEdit, onDelete,
     currentPage, totalPages, rowsPerPage, totalItems,
-    onPageChange, onRowsPerPageChange,
+    onPageChange, onRowsPerPageChange, onUpdatePassword
   } = props;
 
   const handleToggleDropdown = (id: number | string | null) => {
@@ -56,6 +57,7 @@ function SettingsTableLayoutInner<T extends { id: number | string }>(props: Sett
         onToggleDropdown={handleToggleDropdown}
         onEdit={onEdit}
         onDelete={onDelete}
+        onUpdatePassword={onUpdatePassword}
       />
 
       <AdminPagination

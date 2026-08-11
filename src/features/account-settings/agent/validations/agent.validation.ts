@@ -78,17 +78,12 @@ export const editAgentValidationSchema = yup.object({
   fullName: nameValidation,
   email: emailValidation,
   phone: phoneValidation,
-  password: yup.string().notRequired().test(
-    'min-length-if-present',
-    'Password must be at least 6 characters',
-    (value) => !value || value.length >= 6,
-  ),
-  confirmPassword: yup.string().notRequired().test(
-    'matches-if-present',
-    'Passwords do not match',
-    (value, context) => !context.parent.password || value === context.parent.password,
-  ),
   designationId: yup.string().required('Please select a designation'),
   departmentId: yup.string().required('Please select a department'),
   status: yup.string().required('Please select a status'),
+});
+
+export const updatePasswordValidationSchema = yup.object({
+  password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+  confirmPassword: yup.string().oneOf([yup.ref('password')], 'Passwords do not match').required('Confirm password is required'),
 });

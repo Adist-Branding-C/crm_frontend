@@ -3,6 +3,7 @@ import { Search, Download, DollarSign, ChevronLeft, ChevronRight } from 'lucide-
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { dealStageData, dealAgentData } from '../constants';
 import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const DealStageReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,10 +28,7 @@ const DealStageReport = () => {
     const headers = ['Agent Name', 'Total Deals', 'Open Deals', 'Win Deals', 'Close Deals'];
     const csvContent = [headers.join(','), ...filteredData.map(d => [d.name, d.totalDeals, d.openDeals, d.winDeals, d.closeDeals].join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'deal_stage_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'deal_stage_report.csv');
   };
 
   return (

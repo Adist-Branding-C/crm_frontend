@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { DollarSign, Phone, Calendar } from 'lucide-react';
+import { DollarSign, Phone, Calendar, AlertTriangle } from 'lucide-react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { formatDate } from '../../../shared/utils/dateUtils';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import ToastNotification from '../../../shared/components/ToastNotification';
+import EmptyState from '../../../shared/components/EmptyState';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useSalesPipelineFilters } from '../hooks/useSalesPipelineFilters';
@@ -20,6 +21,7 @@ import DealPipelineBoard from '../components/DealPipelineBoard';
 import LeadPipelineBoard from '../components/LeadPipelineBoard';
 import TaskPipelineBoard from '../components/TaskPipelineBoard';
 import type { ActiveView } from '../types';
+import { VIEW_EMPTY_MESSAGE } from '../constants';
 import './SalesPipelinePage.css';
 
 const SalesPipelinePage: React.FC = () => {
@@ -93,6 +95,22 @@ const SalesPipelinePage: React.FC = () => {
         ? leads.isLoading
         : tasks.isLoading;
 
+  const activeGroupCount =
+    activeView === 'deals'
+      ? deals.statusGroups.length
+      : activeView === 'leads'
+        ? leads.leadGroups.length
+        : tasks.taskGroups.length;
+
+  const activeError =
+    activeView === 'deals' ? deals.error : activeView === 'leads' ? leads.error : tasks.error;
+
+  const handleRetry = useCallback(() => {
+    if (activeView === 'deals') deals.fetchDeals(filterParams);
+    else if (activeView === 'leads') leads.fetchLeads(filterParams);
+    else tasks.fetchTasks(filterParams);
+  }, [activeView, deals.fetchDeals, leads.fetchLeads, tasks.fetchTasks, filterParams]);
+
   return (
     <PageContainer>
       <PageHeader
@@ -134,28 +152,49 @@ const SalesPipelinePage: React.FC = () => {
         onDragEnd={dragDrop.handleDragEnd}
         onDragCancel={dragDrop.handleDragCancel}
       >
-        {activeView === 'deals' && (
-          <DealPipelineBoard
-            filteredStatusGroups={deals.statusGroups}
-            loadingStatusId={deals.loadingStatusId}
-            loadMoreDeals={deals.loadMoreDeals}
+        {loading && activeGroupCount === 0 ? null : activeError ? (
+          <EmptyState
+            message={activeError}
+            icon={<AlertTriangle size={48} />}
+            action={
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ marginTop: '1rem' }}
+                onClick={handleRetry}
+              >
+                Retry
+              </button>
+            }
           />
-        )}
+        ) : activeGroupCount === 0 ? (
+          <EmptyState message={VIEW_EMPTY_MESSAGE[activeView]} />
+        ) : (
+          <>
+            {activeView === 'deals' && (
+              <DealPipelineBoard
+                filteredStatusGroups={deals.statusGroups}
+                loadingStatusId={deals.loadingStatusId}
+                loadMoreDeals={deals.loadMoreDeals}
+              />
+            )}
 
-        {activeView === 'leads' && (
-          <LeadPipelineBoard
-            filteredLeadGroups={leads.leadGroups}
-            loadingLeadStatusId={leads.loadingLeadStatusId}
-            loadMoreLeads={leads.loadMoreLeads}
-          />
-        )}
+            {activeView === 'leads' && (
+              <LeadPipelineBoard
+                filteredLeadGroups={leads.leadGroups}
+                loadingLeadStatusId={leads.loadingLeadStatusId}
+                loadMoreLeads={leads.loadMoreLeads}
+              />
+            )}
 
-        {activeView === 'tasks' && (
-          <TaskPipelineBoard
-            filteredTaskGroups={tasks.taskGroups}
-            loadingTaskStatus={tasks.loadingTaskStatus}
-            loadMoreTasks={tasks.loadMoreTasks}
-          />
+            {activeView === 'tasks' && (
+              <TaskPipelineBoard
+                filteredTaskGroups={tasks.taskGroups}
+                loadingTaskStatus={tasks.loadingTaskStatus}
+                loadMoreTasks={tasks.loadMoreTasks}
+              />
+            )}
+          </>
         )}
 
         <DragOverlay>
