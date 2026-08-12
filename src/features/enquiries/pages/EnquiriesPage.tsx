@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronUp, ChevronDown, Filter, Plus, Flame, Bell } from 'lucide-react';
+import { ChevronUp, ChevronDown, Filter, Plus, Flame, Bell, FileText } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
@@ -11,6 +11,7 @@ import Toast from '../../../shared/components/Toast';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useDrawer } from '../../../shared/hooks/useDrawer';
+import { useDrafts } from '../../../shared/hooks/useDrafts';
 import { useTableSelection } from '../../../shared/hooks/useTableSelection';
 import { useLeadListData } from '../hooks/useLeadListData';
 import { useLeadPagination } from '../hooks/useLeadPagination';
@@ -36,15 +37,23 @@ import AssignStaffModal from '../components/AssignStaffModal';
 import AssignCampaignModal from '../components/AssignCampaignModal';
 import SpotlightPanel from '../../spotlight/components/SpotlightPanel';
 import FollowupPanel from '../../followup-required/components/FollowupPanel';
+import DraftsList from '../components/DraftsList';
 import type { Lead } from '../../../features/enquiries/types';
 import type { UpdateLeadPayload } from '../types/request';
 import './EnquiriesPage.css';
 
-type EnquiriesView = 'leads' | 'spotlight' | 'followups';
+type EnquiriesView = 'leads' | 'spotlight' | 'followups' | 'drafts';
 
 const EnquiriesPage = () => {
   const [activeView, setActiveView] = useState<EnquiriesView>('leads');
+  const drafts = useDrafts('lead');
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (activeView === 'drafts' && drafts.length === 0) {
+      setActiveView('leads');
+    }
+  }, [activeView, drafts.length]);
   const toast = useToast();
   const crud = useLeadListData(toast.showToastMessage);
 
@@ -140,6 +149,14 @@ const EnquiriesPage = () => {
         }
         action={
           <>
+            {drafts.length > 0 && (
+              <button
+                className={`btn btn-secondary ${activeView === 'drafts' ? 'active' : ''}`}
+                onClick={() => setActiveView((v) => (v === 'drafts' ? 'leads' : 'drafts'))}
+              >
+                <FileText size={16} /> {activeView === 'drafts' ? 'Back to Leads' : 'Drafts'}
+              </button>
+            )}
             <button
               className={`btn btn-secondary ${activeView === 'followups' ? 'active' : ''}`}
               onClick={() => setActiveView((v) => (v === 'followups' ? 'leads' : 'followups'))}
@@ -158,6 +175,7 @@ const EnquiriesPage = () => {
 
       {activeView === 'spotlight' && <SpotlightPanel />}
       {activeView === 'followups' && <FollowupPanel />}
+      {activeView === 'drafts' && <DraftsList type="lead" onResumeDraft={(id) => { setActiveView('leads'); addDrawer.open({ draftId: id } as any); }} />}
 
       {activeView === 'leads' && (
         <>
@@ -271,7 +289,12 @@ const EnquiriesPage = () => {
             />
           </div>
 
-          <AddLeadDrawer isOpen={addDrawer.isOpen} onClose={addDrawer.close} onSaved={crud.handleLeadSaved} />
+          <AddLeadDrawer 
+            isOpen={addDrawer.isOpen} 
+            onClose={addDrawer.close} 
+            onSaved={crud.handleLeadSaved} 
+            draftId={(addDrawer.item as { draftId?: string })?.draftId}
+          />
           <LeadDetailDrawer lead={detailDrawer.item} isOpen={detailDrawer.isOpen} onClose={detailDrawer.close} onLeadUpdated={crud.refreshCurrentPage} onDeleteLead={rowActions.handleDeleteFromDrawer} />
           <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.name} itemType="lead"
             onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
