@@ -3,4 +3,5 @@
  */
 export enum FOLLOWUP_API_ENDPOINTS {
   LEADS = '/followup/leads',
+  STATISTICS = '/followup/statistics',
 }

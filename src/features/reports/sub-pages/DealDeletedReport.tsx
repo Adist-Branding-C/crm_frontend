@@ -3,6 +3,7 @@ import { Search, Filter, Download, RotateCcw, ChevronLeft, ChevronRight } from '
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { deletedDealData } from '../constants';
 import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const DealDeletedReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,10 +61,7 @@ const DealDeletedReport = () => {
     const rows = filteredData.map(d => selectedFields.map(f => (d as Record<string, unknown>)[f] || ''));
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = exportFileName || 'deleted_deals_export.csv';
-    link.click();
+    triggerBlobDownload(blob, exportFileName || 'deleted_deals_export.csv');
     setShowExport(false);
   };
 

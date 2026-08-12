@@ -81,6 +81,11 @@
   color: var(--text-muted);
 }
 
+.date-range-error {
+  font-size: 0.75rem;
+  color: #e0323e;
+}
+
 .filter-dropdown {
   display: flex;
   align-items: center;

@@ -4,7 +4,7 @@ export interface CampaignTaskFormData {
   scheduledDate: string;
   scheduledTime: string;
   assignedTo: string;
-  leadId: string;
+  campaignId: string;
   priority: string;
   status: string;
 }

@@ -12,9 +12,9 @@ interface InProgressDealsCardProps {
 const InProgressDealsCard = ({ period, from, to }: InProgressDealsCardProps) => {
   const { count, isLoading, isError } = useInProgressDeals(period, from, to);
 
-  const value = isLoading ? 'Loading...' : isError ? 'No data' : String(count ?? 0);
+  const value = isError ? 'No data' : String(count ?? 0);
 
-  return <KpiCard title="In Progress Deals" value={value} />;
+  return <KpiCard title="In Progress Deals" value={value} isLoading={isLoading} />;
 };
 
 export default InProgressDealsCard;

@@ -1,5 +1,15 @@
 import type { Campaign } from './interface';
 
+export type CampaignSortField = 'createdAt' | 'name' | 'progress';
+
+export interface CampaignFilters {
+  type?: string | undefined;
+  agentId?: string | undefined;
+  createdBy?: string | undefined;
+  startDate?: string | undefined;
+  endDate?: string | undefined;
+}
+
 export interface SubmitHandlerConfig {
   onAddSuccess: () => void;
   onEditSuccess: () => void;

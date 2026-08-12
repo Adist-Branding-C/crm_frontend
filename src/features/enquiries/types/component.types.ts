@@ -1,10 +1,11 @@
 import type { Filters, AdditionalFieldDef } from './index';
 
 export interface EnquiriesBulkActionCallbacks {
-  onExportSelected: () => void;
+
   onChangeStatus: () => void;
   onAssignStaff: () => void;
-  onDuplicateLead: () => void;
+  onAssignCampaign: () => void;
+
   onDeleteSelected: () => void;
 }
 

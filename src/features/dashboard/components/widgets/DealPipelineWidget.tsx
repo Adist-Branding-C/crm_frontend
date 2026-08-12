@@ -2,6 +2,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from 'recharts';
 import type { CustomLabelProps, DashboardPeriod } from '../../types';
 import { useDealPipeline } from '../../hooks/useDealPipeline';
+import { ChartSkeleton } from './WidgetSkeletons';
 import './WidgetStyles.css';
 
 const MIN_BARS_BEFORE_SCROLL = 6;
@@ -32,7 +33,7 @@ const DealPipelineWidget = ({ period, from, to }: DealPipelineWidgetProps) => {
     <div className="card widget-base deal-pipeline-widget">
       <h3 className="widget-title">Deal pipeline</h3>
       {isLoading ? (
-        <div className="widget-status-text">Loading...</div>
+        <ChartSkeleton />
       ) : isError ? (
         <div className="widget-status-text">Failed to load deal pipeline</div>
       ) : data.length === 0 ? (
@@ -44,7 +45,7 @@ const DealPipelineWidget = ({ period, from, to }: DealPipelineWidgetProps) => {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="name" axisLine={true} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} allowDecimals={false} />
-              <Bar dataKey="value" barSize={32} radius={[2, 2, 0, 0]}>
+              <Bar dataKey="value" barSize={32} radius={[2, 2, 0, 0]} isAnimationActive={false}>
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}

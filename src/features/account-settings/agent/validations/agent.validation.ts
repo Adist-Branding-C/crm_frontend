@@ -55,7 +55,9 @@ export const addAgentValidationSchema = yup.object({
   password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
   confirmPassword: yup.string().oneOf([yup.ref('password')], 'Passwords do not match').required('Confirm password is required'),
   designationId: yup.string().required('Please select a designation'),
+  departmentId: yup.string().required('Please select a department'),
   status: yup.string().required('Please select a status'),
+  isAdmin: yup.boolean().default(false),
 });
 
 /**
@@ -66,15 +68,22 @@ export const addAgentValidationSchema = yup.object({
  *
  * Notes:
  * - Same field rules as addAgentValidationSchema, except password/confirmPassword are optional
- *   since editing an existing staff member doesn't reset credentials.
+ *   since editing an existing staff member doesn't require resetting credentials - left blank,
+ *   the staff member's current password is unchanged (see useAgentCrud.handleUpdateAgent, which
+ *   omits password from the update payload when blank). If a password IS entered, it must meet
+ *   the same 6-character minimum and be confirmed, same as at creation.
  * - email format is checked here only; uniqueness per staff record is enforced by the backend.
  */
 export const editAgentValidationSchema = yup.object({
   fullName: nameValidation,
   email: emailValidation,
   phone: phoneValidation,
-  password: yup.string().notRequired(),
-  confirmPassword: yup.string().notRequired(),
   designationId: yup.string().required('Please select a designation'),
+  departmentId: yup.string().required('Please select a department'),
   status: yup.string().required('Please select a status'),
+});
+
+export const updatePasswordValidationSchema = yup.object({
+  password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+  confirmPassword: yup.string().oneOf([yup.ref('password')], 'Passwords do not match').required('Confirm password is required'),
 });

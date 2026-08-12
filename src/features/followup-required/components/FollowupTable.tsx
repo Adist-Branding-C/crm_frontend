@@ -5,28 +5,81 @@ import {
   formatRelativeDate,
   formatFollowUpDateOnly,
 } from '../../../shared/utils/dateUtils';
-import { LABEL_NOT_ASSIGNED } from '../../../shared/constants/labels';
-import type { FollowupLead, FollowupTableProps } from '../types';
+import FollowupEditableCell from './FollowupEditableCell';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
+import type { FollowupLead, FollowupTableProps, FollowupFieldOptions } from '../types';
 
 // Column key -> cell content. Keeps SortableTable generic (it just calls this
 // per row/column) while all follow-up-specific formatting (badges, relative
 // dates) stays here.
-const renderCell = (row: FollowupLead, columnKey: string): React.ReactNode => {
+const renderCell = (
+  row: FollowupLead,
+  columnKey: string,
+  fieldOptions: FollowupFieldOptions,
+  onFieldSave: (leadId: string, payload: UpdateLeadPayload) => Promise<boolean>,
+): React.ReactNode => {
   switch (columnKey) {
     case 'name':
       return row.name;
     case 'phone':
       return row.phone;
     case 'assignedTo':
-      return row.assignedTo || LABEL_NOT_ASSIGNED;
+      return (
+        <FollowupEditableCell
+          leadId={row.leadId}
+          value={row.assignedTo}
+          label="Assigned To"
+          payloadKey="agentId"
+          options={fieldOptions.staffOptions}
+          onFieldSave={onFieldSave}
+        />
+      );
     case 'purpose':
-      return row.purpose || '-';
+      return (
+        <FollowupEditableCell
+          leadId={row.leadId}
+          value={row.purpose}
+          label="Purpose"
+          payloadKey="purposeId"
+          options={fieldOptions.purposeOptions}
+          onFieldSave={onFieldSave}
+        />
+      );
     case 'type':
-      return <span className={`badge badge-${badgeClass(row.type)}`}>{row.type || '-'}</span>;
+      return (
+        <FollowupEditableCell
+          leadId={row.leadId}
+          value={row.type}
+          label="Type"
+          payloadKey="typeId"
+          options={fieldOptions.typeOptions}
+          onFieldSave={onFieldSave}
+          renderValue={(v) => <span className={`badge badge-${badgeClass(v)}`}>{v}</span>}
+        />
+      );
     case 'status':
-      return <span className={`badge badge-${badgeClass(row.status)}`}>{row.status || '-'}</span>;
+      return (
+        <FollowupEditableCell
+          leadId={row.leadId}
+          value={row.status}
+          label="Status"
+          payloadKey="statusId"
+          options={fieldOptions.statusOptions}
+          onFieldSave={onFieldSave}
+          renderValue={(v) => <span className={`badge badge-${badgeClass(v)}`}>{v}</span>}
+        />
+      );
     case 'source':
-      return row.source || '-';
+      return (
+        <FollowupEditableCell
+          leadId={row.leadId}
+          value={row.source}
+          label="Source"
+          payloadKey="sourceId"
+          options={fieldOptions.sourceOptions}
+          onFieldSave={onFieldSave}
+        />
+      );
     case 'createdAt':
       return formatRelativeDate(row.createdAt);
     case 'updatedAt':
@@ -47,6 +100,8 @@ const FollowupTable: React.FC<FollowupTableProps> = ({
   error,
   onRetry,
   onViewLead,
+  fieldOptions,
+  onFieldSave,
 }) => (
   <SortableTable
     data={data}
@@ -58,7 +113,7 @@ const FollowupTable: React.FC<FollowupTableProps> = ({
     onRetry={onRetry}
     emptyMessage="No leads are due for follow-up."
     keyExtractor={(row) => row.id}
-    renderCell={renderCell}
+    renderCell={(row, columnKey) => renderCell(row, columnKey, fieldOptions, onFieldSave)}
     onRowClick={onViewLead}
   />
 );

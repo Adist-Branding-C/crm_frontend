@@ -71,10 +71,23 @@
   color: var(--primary);
   cursor: pointer;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .lead-name-cell:hover {
   text-decoration: underline;
+}
+
+.lead-cell-empty {
+  color: var(--text-muted, #6b7280);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.lead-cell-empty:hover {
+  color: var(--primary);
 }
 
 .action-btn {

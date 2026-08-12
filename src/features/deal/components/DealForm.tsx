@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext } from 'formik';
+import { draftService } from '../../../shared/services/draftService';
+import type { PreviewSection } from '../../../shared/components/preview/PreviewCanvas';
 import ErrorMessage from '../../../shared/components/ErrorMessage';
 import { scrollToFirstError } from '../../task-settings/utils/scrollToFirstError';
 import { ACTION_SAVE, ACTION_UPDATE, ACTION_CANCEL } from '../../../shared/constants/actionLabels';
@@ -9,7 +11,7 @@ import { useDealFormOptions } from '../hooks/useDealFormOptions';
 import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
 import DealDynamicAdditionalFields from './DealDynamicAdditionalFields';
 import { getTodayDateString } from '../utils/dealDateValidation';
-import { COUNTRY_CODES } from '../../../shared/constants/countryCodes';
+import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from '../../../shared/constants/countryCodes';
 import type { DealFormProps } from '../types';
 import '../../../shared/components/drawers/AddLeadDrawer.css';
 
@@ -25,17 +27,46 @@ import '../../../shared/components/drawers/AddLeadDrawer.css';
  * - `text-danger` asterisk on required labels.
  * - `Loader2` spinner while saving; submit disabled when pristine in edit mode.
  */
+const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
+  const { values, dirty } = useFormikContext<any>();
+  
+  useEffect(() => {
+    if (dirty) {
+      const timeout = setTimeout(() => {
+        const title = values.dealName ? values.dealName : 'Untitled Deal';
+        const subtitle = values.amount ? `$${values.amount}` : 'No amount';
+        const id = draftService.saveDraft('deal', values, title, subtitle, draftId || undefined);
+        if (id !== draftId) {
+          onDraftSaved?.(id);
+        }
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [values, dirty, draftId, onDraftSaved]);
+
+  return null;
+};
+
 const DealForm = ({
   editingItem,
+  draftId,
+  initialDraftValues,
   validationSchema,
   initialValues,
   onSubmit,
+  onPreviewRequest,
+  onDraftSaved,
   isLoading,
   error,
   onCancel,
   scrollContainerRef,
 }: DealFormProps) => {
   const prevSubmitCountRef = useRef(0);
+  // Once the user manually edits Mobile or Assign Agent, lead-selection auto-fill
+  // stops overwriting that field — switching leads again should never clobber an
+  // edit the user already made on purpose.
+  const mobileEditedRef = useRef(false);
+  const agentEditedRef = useRef(false);
   const {
     leads, staff, statuses, types,
     isLoadingLeads, isLoadingStaff, isLoadingStatuses, isLoadingTypes,
@@ -53,9 +84,36 @@ const DealForm = ({
     <>
       <Formik
         enableReinitialize
-        initialValues={initialValues}
+        initialValues={initialDraftValues || initialValues}
         validationSchema={validationSchema}
-        onSubmit={onSubmit}
+        onSubmit={async (values, helpers) => {
+          if (onPreviewRequest) {
+            const sections: PreviewSection[] = [
+              {
+                title: 'Basic Info',
+                fields: [
+                  { label: 'Deal Name', value: values.dealName },
+                  { label: 'Lead', value: leads.find(l => String(l.value) === String(values.leadId))?.label || '' },
+                  { label: 'Mobile', value: values.mobileNumber ? `${values.mobileCountryCode} ${values.mobileNumber}` : '' },
+                  { label: 'Amount', value: values.amount },
+                ]
+              },
+              {
+                title: 'Details',
+                fields: [
+                  { label: 'Status', value: statuses.find(s => String(s.value) === String(values.statusId))?.label || '' },
+                  { label: 'Type', value: types.find(t => String(t.value) === String(values.typeId))?.label || '' },
+                  { label: 'Start Date', value: values.startDate },
+                  { label: 'End Date', value: values.endDate },
+                  { label: 'Agent', value: staff.find(s => String(s.value) === String(values.agentId))?.label || '' },
+                ]
+              }
+            ];
+            onPreviewRequest({ sections, payload: values, formValues: values });
+            return;
+          }
+          await onSubmit(values, helpers);
+        }}
       >
         {({ errors, touched, dirty, submitCount, isSubmitting, values, setFieldValue, setFieldTouched, setValues, handleChange, handleBlur }) => {
           if (submitCount > prevSubmitCountRef.current) {
@@ -93,6 +151,7 @@ const DealForm = ({
           // errors.mobileNumber / touched.mobileNumber keep working as expected.
           const handleMobileNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const digitsOnly = e.target.value.replace(/\D/g, '');
+            mobileEditedRef.current = true;
             setFieldValue('mobileNumber', digitsOnly);
           };
 
@@ -102,6 +161,7 @@ const DealForm = ({
 
           const handleMobileCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
+            mobileEditedRef.current = true;
             setFieldValue('mobileCountryCode', value);
             setFieldTouched('mobileCountryCode', true, false);
             if (values.mobileNumber) {
@@ -119,17 +179,42 @@ const DealForm = ({
           const handleLeadChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
             const match = leads.find(l => String(l.value) === String(value));
-            setValues(prev => ({
-              ...prev,
-              leadId: match ? match.value : '',
-              lead: match?.label ?? '',
-            }));
+            setValues(prev => {
+              const next = {
+                ...prev,
+                leadId: match ? match.value : '',
+                lead: match?.label ?? '',
+              };
+
+              // Convenience pre-fill only — skip a field entirely once the user has
+              // manually touched it, so re-selecting a lead never overwrites their edit.
+              if (!mobileEditedRef.current) {
+                if (match?.phone) {
+                  next.mobileNumber = match.phone.replace(/\D/g, '');
+                  next.mobileCountryCode = match.countryCode || DEFAULT_COUNTRY_CODE;
+                } else {
+                  next.mobileNumber = '';
+                  next.mobileCountryCode = DEFAULT_COUNTRY_CODE;
+                }
+              }
+
+              if (!agentEditedRef.current) {
+                const agentMatch = match?.agentId
+                  ? staff.find(s => String(s.value) === String(match.agentId))
+                  : undefined;
+                next.agentId = agentMatch ? agentMatch.value : '';
+                next.assignAgent = agentMatch?.label ?? '';
+              }
+
+              return next;
+            });
             setFieldTouched('leadId', true, false);
           };
 
           const handleAgentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
             const value = e.target.value;
             const match = staff.find(s => String(s.value) === String(value));
+            agentEditedRef.current = true;
             setValues(prev => ({
               ...prev,
               agentId: match ? match.value : '',
@@ -322,6 +407,8 @@ const DealForm = ({
                 handleBlur={handleBlur}
               />
 
+              <AutoSaveForm draftId={draftId} onDraftSaved={onDraftSaved} />
+
               <div className="drawer-footer">
                 <button type="button" className="btn btn-secondary" onClick={onCancel}>{ACTION_CANCEL}</button>
                 <button
@@ -329,7 +416,7 @@ const DealForm = ({
                   className="btn btn-primary"
                   disabled={isLoading || isSubmitting || (isEditing && !dirty)}
                 >
-                  {isLoading || isSubmitting ? <Loader2 size={16} className="spin" /> : (isEditing ? ACTION_UPDATE : ACTION_SAVE)}
+                  {isLoading || isSubmitting ? <Loader2 size={16} className="spin" /> : onPreviewRequest ? 'Preview Deal' : (isEditing ? ACTION_UPDATE : ACTION_SAVE)}
                 </button>
               </div>
             </Form>

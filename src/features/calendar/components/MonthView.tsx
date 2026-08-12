@@ -33,7 +33,7 @@ const MonthView: React.FC<MonthViewProps> = ({
               {tasksForDate.length > 0 && (
                 <div className="month-events-container">
                   {tasksForDate.slice(0, 2).map((task, i) => (
-                    <div key={i} className={`month-event-pill ${task.priority}`}>
+                    <div key={i} className={`month-event-pill ${(task.priority || '').toLowerCase()}`}>
                       {task.title.substring(0, 15)}{task.title.length > 15 ? '...' : ''}
                     </div>
                   ))}

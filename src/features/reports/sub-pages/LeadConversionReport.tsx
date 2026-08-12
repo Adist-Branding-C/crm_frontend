@@ -3,6 +3,7 @@ import { Search, Filter, Download, ChevronDown, ChevronLeft, ChevronRight } from
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { dealConversionData } from '../constants';
 import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const LeadConversionReport = () => {
   const [filters, setFilters] = useState({ dateFrom: '2024-01-01', dateTo: '2024-01-31', agent: 0, search: '' });
@@ -43,10 +44,7 @@ const LeadConversionReport = () => {
       : filteredDealData.map(d => [d.id, d.dealCode, d.dealName, d.leadName, d.mobile, d.dealAmount, d.dealStatus, d.leadSource, d.lostReason, d.startDate, d.endDate, d.staffName, d.createdBy, d.updatedAt]);
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = type === 'lead' ? 'lead_summary.csv' : 'deal_summary.csv';
-    link.click();
+    triggerBlobDownload(blob, type === 'lead' ? 'lead_summary.csv' : 'deal_summary.csv');
   };
 
   return (

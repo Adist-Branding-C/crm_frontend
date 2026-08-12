@@ -1,6 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
 import type { SampleDeal, SampleAgent, TaskFormData, AddDealTaskDrawerProps } from '../../types/drawers';
+import PreviewCanvas, { PreviewSection } from '../preview/PreviewCanvas';
+import { draftService } from '../../services/draftService';
 import './AddLeadDrawer.css';
 
 const sampleDeals: SampleDeal[] = [
@@ -23,7 +25,13 @@ const sampleCategories: SampleAgent[] = [
   { id: 5, name: 'Closing' },
 ];
 
-const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }: AddDealTaskDrawerProps) => {
+const AddDealTaskDrawer = ({ isOpen, onClose, task = null, draftId: initialDraftId, onSave }: AddDealTaskDrawerProps) => {
+  const isEditing = !!task;
+  const [view, setView] = useState<'form' | 'preview'>('form');
+  const [draftId, setDraftId] = useState<string | null>(initialDraftId || null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+
   const [formData, setFormData] = useState<TaskFormData>({
     title: task?.title || '',
     category: task?.category || '',
@@ -38,6 +46,25 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }: AddDealTask
     priority: task?.priority || 'medium',
     status: task?.status || 'pending',
   });
+
+  useEffect(() => {
+    if (initialDraftId && isOpen) {
+      const draft = draftService.getDrafts('deal-task').find(d => d.id === initialDraftId);
+      if (draft) {
+        setFormData(draft.payload);
+        setDraftId(draft.id);
+      }
+    } else if (!isOpen) {
+      if (!isEditing) {
+        setFormData({
+          title: '', category: '', deal: '', dealId: '', amount: '',
+          description: '', scheduledDate: '', scheduledTime: '',
+          assignedBy: 'Admin', assignedTo: '', priority: 'medium', status: 'pending'
+        });
+      }
+      setDraftId(null);
+    }
+  }, [initialDraftId, isOpen, isEditing]);
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDealDropdown, setShowDealDropdown] = useState(false);
@@ -53,6 +80,7 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }: AddDealTask
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setIsDirty(true);
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -65,9 +93,38 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }: AddDealTask
       dealId: deal.dealId,
       amount: String(deal.amount)
     }));
+    setIsDirty(true);
     setShowDealDropdown(false);
     setDealSearch('');
   };
+
+  // Auto-save draft
+  useEffect(() => {
+    if (isDirty) {
+      const timeout = setTimeout(() => {
+        const title = formData.title ? formData.title : 'Untitled Task';
+        const subtitle = formData.deal ? `For ${formData.deal}` : 'No deal attached';
+        const id = draftService.saveDraft('deal-task', formData, title, subtitle, draftId || undefined);
+        if (id !== draftId) {
+          setDraftId(id);
+        }
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [formData, isDirty, draftId]);
+
+  // Load draft if initialDraftId is provided and we haven't dirtied the form yet
+  useEffect(() => {
+    if (initialDraftId && !isDirty && isOpen) {
+      const draft = draftService.getDrafts('deal-task').find(d => d.id === initialDraftId);
+      if (draft) {
+        setFormData(draft.payload);
+        setDraftId(draft.id);
+      }
+    }
+  }, [initialDraftId, isDirty, isOpen]);
+
+
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -83,19 +140,77 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }: AddDealTask
 
   const handleSubmit = () => {
     if (validate()) {
-      onSave(formData);
-      onClose();
+      setView('preview');
     }
   };
 
+  const handleFinalSave = () => {
+    setIsSaving(true);
+    try {
+      onSave(formData);
+      if (draftId) {
+        draftService.deleteDraft(draftId);
+      }
+      handleClose();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleClose = () => {
+    setView('form');
+    setDraftId(null);
+    setIsDirty(false);
+    onClose();
+  };
+
   if (!isOpen) return null;
+
+  if (view === 'preview') {
+    const sections: PreviewSection[] = [
+      {
+        title: 'Task Details',
+        fields: [
+          { label: 'Title', value: formData.title },
+          { label: 'Category', value: formData.category },
+          { label: 'Deal', value: formData.deal },
+          { label: 'Amount', value: formData.amount ? `₹${formData.amount}` : '' },
+          { label: 'Description', value: formData.description },
+        ]
+      },
+      {
+        title: 'Schedule & Assignment',
+        fields: [
+          { label: 'Date', value: formData.scheduledDate },
+          { label: 'Time', value: formData.scheduledTime },
+          { label: 'Assigned By', value: formData.assignedBy },
+          { label: 'Assigned To', value: formData.assignedTo },
+          { label: 'Priority', value: formData.priority },
+          { label: 'Status', value: formData.status },
+        ]
+      }
+    ];
+
+    return (
+      <PreviewCanvas
+        isOpen={isOpen}
+        title={isEditing ? 'Preview Task Edit' : 'Preview Task'}
+        subtitle="Review the details before saving"
+        sections={sections}
+        isSaving={isSaving}
+        onClose={handleClose}
+        onEdit={() => setView('form')}
+        onSave={handleFinalSave}
+      />
+    );
+  }
 
   return (
     <div className="drawer-overlay" onClick={onClose}>
       <div className="drawer-panel" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
-          <h2>{task ? 'Edit Deal Task' : 'Create Deal Task'}</h2>
-          <button className="drawer-close" onClick={onClose}>
+          <h2>{isEditing ? 'Edit Deal Task' : 'Create Deal Task'}</h2>
+          <button className="drawer-close" onClick={handleClose}>
             <X size={20} />
           </button>
         </div>
@@ -250,8 +365,8 @@ const AddDealTaskDrawer = ({ isOpen, onClose, task = null, onSave }: AddDealTask
           </form>
         </div>
         <div className="drawer-footer">
-          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSubmit}>Save Task</button>
+          <button className="btn btn-secondary" onClick={handleClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSubmit}>Preview Task</button>
         </div>
       </div>
     </div>

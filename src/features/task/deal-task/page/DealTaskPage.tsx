@@ -9,7 +9,7 @@ import { useDealTaskDrawer } from '../hooks/useDealTaskDrawer';
 import { useDealTaskDeleteConfirm } from '../hooks/useDealTaskDeleteConfirm';
 import { useDealTaskFormSubmit } from '../hooks/useDealTaskFormSubmit';
 import { useStaffOptions } from '../../common/hooks/useStaffOptions';
-import { useLeadOptions } from '../../common/hooks/useLeadOptions';
+import { useDealOptions } from '../../common/hooks/useDealOptions';
 import { dealTaskDataService } from '../services/dealTaskDataService';
 import { addDealTaskValidationSchema, editDealTaskValidationSchema } from '../validations/dealTask.validation';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
@@ -18,7 +18,7 @@ import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import GenericTaskForm from '../../common/components/GenericTaskForm';
 import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
-import TaskItemRow from '../../common/components/TaskItemRow';
+import DealTaskRow from '../components/DealTaskRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
@@ -36,8 +36,8 @@ const DealTaskPage = () => {
   const toast = useToast();
   const crud = useDealTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
   const staff = useStaffOptions();
-  const leads = useLeadOptions();
-  const drawer = useDealTaskDrawer({ loadStaff: staff.loadStaff, loadLeads: leads.loadLeads });
+  const deals = useDealOptions();
+  const drawer = useDealTaskDrawer({ loadStaff: staff.loadStaff, loadDeals: deals.loadDeals });
   const dropdown = useDropdownMenu<number>();
   const deleteConfirm = useDealTaskDeleteConfirm({ handleDeleteDealTask: crud.handleDeleteDealTask });
   const formSubmit = useDealTaskFormSubmit({
@@ -71,7 +71,7 @@ const DealTaskPage = () => {
                 <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
-                <TCell variant="th">Lead</TCell>
+                <TCell variant="th">Deal</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
@@ -81,7 +81,7 @@ const DealTaskPage = () => {
               ) : !pagination.isLoading && pagination.list.length === 0 ? (
                 <EmptyState colSpan={11} message={LABEL_NO_DATA} />
               ) : pagination.list.map((item, idx) => (
-                <TaskItemRow
+                <DealTaskRow
                   key={item.id}
                   item={item}
                   index={pagination.startIndex + idx + 1}
@@ -111,8 +111,13 @@ const DealTaskPage = () => {
             isEditing={!!drawer.editingItem}
             staffOptions={staff.staffOptions}
             staffLoading={staff.staffLoading}
-            leadOptions={leads.leadOptions}
-            leadLoading={leads.leadLoading}
+            associationOptions={deals.dealOptions}
+            associationLoading={deals.dealLoading}
+            associationFieldName="dealId"
+            associationLabel="Deal"
+            associationPlaceholder="Select a deal"
+            associationLoadingLabel="Loading deals..."
+            associationEmptyMessage="No deals available. Please create a deal first."
             hideCategory
           />
         </Drawer>

@@ -1,16 +1,16 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Mail, Phone, Users, Calendar } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import PageContainer from '../../../shared/components/layout/PageContainer';
-import { RECENT_ACTIVITIES } from '../constants';
-import type { StaffDetailViewProps } from '../types';
+import { staffPerformanceService } from '../services/staffPerformance.service';
+import type { StaffDetailViewProps, StaffPerformanceItem } from '../types';
 import KpiCard from './KpiCard';
-import ActivityIcon from './ActivityIcon';
 
 const StaffDetailView = ({ staff }: StaffDetailViewProps) => {
   const [detailDateFrom, setDetailDateFrom] = useState('');
   const [detailDateTo, setDetailDateTo] = useState('');
   const [detailShowFilters, setDetailShowFilters] = useState(false);
+  const [metrics, setMetrics] = useState<StaffPerformanceItem>(staff);
   const detailFilterRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -23,9 +23,27 @@ const StaffDetailView = ({ staff }: StaffDetailViewProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const conversionRate = useMemo(() => Math.round((staff.converted / staff.totalLeads) * 100), [staff.converted, staff.totalLeads]);
-  const taskCompletion = useMemo(() => Math.round((staff.completedTasks / (staff.completedTasks + staff.pendingTasks)) * 100), [staff.completedTasks, staff.pendingTasks]);
-  const avgDealValue = useMemo(() => Math.round(staff.revenue / staff.deals), [staff.revenue, staff.deals]);
+  // Re-fetch the whole company's performance list scoped to this staff
+  // member's own date filter and pick out their row - the list endpoint is
+  // already company-scoped and cheap enough not to warrant a dedicated
+  // single-staff+date-range endpoint yet.
+  useEffect(() => {
+    if (!detailDateFrom && !detailDateTo) {
+      setMetrics(staff);
+      return;
+    }
+    let cancelled = false;
+    staffPerformanceService
+      .getStaffPerformance(detailDateFrom || undefined, detailDateTo || undefined)
+      .then((response) => {
+        if (cancelled) return;
+        const match = response.data.find((s) => s.staffId === staff.staffId);
+        setMetrics(match ?? { ...staff, totalLeadsAssigned: 0, convertedLeads: 0, conversionRate: 0 });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [detailDateFrom, detailDateTo, staff]);
 
   return (
     <PageContainer className="sp-detail-page">
@@ -37,25 +55,21 @@ const StaffDetailView = ({ staff }: StaffDetailViewProps) => {
         <div className="profile-avatar">{staff.name.charAt(0)}</div>
         <div className="profile-info">
           <h1 className="profile-name">{staff.name}</h1>
-          <p className="profile-role">{staff.role}</p>
+          <p className="profile-role">{staff.designation ?? 'Not assigned'}</p>
           <div className="contact-info">
-            <span><Mail size={14} /> {staff.email}</span>
-            <span><Phone size={14} /> {staff.phone}</span>
-            <span><Users size={14} /> {staff.department}</span>
-            <span><Calendar size={14} /> Joined {staff.joinDate}</span>
+            <span><Users size={14} /> {staff.designation ?? 'No designation'}</span>
           </div>
         </div>
         <div className="rating-badge">
-          <div className="rating-value">{staff.rating}</div>
-          <div className="rating-label">Rating</div>
+          <div className="rating-value">{metrics.conversionRate}%</div>
+          <div className="rating-label">Conversion Rate</div>
         </div>
       </div>
 
       <div className="stats-grid">
-        <KpiCard title="Total Leads" value={staff.totalLeads} />
-        <KpiCard title="Converted" value={staff.converted} />
-        <KpiCard title="Conversion Rate" value={`${conversionRate}%`} />
-        <KpiCard title="Revenue" value={`$${staff.revenue.toLocaleString()}`} />
+        <KpiCard title="Leads Assigned" value={metrics.totalLeadsAssigned} />
+        <KpiCard title="Converted" value={metrics.convertedLeads} />
+        <KpiCard title="Conversion Rate" value={`${metrics.conversionRate}%`} />
       </div>
 
       <div className="performance-table-section">
@@ -96,36 +110,11 @@ const StaffDetailView = ({ staff }: StaffDetailViewProps) => {
             </tr>
           </thead>
           <tbody>
-            <tr><td>Total Leads</td><td>{staff.totalLeads}</td></tr>
-            <tr><td>Converted Leads</td><td>{staff.converted}</td></tr>
-            <tr><td>Conversion Rate</td><td>{conversionRate}%</td></tr>
-            <tr><td>Deals Closed</td><td>{staff.deals}</td></tr>
-            <tr><td>Total Revenue</td><td>${staff.revenue.toLocaleString()}</td></tr>
-            <tr><td>Avg Deal Value</td><td>${avgDealValue.toLocaleString()}</td></tr>
-            <tr><td>Completed Tasks</td><td>{staff.completedTasks}</td></tr>
-            <tr><td>Pending Tasks</td><td>{staff.pendingTasks}</td></tr>
-            <tr><td>Task Completion</td><td>{taskCompletion}%</td></tr>
-            <tr><td>Calls Made</td><td>{staff.calls}</td></tr>
-            <tr><td>Emails Sent</td><td>{staff.emails}</td></tr>
-            <tr><td>Meetings</td><td>{staff.meetings}</td></tr>
-            <tr><td>Follow-ups</td><td>{staff.followups}</td></tr>
+            <tr><td>Leads Assigned</td><td>{metrics.totalLeadsAssigned}</td></tr>
+            <tr><td>Converted Leads</td><td>{metrics.convertedLeads}</td></tr>
+            <tr><td>Conversion Rate</td><td>{metrics.conversionRate}%</td></tr>
           </tbody>
         </table>
-      </div>
-
-      <div className="activity-section">
-        <h2 className="section-title">Recent Activity</h2>
-        <div className="activity-list">
-          {RECENT_ACTIVITIES.map(activity => (
-            <div key={activity.id} className="activity-item">
-              <div className="activity-icon"><ActivityIcon type={activity.type} /></div>
-              <div className="activity-content">
-                <div className="activity-title">{activity.title}</div>
-                <div className="activity-time">{activity.time}</div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </PageContainer>
   );

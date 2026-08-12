@@ -14,7 +14,7 @@ export interface UseDealTaskDeleteConfirmParams {
 
 export interface UseDealTaskDrawerLookups {
   loadStaff: () => void;
-  loadLeads: () => void;
+  loadDeals: () => void;
 }
 
 export interface UseDealTaskFormSubmitParams {

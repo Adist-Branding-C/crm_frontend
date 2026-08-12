@@ -13,3 +13,11 @@ export interface AssignStaffModalProps {
   onConfirm: (staffId: string) => void;
   onClose: () => void;
 }
+
+export interface AssignCampaignModalProps {
+  isOpen: boolean;
+  selectedCount: number;
+  isProcessing: boolean;
+  onConfirm: (campaignId: string) => void;
+  onClose: () => void;
+}

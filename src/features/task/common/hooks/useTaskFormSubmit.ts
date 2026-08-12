@@ -35,20 +35,22 @@ export function useTaskFormSubmit<TItem extends { id: number }, TFormData>({
   ) => {
     const success = await handleAdd(values, helpers);
     if (success) closeDrawer();
+    return success;
   }, [handleAdd, closeDrawer]);
 
   const handleEditSubmit = useCallback(async (
     values: TFormData,
     helpers: FormikHelpers<TFormData>,
   ) => {
-    if (!editingItem) return;
+    if (!editingItem) return false;
     const original = mapItemToFormData(editingItem);
     if (JSON.stringify(values) === JSON.stringify(original)) {
       helpers.setSubmitting(false);
-      return;
+      return true;
     }
     const success = await handleUpdate(editingItem.id, values, helpers);
     if (success) closeDrawer();
+    return success;
   }, [editingItem, handleUpdate, closeDrawer, mapItemToFormData]);
 
   return { handleSubmit, handleEditSubmit };

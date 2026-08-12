@@ -11,8 +11,8 @@ import type { UseCampaignTaskDrawerLookups } from '../types/hook.types';
  * Used by:
  * - CampaignTaskPage.
  */
-export function useCampaignTaskDrawer({ loadStaff, loadLeads }: UseCampaignTaskDrawerLookups) {
-  const loaders = useMemo(() => [loadStaff, loadLeads], [loadStaff, loadLeads]);
+export function useCampaignTaskDrawer({ loadStaff, loadCampaigns }: UseCampaignTaskDrawerLookups) {
+  const loaders = useMemo(() => [loadStaff, loadCampaigns], [loadStaff, loadCampaigns]);
 
   return useTaskDrawer({
     mapItemToFormData: CampaignTaskMapper.toFormValues,

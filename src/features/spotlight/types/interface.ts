@@ -4,20 +4,6 @@ export interface SpotlightLead {
   id: number;
   name: string;
   phone: string;
-  assignedTo: string;
-  purpose: string;
-  type: string;
-  status: string;
-  source: string;
-  createdAt: string;
-  updatedAt: string;
-  nextFollowUp: string;
-}
-
-export interface SpotlightLeadApi {
-  id: number;
-  name: string;
-  phone: string;
   email: string;
   location: string;
   address: string;
@@ -38,19 +24,21 @@ export interface SpotlightLeadApi {
   updatedBy: string | null;
   updatedByType: string | null;
   deletedBy: string | null;
-  status: string | null;
-  type: string | null;
-  source: string | null;
-  purpose: string | null;
-  agentName: string | null;
+  status: { statusId: string; status: string; color?: string; conversion?: boolean } | null;
+  type: { typeId: string; type: string } | null;
+  source: { sourceId: string; source: string } | null;
+  purpose: { purposeId: string; purpose: string } | null;
+  assignedStaff: { staff_id: string; name: string } | null;
 }
+
+export type SpotlightLeadApi = SpotlightLead;
 
 export interface SpotlightFilters {
   dateRange: DateRange;
   filterByDate: string;
-  enquirySource: string;
-  enquiryPurpose: string;
-  leadStatusId: string;
+  sourceId: string;
+  purposeId: string;
+  statusId: string;
   assignedTo: string;
   leadTypeId: string;
   location: string;

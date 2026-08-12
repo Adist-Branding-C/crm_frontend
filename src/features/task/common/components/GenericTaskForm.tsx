@@ -1,6 +1,8 @@
 import { useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext } from 'formik';
+import { draftService } from '../../../../shared/services/draftService';
+import type { PreviewSection } from '../../../../shared/components/preview/PreviewCanvas';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import { ScrollToFirstError } from '../../../../shared/components/ScrollToFirstError';
 import { scrollContainerToTop } from '../../../../shared/utils/scrollToError.util';
@@ -9,6 +11,26 @@ import { STATUS_OPTIONS } from '../constants/statusOptions';
 import { getFieldClassName } from '../utils/fieldClassName';
 import type { GenericTaskFormProps } from '../types/genericTaskForm.types';
 
+const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
+  const { values, dirty } = useFormikContext<any>();
+  
+  useEffect(() => {
+    if (dirty) {
+      const timeout = setTimeout(() => {
+        const title = values.title ? values.title : 'Untitled Task';
+        const subtitle = values.scheduledDate ? `Due ${values.scheduledDate}` : 'No due date';
+        const id = draftService.saveDraft('task', values, title, subtitle, draftId || undefined);
+        if (id !== draftId) {
+          onDraftSaved?.(id);
+        }
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [values, dirty, draftId, onDraftSaved]);
+
+  return null;
+};
+
 const GenericTaskForm = ({
   validationSchema,
   initialValues,
@@ -16,17 +38,29 @@ const GenericTaskForm = ({
   isLoading,
   error,
   isEditing,
+  draftId,
+  onDraftSaved,
+  onPreviewRequest,
   staffOptions,
   staffLoading,
   leadOptions,
   leadLoading,
+  associationOptions,
+  associationLoading,
+  associationFieldName = 'leadId',
+  associationLabel = 'Lead',
+  associationPlaceholder = 'Select a lead',
+  associationLoadingLabel = 'Loading leads...',
+  associationEmptyMessage = 'No leads available. Please create a lead first.',
   categoryOptions,
   categoryLoading,
   hideCategory = false,
   children,
 }: GenericTaskFormProps) => {
   const staffEmpty = !staffLoading && staffOptions.length === 0;
-  const leadEmpty = !leadLoading && (leadOptions ?? []).length === 0;
+  const resolvedAssociationOptions = associationOptions ?? leadOptions ?? [];
+  const resolvedAssociationLoading = associationLoading ?? leadLoading ?? false;
+  const associationEmpty = !resolvedAssociationLoading && resolvedAssociationOptions.length === 0;
   const categoryEmpty = !categoryLoading && (categoryOptions ?? []).length === 0;
   const drawerBodyRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +76,34 @@ const GenericTaskForm = ({
         enableReinitialize
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={onSubmit}
+        onSubmit={async (values, helpers) => {
+          if (onPreviewRequest) {
+            const sections: PreviewSection[] = [
+              {
+                title: 'Task Info',
+                fields: [
+                  { label: 'Title', value: values.title },
+                  { label: 'Description', value: values.description },
+                  !hideCategory ? { label: 'Category', value: categoryOptions?.find(c => String(c.value) === String(values.categoryId))?.label || '' } : null,
+                  { label: associationLabel, value: resolvedAssociationOptions.find(o => String(o.value) === String(values[associationFieldName]))?.label || '' },
+                ].filter(Boolean) as any
+              },
+              {
+                title: 'Schedule & Assignment',
+                fields: [
+                  { label: 'Date', value: values.scheduledDate },
+                  { label: 'Time', value: values.scheduledTime },
+                  { label: 'Assigned To', value: staffOptions.find(s => String(s.value) === String(values.assignedTo))?.label || '' },
+                  { label: 'Priority', value: values.priority },
+                  { label: 'Status', value: values.status },
+                ]
+              }
+            ];
+            onPreviewRequest({ sections, payload: values, formValues: values });
+            return;
+          }
+          await onSubmit(values, helpers);
+        }}
       >
         {({ errors, touched, dirty, submitCount, isSubmitting }) => {
           const fieldClass = (name: string) => getFieldClassName(
@@ -130,24 +191,22 @@ const GenericTaskForm = ({
               </div>
 
               <div className="form-group">
-                <label>Lead <span className="text-danger">*</span></label>
+                <label>{associationLabel} <span className="text-danger">*</span></label>
                 <Field
                   as="select"
-                  name="leadId"
-                  className={fieldClass('leadId')}
-                  disabled={leadLoading || leadEmpty}
+                  name={associationFieldName}
+                  className={fieldClass(associationFieldName)}
+                  disabled={resolvedAssociationLoading || associationEmpty}
                 >
-                  <option value="">{leadLoading ? 'Loading leads...' : 'Select a lead'}</option>
-                  {(leadOptions ?? []).map(lead => (
-                    <option key={lead.value} value={lead.value}>{lead.label}</option>
+                  <option value="">{resolvedAssociationLoading ? associationLoadingLabel : associationPlaceholder}</option>
+                  {resolvedAssociationOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </Field>
-                {leadEmpty ? (
-                  <small className="field-error-text">
-                    No leads available. Please create a lead first.
-                  </small>
+                {associationEmpty ? (
+                  <small className="field-error-text">{associationEmptyMessage}</small>
                 ) : (
-                  <FormikError name="leadId" component="small" className="field-error-text" />
+                  <FormikError name={associationFieldName} component="small" className="field-error-text" />
                 )}
               </div>
 
@@ -173,9 +232,11 @@ const GenericTaskForm = ({
                 <FormikError name="status" component="small" className="field-error-text" />
               </div>
 
+              <AutoSaveForm draftId={draftId} onDraftSaved={onDraftSaved} />
+
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary" disabled={isLoading || isSubmitting || (isEditing && !dirty)}>
-                  {isLoading || isSubmitting ? <Loader2 size={16} className="spin" /> : isEditing ? 'Update' : 'Save'}
+                  {isLoading || isSubmitting ? <Loader2 size={16} className="spin" /> : onPreviewRequest ? 'Preview Task' : (isEditing ? 'Update' : 'Save')}
                 </button>
               </div>
             </Form>

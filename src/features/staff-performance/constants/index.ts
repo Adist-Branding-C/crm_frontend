@@ -1,4 +1,37 @@
-import type { StaffMember, Activity } from '../types';
+// Unused mock data, replaced by the real GET /staff/performance API (see
+// services/staffPerformance.service.ts) - kept compiling rather than
+// deleted; safe to remove this file if it's confirmed dead.
+interface StaffMember {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  department: string;
+  joinDate: string;
+  totalLeads: number;
+  converted: number;
+  rating: number;
+  completedTasks: number;
+  pendingTasks: number;
+  calls: number;
+  emails: number;
+  meetings: number;
+  deals: number;
+  revenue: number;
+  followups: number;
+  newLeads: number;
+  qualifiedLeads: number;
+  lostLeads: number;
+}
+
+interface Activity {
+  id: number;
+  type: string;
+  title: string;
+  time: string;
+  status: string;
+}
 
 export const STAFF_DATA: StaffMember[] = [
   { id: 1, name: 'John Smith', email: 'john.smith@company.com', role: 'Sales Executive', phone: '+1 234 567 890', department: 'Sales', joinDate: '2024-01-15', totalLeads: 45, converted: 12, rating: 4.8, completedTasks: 78, pendingTasks: 12, calls: 156, emails: 45, meetings: 8, deals: 12, revenue: 45000, followups: 89, newLeads: 23, qualifiedLeads: 18, lostLeads: 5 },

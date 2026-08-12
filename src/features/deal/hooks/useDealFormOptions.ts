@@ -2,9 +2,23 @@ import { useState, useEffect } from 'react';
 import { dealFormOptionsService } from '../services/dealFormOptions.service';
 import type { LabelValuePair } from '../../../shared/types/common';
 
+// Carries the lead's own phone/countryCode/agent data alongside the option
+// label/value so DealForm can auto-fill Mobile and Assign Agent on selection
+// without a second lookup.
+export interface DealLeadOption extends LabelValuePair {
+  phone?: string | null;
+  countryCode?: string | null;
+  agentId?: string | number | null;
+  agentName?: string | null;
+}
+
+export interface DealStaffOption extends LabelValuePair {
+  rawId?: string | number | null;
+}
+
 interface UseDealFormOptionsReturn {
-  leads: LabelValuePair[];
-  staff: LabelValuePair[];
+  leads: DealLeadOption[];
+  staff: DealStaffOption[];
   statuses: LabelValuePair[];
   types: LabelValuePair[];
   isLoadingLeads: boolean;
@@ -14,8 +28,8 @@ interface UseDealFormOptionsReturn {
 }
 
 interface DealFormOptionsData {
-  leads: LabelValuePair[];
-  staff: LabelValuePair[];
+  leads: DealLeadOption[];
+  staff: DealStaffOption[];
   statuses: LabelValuePair[];
   types: LabelValuePair[];
 }
@@ -40,7 +54,19 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
     ? (() => {
       const data = leadsResult.value?.data;
       const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((l: { id: string | number; name?: string; leadName?: string }) => ({ label: l.name || l.leadName || 'Unknown', value: l.id }));
+      return items.map((l: {
+        id: string | number; name?: string; leadName?: string;
+        phone?: string | null; countryCode?: string | null;
+        agentId?: string | number | null;
+        assignedStaff?: { staff_id?: string; name?: string } | null;
+      }) => ({
+        label: l.name || l.leadName || 'Unknown',
+        value: l.id,
+        phone: l.phone ?? null,
+        countryCode: l.countryCode ?? null,
+        agentId: l.agentId ?? l.assignedStaff?.staff_id ?? null,
+        agentName: l.assignedStaff?.name ?? null,
+      }));
     })()
     : [];
 
@@ -48,7 +74,7 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
     ? (() => {
       const data = staffResult.value?.data;
       const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((s: { id: string | number; name?: string; fullName?: string; staffName?: string }) => ({ label: s.name || s.fullName || s.staffName || 'Unknown', value: s.id }));
+      return items.map((s: { id?: string | number; staff_id?: string; name?: string; fullName?: string; staffName?: string }) => ({ label: s.name || s.fullName || s.staffName || 'Unknown', value: s.staff_id ?? s.id ?? '', rawId: s.id ?? null }));
     })()
     : [];
 

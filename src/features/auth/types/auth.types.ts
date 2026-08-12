@@ -15,6 +15,7 @@ export interface ResetPasswordFormData {
 export interface LoginRequest {
   phone: string
   password: string
+   is_limited?: boolean;
 }
 
 export interface AuthUser {
@@ -24,6 +25,7 @@ export interface AuthUser {
   staffId?: string
   companyId?: string
   isAdmin?: boolean
+  isSuperAdmin?: boolean
 }
 
 export interface LoginResponseData {
@@ -33,6 +35,7 @@ export interface LoginResponseData {
   staffId: string
   companyId: string
   isAdmin: boolean
+  isSuperAdmin: boolean
   accessToken: string
   refreshToken: string
 }

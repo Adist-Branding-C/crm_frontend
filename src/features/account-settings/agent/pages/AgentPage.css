@@ -1,3 +1,5 @@
+@import '../../../../shared/styles/forms.css';
+
 .agent-table-wrapper .table-container,
 .agent-table-wrapper .table-scroll {
   overflow: visible;

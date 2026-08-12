@@ -3,9 +3,10 @@ export interface GetCampaignsParams {
   limit: number;
   search?: string | undefined;
   type?: string | undefined;
+  agentId?: string | undefined;
   createdBy?: string | undefined;
   sortBy?: string | undefined;
-  sortOrder?: 'asc' | 'desc' | undefined;
+  sortOrder?: 'ASC' | 'DESC' | undefined;
   startDate?: string | undefined;
   endDate?: string | undefined;
 }

@@ -3,11 +3,17 @@ import { X, Phone, MessageSquare, Trash2, Plus, Briefcase, User, Mail as MailIco
 import AddLeadTaskDrawer from '../../../components/AddLeadTaskDrawer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
 import AddDealDrawer from '../../../shared/components/drawers/AddDealDrawer';
+import WhatsappTemplatePickerOverlay from '../../../shared/components/WhatsappTemplatePickerOverlay';
+import { useActiveWhatsappTemplates } from '../../../shared/hooks/useActiveWhatsappTemplates';
+import { buildWhatsappUrl, substituteTemplateVariables } from '../../../shared/utils/whatsappMessage.util';
+import type { WhatsappTemplateItem } from '../../account-settings/whatsapp-template/types/whatsapp-template.types';
 import { useLeadActivities } from '../hooks/useLeadActivities';
 import Toast from '../../../shared/components/Toast';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import { useLeadRemarks } from '../hooks/useLeadRemarks';
 import { useLeadTasks } from '../hooks/useLeadTasks';
+import ActivityTimelineCard from '../../daily-activity/components/ActivityTimelineCard';
+import { ActivityMapper } from '../../daily-activity/mappers/activity.mapper';
 import { useLeadTaskDropdowns } from '../hooks/useLeadTaskDropdowns';
 import { useLeadFormOptions } from '../hooks/useLeadFormOptions';
 import { useLeadDeals } from '../hooks/useLeadDeals';
@@ -55,6 +61,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
   const [showDeleteTaskModal, setShowDeleteTaskModal] = useState(false);
   const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [showAddDealDrawer, setShowAddDealDrawer] = useState(false);
+  const [showWhatsappTemplatePicker, setShowWhatsappTemplatePicker] = useState(false);
+  const { hasTemplates: hasWhatsappTemplates, isLoading: whatsappTemplatesLoading, hasError: whatsappTemplatesError } = useActiveWhatsappTemplates();
 
   const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError } = useLeadActivities(lead.id, true);
   const {
@@ -65,6 +73,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     isDeleting: isDeletingRemark,
     addRemark,
     deleteRemark,
+    hasMore,
+    loadMore,
   } = useLeadRemarks(lead.id, true, activeTab);
 
   const {
@@ -152,16 +162,27 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
 
   const handleWhatsAppClick = () => {
     if (!lead.phone) return;
-    const digits = lead.phone.replace(/[^0-9]/g, '');
-    let number: string;
-    if (digits.length === 10) {
-      number = `91${digits}`;
-    } else if (digits.length === 12 && digits.startsWith('91')) {
-      number = digits;
-    } else {
-      number = digits;
+    // Fail-open: if templates haven't loaded, failed to load, or the company
+    // has none active, fall back to today's plain "open WhatsApp" behavior
+    // instead of showing an empty/broken picker.
+    if (whatsappTemplatesError || (!whatsappTemplatesLoading && !hasWhatsappTemplates)) {
+      window.open(buildWhatsappUrl(lead.phone), '_blank');
+      return;
     }
-    window.open(`https://wa.me/${number}`, '_blank');
+    setShowWhatsappTemplatePicker(true);
+  };
+
+  const handleSelectWhatsappTemplate = (template: WhatsappTemplateItem) => {
+    if (!lead.phone) return;
+    const message = substituteTemplateVariables(template.message || template.content || '', {
+      name: lead.name,
+    });
+    window.open(buildWhatsappUrl(lead.phone, message), '_blank');
+  };
+
+  const handleSendWhatsappWithoutTemplate = () => {
+    if (!lead.phone) return;
+    window.open(buildWhatsappUrl(lead.phone), '_blank');
   };
 
   const handleAddTask = async (formData: any) => {
@@ -282,6 +303,13 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
             <div className="leaddrawer-actions">
               <button className="leaddrawer-action-btn" title="Edit" onClick={() => setShowEditDrawer(true)}><Edit2 size={16} /></button>
               <button className="leaddrawer-action-btn" title="WhatsApp" onClick={handleWhatsAppClick} disabled={!lead.phone} style={!lead.phone ? { opacity: 0.5, cursor: 'not-allowed' } : {}}><MessageSquare size={16} /></button>
+              {showWhatsappTemplatePicker && (
+                <WhatsappTemplatePickerOverlay
+                  onClose={() => setShowWhatsappTemplatePicker(false)}
+                  onSelectTemplate={handleSelectWhatsappTemplate}
+                  onSendWithoutTemplate={handleSendWhatsappWithoutTemplate}
+                />
+              )}
               <button className="leaddrawer-action-btn" title="Phone" onClick={handlePhoneClick} disabled={!lead.phone} style={!lead.phone ? { opacity: 0.5, cursor: 'not-allowed' } : {}}><Phone size={16} /></button>
               <button className="leaddrawer-action-btn delete" title="Delete" onClick={() => onDeleteLead?.(lead as Lead)}><Trash2 size={16} /></button>
             </div>
@@ -293,7 +321,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   <div className="leaddrawer-info-icon"><User size={14} /></div>
                   <div className="leaddrawer-info-content">
                     <span className="leaddrawer-info-label">Created By</span>
-                    <span className="leaddrawer-info-value">{lead.assignedTo || '-'}</span>
+                    <span className="leaddrawer-info-value">{lead.createdByName || '-'}</span>
                   </div>
                 </div>
                 <div className="leaddrawer-info-item">
@@ -463,23 +491,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                 ) : (
                   <div className="leaddrawer-activity-list">
                     {apiActivities.map((item: any) => {
-                      // The activities API returns raw rows only (no actor-name
-                      // enrichment), so fall back to the actor's id/type.
-                      const actorLabel = item.actorName || item.actorId || item.actorType || 'Unknown';
-                      return (
-                        <div className="leaddrawer-activity-card" key={item.id}>
-                          <div className="leaddrawer-activity-avatar">
-                            {actorLabel.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="leaddrawer-activity-content">
-                            <div className="leaddrawer-activity-header">
-                              <span className="leaddrawer-activity-user">{actorLabel}</span>
-                            </div>
-                            <span className="leaddrawer-activity-time">{formatDateTime(item.createdAt)}</span>
-                            <p className="leaddrawer-activity-desc">{item.description}</p>
-                          </div>
-                        </div>
-                      );
+                      const activity = ActivityMapper.toEntity(item);
+                      return <ActivityTimelineCard key={item.id} activity={activity} />;
                     })}
                   </div>
                 )}
@@ -551,6 +564,13 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                         </div>
                       </div>
                     ))}
+                    {hasMore && (
+                      <div className="leaddrawer-load-more" style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        <button className="btn btn-secondary btn-sm" onClick={loadMore} disabled={isLoadingRemarks}>
+                          {isLoadingRemarks ? <><Loader2 size={14} className="spin" /> Loading...</> : 'Load More'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
                 <AdminDeleteModal

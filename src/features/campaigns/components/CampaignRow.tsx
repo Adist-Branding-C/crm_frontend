@@ -5,7 +5,7 @@ import { formatDisplayDate } from '../utils/date.utils';
 import { getCreatedByLabel, getPoolAgentsLabel, getCampaignTypeBadgeClass } from '../utils/campaign.utils';
 import type { CampaignRowProps } from '../types';
 
-const CampaignRow = ({ campaign, dropdownOpen, onToggleDropdown, onView, onEdit, onAssign, onDelete }: CampaignRowProps) => (
+const CampaignRow = ({ campaign, dropdownOpen, onToggleDropdown, onView, onEdit, onDelete }: CampaignRowProps) => (
   <TRow>
     <TCell>{campaign.slNo}</TCell>
     <TCell>{campaign.name}</TCell>
@@ -32,7 +32,6 @@ const CampaignRow = ({ campaign, dropdownOpen, onToggleDropdown, onView, onEdit,
         onToggleDropdown={onToggleDropdown}
         onView={onView}
         onEdit={onEdit}
-        onAssign={onAssign}
         onDelete={onDelete}
       />
     </TCell>

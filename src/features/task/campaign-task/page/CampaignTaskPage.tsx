@@ -9,7 +9,7 @@ import { useCampaignTaskDrawer } from '../hooks/useCampaignTaskDrawer';
 import { useCampaignTaskDeleteConfirm } from '../hooks/useCampaignTaskDeleteConfirm';
 import { useCampaignTaskFormSubmit } from '../hooks/useCampaignTaskFormSubmit';
 import { useStaffOptions } from '../../common/hooks/useStaffOptions';
-import { useLeadOptions } from '../../common/hooks/useLeadOptions';
+import { useCampaignOptions } from '../../common/hooks/useCampaignOptions';
 import { campaignTaskDataService } from '../services/campaignTaskDataService';
 import { addCampaignTaskValidationSchema, editCampaignTaskValidationSchema } from '../validations/campaignTask.validation';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
@@ -18,7 +18,7 @@ import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import GenericTaskForm from '../../common/components/GenericTaskForm';
 import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
-import TaskItemRow from '../../common/components/TaskItemRow';
+import CampaignTaskRow from '../components/CampaignTaskRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
@@ -36,8 +36,8 @@ const CampaignTaskPage = () => {
   const toast = useToast();
   const crud = useCampaignTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
   const staff = useStaffOptions();
-  const leads = useLeadOptions();
-  const drawer = useCampaignTaskDrawer({ loadStaff: staff.loadStaff, loadLeads: leads.loadLeads });
+  const campaigns = useCampaignOptions();
+  const drawer = useCampaignTaskDrawer({ loadStaff: staff.loadStaff, loadCampaigns: campaigns.loadCampaigns });
   const dropdown = useDropdownMenu<number>();
   const deleteConfirm = useCampaignTaskDeleteConfirm({ handleDeleteCampaignTask: crud.handleDeleteCampaignTask });
   const formSubmit = useCampaignTaskFormSubmit({
@@ -55,7 +55,7 @@ const CampaignTaskPage = () => {
       <div className="account-content">
         <div className="table-container">
           <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
-            <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
               <Plus size={16} /> Add Campaign Task
             </button>
           </TableNav>
@@ -71,7 +71,7 @@ const CampaignTaskPage = () => {
                 <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
-                <TCell variant="th">Lead</TCell>
+                <TCell variant="th">Campaign</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
@@ -81,7 +81,7 @@ const CampaignTaskPage = () => {
               ) : !pagination.isLoading && pagination.list.length === 0 ? (
                 <EmptyState colSpan={11} message={LABEL_NO_DATA} />
               ) : pagination.list.map((item, idx) => (
-                <TaskItemRow
+                <CampaignTaskRow
                   key={item.id}
                   item={item}
                   index={pagination.startIndex + idx + 1}
@@ -111,8 +111,13 @@ const CampaignTaskPage = () => {
             isEditing={!!drawer.editingItem}
             staffOptions={staff.staffOptions}
             staffLoading={staff.staffLoading}
-            leadOptions={leads.leadOptions}
-            leadLoading={leads.leadLoading}
+            associationOptions={campaigns.campaignOptions}
+            associationLoading={campaigns.campaignLoading}
+            associationFieldName="campaignId"
+            associationLabel="Campaign"
+            associationPlaceholder="Select a campaign"
+            associationLoadingLabel="Loading campaigns..."
+            associationEmptyMessage="No campaigns available. Please create a campaign first."
             hideCategory
           />
         </Drawer>

@@ -1,23 +1,44 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { AGENTS, SAMPLE_TASKS, TODAY, MONTH_NAMES, DAY_NAMES } from '../constants';
-import type { CalendarTask } from '../types';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { ALL_AGENTS, ALL_AGENTS_ID, MONTH_NAMES, DAY_NAMES } from '../constants';
+import { calendarService } from '../services/calendarService';
+import { mapCalendarResponseToTasks } from '../mappers/calendar.mapper';
+import { taskDataService } from '../../task/task/services/taskDataService';
+import { useDeleteConfirmation } from '../../../shared/hooks/useDeleteConfirmation';
+import { useStaffOptions } from '../../task/common/hooks/useStaffOptions';
+import { toLocalDateString } from '../../../shared/utils/dateUtils';
+import type { ToastType } from '../../../shared/types/toast.types';
+import type { CalendarTask, Agent } from '../types';
 
-export function useCalendarData() {
-  const [selectedAgent, setSelectedAgent] = useState(1);
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 25));
+const TODAY = new Date();
+
+export function useCalendarData(showToastMessage: (message: string, type: ToastType) => void) {
+  const [selectedAgent, setSelectedAgent] = useState(ALL_AGENTS_ID);
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('month');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAgentDropdown, setShowAgentDropdown] = useState(false);
-  const [tasks, setTasks] = useState<CalendarTask[]>(SAMPLE_TASKS);
+  const [tasks, setTasks] = useState<CalendarTask[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [draggedTask, setDraggedTask] = useState<CalendarTask | null>(null);
+
+  const staff = useStaffOptions();
+  useEffect(() => {
+    staff.loadStaff();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const agents = useMemo<Agent[]>(
+    () => [ALL_AGENTS, ...staff.staffOptions.map(o => ({ id: Number(o.value), name: o.label }))],
+    [staff.staffOptions],
+  );
 
   const getAgentsFilteredTasks = useMemo(() => {
     let filtered = [...tasks];
-    if (selectedAgent !== 1) {
-      const agent = AGENTS.find(a => a.id === selectedAgent);
-      if (agent) filtered = filtered.filter(t => t.assignedTo === agent.name);
+    if (selectedAgent !== ALL_AGENTS_ID) {
+      filtered = filtered.filter(t => t.assignedTo === String(selectedAgent));
     }
     if (searchQuery) {
       filtered = filtered.filter(t =>
@@ -86,6 +107,57 @@ export function useCalendarData() {
     return days;
   }, [currentDate]);
 
+  // The calendar grid (getCalendarDays) always spans a padded month range
+  // that covers whatever the day/week views currently need too, since both
+  // are derived from the same currentDate - refetching whenever that range
+  // changes keeps all three view modes backed by real data.
+  const rangeStart = getCalendarDays[0];
+  const rangeEnd = getCalendarDays[getCalendarDays.length - 1];
+
+  // Kept in a ref so refetch() (called after create/update/delete) always
+  // reads the latest range without needing to be recreated itself.
+  const rangeRef = useRef({ start: rangeStart, end: rangeEnd });
+  rangeRef.current = { start: rangeStart, end: rangeEnd };
+
+  const fetchCalendar = useCallback((isCancelled: () => boolean) => {
+    const { start, end } = rangeRef.current;
+    if (!start || !end) return;
+
+    setIsLoading(true);
+    setIsError(false);
+
+    return calendarService
+      .getCalendar({
+        startDate: toLocalDateString(start),
+        endDate: toLocalDateString(end),
+      })
+      .then((items) => {
+        if (isCancelled()) return;
+        setTasks(mapCalendarResponseToTasks(items));
+      })
+      .catch((error) => {
+        if (isCancelled()) return;
+        console.error('useCalendarData: failed to fetch calendar', error);
+        setIsError(true);
+      })
+      .finally(() => {
+        if (!isCancelled()) setIsLoading(false);
+      });
+  }, []);
+
+  const refetch = useCallback(() => fetchCalendar(() => false), [fetchCalendar]);
+
+  useEffect(() => {
+    if (!rangeStart || !rangeEnd) return;
+
+    let cancelled = false;
+    fetchCalendar(() => cancelled);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [rangeStart?.getTime(), rangeEnd?.getTime(), fetchCalendar]);
+
   const isToday = useCallback((date: Date) => date.toDateString() === TODAY.toDateString(), []);
   const isCurrentMonth = useCallback((date: Date) => date.getMonth() === currentDate.getMonth(), [currentDate]);
 
@@ -110,13 +182,11 @@ export function useCalendarData() {
     setModalOpen(true);
   }, []);
 
-  const handleCompleteTask = useCallback((taskId: number) => {
-    setTasks(prev => prev.map(task =>
-      task.id === taskId ? { ...task, status: 'completed' } : task
-    ));
-  }, []);
-
   const handleDragStartTask = useCallback((e: React.DragEvent, task: CalendarTask) => {
+    if (task.origin !== 'task') {
+      e.preventDefault();
+      return;
+    }
     setDraggedTask(task);
     e.dataTransfer.effectAllowed = 'move';
   }, []);
@@ -127,19 +197,59 @@ export function useCalendarData() {
 
   const handleDropTask = useCallback((e: React.DragEvent, hour: number) => {
     e.preventDefault();
-    if (draggedTask) {
-      const newTime = hour.toString().padStart(2, '0') + ':00';
-      setTasks(prev => prev.map(t =>
-        t.id === draggedTask.id ? { ...t, dueTime: newTime } : t
-      ));
-    }
+    const task = draggedTask;
     setDraggedTask(null);
-  }, [draggedTask]);
+    if (!task || task.origin !== 'task') return;
 
-  const handleDeleteTask = useCallback((taskId: number, e: React.MouseEvent) => {
+    const newTime = `${hour.toString().padStart(2, '0')}:00`;
+    const previousTasks = tasks;
+    // Optimistic update so the timeline reflects the move immediately;
+    // reverted below if the backend save fails.
+    setTasks(prev => prev.map(t => (t.id === task.id ? { ...t, dueTime: newTime } : t)));
+
+    taskDataService
+      .update(task.id, { scheduledTime: newTime })
+      .then((response) => {
+        if (!response.status) {
+          setTasks(previousTasks);
+          showToastMessage(response.message || 'Failed to reschedule task', 'error');
+          return;
+        }
+        showToastMessage('Task rescheduled', 'success');
+      })
+      .catch(() => {
+        setTasks(previousTasks);
+        showToastMessage('Failed to reschedule task', 'error');
+      });
+  }, [draggedTask, tasks, showToastMessage]);
+
+  const deleteTask = useCallback(async (task: CalendarTask): Promise<boolean> => {
+    const previousTasks = tasks;
+    setTasks(prev => prev.filter(t => t.id !== task.id));
+
+    try {
+      const response = await taskDataService.delete(task.id);
+      if (!response.status) {
+        setTasks(previousTasks);
+        showToastMessage(response.message || 'Failed to delete task', 'error');
+        return false;
+      }
+      showToastMessage('Task deleted', 'success');
+      return true;
+    } catch {
+      setTasks(previousTasks);
+      showToastMessage('Failed to delete task', 'error');
+      return false;
+    }
+  }, [tasks, showToastMessage]);
+
+  const deleteConfirm = useDeleteConfirmation<CalendarTask>(deleteTask);
+
+  const handleDeleteTask = useCallback((task: CalendarTask, e: React.MouseEvent) => {
     e.stopPropagation();
-    setTasks(prev => prev.filter(t => t.id !== taskId));
-  }, []);
+    if (task.origin !== 'task') return;
+    deleteConfirm.handleDeleteClick(task);
+  }, [deleteConfirm]);
 
   const closeModal = useCallback(() => {
     setModalOpen(false);
@@ -147,12 +257,13 @@ export function useCalendarData() {
   }, []);
 
   const handleTodayClick = useCallback(() => {
-    setCurrentDate(new Date(2026, 3, 25));
+    setCurrentDate(new Date());
   }, []);
 
-  const selectedAgentName = AGENTS.find(a => a.id === selectedAgent)?.name || 'All Agents';
+  const selectedAgentName = agents.find(a => a.id === selectedAgent)?.name || 'All Agents';
 
   return {
+    agents,
     selectedAgent, setSelectedAgent,
     currentDate, setCurrentDate,
     viewMode, setViewMode,
@@ -161,6 +272,7 @@ export function useCalendarData() {
     searchQuery, setSearchQuery,
     showAgentDropdown, setShowAgentDropdown,
     tasks, setTasks,
+    isLoading, isError, refetch,
     draggedTask, setDraggedTask,
     getAgentsFilteredTasks,
     getDayView, getWeekView,
@@ -169,9 +281,11 @@ export function useCalendarData() {
     isToday, isCurrentMonth,
     handlePrevMonth, handleNextMonth,
     handleDateClick,
-    handleCompleteTask,
     handleDragStartTask, handleDragOverTask, handleDropTask,
     handleDeleteTask,
+    deletingTask: deleteConfirm.deletingItem,
+    handleConfirmDeleteTask: deleteConfirm.handleConfirmDelete,
+    closeDeleteTaskModal: deleteConfirm.closeDeleteModal,
     closeModal,
     handleTodayClick,
     selectedAgentName,

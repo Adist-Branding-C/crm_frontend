@@ -94,7 +94,7 @@ const TopNav = ({ onOpenDrawer }) => {
   };
 
   const handleNotificationClick = (notification) => {
-    setNotifications(prev => prev.map(n => 
+    setNotifications(prev => prev.map(n =>
       n.id === notification.id ? { ...n, isRead: true } : n
     ));
     if (notification.link) {
@@ -170,7 +170,7 @@ const TopNav = ({ onOpenDrawer }) => {
           <Search size={18} className="search-icon" />
           <input
             type="text"
-            placeholder="Search leads, deals, tasks..."
+            placeholder="Search leads..."
             className="search-input dashboard-search-input"
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); setSelectedIndex(-1); }}
@@ -247,9 +247,9 @@ const TopNav = ({ onOpenDrawer }) => {
           )}
         </div>
 
-<div className="icon-btn-container">
-          <button 
-            className="icon-btn notification-btn" 
+        <div className="icon-btn-container">
+          <button
+            className="icon-btn notification-btn"
             ref={notificationsRef}
             onClick={() => setShowNotificationsDrawer(!showNotificationsDrawer)}
           >

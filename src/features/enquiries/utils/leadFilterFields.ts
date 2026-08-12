@@ -8,10 +8,10 @@ import type { AdditionalFieldDef } from '../types';
  * Used by:
  * - EnquiriesFilters
  */
-export function getVisibleAdditionalFields(fields: AdditionalFieldDef[], enquiryPurpose: string): AdditionalFieldDef[] {
+export function getVisibleAdditionalFields(fields: AdditionalFieldDef[], purposeId: string): AdditionalFieldDef[] {
   return fields.filter((f) => {
     if (!f.connectWithLeadPurpose) return true;
-    if (!enquiryPurpose) return false;
-    return f.purposeId === enquiryPurpose;
+    if (!purposeId) return false;
+    return f.purposeId === purposeId;
   });
 }

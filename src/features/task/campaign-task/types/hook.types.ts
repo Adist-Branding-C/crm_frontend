@@ -14,7 +14,7 @@ export interface UseCampaignTaskDeleteConfirmParams {
 
 export interface UseCampaignTaskDrawerLookups {
   loadStaff: () => void;
-  loadLeads: () => void;
+  loadCampaigns: () => void;
 }
 
 export interface UseCampaignTaskFormSubmitParams {

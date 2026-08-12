@@ -11,12 +11,14 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
   const [isAdding, setIsAdding] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const fetchedRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen || !leadId || activeTab !== 'note') return;
 
-    if (fetchedRef.current && refreshKey === 0) return;
+    if (fetchedRef.current && page === 1) return;
 
     let cancelled = false;
 
@@ -27,9 +29,22 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
         const response = await remarkService.getRemarks({
           referenceId: String(leadId),
           entityType: 'LEAD',
+          page,
+          limit: 10,
         });
         if (!cancelled) {
-          setRemarks(response?.data?.items ?? []);
+          const newItems = response?.data?.items ?? [];
+          if (page === 1) {
+            setRemarks(newItems);
+          } else {
+            setRemarks((prev) => {
+              const existingIds = new Set(prev.map(r => r.id));
+              const deduplicated = newItems.filter(r => !existingIds.has(r.id));
+              return [...prev, ...deduplicated];
+            });
+          }
+          const totalPages = response?.data?.pagination?.total_pages || 1;
+          setHasMore(page < totalPages);
           fetchedRef.current = true;
         }
       } catch {
@@ -44,16 +59,24 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
     return () => {
       cancelled = true;
     };
-  }, [leadId, isOpen, activeTab, refreshKey]);
+  }, [leadId, isOpen, activeTab, refreshKey, page]);
 
   useEffect(() => {
     fetchedRef.current = false;
+    setPage(1);
   }, [leadId]);
 
   const refreshRemarks = useCallback(() => {
     fetchedRef.current = false;
+    setPage(1);
     setRefreshKey((k) => k + 1);
   }, []);
+
+  const loadMore = useCallback(() => {
+    if (!isLoading && hasMore) {
+      setPage((p) => p + 1);
+    }
+  }, [isLoading, hasMore]);
 
   const addRemark = useCallback(
     async (remarkText: string) => {
@@ -109,5 +132,7 @@ export function useLeadRemarks(leadId: number | undefined, isOpen: boolean, acti
     updateRemark,
     deleteRemark,
     refreshRemarks,
+    hasMore,
+    loadMore,
   };
 }

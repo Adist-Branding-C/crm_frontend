@@ -11,11 +11,6 @@
 @import '../../../../shared/styles/tabs.css';
 @import '../../../../shared/styles/toolbars.css';
 
-.task-settings-page .table-container,
-.task-settings-page .table-scroll {
-  overflow: visible;
-}
-
 .task-settings-page .dropdown-menu {
   z-index: 9999;
 }

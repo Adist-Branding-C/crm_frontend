@@ -81,15 +81,19 @@ export interface UseLeadFilterOptionsReturn {
 export interface UseLeadBulkActionsReturn {
   showChangeStatusModal: boolean;
   showAssignStaffModal: boolean;
+  showAssignCampaignModal: boolean;
   showDeleteSelectedModal: boolean;
   isProcessingSelected: boolean;
   setShowChangeStatusModal: (v: boolean) => void;
   setShowAssignStaffModal: (v: boolean) => void;
+  setShowAssignCampaignModal: (v: boolean) => void;
   setShowDeleteSelectedModal: (v: boolean) => void;
   handleChangeStatusClick: () => void;
   handleConfirmChangeStatus: (statusId: string) => Promise<void>;
   handleAssignStaffClick: () => void;
   handleConfirmAssignStaff: (agentId: string) => Promise<void>;
+  handleAssignCampaignClick: () => void;
+  handleConfirmAssignCampaign: (campaignId: string) => Promise<void>;
   handleDeleteSelectedClick: () => void;
   handleConfirmDeleteSelected: () => Promise<void>;
   handleExportSelected: () => void;

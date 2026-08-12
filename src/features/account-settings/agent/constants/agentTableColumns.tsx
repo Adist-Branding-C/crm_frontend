@@ -7,5 +7,14 @@ export const AGENT_TABLE_COLUMNS: Column<AgentItem>[] = [
   { key: 'fullName', label: 'Name', render: (item) => item.fullName || item.name || '-' },
   { key: 'email', label: 'Email' },
   { key: 'mobile', label: 'Mobile', render: (item) => item.mobile || item.phone || item.phone_number || item.phoneNumber || '-' },
+  {
+    key: 'isAdmin',
+    label: 'Admin',
+    render: (item) => (
+      <span className={`badge ${item.isAdmin ? 'badge-active' : 'badge-inactive'}`}>
+        {item.isAdmin ? 'Admin' : 'Staff'}
+      </span>
+    ),
+  },
   { key: 'status', label: 'Status', render: (item) => <SettingsStatusBadge status={item.status} /> },
 ];

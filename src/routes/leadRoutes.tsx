@@ -2,6 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import EnquiriesPage from '../features/enquiries/pages/EnquiriesPage';
 import CampaignsPage from '../features/campaigns/page/CampaignsPage';
+import CampaignLeadsPage from '../features/campaigns/page/CampaignLeadsPage';
 import FollowupRequiredPage from '../features/followup-required/pages/FollowupRequiredPage';
 import SalesPipelinePage from '../features/sales-pipeline/pages/SalesPipelinePage';
 import SpotlightPage from '../features/spotlight/pages/SpotlightPage';
@@ -12,21 +13,23 @@ import FacebookConnectionsPage from '../features/facebook-connect/pages/Facebook
 import FacebookWorkflowsListPage from '../features/facebook-connect/pages/FacebookWorkflowsListPage';
 import CreateWorkflowPage from '../features/facebook-connect/pages/CreateWorkflowPage';
 import EditWorkflowPage from '../features/facebook-connect/pages/EditWorkflowPage';
+import RequireSuperAdmin from './RequireSuperAdmin';
 
 export default (
   <>
     <Route path="leads" element={<EnquiriesPage />} />
     <Route path="enquiries" element={<EnquiriesPage />} />
     <Route path="campaigns" element={<CampaignsPage />} />
+    <Route path="campaigns/:campaignId/leads" element={<CampaignLeadsPage />} />
     <Route path="followup-required" element={<FollowupRequiredPage />} />
     <Route path="sales-pipeline" element={<SalesPipelinePage />} />
     <Route path="spotlight" element={<SpotlightPage />} />
-    <Route path="companies" element={<CompaniesPage />} />
-    <Route path="companies/:companyId/subscription" element={<CompanySubscriptionPage />} />
     <Route path="facebook/connections" element={<FacebookConnectionsPage />} />
     <Route path="facebook/workflows" element={<FacebookWorkflowsListPage />} />
     <Route path="facebook/workflows/create" element={<CreateWorkflowPage />} />
     <Route path="facebook/workflows/:id/edit" element={<EditWorkflowPage />} />
+    <Route path="companies" element={<RequireSuperAdmin><CompaniesPage /></RequireSuperAdmin>} />
+    <Route path="companies/:companyId/subscription" element={<RequireSuperAdmin><CompanySubscriptionPage /></RequireSuperAdmin>} />
     <Route path="facebook/view-leads" element={<FacebookViewLeadsPage />} />
   </>
 );

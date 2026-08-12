@@ -25,6 +25,7 @@ export interface CreateCompanyPayload {
   gstNumber?: string;
   dateOfRegistration?: string;
   status?: string;
+  adminPassword?: string;
 }
 
 export type UpdateCompanyPayload = Partial<CreateCompanyPayload>;

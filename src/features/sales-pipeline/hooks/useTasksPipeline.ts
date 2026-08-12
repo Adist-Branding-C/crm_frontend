@@ -8,6 +8,7 @@ import type { TaskStatusGroup, GetPipelineParams } from '../types';
 export function useTasksPipeline(onError: (message: string) => void) {
   const [taskGroups, setTaskGroups] = useState<TaskStatusGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loadingTaskStatus, setLoadingTaskStatus] = useState<string | null>(
     null,
   );
@@ -15,13 +16,16 @@ export function useTasksPipeline(onError: (message: string) => void) {
   const fetchTasks = useCallback(
     async (params: Partial<GetPipelineParams>) => {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await pipelineService.getTasks(params);
         if (response.status && response.data) {
           setTaskGroups(response.data.items);
         }
       } catch (err: unknown) {
-        onError(getErrorMessage(err, 'Failed to fetch tasks'));
+        const message = getErrorMessage(err, 'Failed to fetch tasks');
+        setError(message);
+        onError(message);
       } finally {
         setIsLoading(false);
       }
@@ -44,7 +48,8 @@ export function useTasksPipeline(onError: (message: string) => void) {
         );
 
         if (response.status && response.data) {
-          const { items, count } = response.data;
+          const items = response.data.items;
+          const count = response.data.pagination.total;
           setTaskGroups((prevGroups) =>
             prevGroups.map((group) => {
               if (group.status !== status) return group;
@@ -67,6 +72,7 @@ export function useTasksPipeline(onError: (message: string) => void) {
     taskGroups,
     setTaskGroups,
     isLoading,
+    error,
     loadingTaskStatus,
     fetchTasks,
     loadMoreTasks,

@@ -65,6 +65,7 @@ export interface AdminTableProps<T extends { id: number | string }> {
   onToggleDropdown: (id: T['id'] | null) => void;
   onEdit: (item: T) => void;
   onDelete: (item: T) => void;
+  onUpdatePassword?: (item: T) => void;
   renderActions?: (item: T) => ReactNode;
   emptyMessage?: string;
 }

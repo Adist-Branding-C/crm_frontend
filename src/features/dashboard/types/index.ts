@@ -16,6 +16,7 @@ export interface CustomLabelProps {
 export interface StatCardProps {
   title: string;
   value: string;
+  isLoading?: boolean;
 }
 
 export interface KpiCardProps {
@@ -23,6 +24,7 @@ export interface KpiCardProps {
   value: string;
   isPrimary?: boolean;
   isHighlight?: boolean;
+  isLoading?: boolean;
 }
 
 export type DashboardPeriod = 'today' | 'week' | 'month' | 'custom';
@@ -106,3 +108,211 @@ export interface TasksStatisticsResponseData {
   overdue: number;
   completed: number;
 }
+
+export interface GetActivitiesStatisticsParams {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+export interface ActivityTypeCount {
+  activityType: string;
+  count: number;
+}
+
+export interface ActivityEntityCount {
+  entityType: string;
+  count: number;
+}
+
+export interface ActivityTimelinePoint {
+  date: string;
+  count: number;
+}
+
+export interface ActivitiesStatisticsResponseData {
+  byType: ActivityTypeCount[];
+  byEntity: ActivityEntityCount[];
+  timeline: ActivityTimelinePoint[];
+}
+
+export interface GetCampaignsStatisticsParams {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+export interface CampaignStatusCount {
+  status: string;
+  count: number;
+}
+
+export interface CampaignTypeCount {
+  type: string;
+  count: number;
+}
+
+export interface CampaignLeadProgress {
+  totalLeads: number;
+  completedLeads: number;
+  completedPercent: number;
+}
+
+export interface CampaignsStatisticsResponseData {
+  byStatus: CampaignStatusCount[];
+  byType: CampaignTypeCount[];
+  leadProgress: CampaignLeadProgress;
+}
+
+export interface CampaignsWidgetProps {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+export interface ActivitiesWidgetProps {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+export interface GetLeadStatusStatisticsParams {
+  period: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface LeadStatusCountItem {
+  statusId: string;
+  status: string;
+  count: number;
+}
+
+export interface LeadStatusStatisticsResponseData {
+  leadsByStatus: LeadStatusCountItem[];
+}
+
+export interface LeadStatusWidgetProps {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+export interface GetLeadSourceStatisticsParams {
+  period: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface LeadSourceCountItem {
+  sourceId: string;
+  source: string;
+  count: number;
+}
+
+export interface LeadSourceStatisticsResponseData {
+  leadsBySource: LeadSourceCountItem[];
+}
+
+export interface LeadSourceWidgetProps {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+export interface GetLeadPurposeStatisticsParams {
+  period: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface LeadPurposeCountItem {
+  purposeId: string;
+  purpose: string;
+  count: number;
+}
+
+export interface LeadPurposeStatisticsResponseData {
+  leadsByPurpose: LeadPurposeCountItem[];
+}
+
+export interface LeadPurposeWidgetProps {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+// GET /statistics/lead - fromDate/toDate naming matches the sibling Lead
+// statistics endpoints (status/source/purpose), not the from/to naming the
+// Deals/Tasks/Activities/Campaigns endpoints use.
+export interface GetLeadOverviewStatisticsParams {
+  period: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface LeadOverviewTypeCount {
+  typeId: string;
+  type: string;
+  count: number;
+}
+
+export interface LeadOverviewStatisticsResponseData {
+  totalLeads: number;
+  todayLeads: number;
+  leadsThisWeek: number;
+  leadsThisMonth: number;
+  myLeads: number;
+  conversionRate: number;
+  leadsByType: LeadOverviewTypeCount[];
+}
+
+// GET /deals/statistics/pipeline - period/from/to naming matches the other
+// Deals statistics endpoints (status/stage).
+export interface GetPipelineAmountParams {
+  period: DashboardPeriod;
+  from?: string;
+  to?: string;
+}
+
+// GET /followup/leads - only the pagination total is used, for the "Today's
+// Followups" KPI card. `limit=1` is passed to avoid fetching the lead rows.
+export interface GetFollowupCountParams {
+  limit: number;
+}
+
+export interface FollowupCountResponseData {
+  items: unknown[];
+  pagination: {
+    total: number;
+  };
+}
+
+// GET /call-logs - only the pagination total is used, for the "Outbound
+// Calls Today" KPI card. `limit=1` is passed to avoid fetching the log rows.
+// period/fromDate/toDate mirror the /statistics/lead naming convention.
+export interface GetCallLogsCountParams {
+  limit: number;
+  period?: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface CallLogsCountResponseData {
+  items: unknown[];
+  pagination: {
+    total: number;
+  };
+}
+
+// Flat array, one row per active deal status, with the summed deal amount
+// for that status.
+export interface PipelineAmountItem {
+  statusId: number;
+  statusName: string;
+  dealStage: string;
+  count: number;
+  totalAmount: string;
+}
+
+export type PipelineAmountResponseData = PipelineAmountItem[];

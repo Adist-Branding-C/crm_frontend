@@ -12,9 +12,9 @@ interface LostDealsCardProps {
 const LostDealsCard = ({ period, from, to }: LostDealsCardProps) => {
   const { count, isLoading, isError } = useLostDeals(period, from, to);
 
-  const value = isLoading ? 'Loading...' : isError ? 'No data' : String(count ?? 0);
+  const value = isError ? 'No data' : String(count ?? 0);
 
-  return <KpiCard title="Lost Deals" value={value} />;
+  return <KpiCard title="Lost Deals" value={value} isLoading={isLoading} />;
 };
 
 export default LostDealsCard;
