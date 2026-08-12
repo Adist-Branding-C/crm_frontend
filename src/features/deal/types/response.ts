@@ -15,9 +15,10 @@ export interface DealApiItem {
   stage?: string;
   priority?: string;
   assignedTo?: string;
-  agent?: string | { id?: string | number; name?: string };
+  agent?: string | { id?: string | number; name?: string; staff_id?: string };
   agentId?: string | number;
-  createdBy?: string;
+  createdBy?: string | { id?: string | number; name?: string } | null;
+  createdByType?: string;
   startDate?: string;
   endDate?: string;
   createdAt?: string;

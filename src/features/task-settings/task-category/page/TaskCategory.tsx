@@ -84,13 +84,14 @@ const TaskCategoryPage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Category</TCell>
+                <TCell variant="th">Created By</TCell>
                 <TCell variant="th">Status</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
               {fetch.taskCategoryList.length === 0 ? (
-                <EmptyState colSpan={4} />
+                <EmptyState colSpan={5} />
               ) : (
                 fetch.taskCategoryList.map((item, index) => (
                   <TaskCategoryRow

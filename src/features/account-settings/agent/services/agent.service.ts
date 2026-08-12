@@ -3,14 +3,7 @@ import { AGENT_API_ENDPOINTS } from '../constants/agentApiEndpoints';
 import { buildQueryParams } from '../../../../shared/utils/queryParams.util';
 import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { sanitizePhoneDigits } from '../../../../shared/utils/phone.util';
-import type {
-  AgentFormData,
-  AgentResponse,
-  GetAllAgentsParams,
-  GetAllAgentsResponse,
-  AgentListData,
-  StaffDeletionDependenciesResponse,
-} from '../types/agent.types';
+import type { AgentFormData, AgentResponse, GetAllAgentsParams, GetAllAgentsResponse, AgentListData, GetStaffMeResponse } from '../types/agent.types';
 
 class AgentService {
   async getAllAgents(params: GetAllAgentsParams = {}): Promise<GetAllAgentsResponse> {
@@ -27,14 +20,16 @@ class AgentService {
   }
 
   async createAgent(data: Omit<AgentFormData, 'confirmPassword'>): Promise<AgentResponse> {
-    const { fullName, email, phone, password, designationId, status } = data;
+    const { fullName, email, phone, password, designationId, departmentId, status, isAdmin } = data;
     const payload = {
       fullName,
       email: email.trim(),
       phone_number: sanitizePhoneDigits(phone),
       password,
       designationId,
+      departmentId,
       status,
+      isAdmin,
     };
     const response = await axiosInstance.post<AgentResponse>(AGENT_API_ENDPOINTS.CREATE, payload);
     return ServiceResponseUtil.normalize({
@@ -46,14 +41,19 @@ class AgentService {
     });
   }
 
-  async updateAgent(staffId: string, data: Omit<AgentFormData, 'password' | 'confirmPassword'>): Promise<AgentResponse> {
-    const { fullName, email, phone, designationId, status } = data;
+  async updateAgent(
+    staffId: string,
+    data: Omit<AgentFormData, 'password' | 'confirmPassword' | 'isAdmin'> & { password?: string },
+  ): Promise<AgentResponse> {
+    const { fullName, email, phone, password, designationId, departmentId, status } = data;
     const payload = {
       fullName,
       email: email.trim(),
       phone_number: sanitizePhoneDigits(phone),
       designationId,
+      departmentId,
       status,
+      ...(password ? { password } : {}),
     };
     const response = await axiosInstance.patch<AgentResponse>(AGENT_API_ENDPOINTS.UPDATE(staffId), payload);
     return ServiceResponseUtil.normalize({
@@ -96,6 +96,11 @@ class AgentService {
       status: response.data.status,
       message: response.data.message,
     });
+  }
+  
+  async getMe(): Promise<GetStaffMeResponse> {
+    const response = await axiosInstance.get<GetStaffMeResponse>(AGENT_API_ENDPOINTS.ME);
+    return response.data;
   }
 }
 

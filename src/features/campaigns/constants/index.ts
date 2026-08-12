@@ -32,13 +32,17 @@ export const CAMPAIGN_TYPE_OPTIONS = [
  *
  * Used by:
  * - CampaignApiService, for every request it makes.
+ * - CampaignLeadsApiService (LEADS/ASSIGNED_LEADS/LEAD_STATUS/LEAD_BY_ID), for the
+ *   Assign Leads drawer.
  */
 export const CAMPAIGN_API_ENDPOINTS = {
   BASE: '/campaigns',
   BY_ID: (id: string) => `/campaigns/${id}`,
   EXPORT: '/campaigns/export',
   LEADS: (id: string) => `/campaigns/${id}/leads`,
-  ASSIGN: (id: string) => `/campaigns/${id}/assign`,
+  ASSIGNED_LEADS: (id: string) => `/campaigns/${id}/assign-leads`,
+  LEAD_STATUS: (id: string) => `/campaigns/${id}/leads/status`,
+  LEAD_BY_ID: (id: string, leadId: string) => `/campaigns/${id}/leads/${leadId}`,
 };
 
 /**

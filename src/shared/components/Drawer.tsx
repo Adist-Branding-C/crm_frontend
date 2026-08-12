@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface DrawerProps {
@@ -12,7 +13,7 @@ interface DrawerProps {
 const Drawer = forwardRef<HTMLDivElement, DrawerProps>(({ isOpen, onClose, title, children }, bodyRef) => {
   if (!isOpen) return null;
 
-  return (
+  const content = (
     <div className="drawer-overlay" onClick={onClose}>
       <div className="drawer drawer-right" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
@@ -27,6 +28,8 @@ const Drawer = forwardRef<HTMLDivElement, DrawerProps>(({ isOpen, onClose, title
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(content, document.body) : null;
 });
 
 Drawer.displayName = 'Drawer';

@@ -8,6 +8,7 @@ import { useTableData } from '../../../../shared/hooks/useTableData';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirmation';
 import { useRowActions } from '../../../../shared/hooks/useRowActions';
+import { useToast } from '../../../task-settings/hooks/useToast';
 import { useDealAdditionalFieldDrawer, useDealAdditionalFieldCrud } from '../hooks';
 import { dealAdditionalFieldService } from '../services/dealAdditionalField.service';
 import { DealAdditionalFieldMapper } from '../mappers/dealAdditionalField.mapper';
@@ -18,6 +19,7 @@ import AdminConfirmationModal from '../../../../shared/components/crud/AdminConf
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import DealAdditionalFieldFormPanel from '../components/DealAdditionalFieldFormPanel';
 import DealAdditionalFieldRow from '../components/DealAdditionalFieldRow';
+import ToastNotification from '../../../task-settings/components/ToastNotification';
 import type { DealAdditionalField } from '../types/interface';
 import './DealAdditionalFieldPage.css';
 
@@ -32,6 +34,7 @@ const DealAdditionalFieldPage = () => {
 
   const drawer = useDealAdditionalFieldDrawer();
   const dropdown = useDropdownMenu<string>();
+  const toast = useToast();
 
   const refetchRef = useRef<() => void>(() => {});
   refetchRef.current = () => pagination.refresh();
@@ -41,6 +44,7 @@ const DealAdditionalFieldPage = () => {
     closeDrawer: drawer.closeDrawer,
     setError: pagination.setError,
     refresh: useCallback(() => refetchRef.current(), []),
+    showToastMessage: toast.showToastMessage,
   });
 
   const deleteConfirm = useDeleteConfirmation<DealAdditionalField>(crud.handleDelete);
@@ -150,6 +154,13 @@ const DealAdditionalFieldPage = () => {
         itemType="additional field"
         onConfirm={deleteConfirm.handleConfirmDelete}
         onClose={deleteConfirm.closeDeleteModal}
+      />
+
+      <ToastNotification
+        message={toast.toastMessage}
+        type={toast.toastType}
+        visible={toast.showToast}
+        onClose={() => toast.setShowToast(false)}
       />
     </PageContainer>
   );

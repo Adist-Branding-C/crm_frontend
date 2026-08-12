@@ -8,7 +8,7 @@ import type { DealFiltersProps } from '../types';
 
 const DealFilters: React.FC<DealFiltersProps> = ({ filters, onFilterChange, onApplyFilters, onClearFilters }) => {
   const { statusOptions, typeOptions, staffOptions, isLoading } = useDealFilterOptions();
-  const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
+  const { dealAdditionalFieldDefs, additionalFieldDefsError } = useDealAdditionalFieldDefs();
   const filterableFields = dealAdditionalFieldDefs.filter(f => f.showInFilter);
 
   return (
@@ -54,6 +54,11 @@ const DealFilters: React.FC<DealFiltersProps> = ({ filters, onFilterChange, onAp
         </div>
         <div className="filter-group" />
       </div>
+      {additionalFieldDefsError && filterableFields.length === 0 && (
+        <div className="filter-row">
+          <small className="field-error-text">Couldn't load custom field filters: {additionalFieldDefsError}</small>
+        </div>
+      )}
       {filterableFields.length > 0 && (
         <div className="filter-row">
           {filterableFields.map(field => (

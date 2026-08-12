@@ -4,14 +4,14 @@ export interface SpotlightRequestParams {
   search?: string | undefined;
   sort_by?: string | undefined;
   sort_order?: string | undefined;
-  leadStatusId?: string | undefined;
-  leadType?: string | undefined;
+  statusId?: string | undefined;
+  typeId?: string | undefined;
   location?: string | undefined;
-  enquirySource?: string | undefined;
-  enquiryPurpose?: string | undefined;
+  sourceId?: string | undefined;
+  purposeId?: string | undefined;
   assignedTo?: string | undefined;
   notes?: string | undefined;
-  startDate?: string | undefined;
-  endDate?: string | undefined;
+  dateFrom?: string | undefined;
+  dateTo?: string | undefined;
   dateFilterBy?: string | undefined;
 }

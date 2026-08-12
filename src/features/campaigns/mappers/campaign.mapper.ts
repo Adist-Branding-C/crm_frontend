@@ -45,15 +45,31 @@ export class CampaignMapper {
 
   static toFormValues(item: Campaign | null): CampaignFormData {
     if (!item) return ADD_CAMPAIGN_INITIAL_VALUES;
+
+    const isLeadCampaign = item.type === CAMPAIGN_TYPES.LEAD_CAMPAIGN;
+
+    let leadCampaignAgents: string[] = [];
+    if (isLeadCampaign) {
+      leadCampaignAgents = (item.poolAgents || []).map((agent: any) => agent.agentId || agent.id || String(agent));
+    }
+
+    let dataPoolAgents: string[] = [];
+    if (!isLeadCampaign) {
+      dataPoolAgents = (item.poolAgents || []).map((agent: any) => agent.agentId || String(agent.id || agent));
+    }
+
     return {
       type: item.type || '',
       name: item.name || '',
-      startDate: item.startDate || '',
-      endDate: item.endDate || '',
+      // Backend sends a full ISO timestamp (e.g. "2026-08-05T00:00:00.000Z");
+      // <input type="date"> only accepts "YYYY-MM-DD" and silently renders
+      // blank otherwise.
+      startDate: item.startDate ? item.startDate.slice(0, 10) : '',
+      endDate: item.endDate ? item.endDate.slice(0, 10) : '',
       description: item.description || '',
       poolName: item.poolName || (item.type === CAMPAIGN_TYPES.DATA_POOL ? item.name : '') || '',
-      poolAgents: (item.poolAgents || []).map((agent) => agent.agentId || String(agent.id)),
-      agents: (item.type === CAMPAIGN_TYPES.LEAD_CAMPAIGN ? item.agents : []) || [],
+      poolAgents: dataPoolAgents,
+      agents: leadCampaignAgents,
     };
   }
 }

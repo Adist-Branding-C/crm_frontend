@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import type { FacebookLead, LeadDetailsModalProps } from '../types';
+import type { LeadDetailsModalProps } from '../types';
 
 const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({ isOpen, lead, onClose }) => {
   if (!isOpen || !lead) return null;
@@ -14,36 +14,36 @@ const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({ isOpen, lead, onClo
         </div>
         <div className="modal-body">
           <div className="detail-row">
-            <span className="detail-label">Full Name</span>
-            <span className="detail-value">{lead.name}</span>
+            <span className="detail-label">Facebook Lead ID</span>
+            <span className="detail-value">{lead.leadgenId}</span>
           </div>
           <div className="detail-row">
-            <span className="detail-label">Phone</span>
-            <span className="detail-value">{lead.phone}</span>
+            <span className="detail-label">Workflow</span>
+            <span className="detail-value">{lead.workflowName}</span>
           </div>
           <div className="detail-row">
-            <span className="detail-label">Email</span>
-            <span className="detail-value">{lead.additionalData.email || '-'}</span>
+            <span className="detail-label">Status</span>
+            <span className="detail-value">{lead.status}</span>
           </div>
           <div className="detail-row">
-            <span className="detail-label">City</span>
-            <span className="detail-value">{lead.additionalData.city || '-'}</span>
+            <span className="detail-label">CRM Lead</span>
+            <span className="detail-value">{lead.leadId || '-'}</span>
           </div>
-          <div className="detail-row">
-            <span className="detail-label">Course</span>
-            <span className="detail-value">{lead.additionalData.course || '-'}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">Campaign</span>
-            <span className="detail-value">{lead.additionalData.campaign || '-'}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-label">UTM Source</span>
-            <span className="detail-value">-</span>
-          </div>
+          {lead.errorMessage && (
+            <div className="detail-row">
+              <span className="detail-label">Error</span>
+              <span className="detail-value">{lead.errorMessage}</span>
+            </div>
+          )}
+          {lead.rawFieldData && Object.entries(lead.rawFieldData).map(([key, value]) => (
+            <div className="detail-row" key={key}>
+              <span className="detail-label">{key}</span>
+              <span className="detail-value">{value}</span>
+            </div>
+          ))}
           <div className="detail-row">
             <span className="detail-label">Raw JSON</span>
-            <pre className="detail-json">{JSON.stringify(lead.additionalData, null, 2)}</pre>
+            <pre className="detail-json">{JSON.stringify(lead.rawFieldData, null, 2)}</pre>
           </div>
         </div>
         <div className="modal-footer">

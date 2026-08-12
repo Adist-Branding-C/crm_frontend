@@ -1,8 +1,10 @@
 import type { Dispatch, SetStateAction } from 'react';
+import type { FormikHelpers } from 'formik';
 import type { DealItem, DealFormData, DealStatusFilters } from './interface';
 import type { SortConfig } from '../../../shared/types/sort';
 import type { LabelValuePair } from '../../../shared/types/common';
 import type { DealAdditionalFieldDef } from './interface';
+import type { ToastType } from '../../../shared/types/toast.types';
 
 export interface UseDealListReturn {
   dealList: DealItem[];
@@ -16,12 +18,25 @@ export interface UseDealListReturn {
   refreshCurrentPage: () => void;
 }
 
+export interface UseDealActionsParams {
+  deal: {
+    handleAddDeal: (values: DealFormData, helpers: FormikHelpers<DealFormData>) => Promise<boolean>;
+    handleUpdateDeal: (dealId: string, values: DealFormData, helpers: FormikHelpers<DealFormData>) => Promise<boolean>;
+    handleDeleteDeal: (dealId: string) => Promise<boolean>;
+  };
+  drawer: {
+    editingItem: DealItem | null;
+    closeDrawer: () => void;
+  };
+}
+
 export interface UseDealCrudParams {
   pagination: {
     setError: (message: string) => void;
     setIsLoading: (loading: boolean) => void;
     refresh: () => void;
   };
+  showToastMessage: (message: string, type: ToastType) => void;
 }
 
 export interface UseDealCrudReturn {
@@ -73,7 +88,7 @@ export interface UseDealPaginationReturn {
   startIndex: number;
   totalItems: number;
   handleSetCurrentPage: (page: number | ((prev: number) => number)) => void;
-  handleRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleRowsPerPageChange: (value: number) => void;
   resetPage: () => void;
 }
 
@@ -94,3 +109,5 @@ export interface UseDealRowActionsReturn {
   handleDeleteFromRow: (deal: DealItem) => void;
   handleDeleteFromDrawer: (deal: DealItem) => void;
 }
+
+

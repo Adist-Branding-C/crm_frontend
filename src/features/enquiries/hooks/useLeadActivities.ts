@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { AxiosError } from 'axios';
 import { activityService } from '../services/activityService';
 import { ERROR_MESSAGES } from '../constants/messages';
 import type { ActivityItem } from '../types';
@@ -33,9 +34,12 @@ export function useLeadActivities(leadId: number | undefined, isOpen: boolean) {
           const items = response?.data?.items ?? [];
           setActivities(items);
         }
-      } catch {
+      } catch (err) {
         if (!cancelled) {
-          setError(ERROR_MESSAGES.FETCH_ACTIVITIES);
+          setError(
+            (err as AxiosError<{ message?: string }>)?.response?.data?.message ||
+              ERROR_MESSAGES.FETCH_ACTIVITIES,
+          );
         }
       } finally {
         if (!cancelled) {

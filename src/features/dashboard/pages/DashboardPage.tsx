@@ -10,15 +10,44 @@ import DealByStageWidget from '../components/widgets/DealByStageWidget';
 import TasksWidget from '../components/widgets/TasksWidget';
 import CampaignsWidget from '../components/widgets/CampaignsWidget';
 import ActivitiesWidget from '../components/widgets/ActivitiesWidget';
+import ActivitiesStatisticsWidget from '../components/widgets/ActivitiesStatisticsWidget';
 import { StatCard, KpiCard } from '../components/widgets/Cards';
-import { DASHBOARD_KPI_CARDS } from '../constants/dashboard.constants';
+import WonDealsCard from '../components/widgets/WonDealsCard';
+import LostDealsCard from '../components/widgets/LostDealsCard';
+import InProgressDealsCard from '../components/widgets/InProgressDealsCard';
+import {
+  CALL_LOGGED_ACTIVITY_TYPE,
+  HOT_LEAD_TYPE_NAME,
+} from '../constants/dashboard.constants';
+import { useLeadOverviewStatistics } from '../hooks/useLeadOverviewStatistics';
+import { usePipelineAmount } from '../hooks/usePipelineAmount';
+import { useFollowupStatistics } from '../../followup-required/hooks/useFollowupStatistics';
+import { useActivitiesStatistics } from '../hooks/useActivitiesStatistics';
+import { useCallLogsCount } from '../hooks/useCallLogsCount';
+import type { DashboardPeriod } from '../types';
+import { todayDateString } from '../../../shared/utils/dateUtils';
 
 const DashboardPage = () => {
-//   const [branch, setBranch] = useState<string>('calicut');
-  const [period, setPeriod] = useState<string>('today');
+  //   const [branch, setBranch] = useState<string>('calicut');
+  const [period, setPeriod] = useState<DashboardPeriod>('today');
   const [customFrom, setCustomFrom] = useState<string>('');
   const [customTo, setCustomTo] = useState<string>('');
   const [showCustom, setShowCustom] = useState<boolean>(false);
+
+  const today = todayDateString();
+
+  const isCustomRangeInvalid = Boolean(customFrom && customTo && customFrom > customTo);
+  const effectiveFrom = isCustomRangeInvalid ? '' : customFrom;
+  const effectiveTo = isCustomRangeInvalid ? '' : customTo;
+
+  const leadOverview = useLeadOverviewStatistics(period, effectiveFrom, effectiveTo);
+  const pipelineAmount = usePipelineAmount(period, effectiveFrom, effectiveTo);
+  const followupStats = useFollowupStatistics();
+  const outboundCallsCount = useCallLogsCount(period, effectiveFrom, effectiveTo);
+  const todaysActivities = useActivitiesStatistics(period, effectiveFrom, effectiveTo);
+  const callsToday =
+    todaysActivities.byType?.find((item) => item.activityType === CALL_LOGGED_ACTIVITY_TYPE)?.count ?? 0;
+  const hotLeads = leadOverview.leadsByType?.find((type) => type.type === HOT_LEAD_TYPE_NAME)?.count ?? 0;
 
   return (
     <PageContainer>
@@ -56,6 +85,7 @@ const DashboardPage = () => {
               <input
                 type="date"
                 value={customFrom}
+                max={customTo || today}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomFrom(e.target.value)}
                 className="date-input"
               />
@@ -63,9 +93,14 @@ const DashboardPage = () => {
               <input
                 type="date"
                 value={customTo}
+                min={customFrom || undefined}
+                max={today}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomTo(e.target.value)}
                 className="date-input"
               />
+              {isCustomRangeInvalid && (
+                <span className="date-range-error">"To" date can't be before "From" date</span>
+              )}
             </div>
           )}
 
@@ -73,49 +108,109 @@ const DashboardPage = () => {
       </div>
 
       <div className="widgets-grid middle-cards-grid">
-        {DASHBOARD_KPI_CARDS.map((card, index) => (
-          <KpiCard
-            key={index}
-            title={card.title}
-            value={card.value}
-            isPrimary={card.isPrimary}
-            isHighlight={card.isHighlight ?? false}
-          />
-        ))}
+        <KpiCard
+          title="Today's Leads"
+          value={String(leadOverview.todayLeads)}
+          isPrimary={true}
+          isLoading={leadOverview.isLoading}
+        />
+        <KpiCard
+          title="Hot Leads"
+          value={String(hotLeads)}
+          isPrimary={true}
+          isLoading={leadOverview.isLoading}
+        />
+
+        <KpiCard
+          title="Conversion Rate"
+          value={`${leadOverview.conversionRate}%`}
+          isPrimary={true}
+          isHighlight={true}
+          isLoading={leadOverview.isLoading}
+        />
+
+        <KpiCard
+          title="Leads This Month"
+          value={String(leadOverview.leadsThisMonth)}
+          isPrimary={true}
+          isLoading={leadOverview.isLoading}
+        />
+
+        <KpiCard
+          title="Total Leads"
+          value={String(leadOverview.totalLeads)}
+          isPrimary={true}
+          isLoading={leadOverview.isLoading}
+        />
+
+        <KpiCard
+          title="My Leads"
+          value={String(leadOverview.myLeads)}
+          isLoading={leadOverview.isLoading}
+        />
+        <KpiCard
+          title="Pipeline amount"
+          value={`₹${pipelineAmount.pipelineAmount.toLocaleString()}`}
+          isPrimary={true}
+          isLoading={pipelineAmount.isLoading}
+        />
+        <KpiCard
+          title="Calls Today"
+          value={String(callsToday)}
+          isLoading={todaysActivities.isLoading}
+        />
+        <KpiCard
+          title="Outbound Calls Today"
+          value={String(outboundCallsCount.total)}
+          isLoading={outboundCallsCount.isLoading}
+        />
+
+        <KpiCard
+          title="Overdue Followups"
+          value={String(followupStats.data?.overdue ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+        <KpiCard
+          title="Due Today Followups"
+          value={String(followupStats.data?.dueToday ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+        <KpiCard
+          title="Upcoming Followups"
+          value={String(followupStats.data?.upcoming ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+        <KpiCard
+          title="Total Followups"
+          value={String(followupStats.data?.total ?? 0)}
+          isPrimary={true}
+          isLoading={followupStats.isLoading}
+        />
+
+        <WonDealsCard period={period} from={effectiveFrom} to={effectiveTo} />
+        <LostDealsCard period={period} from={effectiveFrom} to={effectiveTo} />
+        <InProgressDealsCard period={period} from={effectiveFrom} to={effectiveTo} />
       </div>
 
       <div className="widgets-grid middle-cards-grid">
-        <KpiCard title="Leads This Month" value="526" isPrimary={true} />
-        <KpiCard title="Pipeline Leads" value="45" isPrimary={true} />
-        <KpiCard title="Total Leads" value="1048" isPrimary={true} />
-        <KpiCard title="Today's Followups" value="12" isPrimary={true} />
-      </div>
-
-
-      <div className="widgets-grid middle-cards-grid">
-        <KpiCard title="My Leads" value="28" />
-        <KpiCard title="Pipeline amount" value="₹70,205" isPrimary={true} />
-        <KpiCard title="Calls Today" value="35" />
-        <KpiCard title="Outbound Calls Today" value="18" />
-      </div>
-
-      <div className="widgets-grid middle-cards-grid">
-        <KpiCard title="Won Deals" value="12" />
-        <KpiCard title="Lost Deals" value="3" />
-      </div>
-
-      <div className="widgets-grid middle-cards-grid">
-        <LeadStatusWidget />
-        <LeadSourceWidget />
-        <LeadPurposeWidget />
-        <DealPipelineWidget />
+        <LeadStatusWidget period={period} from={effectiveFrom} to={effectiveTo} />
+        <LeadSourceWidget period={period} from={effectiveFrom} to={effectiveTo} />
+        <LeadPurposeWidget period={period} from={effectiveFrom} to={effectiveTo} />
+        <DealPipelineWidget period={period} from={effectiveFrom} to={effectiveTo} />
       </div>
 
       <div className="widgets-grid bottom-cards-grid">
-        <DealByStageWidget />
-        <TasksWidget />
-        <CampaignsWidget />
-        <ActivitiesWidget />
+        <DealByStageWidget period={period} from={effectiveFrom} to={effectiveTo} />
+        <TasksWidget period={period} from={effectiveFrom} to={effectiveTo} />
+        <CampaignsWidget period={period} from={effectiveFrom} to={effectiveTo} />
+        <ActivitiesWidget period={period} from={effectiveFrom} to={effectiveTo} />
+      </div>
+
+      <div className="widgets-grid bottom-cards-grid">
+        <ActivitiesStatisticsWidget period={period} from={effectiveFrom} to={effectiveTo} />
       </div>
 
     </PageContainer>

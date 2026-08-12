@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Toast from '../../../shared/components/Toast';
-import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
+import DeleteCompanyModal from '../components/DeleteCompanyModal';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useDrawer } from '../../../shared/hooks/useDrawer';
 import { useTableSelection } from '../../../shared/hooks/useTableSelection';
@@ -151,10 +151,9 @@ const CompaniesPage = () => {
         onClose={viewDrawer.close}
       />
 
-      <AdminDeleteModal
+      <DeleteCompanyModal
         isOpen={!!deleteConfirm.deletingItem}
-        itemName={deleteConfirm.deletingItem?.name}
-        itemType="company"
+        companyName={deleteConfirm.deletingItem?.name}
         onConfirm={handleDeleted}
         onClose={deleteConfirm.closeDeleteModal}
       />

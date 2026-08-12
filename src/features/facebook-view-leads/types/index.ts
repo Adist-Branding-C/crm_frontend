@@ -1,40 +1,36 @@
-import type { FacebookLeadStatus } from '../../../shared/constants/enums';
+export type FacebookLeadStatus = 'received' | 'processing' | 'processed' | 'failed';
 
 export interface FacebookLead {
-  id: number;
+  id: string;
+  leadgenId: string;
+  workflowId: string | null;
   workflowName: string;
-  name: string;
-  phone: string;
-  additionalData: {
-    city: string;
-    course: string;
-    email: string;
-    campaign: string;
-  };
   status: FacebookLeadStatus;
-  leadStatus: string;
+  leadId: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  rawFieldData: Record<string, string> | null;
   createdAt: string;
-  failureReason: string;
 }
 
-import type { SelectOption } from '../../../shared/types/common';
-
-export type Workflow = SelectOption;
+export interface Workflow {
+  id: string;
+  name: string;
+}
 
 export interface Filters {
   dateFrom: string;
   dateTo: string;
   workflow: string;
-  search: string;
+  status: string;
 }
 
 export interface LeadStats {
   total: number;
-  success: number;
+  processed: number;
   failed: number;
-  new: number;
-  duplicate: number;
-  pending: number;
+  processing: number;
+  received: number;
 }
 
 export interface LeadsPaginationProps {
@@ -56,7 +52,7 @@ export interface LeadsTableProps {
   onViewDetails: (lead: FacebookLead) => void;
   rowsPerPage: number;
   onRowsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onSearchChange: (value: string) => void;
+  loading: boolean;
 }
 
 export interface LeadDetailsModalProps {
@@ -71,6 +67,7 @@ export interface SummaryCardsProps {
 
 export interface FilterCardProps {
   filters: Filters;
+  workflows: Workflow[];
   onFilterChange: (field: keyof Filters, value: string) => void;
   onClearClick: () => void;
 }

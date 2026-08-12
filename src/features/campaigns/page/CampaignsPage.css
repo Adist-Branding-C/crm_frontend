@@ -309,3 +309,185 @@
   border-color: #dc2626;
   box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
+
+/* ─── Assign Leads Drawer ─── */
+.assign-leads-drawer .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.lead-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+}
+
+.lead-search-box .form-control {
+  border: none;
+  padding-left: 0;
+}
+
+.lead-search-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.lead-search-results {
+  margin-top: 0.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+}
+
+.lead-search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.lead-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.lead-search-result-item--assigned {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.lead-search-result-phone {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.lead-search-result-tag {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.assigned-leads-empty {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.assigned-leads-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.assigned-lead-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+}
+
+.assigned-lead-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.assigned-lead-name {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.assigned-lead-phone {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.assigned-lead-status {
+  width: auto;
+  height: 36px;
+}
+
+.assigned-lead-remove {
+  color: #dc2626;
+}
+
+.claimed-lead-result {
+  margin-top: 1rem;
+}
+
+.claimed-lead-source {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.campaign-detail-summary {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.campaign-detail-description {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.campaign-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem 1.5rem;
+  margin: 1rem 0 0;
+}
+
+.campaign-detail-meta dt {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.125rem;
+}
+
+.campaign-detail-meta dd {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Visually hidden but still announced by screen readers - used to label the
+   AgentMultiSelect search input, which only has a placeholder otherwise. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sortable-column-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  cursor: pointer;
+}

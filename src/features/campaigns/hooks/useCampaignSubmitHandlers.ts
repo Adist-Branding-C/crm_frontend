@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useCampaignApi } from './useCampaignApi';
 import { useDrawerScroll } from '../../task-settings/hooks/useDrawerScroll';
@@ -15,6 +15,8 @@ export function useCampaignSubmitHandlers(
 ) {
   const api = useCampaignApi();
   const { scrollAndFocusError, scrollToTop } = useDrawerScroll();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleAddSubmit = useCallback(async (
     values: CampaignFormData,
@@ -138,7 +140,8 @@ export function useCampaignSubmitHandlers(
   const handleConfirmDelete = useCallback(async () => {
     if (!config.deletingItem) return;
 
-    fetch.setError('');
+    setDeleteError(null);
+    setIsDeleting(true);
 
     try {
       const response = await api.remove(String(config.deletingItem.id));
@@ -147,15 +150,17 @@ export function useCampaignSubmitHandlers(
         fetch.refresh();
         config.onDeleteSuccess();
       } else {
-        fetch.setError(response?.message || 'Failed to delete campaign');
+        setDeleteError(response?.message || 'Failed to delete campaign');
       }
     } catch (err: unknown) {
       const msg = err && typeof err === 'object' && 'message' in err
         ? (err as { message: string }).message
         : 'Failed to delete campaign';
-      fetch.setError(msg);
+      setDeleteError(msg);
+    } finally {
+      setIsDeleting(false);
     }
   }, [api, fetch, config]);
 
-  return { handleAddSubmit, handleEditSubmit, handleConfirmDelete };
+  return { handleAddSubmit, handleEditSubmit, handleConfirmDelete, isDeleting, deleteError };
 }

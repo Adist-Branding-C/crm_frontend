@@ -1,7 +1,7 @@
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import TopNav from '../components/TopNav';
+import TopNav from '../shared/components/layout/TopNav';
 import AddLeadDrawer from '../components/AddLeadDrawer';
 import AddDealDrawer from '../components/AddDealDrawer';
 import AddDealTaskDrawer from '../components/AddDealTaskDrawer';

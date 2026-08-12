@@ -8,7 +8,7 @@ import type { StaffOption } from '../types';
  * Fetches the staff list for the activity filter's staff dropdown.
  *
  * Used by:
- * - useDailyActivityData (composes this with useSearchFilter for the dropdown).
+ * - DailyActivityPage (composed alongside useSearchFilter for the dropdown).
  *
  * Notes:
  * - Failure is non-fatal: the "All Staff" option still works without the live list.
@@ -16,9 +16,9 @@ import type { StaffOption } from '../types';
 export function useStaffOptions(onError: (message: string) => void) {
   const [staffOptions, setStaffOptions] = useState<StaffOption[]>([ALL_STAFF_OPTION]);
 
-  const fetchStaffOptions = useCallback(async () => {
+  const fetchStaffOptions = useCallback(async (searchQuery?: string) => {
     try {
-      const response = await activityService.getStaffOptions();
+      const response = await activityService.getStaffOptions(searchQuery);
       if (response.status && response.data) {
         setStaffOptions([ALL_STAFF_OPTION, ...response.data.items.map(ActivityMapper.toStaffOption)]);
       }
@@ -27,9 +27,5 @@ export function useStaffOptions(onError: (message: string) => void) {
     }
   }, [onError]);
 
-  useEffect(() => {
-    fetchStaffOptions();
-  }, [fetchStaffOptions]);
-
-  return { staffOptions };
+  return { staffOptions, fetchStaffOptions };
 }

@@ -1,4 +1,4 @@
-import { ChevronDown, MoreHorizontal, Download, RotateCcw, Users, Copy, Trash2 } from 'lucide-react';
+import { ChevronDown, MoreHorizontal, Download, RotateCcw, Users, Megaphone, Copy, Trash2 } from 'lucide-react';
 import Dropdown from '../../../shared/components/Dropdown';
 import { useDropdownState } from '../../../shared/hooks/useDropdownState';
 import type { EnquiriesBulkActionCallbacks } from '../types/component.types';
@@ -31,18 +31,17 @@ const LeadActionsDropdown = ({ selectedCount, bulkActions }: LeadActionsDropdown
       }
     >
       <div className="dropdown-header">Actions {selectedCount > 0 && `(${selectedCount} selected)`}</div>
-      <button className="dropdown-item" onClick={() => { bulkActions.onExportSelected(); dropdown.close(); }}>
-        <Download size={16} /> <span>Export Selected</span>
-      </button>
+
       <button className="dropdown-item" onClick={() => { bulkActions.onChangeStatus(); dropdown.close(); }}>
         <RotateCcw size={16} /> <span>Change Status</span>
       </button>
       <button className="dropdown-item" onClick={() => { bulkActions.onAssignStaff(); dropdown.close(); }}>
         <Users size={16} /> <span>Assign Staff</span>
       </button>
-      <button className="dropdown-item" onClick={() => { bulkActions.onDuplicateLead(); dropdown.close(); }}>
-        <Copy size={16} /> <span>Duplicate Lead</span>
+      <button className="dropdown-item" onClick={() => { bulkActions.onAssignCampaign(); dropdown.close(); }}>
+        <Megaphone size={16} /> <span>Add to Campaign</span>
       </button>
+
       <div className="dropdown-divider"></div>
       <button className="dropdown-item danger" onClick={() => { bulkActions.onDeleteSelected(); dropdown.close(); }}>
         <Trash2 size={16} /> <span>Delete Selected</span>

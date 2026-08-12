@@ -2,6 +2,7 @@ import type { SortConfig } from '../../../shared/types/sort';
 import type { DateRange, LabelValuePair } from '../../../shared/types/common';
 import type { Column } from '../../../shared/types/table';
 import type { PaginationProps } from '../../../shared/types/pagination';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
 
 export interface FollowupLead {
   id: number;
@@ -57,6 +58,8 @@ export interface FollowupLeadsData {
   pagination: FollowupPaginationMeta;
 }
 
+export type FollowupBucket = 'overdue' | 'due_today' | 'upcoming';
+
 export interface GetFollowupLeadsParams {
   pageNumber: number;
   limit: number;
@@ -67,19 +70,24 @@ export interface GetFollowupLeadsParams {
   assignedTo?: string;
   startDate?: string;
   endDate?: string;
+  bucket?: FollowupBucket;
   sort_by?: 'name' | 'createdAt' | 'nextFollowUp';
   sort_order?: 'ASC' | 'DESC';
 }
 
-export interface FollowupToolbarProps {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  showFilters: boolean;
-  onToggleFilters: () => void;
-  sortConfig: SortConfig;
-  onSort: (key: string) => void;
-  showSortDropdown: boolean;
-  onToggleSortDropdown: () => void;
+
+export interface FollowupStatistics {
+  total: number;
+  overdue: number;
+  dueToday: number;
+  upcoming: number;
+}
+
+export interface FollowupStatCardsProps {
+  statistics: FollowupStatistics | null;
+  isLoading: boolean;
+  activeBucket: FollowupBucket | null;
+  onBucketClick: (bucket: FollowupBucket | null) => void;
 }
 
 export interface FollowupFiltersProps {
@@ -95,6 +103,14 @@ export interface FollowupFiltersProps {
   onClear: () => void;
 }
 
+export interface FollowupFieldOptions {
+  typeOptions: LabelValuePair[];
+  statusOptions: LabelValuePair[];
+  sourceOptions: LabelValuePair[];
+  purposeOptions: LabelValuePair[];
+  staffOptions: LabelValuePair[];
+}
+
 export interface FollowupTableProps {
   data: FollowupLead[];
   columns: Column[];
@@ -104,6 +120,8 @@ export interface FollowupTableProps {
   error: string | null;
   onRetry: () => void;
   onViewLead: (lead: FollowupLead) => void;
+  fieldOptions: FollowupFieldOptions;
+  onFieldSave: (leadId: string, payload: UpdateLeadPayload) => Promise<boolean>;
 }
 
 export interface FollowupPaginationProps extends PaginationProps { }

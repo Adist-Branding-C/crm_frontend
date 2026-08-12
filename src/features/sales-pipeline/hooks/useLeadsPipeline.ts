@@ -2,12 +2,14 @@ import { useState, useCallback } from 'react';
 import { pipelineService } from '../services/PipelineService';
 import { getErrorMessage } from '../../../shared/utils/error';
 import { PIPELINE_PAGINATION_LIMIT } from '../constants';
+import { mapPipelineLead, mapLeadStatusGroup } from '../utils/leadPipelineMapper';
 import type { LeadStatusGroup, GetPipelineParams } from '../types';
 
 
 export function useLeadsPipeline(onError: (message: string) => void) {
   const [leadGroups, setLeadGroups] = useState<LeadStatusGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loadingLeadStatusId, setLoadingLeadStatusId] = useState<string | null>(
     null,
   );
@@ -15,13 +17,16 @@ export function useLeadsPipeline(onError: (message: string) => void) {
   const fetchLeads = useCallback(
     async (params: Partial<GetPipelineParams>) => {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await pipelineService.getLeads(params);
         if (response.status && response.data) {
-          setLeadGroups(response.data.items);
+          setLeadGroups(response.data.items.map(mapLeadStatusGroup));
         }
       } catch (err: unknown) {
-        onError(getErrorMessage(err, 'Failed to fetch leads'));
+        const message = getErrorMessage(err, 'Failed to fetch leads');
+        setError(message);
+        onError(message);
       } finally {
         setIsLoading(false);
       }
@@ -45,11 +50,12 @@ export function useLeadsPipeline(onError: (message: string) => void) {
 
         if (response.status && response.data) {
           const { items, count } = response.data;
+          const mappedItems = items.map(mapPipelineLead);
           setLeadGroups((prevGroups) =>
             prevGroups.map((group) => {
               if (group.statusId !== statusId) return group;
               const existingIds = new Set(group.leads.map((d) => d.id));
-              const newLeads = items.filter((d) => !existingIds.has(d.id));
+              const newLeads = mappedItems.filter((d) => !existingIds.has(d.id));
               return { ...group, leads: [...group.leads, ...newLeads], count };
             }),
           );
@@ -67,6 +73,7 @@ export function useLeadsPipeline(onError: (message: string) => void) {
     leadGroups,
     setLeadGroups,
     isLoading,
+    error,
     loadingLeadStatusId,
     fetchLeads,
     loadMoreLeads,

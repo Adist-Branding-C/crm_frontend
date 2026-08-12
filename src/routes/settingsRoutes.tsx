@@ -7,17 +7,18 @@ import LeadStatusPage from '../features/lead-settings/lead-status/pages/LeadStat
 import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSourcePage';
 import LeadTypesPage from '../features/lead-settings/lead-types/pages/LeadTypesPage';
 import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/LeadAdditionalPage';
-import CustomPipelinePage from '../features/pipeline-settings/pages/CustomPipelinePage';
+// import CustomPipelinePage from '../features/pipeline-settings/pages/CustomPipelinePage';
 import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
-import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
+// import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
 import ConnectPage from '../features/connect/pages/ConnectPage';
 import ConnectApiPage from '../features/connect-api/pages/ConnectApiPage';
 import UserLayout from '../features/task-settings/components/UserLayout';
-import GeneralSettingsPage from '../features/general-settings/pages/GeneralSettingsPage';
-import CallStatusPage from '../features/call-status/pages/CallStatusPage';
-import CallReasonPage from '../features/call-reason/pages/CallReasonPage';
-import MeetingOutcomePage from '../features/meeting-outcome/pages/MeetingOutcomePage';
+// import GeneralSettingsPage from '../features/general-settings/pages/GeneralSettingsPage';
+
 import TaskCategoryPage from '../features/task-settings/task-category/page/TaskCategory';
+import CallStatusPage from '../features/task-settings/call-status/page/CallStatus';
+import CallReasonPage from '../features/task-settings/call-reason/page/CallReason';
+import MeetingOutcomePage from '../features/task-settings/meeting-outcome/pages/MeetingOutcome';
 
 export default (
   <>
@@ -27,9 +28,9 @@ export default (
     <Route path="settings/lead-settings/source" element={<ErrorBoundary><LeadSourcePage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/types" element={<ErrorBoundary><LeadTypesPage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/additional" element={<ErrorBoundary><LeadAdditionalPage /></ErrorBoundary>} />
-    <Route path="settings/custom-pipeline" element={<ErrorBoundary><CustomPipelinePage /></ErrorBoundary>} />
+    {/* <Route path="settings/custom-pipeline" element={<ErrorBoundary><CustomPipelinePage /></ErrorBoundary>} /> */}
     <Route path="user/notifications-users" element={<NotificationSettingsPage />} />
-    <Route path="user/payment-plans" element={<PaymentPlansPage />} />
+    {/* <Route path="user/payment-plans" element={<PaymentPlansPage />} /> */}
     <Route path="user/connect" element={<ConnectPage />} />
     <Route path="user/connect/api" element={<ConnectApiPage />} />
     <Route path="user" element={<UserLayout />}>

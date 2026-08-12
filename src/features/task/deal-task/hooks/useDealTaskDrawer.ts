@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
-import { useEditDrawer } from '../../../../shared/hooks/useEditDrawer';
-import { ADD_DEAL_TASK_INITIAL_VALUES } from '../constants/index';
-import { DealTaskMapper } from '../mappers/dealTask.mapper';
-import type { DealTaskItem } from '../types/index';
-import type { UseDealTaskDrawerLookups } from '../types/useDealTaskDrawer.types';
+import { useMemo } from 'react';
+import { useTaskDrawer } from '../../common/hooks/useTaskDrawer';
+import { ADD_DEAL_TASK_INITIAL_VALUES } from '../constants/addDealTask.constants';
+import { DealTaskMapper } from '../mapper/dealTaskMapper';
+import type { UseDealTaskDrawerLookups } from '../types/hook.types';
 
 /**
  * Add/edit drawer state for the Deal Task feature, composed with the lookup
@@ -11,29 +10,13 @@ import type { UseDealTaskDrawerLookups } from '../types/useDealTaskDrawer.types'
  *
  * Used by:
  * - DealTaskPage.
- *
- * Notes:
- * - Wraps the shared useEditDrawer's open actions so opening the drawer (add or
- *   edit) always triggers the staff/lead option loads it needs - the page just
- *   calls openAddDrawer/openEditDrawer directly, without composing them.
  */
-export function useDealTaskDrawer({ loadStaff, loadLeads }: UseDealTaskDrawerLookups) {
-  const drawer = useEditDrawer({
+export function useDealTaskDrawer({ loadStaff, loadDeals }: UseDealTaskDrawerLookups) {
+  const loaders = useMemo(() => [loadStaff, loadDeals], [loadStaff, loadDeals]);
+
+  return useTaskDrawer({
     mapItemToFormData: DealTaskMapper.toFormValues,
     emptyFormData: ADD_DEAL_TASK_INITIAL_VALUES,
+    loaders,
   });
-
-  const openAddDrawer = useCallback(() => {
-    loadStaff();
-    loadLeads();
-    drawer.openAddDrawer();
-  }, [loadStaff, loadLeads, drawer.openAddDrawer]);
-
-  const openEditDrawer = useCallback((item: DealTaskItem) => {
-    loadStaff();
-    loadLeads();
-    drawer.openEditDrawer(item);
-  }, [loadStaff, loadLeads, drawer.openEditDrawer]);
-
-  return { ...drawer, openAddDrawer, openEditDrawer };
 }

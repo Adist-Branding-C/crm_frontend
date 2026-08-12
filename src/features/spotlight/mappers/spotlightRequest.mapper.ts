@@ -28,15 +28,15 @@ export class SpotlightRequestMapper {
       sort_order: sortConfig.key
         ? sortConfig.direction.toUpperCase()
         : undefined,
-      leadType: filters.leadTypeId,
-      enquirySource: filters.enquirySource,
-      enquiryPurpose: filters.enquiryPurpose,
-      leadStatusId: filters.leadStatusId,
+      typeId: filters.leadTypeId,
+      sourceId: filters.sourceId,
+      purposeId: filters.purposeId,
+      statusId: filters.statusId,
       assignedTo: filters.assignedTo,
       location: filters.location,
       notes: filters.remarks,
-      startDate: filters.dateRange.start,
-      endDate: filters.dateRange.end,
+      dateFrom: filters.dateRange.start,
+      dateTo: filters.dateRange.end,
       dateFilterBy: filters.filterByDate,
     });
   }

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { checkinData } from '../constants';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const CheckinReport = () => {
   const [search, setSearch] = useState('');
@@ -28,10 +29,7 @@ const CheckinReport = () => {
     const headers = ['Shop', 'Agent', 'Note', 'Type', 'Date', 'Location', 'Type', 'Date', 'Location'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.shop},${d.agent},${d.note},${d.typeIn},${d.dateIn},${d.locationIn},${d.typeOut},${d.dateOut},${d.locationOut}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'checkin_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'checkin_report.csv');
   };
 
   return (

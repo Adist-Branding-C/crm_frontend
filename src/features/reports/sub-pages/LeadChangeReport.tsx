@@ -3,6 +3,7 @@ import { Search, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-reac
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { leadChangeData } from '../constants';
 import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const LeadChangeReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,10 +30,7 @@ const LeadChangeReport = () => {
     const headers = ['SL Num', 'Lead Name', 'Mobile Number', 'Lead Source', 'Lead Status', 'Note Added By', 'Notes'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.slNum},${d.leadName},${d.mobile},${d.leadSource},${d.leadStatus},${d.noteAddedBy},${d.notes}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'lead_change_report.csv';
-    link.click();
+    triggerBlobDownload(blob, 'lead_change_report.csv');
   };
 
   return (

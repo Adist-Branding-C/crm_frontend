@@ -1,5 +1,11 @@
 import { PhoneCall, MessageSquare, Users, CheckCircle2 } from 'lucide-react';
-import type { ActivityIconProps } from '../types';
+
+// Unused since StaffDetailView dropped the mock "Recent Activity" section
+// (no backend-tracked activity feed exists yet) - kept compiling rather than
+// deleted; safe to remove this file if it's confirmed dead.
+interface ActivityIconProps {
+  type: string;
+}
 
 const ActivityIcon = ({ type }: ActivityIconProps) => {
   switch (type) {

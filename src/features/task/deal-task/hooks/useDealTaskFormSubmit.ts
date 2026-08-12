@@ -1,31 +1,13 @@
-import { useCallback } from 'react';
-import type { FormikHelpers } from 'formik';
-import { DealTaskMapper } from '../mappers/dealTask.mapper';
-import type { DealTaskFormData } from '../types/index';
-import type { UseDealTaskFormSubmitParams } from '../types/useDealTaskFormSubmit.types';
+import { useTaskFormSubmit } from '../../common/hooks/useTaskFormSubmit';
+import { DealTaskMapper } from '../mapper/dealTaskMapper';
+import type { UseDealTaskFormSubmitParams } from '../types/hook.types';
 
 export function useDealTaskFormSubmit({ editingItem, closeDrawer, handleAddDealTask, handleUpdateDealTask }: UseDealTaskFormSubmitParams) {
-  const handleSubmit = useCallback(async (
-    values: DealTaskFormData,
-    helpers: FormikHelpers<DealTaskFormData>,
-  ) => {
-    const success = await handleAddDealTask(values, helpers);
-    if (success) closeDrawer();
-  }, [handleAddDealTask, closeDrawer]);
-
-  const handleEditSubmit = useCallback(async (
-    values: DealTaskFormData,
-    helpers: FormikHelpers<DealTaskFormData>,
-  ) => {
-    if (!editingItem) return;
-    const original = DealTaskMapper.toFormValues(editingItem);
-    if (JSON.stringify(values) === JSON.stringify(original)) {
-      helpers.setSubmitting(false);
-      return;
-    }
-    const success = await handleUpdateDealTask(editingItem.id, values, helpers);
-    if (success) closeDrawer();
-  }, [editingItem, handleUpdateDealTask, closeDrawer]);
-
-  return { handleSubmit, handleEditSubmit };
+  return useTaskFormSubmit({
+    editingItem,
+    closeDrawer,
+    mapItemToFormData: DealTaskMapper.toFormValues,
+    handleAdd: handleAddDealTask,
+    handleUpdate: handleUpdateDealTask,
+  });
 }

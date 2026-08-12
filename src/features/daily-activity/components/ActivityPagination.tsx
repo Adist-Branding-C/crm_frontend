@@ -7,6 +7,7 @@ const ActivityPagination = memo(({
   totalPages,
   totalActivities,
   pageNumbers,
+  isLoading,
   onPageChange,
 }: ActivityPaginationProps) => {
   if (totalActivities <= 0) return null;
@@ -16,7 +17,7 @@ const ActivityPagination = memo(({
       <button
         className="pagination-btn prev"
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-        disabled={currentPage === 1}
+        disabled={isLoading || currentPage === 1}
         aria-label="Go to previous page"
       >
         <ChevronLeft size={16} />
@@ -34,6 +35,7 @@ const ActivityPagination = memo(({
               key={page}
               className={`pagination-number ${currentPage === page ? 'active' : ''}`}
               onClick={() => onPageChange(page)}
+              disabled={isLoading}
               aria-label={`Go to page ${page}`}
               aria-current={currentPage === page ? 'page' : undefined}
             >
@@ -46,7 +48,7 @@ const ActivityPagination = memo(({
       <button
         className="pagination-btn next"
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage === totalPages}
+        disabled={isLoading || currentPage === totalPages}
         aria-label="Go to next page"
       >
         Next

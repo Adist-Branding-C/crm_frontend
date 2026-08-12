@@ -30,9 +30,9 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, password, designationId, status } = values;
+      const { fullName, email, password, designationId, departmentId, status, isAdmin } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, status };
+      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, password, designationId, departmentId, status, isAdmin };
 
       const response = await agentService.createAgent(requestData);
 
@@ -60,19 +60,31 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
     staffId: string,
     values: AgentFormData,
     { setSubmitting, setFieldError }: FormikHelpers<AgentFormData>,
+    customSuccessMessage?: string
   ) => {
     pagination.setError('');
     pagination.setIsLoading(true);
 
     try {
-      const { fullName, email, designationId, status } = values;
+      const { fullName, email, password, designationId, departmentId, status } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), phone: sanitizedPhone, designationId, status };
+      const requestData = {
+        fullName,
+        email: email.trim(),
+        phone: sanitizedPhone,
+        designationId,
+        departmentId,
+        status,
+        // Blank means "leave the current password as-is" - only send it when
+        // the admin actually typed a new one.
+        ...(password ? { password } : {}),
+      };
 
       const response = await agentService.updateAgent(staffId, requestData);
 
       if (response.status) {
         pagination.refresh();
+        showToastMessage(customSuccessMessage || 'Staff member updated successfully', 'success');
         return true;
       }
 
@@ -85,7 +97,7 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
       pagination.setIsLoading(false);
       setSubmitting(false);
     }
-  }, [submitError]);
+  }, [submitError, showToastMessage]);
 
   const handleDeleteAgent = useCallback(async (staffId: string) => {
     pagination.setError('');

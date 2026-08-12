@@ -27,14 +27,16 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId }) => {
         <div className="deal-contact">
           <div
             className="contact-avatar"
-            style={{ background: hashStringToColor(lead.name) }}
+            style={{ background: hashStringToColor(lead.name || 'Unknown') }}
           >
-            {lead.name.charAt(0)}
+            {(lead.name || 'U').charAt(0)}
           </div>
           <span>{lead.email}</span>
         </div>
         <div className="deal-probability" style={{ color: '#6b7280' }}>
-          {lead.source}
+          {typeof lead.source === 'object' && lead.source !== null
+            ? (lead.source as any).source
+            : lead.source}
         </div>
       </div>
       <div className="deal-due">

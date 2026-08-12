@@ -8,4 +8,5 @@ export const AGENT_API_ENDPOINTS = {
   REASSIGN_LEADS: (staffId: string) => `/staff/${staffId}/reassign-leads`,
   RESOLVE_TASKS: (staffId: string) => `/staff/${staffId}/resolve-tasks`,
   REMOVE_AUTOMATION_REFERENCES: (staffId: string) => `/staff/${staffId}/remove-automation-references`,
+  ME: '/staff/me',
 };

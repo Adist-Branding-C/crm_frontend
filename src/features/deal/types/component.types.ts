@@ -1,15 +1,27 @@
 import type { DealItem, DealStatusFilters, DealAdditionalFieldDef } from './interface';
+import type { LabelValuePair } from '../../../shared/types/common';
 import type { Schema } from 'yup';
 import type { FormikHelpers } from 'formik';
+import type { PreviewSection } from '../../../shared/components/preview/PreviewCanvas';
+
+export interface DealPreviewData {
+  sections: PreviewSection[];
+  payload: Record<string, unknown>;
+  formValues: Record<string, unknown>;
+}
 
 export interface DealFormProps {
   editingItem?: DealItem | null;
+  draftId?: string | null;
+  initialDraftValues?: Record<string, unknown>;
   validationSchema: Schema<Record<string, unknown>>;
   initialValues: import('../../../shared/types/drawers').DealFormData;
   onSubmit: (
     values: import('../../../shared/types/drawers').DealFormData,
     helpers: FormikHelpers<import('../../../shared/types/drawers').DealFormData>,
   ) => Promise<void | boolean>;
+  onPreviewRequest?: (previewData: DealPreviewData) => void;
+  onDraftSaved?: (id: string) => void;
   isLoading?: boolean;
   error?: string | null;
   onCancel: () => void;
@@ -70,6 +82,11 @@ export interface DealRowProps {
   };
   onEditDeal: (item: DealItem) => void;
   onDeleteDeal: (deal: DealItem) => void;
-  onWhatsApp: (item: DealItem) => void;
+  onSendWhatsapp: (item: DealItem, message?: string) => void;
   onMessage: (item: DealItem) => void;
+  hasWhatsappTemplates: boolean;
+  whatsappTemplatesLoading: boolean;
+  whatsappTemplatesError: boolean;
+  staffOptions: LabelValuePair[];
+  onFieldSave: (dealId: string, payload: { agentId?: string; startDate?: string; endDate?: string }) => Promise<boolean>;
 }

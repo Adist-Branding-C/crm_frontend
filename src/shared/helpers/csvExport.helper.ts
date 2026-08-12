@@ -7,7 +7,10 @@ import type { CsvColumn } from '../types/csv';
  * - Wraps the value in double quotes if it contains a comma, double quote, or newline
  */
 function escapeCsvValue(value: string | number): string {
-  const str = String(value);
+  let str = String(value);
+  if (/^[=+\-@]/.test(str)) {
+    str = "'" + str;
+  }
   if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
     return `"${str.replace(/"/g, '""')}"`;
   }
@@ -31,13 +34,7 @@ function escapeCsvValue(value: string | number): string {
  *   quotes/escapes it as needed (RFC 4180 style). Do not pre-quote values in a
  *   column definition, or the output will be double-escaped.
  */
-function escapeCsvField(value: string | number): string {
-  const str = String(value);
-  if (/[",\n]/.test(str)) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
-}
+
 
 export function exportToCsv<T>(data: T[], columns: CsvColumn<T>[], filename: string): void {
   const csvContent = [

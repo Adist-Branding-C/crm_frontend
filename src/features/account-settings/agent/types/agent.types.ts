@@ -11,7 +11,10 @@ export interface AgentItem {
   designationId?: string;
   designation_id?: number | string;
   designation?: string;
+  departmentId?: string;
+  department_id?: number | string;
   status: string;
+  isAdmin?: boolean;
 }
 
 export interface AgentFormData {
@@ -21,7 +24,9 @@ export interface AgentFormData {
   password: string;
   confirmPassword: string;
   designationId: string;
+  departmentId: string;
   status: string;
+  isAdmin: boolean;
 }
 
 export interface AgentResponse {
@@ -71,4 +76,26 @@ export interface StaffDeletionDependenciesResponse {
   status: boolean;
   message?: string;
   data?: StaffDeletionDependencies;
+}
+
+export interface StaffProfile {
+  staffId?: string;
+  companyId?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role?: string;
+  isAdmin?: boolean;
+  isSuperAdmin?: boolean;
+}
+
+export interface GetStaffMeResponse {
+  status: boolean;
+  message: string;
+  data: StaffProfile;
+}
+
+export interface DepartmentOption {
+  label: string;
+  value: string;
 }

@@ -2,7 +2,7 @@ import axiosInstance from '../../../api/axiosInstance';
 import { QueryMapper } from '../../../shared/mappers/query.mapper';
 import { DEAL_API_ENDPOINTS } from '../constants/dealApiEndpoints';
 import type { DealFormData } from '../types/interface';
-import type { GetDealsParams } from '../types/request';
+import type { GetDealsParams, GetDealsExportParams } from '../types/request';
 
 class DealService {
   async getAllDeals(params: GetDealsParams) {
@@ -71,6 +71,17 @@ class DealService {
       status: response.data.status,
       message: response.data.message,
       data: response.data.data,
+    };
+  }
+
+  async exportDeals(params: GetDealsExportParams) {
+    const response = await axiosInstance.get(DEAL_API_ENDPOINTS.EXPORT, {
+      params: QueryMapper.toQuery(params),
+      responseType: 'blob',
+    });
+    return {
+      data: response.data as Blob,
+      headers: response.headers,
     };
   }
 }

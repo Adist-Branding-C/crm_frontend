@@ -13,6 +13,7 @@ import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
 import { ACTION_SUBMIT, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 import type { Column } from '../../../shared/types/table';
 import type { LeadSourceWiseFilters } from '../types';
+import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const columns: Column[] = lswColumns;
 
@@ -104,7 +105,7 @@ const LeadSourceWise: React.FC = () => {
       d.source, d.fromDate, d.toDate, d.none, d.new, d.connected, d.interested, d.registered, d.notInterested, d.justEnquiry, d.plusOne, d.detailsShared, d.plusTwoCall, d.neetAfter, d.seminarInt, d.nursingPg, d.fridayWeb, d.plusTwo2027, d.mbbs, d.webinarGform, d.webinarAtt, d.junkForm, d.junkHindi, d.webinarFollow, d.webinarLost, d.dnd, d.later, d.empty, d.total
     ].join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'source_wise_report.csv'; link.click();
+    triggerBlobDownload(blob, 'source_wise_report.csv');
   };
 
   const handleSubmit = (e: React.FormEvent) => {

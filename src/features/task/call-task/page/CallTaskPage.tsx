@@ -8,27 +8,28 @@ import { useCallTaskCrud } from '../hooks/useCallTaskCrud';
 import { useCallTaskDrawer } from '../hooks/useCallTaskDrawer';
 import { useCallTaskDeleteConfirm } from '../hooks/useCallTaskDeleteConfirm';
 import { useCallTaskFormSubmit } from '../hooks/useCallTaskFormSubmit';
-import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
-import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
-import { callTaskApiService } from '../services/index';
-import { addCallTaskValidationSchema, editCallTaskValidationSchema } from '../validations/index';
+import { useStaffOptions } from '../../common/hooks/useStaffOptions';
+import { useLeadOptions } from '../../common/hooks/useLeadOptions';
+import { callTaskDataService } from '../services/callTaskDataService';
+import { addCallTaskValidationSchema, editCallTaskValidationSchema } from '../validations/callTask.validation';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
 import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } from '../../../../shared/components/table';
 import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
-import GenericTaskForm from '../../shared/components/GenericTaskForm';
-import TaskItemRow from '../../shared/components/TaskItemRow';
+import GenericTaskForm from '../../common/components/GenericTaskForm';
+import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
+import TaskItemRow from '../../common/components/TaskItemRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { taskTabs } from '../../shared/taskTabs';
+import { taskTabs } from '../../common/taskTabs';
 import type { CallTaskItem } from '../types/index';
 import './CallTaskPage.css';
 
 const CallTaskPage = () => {
   const pagination = useTableData<CallTaskItem>({
     fetchFn: async (params) => {
-      const response = await callTaskApiService.fetchAll({ ...params, type: 'CALL_TASK' });
+      const response = await callTaskDataService.fetchAll({ ...params, type: 'CALL_TASK' });
       return ListResponseMapper.toPagedResult<CallTaskItem>(response);
     },
   });
@@ -63,8 +64,11 @@ const CallTaskPage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Title</TCell>
+                <TCell variant="th">Description</TCell>
                 <TCell variant="th">Scheduled Date</TCell>
+                <TCell variant="th">Scheduled Time</TCell>
                 <TCell variant="th">Assigned To</TCell>
+                <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
                 <TCell variant="th">Lead</TCell>
@@ -72,7 +76,11 @@ const CallTaskPage = () => {
               </TRow>
             </THead>
             <TBody>
-              {pagination.list.length === 0 ? <EmptyState colSpan={8} message={LABEL_NO_DATA} /> : pagination.list.map((item, idx) => (
+              {pagination.isLoading && pagination.list.length === 0 ? (
+                <TaskListLoadingRow colSpan={11} />
+              ) : !pagination.isLoading && pagination.list.length === 0 ? (
+                <EmptyState colSpan={11} message={LABEL_NO_DATA} />
+              ) : pagination.list.map((item, idx) => (
                 <TaskItemRow
                   key={item.id}
                   item={item}

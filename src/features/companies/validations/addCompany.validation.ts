@@ -9,8 +9,11 @@ import { CompanyStatus } from '../../../shared/constants/enums/companyStatus';
  *
  * Notes:
  * - Frontend validates format/required-ness only; the backend re-validates on submit.
+ * - adminPassword is only required when creating a company - it sets the login
+ *   password for the admin staff account the backend auto-creates alongside
+ *   the company row. Editing an existing company never touches that password.
  */
-export const addCompanyValidationSchema = yup.object({
+export const addCompanyValidationSchema = (isEditing: boolean) => yup.object({
   name: yup.string().trim().required('Company name is required'),
   contactPersonName: yup.string().trim().required('Contact person name is required'),
   email: yup.string().trim().email('Enter a valid email address').required('Email is required'),
@@ -22,4 +25,7 @@ export const addCompanyValidationSchema = yup.object({
     .string()
     .oneOf([CompanyStatus.ACTIVE, CompanyStatus.INACTIVE])
     .required('Status is required'),
+  adminPassword: isEditing
+    ? yup.string()
+    : yup.string().trim().min(6, 'Password must be at least 6 characters').required('Admin password is required'),
 });

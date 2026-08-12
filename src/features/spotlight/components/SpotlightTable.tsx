@@ -24,6 +24,8 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
   onToggleMenu,
   onViewLead,
   loading,
+  fieldOptions,
+  onFieldSave,
 }) => {
   const handleSortKeyDown = (
     e: React.KeyboardEvent<HTMLTableCellElement>,
@@ -36,8 +38,7 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
   };
 
   return (
-    <div className="table-container">
-      <Table className="enquiries-table">
+    <Table wrapperClassName="table-scroll" className="enquiries-table">
         <THead>
           <TRow>
             {columns.map((col) => (
@@ -65,7 +66,7 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
                     type="checkbox"
                     aria-label="Select all rows"
                     checked={
-                      data.length > 0 && selectedIds.length === data.length
+                      paginatedIds.length > 0 && paginatedIds.every((id) => selectedIds.includes(id))
                     }
                     onChange={(e) =>
                       onSelectAll(paginatedIds, e.target.checked)
@@ -103,12 +104,13 @@ const SpotlightTable: React.FC<SpotlightTableProps> = ({
                 onSelectRow={onSelectRow}
                 onToggleMenu={(open) => onToggleMenu(row.id, open)}
                 onViewLead={onViewLead}
+                fieldOptions={fieldOptions}
+                onFieldSave={onFieldSave}
               />
             ))
           )}
         </TBody>
-      </Table>
-    </div>
+    </Table>
   );
 };
 

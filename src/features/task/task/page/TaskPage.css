@@ -1,6 +1,7 @@
 @import '../../../../shared/styles/tables.css';
 @import '../../../../shared/styles/buttons.css';
 @import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/status-badges.css';
 @import '../../../../shared/styles/dropdowns.css';
 @import '../../../../shared/styles/drawers.css';
 @import '../../../../shared/styles/filters.css';
@@ -10,13 +11,15 @@
 @import '../../../../shared/styles/tabs.css';
 @import '../../../../shared/styles/toolbars.css';
 
-.task-settings-page .table-container,
-.task-settings-page .table-scroll {
-  overflow: visible;
-}
-
 .task-settings-page .dropdown-menu {
   z-index: 9999;
+}
+
+.truncate-cell {
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .form-row {

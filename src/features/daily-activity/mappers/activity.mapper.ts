@@ -2,7 +2,6 @@ import { QueryMapper } from '../../../shared/mappers/query.mapper';
 import {
   formatActivityType,
   calculateTimeAgo,
-  formatRelatedLead,
   formatTimestamp,
   getBadge,
 } from '../utils/activityHelpers';
@@ -18,6 +17,15 @@ import type { Activity, ActivityItem, Filters, GetActivitiesParams, StaffListIte
  * Notes:
  * - toActivitiesRequest delegates empty/undefined-value stripping to the shared
  *   QueryMapper rather than reimplementing it per-field.
+ * - `user` uses the API's actorName, resolved in the database via a
+ *   @VirtualColumn on the Activity entity - not a separate enrichment query,
+ *   so it's always present on every row. Falls back to the raw actorId only
+ *   for the edge case where actorName itself comes back null (e.g. the
+ *   staff record was deleted after the activity was logged).
+ * - There's no related-lead name/phone enrichment anymore (that *was* a
+ *   separate query, now removed), so `relatedLead` falls back to the raw
+ *   entityId and `hasContactInfo` is always false - there is no name/phone
+ *   to show below the activity line.
  */
 export class ActivityMapper {
   static toEntity(item: ActivityItem): Activity {
@@ -25,13 +33,14 @@ export class ActivityMapper {
       id: item.id,
       type: formatActivityType(item.activityType),
       entityType: item.entityType,
-      user: item.actorName,
-      relatedLead: formatRelatedLead(item.entityId, item.name, item.phone),
-      hasContactInfo: Boolean(item.name || item.phone),
+      user: item.actorName || item.actorId || item.actorType,
+      relatedLead: item.entityId,
+      hasContactInfo: false,
       description: item.description,
       timestamp: formatTimestamp(item.createdAt),
       timeAgo: calculateTimeAgo(item.createdAt),
       badge: getBadge(item.entityType),
+      changes: item.changes ?? [],
     };
   }
 
@@ -40,16 +49,16 @@ export class ActivityMapper {
   }
 
   static toActivitiesRequest(
-    page: number,
+    pageNumber: number,
     limit: number,
-    tzOffsetMinutes: number,
+    timezoneOffsetMinutes: number,
     filters: Filters,
     activityType: string,
   ): Partial<GetActivitiesParams> {
     return QueryMapper.toQuery<GetActivitiesParams>({
-      pageNumber: page,
+      pageNumber,
       limit,
-      tzOffsetMinutes,
+      timezoneOffsetMinutes,
       date: filters.date,
       startTime: filters.startTime,
       endTime: filters.endTime,

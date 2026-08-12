@@ -16,15 +16,13 @@ import EditableDetailField from '../shared/components/drawers/EditableDetailFiel
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../shared/utils/dateUtils';
 
-const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
+const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }) => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('activity');
   const [showTaskDrawer, setShowTaskDrawer] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newRemarkText, setNewRemarkText] = useState('');
-  const [editingRemarkId, setEditingRemarkId] = useState(null);
-  const [editingRemarkText, setEditingRemarkText] = useState('');
   const [showDeleteRemarkModal, setShowDeleteRemarkModal] = useState(false);
   const [remarkToDelete, setRemarkToDelete] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
@@ -66,10 +64,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
     isLoading: isLoadingRemarks,
     error: errorRemarks,
     isAdding: isAddingRemark,
-    isUpdating: isUpdatingRemark,
     isDeleting: isDeletingRemark,
     addRemark,
-    updateRemark,
     deleteRemark,
   } = useLeadRemarks(lead?.id, isOpen, activeTab);
 
@@ -121,6 +117,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
       const res = await leadDataService.updateLead(lead.leadId, payload);
       if (res.status) {
         showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
+        onFieldSaved?.(payload);
         onLeadUpdated?.();
         return true;
       }
@@ -200,37 +197,6 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
       showToastMessage('Remark added successfully.', 'success');
     } catch {
       showToastMessage('Failed to add remark.', 'error');
-    }
-  };
-
-  const startEditRemark = (remark) => {
-    setEditingRemarkId(remark.remarkId);
-    setEditingRemarkText(remark.remarkNote);
-  };
-
-  const cancelEditRemark = () => {
-    setEditingRemarkId(null);
-    setEditingRemarkText('');
-  };
-
-  const handleSaveEdit = async () => {
-    const trimmed = editingRemarkText.trim();
-    const original = remarks.find((r) => r.remarkId === editingRemarkId);
-    if (!trimmed) {
-      cancelEditRemark();
-      return;
-    }
-    if (trimmed === original?.remarkNote) {
-      cancelEditRemark();
-      return;
-    }
-    try {
-      await updateRemark(editingRemarkId, trimmed);
-      setEditingRemarkId(null);
-      setEditingRemarkText('');
-      showToastMessage('Remark updated successfully.', 'success');
-    } catch {
-      showToastMessage('Failed to update remark.', 'error');
     }
   };
 
@@ -542,39 +508,9 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated }) => {
                               <span className="leaddrawer-note-user">{remark.agentName}</span>
                               <span className="leaddrawer-note-time">{formatDateTime(remark.createdAt)}</span>
                             </div>
-                            {editingRemarkId === remark.remarkId ? (
-                              <div>
-                                <textarea
-                                  className="leaddrawer-remark-edit-textarea"
-                                  value={editingRemarkText}
-                                  onChange={(e) => setEditingRemarkText(e.target.value)}
-                                  disabled={isUpdatingRemark}
-                                />
-                                <div className="leaddrawer-note-edit-actions">
-                                  <button
-                                    className="btn btn-primary btn-sm"
-                                    onClick={handleSaveEdit}
-                                    disabled={isUpdatingRemark || !editingRemarkText.trim()}
-                                  >
-                                    {isUpdatingRemark ? <><Loader2 size={14} className="spin" /> Saving...</> : 'Save'}
-                                  </button>
-                                  <button
-                                    className="btn btn-secondary btn-sm"
-                                    onClick={cancelEditRemark}
-                                    disabled={isUpdatingRemark}
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              </div>
-                            ) : (
-                              <p className="leaddrawer-note-text">{remark.remarkNote}</p>
-                            )}
+                            <p className="leaddrawer-note-text">{remark.remarkNote}</p>
                             {((!!remark.agentId && !!user?.staffId && String(remark.agentId) === String(user.staffId)) || user?.isAdmin) && (
                               <div className="leaddrawer-note-actions">
-                                <button className="leaddrawer-note-action" onClick={() => startEditRemark(remark)}>
-                                  <Edit2 size={14} />
-                                </button>
                                 <button className="leaddrawer-note-action" onClick={() => handleDeleteClick(remark)}>
                                   <Trash2 size={14} />
                                 </button>

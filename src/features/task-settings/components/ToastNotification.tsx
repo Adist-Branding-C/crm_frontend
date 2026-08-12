@@ -1,4 +1,5 @@
 import { Check, X } from 'lucide-react';
+import '../../../shared/components/ToastNotification.css';
 
 interface ToastNotificationProps {
   message: string;

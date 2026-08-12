@@ -6,7 +6,7 @@ import type { Filters } from '../types';
  * Owns the activity filter panel's staged (editable) and applied filter state.
  *
  * Used by:
- * - useDailyActivityData (applyFilters/resetFilters return the freshly-applied
+ * - DailyActivityPage (applyFilters/resetFilters return the freshly-applied
  *   values so the caller can immediately trigger a fetch without waiting on a
  *   state update to commit).
  */
@@ -40,6 +40,7 @@ export function useActivityFilters() {
     appliedFilters,
     appliedActivityType,
     setActivityTypeFilter,
+    setAppliedActivityType,
     handleFilterChange,
     applyFilters,
     resetFilters,

@@ -1,58 +1,115 @@
-import React from 'react';
-import { Plus, DollarSign, Phone, Calendar } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { DollarSign, Phone, Calendar, AlertTriangle } from 'lucide-react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { formatDate } from '../../../shared/utils/dateUtils';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
-import AddDealDrawer from '../../../shared/components/drawers/AddDealDrawer';
 import ToastNotification from '../../../shared/components/ToastNotification';
-import { useSalesPipelineData } from '../hooks/useSalesPipelineData';
+import EmptyState from '../../../shared/components/EmptyState';
+import { useToast } from '../../../shared/hooks/useToast';
+import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
+import { useSalesPipelineFilters } from '../hooks/useSalesPipelineFilters';
+import { useSalesPipelineStaffOptions } from '../hooks/useSalesPipelineStaffOptions';
+import { useDealsPipeline } from '../hooks/useDealsPipeline';
+import { useLeadsPipeline } from '../hooks/useLeadsPipeline';
+import { useTasksPipeline } from '../hooks/useTasksPipeline';
+import { usePipelineDragDrop } from '../hooks/usePipelineDragDrop';
+import { PipelineMapper } from '../mappers/pipeline.mapper';
 import PipelineToolbar from '../components/PipelineToolbar';
 import PipelineFilters from '../components/PipelineFilters';
 import DealPipelineBoard from '../components/DealPipelineBoard';
 import LeadPipelineBoard from '../components/LeadPipelineBoard';
 import TaskPipelineBoard from '../components/TaskPipelineBoard';
+import type { ActiveView } from '../types';
+import { VIEW_EMPTY_MESSAGE } from '../constants';
 import './SalesPipelinePage.css';
 
 const SalesPipelinePage: React.FC = () => {
-  const {
-    searchQuery,
-    setSearchQuery,
-    showDateFilter,
-    setShowDateFilter,
-    dateFrom,
-    setDateFrom,
-    dateTo,
-    setDateTo,
-    selectedAgent,
-    setSelectedAgent,
-    staffOptions,
-    isDrawerOpen,
-    setIsDrawerOpen,
-    activeView,
-    loading,
-    loadingStatusId,
-    loadingLeadStatusId,
-    loadingTaskStatus,
-    onViewLeads,
-    onViewDeals,
-    onViewTasks,
-    loadMoreDeals,
-    loadMoreLeads,
-    loadMoreTasks,
-    filterRef,
-    onClearFilters,
-    filteredStatusGroups,
-    filteredLeadGroups,
-    filteredTaskGroups,
-    sensors,
-    activeItem,
-    handleDragStart,
-    handleDragEnd,
-    handleDragCancel,
-    handleSaveDeal,
-    toast,
-  } = useSalesPipelineData();
+  const [activeView, setActiveView] = useState<ActiveView>('leads');
+  const [committedSearch, setCommittedSearch] = useState('');
+  const activeViewRef = useRef(activeView);
+  activeViewRef.current = activeView;
+
+  const toast = useToast();
+  const reportError = useCallback(
+    (message: string) => toast.showToastMessage(message, 'error'),
+    [toast.showToastMessage],
+  );
+
+  const search = useDebouncedSearch(setCommittedSearch);
+  const filters = useSalesPipelineFilters();
+  const { staffOptions } = useSalesPipelineStaffOptions();
+  const deals = useDealsPipeline(reportError);
+  const leads = useLeadsPipeline(reportError);
+  const tasks = useTasksPipeline(reportError);
+  const dragDrop = usePipelineDragDrop(
+    deals.setStatusGroups,
+    leads.setLeadGroups,
+    tasks.setTaskGroups,
+    reportError,
+  );
+
+  const filterParams = useMemo(
+    () =>
+      PipelineMapper.toQueryParams(
+        committedSearch,
+        filters.dateFrom,
+        filters.dateTo,
+        filters.selectedAgent,
+      ),
+    [committedSearch, filters.dateFrom, filters.dateTo, filters.selectedAgent],
+  );
+
+  useEffect(() => {
+    const view = activeViewRef.current;
+    if (view === 'deals') deals.fetchDeals(filterParams);
+    else if (view === 'leads') leads.fetchLeads(filterParams);
+    else if (view === 'tasks') tasks.fetchTasks(filterParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterParams]);
+
+  const handleViewDeals = useCallback(() => {
+    setActiveView('deals');
+    deals.fetchDeals(filterParams);
+  }, [deals.fetchDeals, filterParams]);
+
+  const handleViewLeads = useCallback(() => {
+    setActiveView('leads');
+    leads.fetchLeads(filterParams);
+  }, [leads.fetchLeads, filterParams]);
+
+  const handleViewTasks = useCallback(() => {
+    setActiveView('tasks');
+    tasks.fetchTasks(filterParams);
+  }, [tasks.fetchTasks, filterParams]);
+
+  const handleClearFilters = useCallback(() => {
+    filters.clearFilters();
+    filters.setShowDateFilter(false);
+  }, [filters]);
+
+  const loading =
+    activeView === 'deals'
+      ? deals.isLoading
+      : activeView === 'leads'
+        ? leads.isLoading
+        : tasks.isLoading;
+
+  const activeGroupCount =
+    activeView === 'deals'
+      ? deals.statusGroups.length
+      : activeView === 'leads'
+        ? leads.leadGroups.length
+        : tasks.taskGroups.length;
+
+  const activeError =
+    activeView === 'deals' ? deals.error : activeView === 'leads' ? leads.error : tasks.error;
+
+  const handleRetry = useCallback(() => {
+    if (activeView === 'deals') deals.fetchDeals(filterParams);
+    else if (activeView === 'leads') leads.fetchLeads(filterParams);
+    else tasks.fetchTasks(filterParams);
+  }, [activeView, deals.fetchDeals, leads.fetchLeads, tasks.fetchTasks, filterParams]);
 
   return (
     <PageContainer>
@@ -64,110 +121,121 @@ const SalesPipelinePage: React.FC = () => {
       <div className="pipeline-toolbar">
         <div className="pipeline-left">
           <PipelineToolbar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
+            searchQuery={search.searchValue}
+            setSearchQuery={search.handleSearchChange}
             activeView={activeView}
             loading={loading}
-            onViewLeads={onViewLeads}
-            onViewDeals={onViewDeals}
-            onViewTasks={onViewTasks}
+            onViewLeads={handleViewLeads}
+            onViewDeals={handleViewDeals}
+            onViewTasks={handleViewTasks}
           />
           <PipelineFilters
-            showDateFilter={showDateFilter}
-            setShowDateFilter={setShowDateFilter}
-            dateFrom={dateFrom}
-            setDateFrom={setDateFrom}
-            dateTo={dateTo}
-            setDateTo={setDateTo}
-            selectedAgent={selectedAgent}
-            setSelectedAgent={setSelectedAgent}
+            activeView={activeView}
+            showDateFilter={filters.showDateFilter}
+            setShowDateFilter={filters.setShowDateFilter}
+            dateFrom={filters.dateFrom}
+            setDateFrom={filters.setDateFrom}
+            dateTo={filters.dateTo}
+            setDateTo={filters.setDateTo}
+            selectedAgent={filters.selectedAgent}
+            setSelectedAgent={filters.setSelectedAgent}
             staffOptions={staffOptions}
-            filterRef={filterRef}
-            onClearFilters={onClearFilters}
+            filterRef={filters.filterRef}
+            onClearFilters={handleClearFilters}
           />
         </div>
-        {activeView === 'deals' && (
-          <div className="pipeline-actions">
-            <button
-              className="btn btn-primary"
-              onClick={() => setIsDrawerOpen(true)}
-            >
-              <Plus size={16} />
-              Add Deal
-            </button>
-          </div>
-        )}
       </div>
 
       <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
+        sensors={dragDrop.sensors}
+        onDragStart={dragDrop.handleDragStart}
+        onDragEnd={dragDrop.handleDragEnd}
+        onDragCancel={dragDrop.handleDragCancel}
       >
-        {activeView === 'deals' && (
-          <DealPipelineBoard
-            filteredStatusGroups={filteredStatusGroups}
-            loadingStatusId={loadingStatusId}
-            loadMoreDeals={loadMoreDeals}
+        {loading && activeGroupCount === 0 ? null : activeError ? (
+          <EmptyState
+            message={activeError}
+            icon={<AlertTriangle size={48} />}
+            action={
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ marginTop: '1rem' }}
+                onClick={handleRetry}
+              >
+                Retry
+              </button>
+            }
           />
-        )}
+        ) : activeGroupCount === 0 ? (
+          <EmptyState message={VIEW_EMPTY_MESSAGE[activeView]} />
+        ) : (
+          <>
+            {activeView === 'deals' && (
+              <DealPipelineBoard
+                filteredStatusGroups={deals.statusGroups}
+                loadingStatusId={deals.loadingStatusId}
+                loadMoreDeals={deals.loadMoreDeals}
+              />
+            )}
 
-        {activeView === 'leads' && (
-          <LeadPipelineBoard
-            filteredLeadGroups={filteredLeadGroups}
-            loadingLeadStatusId={loadingLeadStatusId}
-            loadMoreLeads={loadMoreLeads}
-          />
-        )}
+            {activeView === 'leads' && (
+              <LeadPipelineBoard
+                filteredLeadGroups={leads.leadGroups}
+                loadingLeadStatusId={leads.loadingLeadStatusId}
+                loadMoreLeads={leads.loadMoreLeads}
+              />
+            )}
 
-        {activeView === 'tasks' && (
-          <TaskPipelineBoard
-            filteredTaskGroups={filteredTaskGroups}
-            loadingTaskStatus={loadingTaskStatus}
-            loadMoreTasks={loadMoreTasks}
-          />
+            {activeView === 'tasks' && (
+              <TaskPipelineBoard
+                filteredTaskGroups={tasks.taskGroups}
+                loadingTaskStatus={tasks.loadingTaskStatus}
+                loadMoreTasks={tasks.loadMoreTasks}
+              />
+            )}
+          </>
         )}
 
         <DragOverlay>
-          {activeItem?.type === 'deal' && (
+          {dragDrop.activeItem?.type === 'deal' && (
             <div className="deal-card deal-card--overlay">
-              <div className="deal-title">{activeItem.deal.dealName}</div>
+              <div className="deal-title">{dragDrop.activeItem.deal.dealName}</div>
               <div className="deal-value">
                 <DollarSign size={14} />
-                {activeItem.deal.amount.toLocaleString()}
+                {dragDrop.activeItem.deal.amount.toLocaleString()}
               </div>
               <div className="deal-due">
                 <Calendar size={12} />
                 <span>
-                  {activeItem.deal.endDate
-                    ? formatDate(activeItem.deal.endDate)
+                  {dragDrop.activeItem.deal.endDate
+                    ? formatDate(dragDrop.activeItem.deal.endDate)
                     : 'No due date'}
                 </span>
               </div>
             </div>
           )}
-          {activeItem?.type === 'lead' && (
+          {dragDrop.activeItem?.type === 'lead' && (
             <div className="deal-card deal-card--overlay">
-              <div className="deal-title">{activeItem.lead.name}</div>
+              <div className="deal-title">{dragDrop.activeItem.lead.name}</div>
               <div className="deal-value">
                 <Phone size={14} />
-                {activeItem.lead.phone}
+                {dragDrop.activeItem.lead.phone}
               </div>
               <div className="deal-due">
                 <Calendar size={12} />
-                <span>Added {formatDate(activeItem.lead.createdAt)}</span>
+                <span>Added {formatDate(dragDrop.activeItem.lead.createdAt)}</span>
               </div>
             </div>
           )}
-          {activeItem?.type === 'task' && (
+          {dragDrop.activeItem?.type === 'task' && (
             <div className="deal-card deal-card--overlay">
-              <div className="deal-title">{activeItem.task.title}</div>
+              <div className="deal-title">{dragDrop.activeItem.task.title}</div>
               <div className="deal-due">
                 <Calendar size={12} />
                 <span>
-                  {activeItem.task.scheduledDate
-                    ? formatDate(activeItem.task.scheduledDate)
+                  {dragDrop.activeItem.task.scheduledDate
+                    ? formatDate(dragDrop.activeItem.task.scheduledDate)
                     : 'No due date'}
                 </span>
               </div>
@@ -175,12 +243,6 @@ const SalesPipelinePage: React.FC = () => {
           )}
         </DragOverlay>
       </DndContext>
-
-      <AddDealDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={handleSaveDeal}
-      />
 
       <ToastNotification
         isVisible={toast.showToast}

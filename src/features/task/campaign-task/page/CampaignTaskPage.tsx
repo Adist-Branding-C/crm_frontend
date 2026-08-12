@@ -8,35 +8,36 @@ import { useCampaignTaskCrud } from '../hooks/useCampaignTaskCrud';
 import { useCampaignTaskDrawer } from '../hooks/useCampaignTaskDrawer';
 import { useCampaignTaskDeleteConfirm } from '../hooks/useCampaignTaskDeleteConfirm';
 import { useCampaignTaskFormSubmit } from '../hooks/useCampaignTaskFormSubmit';
-import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
-import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
-import { campaignTaskApiService } from '../services/index';
-import { addCampaignTaskValidationSchema, editCampaignTaskValidationSchema } from '../validations/index';
+import { useStaffOptions } from '../../common/hooks/useStaffOptions';
+import { useCampaignOptions } from '../../common/hooks/useCampaignOptions';
+import { campaignTaskDataService } from '../services/campaignTaskDataService';
+import { addCampaignTaskValidationSchema, editCampaignTaskValidationSchema } from '../validations/campaignTask.validation';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
 import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } from '../../../../shared/components/table';
 import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
-import GenericTaskForm from '../../shared/components/GenericTaskForm';
-import TaskItemRow from '../../shared/components/TaskItemRow';
+import GenericTaskForm from '../../common/components/GenericTaskForm';
+import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
+import CampaignTaskRow from '../components/CampaignTaskRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { taskTabs } from '../../shared/taskTabs';
+import { taskTabs } from '../../common/taskTabs';
 import type { CampaignTaskItem } from '../types/index';
 import './CampaignTaskPage.css';
 
 const CampaignTaskPage = () => {
   const pagination = useTableData<CampaignTaskItem>({
     fetchFn: async (params) => {
-      const response = await campaignTaskApiService.fetchAll({ ...params, type: 'CAMPAIGN_TASK' });
+      const response = await campaignTaskDataService.fetchAll({ ...params, type: 'CAMPAIGN_TASK' });
       return ListResponseMapper.toPagedResult<CampaignTaskItem>(response);
     },
   });
   const toast = useToast();
   const crud = useCampaignTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
   const staff = useStaffOptions();
-  const leads = useLeadOptions();
-  const drawer = useCampaignTaskDrawer({ loadStaff: staff.loadStaff, loadLeads: leads.loadLeads });
+  const campaigns = useCampaignOptions();
+  const drawer = useCampaignTaskDrawer({ loadStaff: staff.loadStaff, loadCampaigns: campaigns.loadCampaigns });
   const dropdown = useDropdownMenu<number>();
   const deleteConfirm = useCampaignTaskDeleteConfirm({ handleDeleteCampaignTask: crud.handleDeleteCampaignTask });
   const formSubmit = useCampaignTaskFormSubmit({
@@ -54,7 +55,7 @@ const CampaignTaskPage = () => {
       <div className="account-content">
         <div className="table-container">
           <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
-            <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button className="btn btn-primary" onClick={drawer.openAddDrawer}>
               <Plus size={16} /> Add Campaign Task
             </button>
           </TableNav>
@@ -63,17 +64,24 @@ const CampaignTaskPage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Title</TCell>
+                <TCell variant="th">Description</TCell>
                 <TCell variant="th">Scheduled Date</TCell>
+                <TCell variant="th">Scheduled Time</TCell>
                 <TCell variant="th">Assigned To</TCell>
+                <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
-                <TCell variant="th">Lead</TCell>
+                <TCell variant="th">Campaign</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
-              {pagination.list.length === 0 ? <EmptyState colSpan={8} message={LABEL_NO_DATA} /> : pagination.list.map((item, idx) => (
-                <TaskItemRow
+              {pagination.isLoading && pagination.list.length === 0 ? (
+                <TaskListLoadingRow colSpan={11} />
+              ) : !pagination.isLoading && pagination.list.length === 0 ? (
+                <EmptyState colSpan={11} message={LABEL_NO_DATA} />
+              ) : pagination.list.map((item, idx) => (
+                <CampaignTaskRow
                   key={item.id}
                   item={item}
                   index={pagination.startIndex + idx + 1}
@@ -103,8 +111,13 @@ const CampaignTaskPage = () => {
             isEditing={!!drawer.editingItem}
             staffOptions={staff.staffOptions}
             staffLoading={staff.staffLoading}
-            leadOptions={leads.leadOptions}
-            leadLoading={leads.leadLoading}
+            associationOptions={campaigns.campaignOptions}
+            associationLoading={campaigns.campaignLoading}
+            associationFieldName="campaignId"
+            associationLabel="Campaign"
+            associationPlaceholder="Select a campaign"
+            associationLoadingLabel="Loading campaigns..."
+            associationEmptyMessage="No campaigns available. Please create a campaign first."
             hideCategory
           />
         </Drawer>

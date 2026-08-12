@@ -27,15 +27,15 @@ export function useLeadFilters(
 
   const handleApplyFilters = useCallback(() => {
     const params: Record<string, string | number> = {};
-    if (filters.leadType) params.leadType = filters.leadType;
-    if (filters.leadStatus) params.leadStatusId = filters.leadStatus;
-    if (filters.enquirySource) params.enquirySource = filters.enquirySource;
-    if (filters.enquiryPurpose) params.enquiryPurpose = filters.enquiryPurpose;
+    if (filters.typeId) params.typeId = filters.typeId;
+    if (filters.leadStatus) params.statusId = filters.leadStatus;
+    if (filters.sourceId) params.sourceId = filters.sourceId;
+    if (filters.purposeId) params.purposeId = filters.purposeId;
     if (filters.assignedTo) params.assignedTo = filters.assignedTo;
     if (filters.location) params.location = filters.location;
     if (filters.dateRange.start && filters.dateRange.end) {
-      params.startDate = filters.dateRange.start;
-      params.endDate = filters.dateRange.end;
+      params.dateFrom = filters.dateRange.start;
+      params.dateTo = filters.dateRange.end;
     }
     if (filters.filterByDate) params.dateFilterBy = DATE_FILTER_BY_API_MAP[filters.filterByDate] ?? filters.filterByDate;
     if (filters.followupAdded) params.followUpAdded = filters.followupAdded;

@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { Loader2 } from 'lucide-react';
-import { Formik, Form, Field, ErrorMessage as FormikError } from 'formik';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { Loader2, Save } from 'lucide-react';
+import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext } from 'formik';
+import { draftService } from '../../../shared/services/draftService';
+import type { PreviewSection } from '../../../shared/components/preview/PreviewCanvas';
 import { staffService } from '../../deal/services/staff.service';
 import { leadPurposeService } from '../../lead-settings/lead-purpose/services';
 import { leadTypeService } from '../../lead-settings/lead-types/services';
@@ -20,11 +22,41 @@ import DynamicAdditionalFields from '../../../shared/components/drawers/DynamicA
 import type { LabelValuePair } from '../../../shared/types/common';
 import type { AddLeadFormValues } from '../../../shared/types/drawers';
 
+export interface PreviewData {
+  sections: PreviewSection[];
+  payload: CreateLeadPayload & UpdateLeadPayload;
+  formValues: AddLeadFormValues;
+}
+
 export interface LeadFormProps {
   lead?: Lead | null | undefined;
+  draftId?: string | null;
+  initialDraftValues?: any;
+  onDraftSaved?: (id: string) => void;
   onSaved?: ((action: 'created' | 'updated') => void) | undefined;
+  onPreviewRequest?: (previewData: PreviewData) => void;
   onClose: () => void;
 }
+
+const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
+  const { values, dirty } = useFormikContext<any>();
+  
+  useEffect(() => {
+    if (dirty) {
+      const timeout = setTimeout(() => {
+        const title = values.name ? values.name : 'Untitled Lead';
+        const subtitle = values.phone ? `${values.countryCode || DEFAULT_COUNTRY_CODE} ${values.phone}` : 'No phone';
+        const id = draftService.saveDraft('lead', values, title, subtitle, draftId || undefined);
+        if (id !== draftId) {
+          onDraftSaved?.(id);
+        }
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [values, dirty, draftId, onDraftSaved]);
+
+  return null;
+};
 
 /**
  * All lead create/edit form content: field layout, dropdown-option loading,
@@ -35,7 +67,7 @@ export interface LeadFormProps {
  * Used by:
  * - AddLeadDrawer (composed inside the shared Drawer shell)
  */
-const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
+const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, onPreviewRequest, onClose }: LeadFormProps) => {
   const [staffOptions, setStaffOptions] = useState<LabelValuePair[]>([]);
   const [purposeOptions, setPurposeOptions] = useState<LabelValuePair[]>([]);
   const [typeOptions, setTypeOptions] = useState<LabelValuePair[]>([]);
@@ -148,6 +180,51 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
       payload.additionalFields = additionalFields;
     }
 
+    if (onPreviewRequest) {
+      const sections: PreviewSection[] = [
+        {
+          title: 'Basic Info',
+          fields: [
+            { label: 'Name', value: trimmed.name },
+            { label: 'Phone', value: trimmed.phone ? `${trimmed.countryCode} ${trimmed.phone}` : '' },
+            { label: 'Email', value: trimmed.email || '' },
+            { label: 'Assigned To', value: staffOptions.find(o => o.value === trimmed.agentId)?.label || '' }
+          ]
+        },
+        {
+          title: 'Lead Details',
+          fields: [
+            { label: 'Purpose', value: purposeOptions.find(o => o.value === trimmed.purposeId)?.label || '' },
+            { label: 'Type', value: typeOptions.find(o => o.value === trimmed.typeId)?.label || '' },
+            { label: 'Status', value: statusOptions.find(o => o.value === trimmed.statusId)?.label || '' },
+            { label: 'Source', value: sourceOptions.find(o => o.value === trimmed.sourceId)?.label || '' },
+            { label: 'Next Follow Up', value: trimmed.nextFollowUp || '' }
+          ]
+        },
+        {
+          title: 'Location & Notes',
+          fields: [
+            { label: 'Location', value: trimmed.location || '' },
+            { label: 'Address', value: trimmed.address || '' },
+            { label: 'Notes', value: trimmed.notes || '' }
+          ]
+        }
+      ];
+
+      if (additionalFields.length > 0) {
+        sections.push({
+          title: 'Additional Info',
+          fields: additionalFields.map(af => ({
+            label: visibleFieldDefs.find(f => f.name === af.name)?.label || af.name,
+            value: af.value || ''
+          }))
+        });
+      }
+
+      onPreviewRequest({ sections, payload, formValues: trimmed });
+      return;
+    }
+
     try {
       if (isEditing && lead) {
         await leadDataService.updateLead(lead.leadId, payload);
@@ -163,6 +240,10 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
 
   const mergedInitialValues = useMemo(() => {
     const base = { ...BASE_INITIAL_VALUES, ...getInitialValues(additionalFieldDefs) };
+
+    if (initialDraftValues) {
+      return { ...base, ...initialDraftValues };
+    }
 
     if (!lead) return base;
 
@@ -206,7 +287,7 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
       address: lead.address || '',
       ...leadAddFields,
     };
-  }, [lead, staffOptions, purposeOptions, typeOptions, statusOptions, sourceOptions, additionalFieldDefs]);
+  }, [lead, staffOptions, purposeOptions, typeOptions, statusOptions, sourceOptions, additionalFieldDefs, initialDraftValues]);
 
   useEffect(() => {
     setActivePurposeId(mergedInitialValues.purposeId || '');
@@ -234,7 +315,21 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
       onSubmit={handleSubmit}
       enableReinitialize
     >
-      {({ errors, touched, isSubmitting, values, handleChange, handleBlur, submitForm, setFieldValue }) => {
+      {({ errors, touched, isSubmitting, values, handleChange, handleBlur, submitForm, setFieldValue, setFieldTouched }) => {
+        const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const digitsOnly = e.target.value.replace(/\D/g, '');
+          setFieldValue('phone', digitsOnly);
+        };
+
+        const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+          const value = e.target.value;
+          setFieldValue('countryCode', value);
+          setFieldTouched('countryCode', true, false);
+          if (values.phone) {
+            setFieldTouched('phone', true, false);
+          }
+        };
+
         const filteredFieldDefs = additionalFieldDefs.filter((f) => {
           if (!f.connectWithLeadPurpose || !f.purposeId) return true;
           return f.purposeId === activePurposeId;
@@ -288,7 +383,7 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
                     <select
                       name="countryCode"
                       value={values.countryCode}
-                      onChange={handleChange}
+                      onChange={handleCountryCodeChange}
                       onBlur={handleBlur}
                       className={`phone-country-code${errors.countryCode && touched.countryCode ? ' error' : ''}`}
                     >
@@ -297,11 +392,17 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
                       ))}
                     </select>
                     <input
-                      type="tel"
-                      name="phone"
+                      type="text"
+                      inputMode="numeric"
+                      name="lead-phone-field-no-autofill"
+                      id="lead-phone-field-no-autofill"
+                      autoComplete="do-not-autofill-phone"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck="false"
                       placeholder="Enter phone number"
                       value={values.phone}
-                      onChange={handleChange}
+                      onChange={handlePhoneChange}
                       onBlur={handleBlur}
                       className={errors.phone && touched.phone ? 'error' : ''}
                     />
@@ -432,12 +533,13 @@ const LeadForm = ({ lead, onSaved, onClose }: LeadFormProps) => {
                   handleBlur={handleBlur}
                   setFieldValue={setFieldValue}
                 />
+                <AutoSaveForm draftId={draftId} onDraftSaved={onDraftSaved} />
               </Form>
             </div>
             <div className="drawer-footer">
               <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
               <button className="btn btn-primary" type="button" onClick={submitForm} disabled={isSubmitting || (isEditing && !hasChanges)}>
-                {isSubmitting ? <><Loader2 size={16} className="spin" /> {isEditing ? 'Updating...' : 'Saving...'}</> : isEditing ? 'Update Lead' : 'Save Lead'}
+                {isSubmitting ? <><Loader2 size={16} className="spin" /> {isEditing ? 'Updating...' : onPreviewRequest ? 'Preparing Preview...' : 'Saving...'}</> : onPreviewRequest ? 'Preview Lead' : isEditing ? 'Update Lead' : 'Save Lead'}
               </button>
             </div>
           </>

@@ -8,35 +8,36 @@ import { useDealTaskCrud } from '../hooks/useDealTaskCrud';
 import { useDealTaskDrawer } from '../hooks/useDealTaskDrawer';
 import { useDealTaskDeleteConfirm } from '../hooks/useDealTaskDeleteConfirm';
 import { useDealTaskFormSubmit } from '../hooks/useDealTaskFormSubmit';
-import { useStaffOptions } from '../../shared/hooks/useStaffOptions';
-import { useLeadOptions } from '../../shared/hooks/useLeadOptions';
-import { dealTaskApiService } from '../services/index';
-import { addDealTaskValidationSchema, editDealTaskValidationSchema } from '../validations/index';
+import { useStaffOptions } from '../../common/hooks/useStaffOptions';
+import { useDealOptions } from '../../common/hooks/useDealOptions';
+import { dealTaskDataService } from '../services/dealTaskDataService';
+import { addDealTaskValidationSchema, editDealTaskValidationSchema } from '../validations/dealTask.validation';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
 import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } from '../../../../shared/components/table';
 import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
-import GenericTaskForm from '../../shared/components/GenericTaskForm';
-import TaskItemRow from '../../shared/components/TaskItemRow';
+import GenericTaskForm from '../../common/components/GenericTaskForm';
+import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
+import DealTaskRow from '../components/DealTaskRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
-import { taskTabs } from '../../shared/taskTabs';
+import { taskTabs } from '../../common/taskTabs';
 import type { DealTaskItem } from '../types/index';
 import './DealTaskPage.css';
 
 const DealTaskPage = () => {
   const pagination = useTableData<DealTaskItem>({
     fetchFn: async (params) => {
-      const response = await dealTaskApiService.fetchAll({ ...params, type: 'DEAL_TASK' });
+      const response = await dealTaskDataService.fetchAll({ ...params, type: 'DEAL_TASK' });
       return ListResponseMapper.toPagedResult<DealTaskItem>(response);
     },
   });
   const toast = useToast();
   const crud = useDealTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
   const staff = useStaffOptions();
-  const leads = useLeadOptions();
-  const drawer = useDealTaskDrawer({ loadStaff: staff.loadStaff, loadLeads: leads.loadLeads });
+  const deals = useDealOptions();
+  const drawer = useDealTaskDrawer({ loadStaff: staff.loadStaff, loadDeals: deals.loadDeals });
   const dropdown = useDropdownMenu<number>();
   const deleteConfirm = useDealTaskDeleteConfirm({ handleDeleteDealTask: crud.handleDeleteDealTask });
   const formSubmit = useDealTaskFormSubmit({
@@ -63,17 +64,24 @@ const DealTaskPage = () => {
               <TRow>
                 <TCell variant="th">Sl No</TCell>
                 <TCell variant="th">Title</TCell>
+                <TCell variant="th">Description</TCell>
                 <TCell variant="th">Scheduled Date</TCell>
+                <TCell variant="th">Scheduled Time</TCell>
                 <TCell variant="th">Assigned To</TCell>
+                <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
-                <TCell variant="th">Lead</TCell>
+                <TCell variant="th">Deal</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
-              {pagination.list.length === 0 ? <EmptyState colSpan={8} message={LABEL_NO_DATA} /> : pagination.list.map((item, idx) => (
-                <TaskItemRow
+              {pagination.isLoading && pagination.list.length === 0 ? (
+                <TaskListLoadingRow colSpan={11} />
+              ) : !pagination.isLoading && pagination.list.length === 0 ? (
+                <EmptyState colSpan={11} message={LABEL_NO_DATA} />
+              ) : pagination.list.map((item, idx) => (
+                <DealTaskRow
                   key={item.id}
                   item={item}
                   index={pagination.startIndex + idx + 1}
@@ -103,8 +111,13 @@ const DealTaskPage = () => {
             isEditing={!!drawer.editingItem}
             staffOptions={staff.staffOptions}
             staffLoading={staff.staffLoading}
-            leadOptions={leads.leadOptions}
-            leadLoading={leads.leadLoading}
+            associationOptions={deals.dealOptions}
+            associationLoading={deals.dealLoading}
+            associationFieldName="dealId"
+            associationLabel="Deal"
+            associationPlaceholder="Select a deal"
+            associationLoadingLabel="Loading deals..."
+            associationEmptyMessage="No deals available. Please create a deal first."
             hideCategory
           />
         </Drawer>
