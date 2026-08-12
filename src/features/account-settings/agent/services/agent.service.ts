@@ -73,6 +73,31 @@ class AgentService {
     });
   }
 
+  async getDeletionDependencies(staffId: string): Promise<StaffDeletionDependenciesResponse> {
+    const response = await axiosInstance.get<StaffDeletionDependenciesResponse>(AGENT_API_ENDPOINTS.DELETION_DEPENDENCIES(staffId));
+    return ServiceResponseUtil.normalize({
+      status: response.data.status,
+      message: response.data.message ?? '',
+      data: response.data.data,
+    });
+  }
+
+  async reassignLeads(staffId: string, toStaffId: string): Promise<Pick<AgentResponse, 'status' | 'message'>> {
+    const response = await axiosInstance.post<AgentResponse>(AGENT_API_ENDPOINTS.REASSIGN_LEADS(staffId), { toStaffId });
+    return ServiceResponseUtil.normalize({
+      status: response.data.status,
+      message: response.data.message,
+    });
+  }
+
+  async resolveTasks(staffId: string, action: 'delete' | 'reassign', toStaffId?: string): Promise<Pick<AgentResponse, 'status' | 'message'>> {
+    const response = await axiosInstance.post<AgentResponse>(AGENT_API_ENDPOINTS.RESOLVE_TASKS(staffId), { action, toStaffId });
+    return ServiceResponseUtil.normalize({
+      status: response.data.status,
+      message: response.data.message,
+    });
+  }
+  
   async getMe(): Promise<GetStaffMeResponse> {
     const response = await axiosInstance.get<GetStaffMeResponse>(AGENT_API_ENDPOINTS.ME);
     return response.data;
