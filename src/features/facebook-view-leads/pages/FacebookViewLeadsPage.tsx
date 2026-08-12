@@ -26,6 +26,7 @@ const FacebookViewLeadsPage: React.FC = () => {
 
       <FilterCard
         filters={d.filters}
+        workflows={d.workflows}
         onFilterChange={d.handleFilterChange}
         onClearClick={() => d.setShowClearConfirm(true)}
       />
@@ -33,18 +34,18 @@ const FacebookViewLeadsPage: React.FC = () => {
       <SummaryCards stats={d.stats} />
 
       <LeadsTable
-        data={d.paginatedLeads}
+        data={d.leads}
         onViewDetails={d.handleViewDetails}
         rowsPerPage={d.rowsPerPage}
         onRowsPerPageChange={d.handleRowsPerPageChange}
-        onSearchChange={(v) => d.handleFilterChange('search', v)}
+        loading={d.loading}
       />
 
-      {d.filteredLeads.length > 0 && (
+      {d.totalItems > 0 && (
         <LeadsPagination
           currentPage={d.currentPage}
           totalPages={d.totalPages}
-          totalItems={d.filteredLeads.length}
+          totalItems={d.totalItems}
           rowsPerPage={d.rowsPerPage}
           onPageChange={d.setCurrentPage}
         />
