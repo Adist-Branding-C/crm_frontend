@@ -1,11 +1,14 @@
 import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
-import { ChevronUp, ChevronDown, Filter, Plus } from 'lucide-react';
+import { ChevronUp, ChevronDown, Filter, Plus, Briefcase, FileText } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import Drawer from '../../../shared/components/Drawer';
 import Toast from '../../../shared/components/Toast';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
+import DraftsList from '../../enquiries/components/DraftsList';
+import PreviewCanvas, { PreviewSection } from '../../../shared/components/preview/PreviewCanvas';
+import { draftService } from '../../../shared/services/draftService';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useDealList } from '../hooks/useDealList';
 import { useDealPagination } from '../hooks/useDealPagination';
@@ -15,6 +18,7 @@ import { useDealFilters } from '../hooks/useDealFilters';
 import { useDealDeleteConfirm } from '../hooks/useDealDeleteConfirm';
 import { useDealActionMenu } from '../hooks/useDealActionMenu';
 import { useDealRowActions } from '../hooks/useDealRowActions';
+import { useDrafts } from '../../../shared/hooks/useDrafts';
 import { useDealClearFilters } from '../hooks/useDealClearFilters';
 import { useDealCrud } from '../hooks/useDealCrud';
 import { useDealDrawer } from '../hooks/useDealDrawer';
@@ -57,6 +61,18 @@ const DealPage = () => {
   const sortHook = useDealSort(list.fetchDeals, activeFiltersRef, searchQueryRef, rowsPerPageRef, resetPage);
 
   const pagination = useDealPagination(list.fetchDeals, activeFiltersRef, searchQueryRef, list.totalCount, list.totalPages);
+
+  const [activeView, setActiveView] = useState<'deals' | 'drafts'>('deals');
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const drafts = useDrafts('deal');
+  const [previewData, setPreviewData] = useState<{ sections: PreviewSection[], payload: any, formValues: any } | null>(null);
+  const [isPreviewSaving, setIsPreviewSaving] = useState(false);
+
+  useEffect(() => {
+    if (activeView === 'drafts' && drafts.length === 0) {
+      setActiveView('deals');
+    }
+  }, [activeView, drafts.length]);
 
   const dealSearch = useDealSearch(list.fetchDeals, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
 
@@ -117,6 +133,11 @@ const DealPage = () => {
   const editInitialValues = useMemo((): DealFormData => {
     const additionalFieldValues = getInitialValues(dealAdditionalFieldDefs);
 
+    if (draftId) {
+      const draft = draftService.getDrafts('deal').find(d => d.id === draftId);
+      if (draft) return draft.payload as DealFormData;
+    }
+
     if (!drawer.editingItem) {
       return { ...DEAL_FORM_DEFAULT_VALUES, ...additionalFieldValues };
     }
@@ -157,9 +178,49 @@ const DealPage = () => {
       agentId: agentMatch ? agentMatch.value : (rawAgentId || ''),
       ...additionalFieldValues,
     };
-  }, [drawer.editingItem, dealAdditionalFieldDefs, formStaff]);
+  }, [drawer.editingItem, dealAdditionalFieldDefs, formStaff, draftId]);
 
   const formBodyRef = useRef<HTMLDivElement>(null);
+
+  const handleResumeDraft = (id: string) => {
+    setDraftId(id);
+    const draft = draftService.getDrafts('deal').find(d => d.id === id);
+    if (draft) {
+      setActiveView('deals');
+      drawer.openAddDrawer();
+    }
+  };
+
+  const handlePreviewRequest = (data: { sections: PreviewSection[], payload: any, formValues: any }) => {
+    setPreviewData(data);
+  };
+
+  const handlePreviewSave = async () => {
+    if (!previewData) return;
+    setIsPreviewSaving(true);
+    try {
+      const values = previewData.payload;
+      const helpers = { setSubmitting: () => {} } as any;
+      const success = drawer.editingItem
+        ? await formSubmit.handleEditSubmit(values, helpers)
+        : await formSubmit.handleAddSubmit(values, helpers);
+      
+      if (success) {
+        if (draftId) draftService.deleteDraft(draftId);
+        setPreviewData(null);
+        setDraftId(null);
+        drawer.closeDrawer();
+      }
+    } finally {
+      setIsPreviewSaving(false);
+    }
+  };
+
+  const handleDrawerClose = () => {
+    setPreviewData(null);
+    setDraftId(null);
+    drawer.closeDrawer();
+  };
 
   const initialFetchDone = useRef(false);
   useEffect(() => {
@@ -218,50 +279,63 @@ const DealPage = () => {
       <PageHeader
         title="Deals"
         description="Track sales opportunities, aiding management and conversion of potential customers."
+        action={
+          drafts.length > 0 && (
+            <button
+              className={`btn ${activeView === 'drafts' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setActiveView(activeView === 'drafts' ? 'deals' : 'drafts')}
+            >
+              {activeView === 'drafts' ? <><Briefcase size={16} /> Back to Deals</> : <><FileText size={16} /> Drafts</>}
+            </button>
+          )
+        }
       />
 
-      {list.error && !drawer.showDrawer && (
+      {list.error && !drawer.showDrawer && activeView === 'deals' && (
         <div className="error-banner">
           <span>{list.error}</span>
           <button className="btn btn-sm btn-secondary" onClick={() => list.fetchDeals(pagination.currentPage, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current)}>Retry</button>
         </div>
       )}
 
-      <div className="table-container">
-        <TableNav
-          searchQuery={dealSearch.searchQuery}
-          onSearchChange={dealSearch.setSearchQuery}
-          searchPlaceholder="Search deals..."
-          rowsPerPage={pagination.rowsPerPage}
-          onRowsPerPageChange={pagination.handleRowsPerPageChange}
-        >
-          <button className="btn btn-secondary" onClick={() => filtersHook.setShowFilters(!filtersHook.showFilters)}>
-            <Filter size={16} /> Filter <ChevronDown size={14} className={filtersHook.showFilters ? 'rotate' : ''} />
-          </button>
+      {activeView === 'drafts' && <DraftsList type="deal" onResumeDraft={handleResumeDraft} />}
 
-          <DealSortDropdown
-            sortBy={sortHook.sortConfig.key}
-            sortOrder={sortHook.sortConfig.direction}
-            onSortChange={(field: string, direction: string) => {
-              if (direction === 'desc') sortHook.handleSortDesc(field);
-              else sortHook.handleSortAsc(field);
-            }}
-          />
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => handleExportCSV(dealSearch.searchQuery, activeFiltersRef.current)}
-            disabled={isExporting}
+      {activeView === 'deals' && (
+        <div className="table-container">
+          <TableNav
+            searchQuery={dealSearch.searchQuery}
+            onSearchChange={dealSearch.setSearchQuery}
+            searchPlaceholder="Search deals..."
+            rowsPerPage={pagination.rowsPerPage}
+            onRowsPerPageChange={pagination.handleRowsPerPageChange}
           >
-            {isExporting ? 'Exporting...' : 'Export'}
-          </button>
+            <button className="btn btn-secondary" onClick={() => filtersHook.setShowFilters(!filtersHook.showFilters)}>
+              <Filter size={16} /> Filter <ChevronDown size={14} className={filtersHook.showFilters ? 'rotate' : ''} />
+            </button>
 
-          <button className="btn btn-primary" onClick={() => { filtersHook.setShowFilters(false); drawer.openAddDrawer(); }}>
-            <Plus size={16} /> Add Deal
-          </button>
-        </TableNav>
+            <DealSortDropdown
+              sortBy={sortHook.sortConfig.key}
+              sortOrder={sortHook.sortConfig.direction}
+              onSortChange={(field: string, direction: string) => {
+                if (direction === 'desc') sortHook.handleSortDesc(field);
+                else sortHook.handleSortAsc(field);
+              }}
+            />
 
-        {filtersHook.showFilters && (
+            <button
+              className="btn btn-secondary"
+              onClick={() => handleExportCSV(dealSearch.searchQuery, activeFiltersRef.current)}
+              disabled={isExporting}
+            >
+              {isExporting ? 'Exporting...' : 'Export'}
+            </button>
+
+            <button className="btn btn-primary" onClick={() => { filtersHook.setShowFilters(false); setDraftId(null); drawer.openAddDrawer(); }}>
+              <Plus size={16} /> Add Deal
+            </button>
+          </TableNav>
+
+          {filtersHook.showFilters && (
           <DealFilters
             filters={filtersHook.filters}
             onFilterChange={filtersHook.setFilters}
@@ -333,20 +407,39 @@ const DealPage = () => {
           onPageChange={pagination.handleSetCurrentPage}
         />
       </div>
+      )}
 
-      <Drawer ref={formBodyRef} isOpen={drawer.showDrawer} onClose={drawer.closeDrawer} title={drawer.editingItem ? 'Edit Deal' : 'Add Deal'}>
-        <DealForm
-          key={drawer.editingItem ? `edit-${drawer.editingItem.id}` : 'add-drawer'}
-          editingItem={drawer.editingItem}
-          validationSchema={dealValidationSchema}
-          initialValues={editInitialValues}
-          onSubmit={drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleAddSubmit}
-          isLoading={list.isLoading}
+      {previewData ? (
+        <PreviewCanvas
+          isOpen={true}
+          title={drawer.editingItem ? 'Preview Edit' : 'Preview Deal'}
+          subtitle="Review the details before saving"
+          sections={previewData.sections}
+          isSaving={isPreviewSaving}
           error={formError}
-          onCancel={drawer.closeDrawer}
-          scrollContainerRef={formBodyRef}
+          onClose={() => { handleDrawerClose(); setFormError(''); }}
+          onEdit={() => { setPreviewData(null); setFormError(''); }}
+          onSave={handlePreviewSave}
         />
-      </Drawer>
+      ) : (
+        <Drawer ref={formBodyRef} isOpen={drawer.showDrawer} onClose={handleDrawerClose} title={drawer.editingItem ? 'Edit Deal' : 'Add Deal'}>
+          <DealForm
+            key={drawer.editingItem ? `edit-${drawer.editingItem.id}` : 'add-drawer'}
+            editingItem={drawer.editingItem}
+            draftId={draftId}
+            initialDraftValues={editInitialValues}
+            validationSchema={dealValidationSchema}
+            initialValues={editInitialValues}
+            onSubmit={drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleAddSubmit}
+            onPreviewRequest={handlePreviewRequest}
+            onDraftSaved={setDraftId}
+            isLoading={list.isLoading}
+            error={formError}
+            onCancel={handleDrawerClose}
+            scrollContainerRef={formBodyRef}
+          />
+        </Drawer>
+      )}
 
       <AdminDeleteModal
         isOpen={!!deleteConfirm.deletingItem}

@@ -67,6 +67,7 @@ export interface AddDealTaskDrawerProps {
   onClose: () => void;
   onSave: (data: TaskFormData) => void;
   task?: TaskFormData | null;
+  draftId?: string;
 }
 
 export interface AddCampaignDrawerProps {
@@ -81,6 +82,7 @@ export interface AddDealDrawerProps {
   onClose: () => void;
   onSave: (data: DealFormData) => void;
   deal?: DealFormData | null;
+  draftId?: string;
 }
 
 import type { Lead } from '../../features/enquiries/types';
@@ -90,6 +92,7 @@ export interface AddLeadDrawerProps {
   onClose: () => void;
   onSaved?: (action: 'created' | 'updated') => void;
   lead?: Lead | null;
+  draftId?: string;
 }
 
 export interface AddLeadFormValues {

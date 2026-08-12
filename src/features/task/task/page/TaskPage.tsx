@@ -1,5 +1,5 @@
-import { Plus } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { Plus, FileText, CheckSquare } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
 import { useToast } from '../../../../shared/hooks/useToast';
@@ -24,11 +24,30 @@ import TaskRow from '../components/TaskRow';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
+import DraftsList from '../../../enquiries/components/DraftsList';
+import PreviewCanvas, { PreviewSection } from '../../../../shared/components/preview/PreviewCanvas';
+import { draftService } from '../../../../shared/services/draftService';
+import { useDrafts } from '../../../../shared/hooks/useDrafts';
+import { getErrorMessage } from '../../../../shared/utils/error';
 import { taskTabs } from '../../common/taskTabs';
 import type { TaskItem, TaskFormDataUpdate } from '../types';
+import type { TaskPreviewData } from '../../common/types/genericTaskForm.types';
 import './TaskPage.css';
 
+type TaskView = 'tasks' | 'drafts';
+
 const TaskPage = () => {
+  const [activeView, setActiveView] = useState<TaskView>('tasks');
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const drafts = useDrafts('task');
+  const [previewData, setPreviewData] = useState<TaskPreviewData | null>(null);
+
+  useEffect(() => {
+    if (activeView === 'drafts' && drafts.length === 0) {
+      setActiveView('tasks');
+    }
+  }, [activeView, drafts.length]);
+
   const pagination = useTableData<TaskItem>({
     fetchFn: async (params) => {
       const response = await taskDataService.getAll({ ...params, type: 'NORMAL' });
@@ -51,6 +70,46 @@ const TaskPage = () => {
   });
   const { searchValue, handleSearchChange } = useDebouncedSearch(pagination.handleSearchChange);
 
+  const handleResumeDraft = (id: string) => {
+    setDraftId(id);
+    const draft = draftService.getDrafts('task').find(d => d.id === id);
+    if (draft) {
+      setActiveView('tasks');
+      drawer.openAddDrawer();
+    }
+  };
+
+  const taskInitialValues = useMemo(() => {
+    if (draftId) {
+      return draftService.getDrafts('task').find(d => d.id === draftId)?.payload || drawer.drawerInitialValues;
+    }
+    return drawer.drawerInitialValues;
+  }, [draftId, drawer.drawerInitialValues]);
+
+  const handleSavePreview = async () => {
+    if (!previewData) return;
+    try {
+      const isEditing = !!drawer.editingItem;
+      const helpers = { setSubmitting: () => {} } as unknown as import('formik').FormikHelpers<Record<string, unknown>>;
+      let success = false;
+      if (isEditing) {
+        success = await formSubmit.handleEditSubmit(previewData.payload as Record<string, unknown>, helpers);
+      } else {
+        success = await formSubmit.handleSubmit(previewData.payload as Record<string, unknown>, helpers);
+      }
+      
+      if (!success) return;
+
+      if (draftId) {
+        draftService.deleteDraft(draftId);
+      }
+      setPreviewData(null);
+      setDraftId(null);
+      drawer.closeDrawer();
+    } catch (e: unknown) {
+      toast.showToastMessage(getErrorMessage(e, 'Failed to save task'), 'error');
+    }
+  };
 
   useEffect(() => {
     staff.loadStaff();
@@ -83,11 +142,29 @@ const TaskPage = () => {
 
   return (
     <div className="task-settings-page">
-      <PageHeader title="Task" description="Manage your tasks" />
-      <SettingsTabs items={taskTabs} />
+      <PageHeader 
+        title={activeView === 'drafts' ? 'Task Drafts' : 'Task'} 
+        description={activeView === 'drafts' ? 'Resume your unfinished tasks' : 'Manage your tasks'} 
+        action={
+          drafts.length > 0 && (
+            <button
+              className={`btn btn-secondary ${activeView === 'drafts' ? 'active' : ''}`}
+              onClick={() => setActiveView((v) => (v === 'drafts' ? 'tasks' : 'drafts'))}
+            >
+              {activeView === 'drafts' ? <><CheckSquare size={16} /> Back to Tasks</> : <><FileText size={16} /> Drafts</>}
+            </button>
+          )
+        }
+      />
+      
+      {activeView === 'tasks' && <SettingsTabs items={taskTabs} />}
+      
       <div className="account-content">
-        <div className="table-container">
-          <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
+        {activeView === 'drafts' && <DraftsList type="task" onResumeDraft={handleResumeDraft} />}
+        
+        {activeView === 'tasks' && (
+          <div className="table-container">
+            <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={16} /> Add Task
             </button>
@@ -137,11 +214,33 @@ const TaskPage = () => {
             onPageChange={pagination.setPageNumber}
           />
         </div>
-        <Drawer isOpen={drawer.showDrawer} onClose={drawer.closeDrawer} title={drawer.editingItem ? 'Edit Task' : 'Add Task'}>
-          <GenericTaskForm
+        )}
+        
+        {previewData ? (
+          <PreviewCanvas
+            isOpen={true}
+            title={drawer.editingItem ? 'Preview Task Edit' : 'Preview Task'}
+            subtitle="Review the details before saving"
+            sections={previewData.sections}
+            isSaving={false}
+            error={pagination.error}
+            onClose={() => { setPreviewData(null); pagination.setError(''); }}
+            onEdit={() => { setPreviewData(null); pagination.setError(''); }}
+            onSave={handleSavePreview}
+          />
+        ) : (
+          <Drawer 
+            isOpen={drawer.showDrawer} 
+            onClose={() => { drawer.closeDrawer(); setDraftId(null); }} 
+            title={drawer.editingItem ? 'Edit Task' : 'Add Task'}
+          >
+            <GenericTaskForm
             validationSchema={drawer.editingItem ? editTaskValidationSchema : addTaskValidationSchema}
-            initialValues={drawer.drawerInitialValues}
+            initialValues={taskInitialValues}
             onSubmit={drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit}
+            draftId={draftId}
+            onDraftSaved={setDraftId}
+            onPreviewRequest={(data) => setPreviewData(data)}
             isLoading={pagination.isLoading}
             error={pagination.error}
             isEditing={!!drawer.editingItem}
@@ -153,6 +252,7 @@ const TaskPage = () => {
             leadLoading={leads.leadLoading}
           />
         </Drawer>
+        )}
         <AdminDeleteModal
           isOpen={!!deleteConfirm.deletingItem}
           itemName={deleteConfirm.deletingItem?.title || ''}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -74,7 +75,7 @@ const Drawer = ({
   const shouldRender = animated ? isVisible : isOpen;
   if (!shouldRender) return null;
 
-  return (
+  const content = (
     <div
       className={`${overlayClassName}${animated && isOpen ? ' visible' : ''}`}
       onClick={closeOnBackdropClick ? onClose : undefined}
@@ -95,6 +96,8 @@ const Drawer = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(content, document.body) : null;
 };
 
 export default Drawer;

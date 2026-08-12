@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, X, AlertTriangle } from 'lucide-react';
 
 export interface ToastProps {
@@ -18,11 +19,12 @@ const Toast: React.FC<ToastProps> = ({ message, type, isVisible, onClose, durati
 
   if (!isVisible) return null;
 
-  return (
+  return createPortal(
     <div className={`toast-notification toast-${type}`} onClick={onClose}>
       {type === 'success' ? <Check size={18} /> : <AlertTriangle size={18} />}
       <span>{message}</span>
-    </div>
+    </div>,
+    document.body
   );
 };
 
