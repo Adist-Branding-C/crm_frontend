@@ -26,7 +26,7 @@ export function useLeadListData(onShowToast: (message: string, type: 'success' |
       if (response.status && response.data) {
         setLeads(response.data.items.map(mapApiToUI));
         setTotal(response.data.pagination?.total ?? 0);
-        setTotalPages(response.data.pagination?.totalPages ?? 1);
+        setTotalPages(response.data.pagination?.total_pages ?? response.data.pagination?.totalPages ?? 1);
       } else {
         setLeads([]);
         setTotal(0);
