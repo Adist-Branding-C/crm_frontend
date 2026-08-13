@@ -28,8 +28,8 @@ export function useLeadPagination(
     onFetch(next, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
   }, [onFetch, activeFiltersRef, searchQueryRef]);
 
-  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    const value = Number(e.target.value);
+  const handleRowsPerPageChange = useCallback((e: number | ChangeEvent<HTMLSelectElement>) => {
+    const value = typeof e === 'number' ? e : Number(e.target.value);
     setRowsPerPage(value);
     setCurrentPage(1);
     onFetch(1, value, searchQueryRef.current, activeFiltersRef.current);

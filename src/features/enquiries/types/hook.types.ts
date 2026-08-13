@@ -28,7 +28,7 @@ export interface UseLeadPaginationReturn {
   startIndex: number;
   totalItems: number;
   handleSetCurrentPage: (page: number | ((prev: number) => number)) => void;
-  handleRowsPerPageChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  handleRowsPerPageChange: (e: number | ChangeEvent<HTMLSelectElement>) => void;
   resetPage: () => void;
 }
 
