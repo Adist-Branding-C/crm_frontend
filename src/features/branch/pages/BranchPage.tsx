@@ -19,7 +19,7 @@ const BranchPage = () => {
           <PageHeader title="Branches" description="Create and manage company branches" />
           <SettingsTabs />
           <div className="table-container">
-            <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Branch" />
+            <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Branch" rowsPerPage={d.rowsPerPage} onRowsPerPageChange={d.handleRowsPerPageChange} />
             <AdminTable data={d.paginatedData} columns={columns} startIndex={d.startIndex}
               dropdownOpen={d.dropdownOpen} onToggleDropdown={d.setDropdownOpen}
               onEdit={d.handleEdit} onDelete={d.handleDeleteClick} />

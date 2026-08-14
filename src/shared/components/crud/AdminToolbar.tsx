@@ -4,12 +4,12 @@ import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
 import type { AdminToolbarProps } from '../../types/crud';
 import { LABEL_SHOW } from '../../constants/labels';
 
-const AdminToolbar: React.FC<AdminToolbarProps> = React.memo(({ searchQuery, onSearchChange, onAdd, addLabel }) => (
+const AdminToolbar: React.FC<AdminToolbarProps> = React.memo(({ searchQuery, onSearchChange, onAdd, addLabel, rowsPerPage, onRowsPerPageChange }) => (
   <div className="table-header-controls">
     <div className="entries-select">
       <label>
-       {LABEL_SHOW}
-        <select value="10">
+        {LABEL_SHOW}
+        <select value={rowsPerPage} onChange={(e) => onRowsPerPageChange && onRowsPerPageChange(e)}>
           {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
         entries

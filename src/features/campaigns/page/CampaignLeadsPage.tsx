@@ -23,42 +23,28 @@ const CampaignLeadsPage = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
 
-  const [pageNumber, setPageNumber] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
-  const [filterQuery, setFilterQuery] = useState('');
-
   const { campaign, isLoading: campaignLoading } = useCampaign(campaignId ?? null);
   const isLeadCampaign = campaign?.type === CAMPAIGN_TYPES.LEAD_CAMPAIGN;
 
-  const { leads, isLoading, error, updateStatus, removeLead } = useCampaignLeads(campaignId ?? null);
+  const { 
+    leads, 
+    isLoading, 
+    error, 
+    updateStatus, 
+    removeLead,
+    totalItems,
+    searchQuery,
+    setSearchQuery,
+    currentPage,
+    setCurrentPage,
+    rowsPerPage,
+    handleRowsPerPageChange,
+    totalPages,
+  } = useCampaignLeads(campaignId ?? null);
   const removeConfirm = useCampaignLeadRemoveConfirm(removeLead);
   const dropdown = useRowDropdown();
 
-  const { searchValue, handleSearchChange } = useDebouncedSearch(useCallback((value: string) => {
-    setFilterQuery(value);
-    setPageNumber(1);
-  }, []));
 
-  const handleRowsPerPageChange = useCallback((value: number) => {
-    setRowsPerPage(value);
-    setPageNumber(1);
-  }, []);
-
-  const filteredLeads = useMemo(() => {
-    if (!filterQuery.trim()) return leads;
-    const q = filterQuery.toLowerCase();
-    return leads.filter((item) =>
-      (item.lead?.name ?? '').toLowerCase().includes(q) ||
-      (item.lead?.phone ?? '').toLowerCase().includes(q) ||
-      (item.lead?.email ?? '').toLowerCase().includes(q),
-    );
-  }, [leads, filterQuery]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / rowsPerPage));
-  const paginatedLeads = useMemo(
-    () => filteredLeads.slice((pageNumber - 1) * rowsPerPage, pageNumber * rowsPerPage),
-    [filteredLeads, pageNumber, rowsPerPage],
-  );
 
   return (
     <PageContainer>
@@ -96,8 +82,8 @@ const CampaignLeadsPage = () => {
 
       <div className="table-container">
         <TableNav
-          searchQuery={searchValue}
-          onSearchChange={handleSearchChange}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
           searchPlaceholder="Search assigned leads..."
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleRowsPerPageChange}
@@ -119,12 +105,12 @@ const CampaignLeadsPage = () => {
           <TBody>
             {isLoading ? (
               <EmptyState colSpan={8} message="Loading assigned leads..." />
-            ) : paginatedLeads.length === 0 ? (
+            ) : leads.length === 0 ? (
               <EmptyState colSpan={8} message={LABEL_NO_DATA} />
             ) : (
-              paginatedLeads.map((item, index) => (
+              leads.map((item, index) => (
                 <TRow key={item.id}>
-                  <TCell>{(pageNumber - 1) * rowsPerPage + index + 1}</TCell>
+                  <TCell>{(currentPage - 1) * rowsPerPage + index + 1}</TCell>
                   <TCell>{item.lead?.name ?? `Lead #${item.leadId}`}</TCell>
                   <TCell>{item.lead?.phone || '-'}</TCell>
                   <TCell>{item.lead?.email || '-'}</TCell>
@@ -147,11 +133,11 @@ const CampaignLeadsPage = () => {
         </Table>
 
         <Pagination
-          currentPage={pageNumber}
+          currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={filteredLeads.length}
+          totalItems={totalItems}
           rowsPerPage={rowsPerPage}
-          onPageChange={setPageNumber}
+          onPageChange={setCurrentPage}
         />
       </div>
 

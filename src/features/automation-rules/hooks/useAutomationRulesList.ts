@@ -1,53 +1,63 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useAutomationData } from '../context/AutomationDataContext';
-import { useSearchFilter } from '../../../shared/hooks/useSearchFilter';
-import { DEFAULT_ROWS_PER_PAGE } from '../../../shared/constants/pagination';
+import { useCallback, useState, useEffect } from 'react';
+import { useTableData } from '../../../shared/hooks/useTableData';
+import { automationRulesApi } from '../services/automationRulesApi';
+import { mapApiRuleToUI } from '../mappers/automationRuleMapper';
 import type { TriggerType } from '../types';
 
 export function useAutomationRulesList() {
-  const { rules, isLoadingRules } = useAutomationData();
   const [triggerTypeFilter, setTriggerTypeFilter] = useState<TriggerType | ''>('');
   const [activeFilter, setActiveFilter] = useState<'' | 'active' | 'inactive'>('');
   const [showFilters, setShowFilters] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
-  const visibleRules = useMemo(() => rules.filter((rule) => !rule.deletedAt), [rules]);
-
-  const filteredByDropdowns = useMemo(() => visibleRules.filter((rule) => {
-    if (triggerTypeFilter && rule.triggerType !== triggerTypeFilter) return false;
-    if (activeFilter === 'active' && !rule.isActive) return false;
-    if (activeFilter === 'inactive' && rule.isActive) return false;
-    return true;
-  }), [visibleRules, triggerTypeFilter, activeFilter]);
-
-  const { query, setQuery, filteredData } = useSearchFilter(filteredByDropdowns, ['name']);
-
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
-  const safePage = Math.min(currentPage, totalPages);
-  const startIndex = (safePage - 1) * rowsPerPage;
-  const paginatedRules = useMemo(
-    () => filteredData.slice(startIndex, startIndex + rowsPerPage),
-    [filteredData, startIndex, rowsPerPage],
-  );
-
-  const handleRowsPerPageChange = useCallback((value: number) => {
-    setRowsPerPage(value);
-    setCurrentPage(1);
-  }, []);
+  const {
+    list,
+    totalCount,
+    isLoading,
+    searchQuery,
+    handleSearchChange,
+    pageNumber,
+    setPageNumber,
+    limit,
+    handleRowsPerPageChange,
+    totalPages,
+    refresh,
+  } = useTableData({
+    fetchFn: async (params) => {
+      const response = await automationRulesApi.getRules({
+        pageNumber: params.pageNumber,
+        limit: params.limit,
+        search: params.search,
+        triggerType: triggerTypeFilter,
+        isActive: activeFilter === 'active' ? true : activeFilter === 'inactive' ? false : '',
+      });
+      
+      const items = response.data?.items ?? [];
+      const mappedItems = items.map(mapApiRuleToUI);
+      return {
+        items: mappedItems,
+        total: response.data?.pagination?.total ?? 0,
+      };
+    },
+  });
 
   const clearFilters = useCallback(() => {
     setTriggerTypeFilter('');
     setActiveFilter('');
   }, []);
 
+  // Trigger re-fetch when custom filters change
+  useEffect(() => {
+    setPageNumber(1);
+    refresh(1);
+  }, [triggerTypeFilter, activeFilter, refresh, setPageNumber]);
+
   return {
-    rules: paginatedRules,
-    totalItems: filteredData.length,
-    isEmpty: !isLoadingRules && visibleRules.length === 0,
-    isLoading: isLoadingRules,
-    searchQuery: query,
-    setSearchQuery: setQuery,
+    rules: list,
+    totalItems: totalCount,
+    isEmpty: !isLoading && totalCount === 0 && !searchQuery && !triggerTypeFilter && !activeFilter,
+    isLoading,
+    searchQuery,
+    setSearchQuery: handleSearchChange,
     triggerTypeFilter,
     setTriggerTypeFilter,
     activeFilter,
@@ -55,10 +65,11 @@ export function useAutomationRulesList() {
     showFilters,
     setShowFilters,
     clearFilters,
-    currentPage: safePage,
-    setCurrentPage,
-    rowsPerPage,
+    currentPage: pageNumber,
+    setCurrentPage: setPageNumber,
+    rowsPerPage: limit,
     handleRowsPerPageChange,
     totalPages,
+    refresh,
   };
 }

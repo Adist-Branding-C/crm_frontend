@@ -19,7 +19,7 @@ const WorkModePage = () => {
           <PageHeader title="Work Mode" description="Configure work modes for staff" />
           <SettingsTabs />
           <div className="table-container">
-            <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Work Mode" />
+            <AdminToolbar searchQuery={d.searchQuery} onSearchChange={d.setSearchQuery} onAdd={d.handleAdd} addLabel="Add Work Mode" rowsPerPage={d.rowsPerPage} onRowsPerPageChange={d.handleRowsPerPageChange} />
             <AdminTable data={d.paginatedData} columns={columns} startIndex={d.startIndex}
               dropdownOpen={d.dropdownOpen} onToggleDropdown={d.setDropdownOpen}
               onEdit={d.handleEdit} onDelete={d.handleDeleteClick} />

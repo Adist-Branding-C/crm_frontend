@@ -13,9 +13,18 @@ import type { CampaignLeadStatus } from '../../../shared/constants/enums';
  * - useCampaignLeads (Assign Leads drawer's data layer).
  */
 export class CampaignLeadsApiService {
-  async getForCampaign(campaignId: string): Promise<ApiResponse<CampaignLeadItem[]>> {
-    const response = await axiosInstance.get<ApiResponse<CampaignLeadItem[]>>(
+  async getForCampaign(
+    campaignId: string,
+    params?: { pageNumber?: number; limit?: number; search?: string },
+  ): Promise<ApiResponse<{ items: CampaignLeadItem[]; pagination: any }>> {
+    const query: Record<string, string | number> = {};
+    if (params?.pageNumber) query.pageNumber = params.pageNumber;
+    if (params?.limit) query.limit = params.limit;
+    if (params?.search) query.search = params.search;
+
+    const response = await axiosInstance.get<ApiResponse<{ items: CampaignLeadItem[]; pagination: any }>>(
       CAMPAIGN_API_ENDPOINTS.ASSIGNED_LEADS(campaignId),
+      { params: query },
     );
     return ServiceResponseUtil.successResponse({
       status: response.data.status,

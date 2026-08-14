@@ -15,7 +15,7 @@ import './AutomationRulesListPage.css';
 const AutomationRulesListPage = () => {
   const navigate = useNavigate();
   const list = useAutomationRulesList();
-  const { togglingId, handleToggle, deleteConfirm, toast } = useRuleActions();
+  const { togglingId, handleToggle, deleteConfirm, toast } = useRuleActions(list.refresh);
 
   const handleEdit = (rule: AutomationRule) => navigate(`/automation-rules/${rule.id}/edit`);
   const handleViewLogs = (rule: AutomationRule) => navigate(`/automation-rules/${rule.id}/execution-logs`);

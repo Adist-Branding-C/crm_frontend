@@ -23,8 +23,9 @@ export function useLeadSourceTableActions({ table, drawer, dropdown, deleteConfi
     dropdown.closeDropdown();
   }, [deleteConfirm, dropdown]);
 
-  const handleRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    table.handleRowsPerPageChange(Number(e.target.value));
+  const handleRowsPerPageChange = useCallback((e: number | ChangeEvent<HTMLSelectElement>) => {
+    const val = typeof e === 'number' ? e : Number(e.target.value);
+    table.handleRowsPerPageChange(val);
   }, [table]);
 
   const clearError = useCallback(() => table.setError(''), [table]);
