@@ -1,0 +1,107 @@
+/* FeesManagementBanner.css */
+.fees-banner-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--sidebar-bg), #1a1e27);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  color: #fff;
+  min-height: 180px; /* approximately 5cm depending on DPI, gives substantial visual weight */
+  gap: 1.5rem;
+}
+
+.fees-banner-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.fees-banner-icon {
+  background: rgba(241, 65, 79, 0.2); /* var(--primary) with opacity */
+  padding: 1rem;
+  border-radius: 50%;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fees-banner-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.fees-banner-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.fees-banner-description {
+  font-size: 1rem;
+  color: #9ca3af;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 600px;
+}
+
+.fees-banner-action {
+  flex-shrink: 0;
+}
+
+.fees-banner-btn {
+  background-color: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fees-banner-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.fees-banner-btn:active {
+  transform: scale(0.98);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fees-banner-container {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 1.5rem;
+    min-height: auto;
+  }
+
+  .fees-banner-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .fees-banner-action {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .fees-banner-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

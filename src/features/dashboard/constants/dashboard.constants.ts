@@ -36,4 +36,3 @@ export const CALL_LOGGED_ACTIVITY_TYPE = 'CALL_LOGGED';
  * "Hot Leads" KPI card value from the lead overview statistics.
  */
 export const HOT_LEAD_TYPE_NAME = 'Hot';
-
