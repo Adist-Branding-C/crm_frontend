@@ -4,12 +4,12 @@ import './FeesManagementBanner.css';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 
 const FeesManagementBanner: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(() => localStorage.getItem('notifiedFeesManagement') !== 'true');
+  const [hasNotified, setHasNotified] = useState(() => localStorage.getItem('notifiedFeesManagement') === 'true');
   const [showToast, setShowToast] = useState(false);
 
   const handleNotifyClick = () => {
     localStorage.setItem('notifiedFeesManagement', 'true');
-    setIsVisible(false);
+    setHasNotified(true);
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
@@ -18,27 +18,25 @@ const FeesManagementBanner: React.FC = () => {
 
   return (
     <>
-      {isVisible && (
-        <div className="fees-banner-container">
-          <div className="fees-banner-content">
-            <div className="fees-banner-icon">
-              <Rocket size={32} strokeWidth={2} />
-            </div>
-            <div className="fees-banner-text">
-              <h2 className="fees-banner-title">Fees Management On the way!</h2>
-              <p className="fees-banner-description">
-                We are actively building a comprehensive Fees Management module. Get ready for advanced tools to seamlessly track your billing, manage subscriptions, and collect payments.
-              </p>
-            </div>
+      <div className="fees-banner-container">
+        <div className="fees-banner-content">
+          <div className="fees-banner-icon">
+            <Rocket size={32} strokeWidth={2} />
           </div>
-          <div className="fees-banner-action">
-            <button className="fees-banner-btn" onClick={handleNotifyClick}>
-              <Bell size={18} />
-              Notify Me
-            </button>
+          <div className="fees-banner-text">
+            <h2 className="fees-banner-title">Fees Management On the way!</h2>
+            <p className="fees-banner-description">
+              We are actively building a comprehensive Fees Management module. Get ready for advanced tools to seamlessly track your billing, manage subscriptions, and collect payments.
+            </p>
           </div>
         </div>
-      )}
+        <div className={`fees-banner-action ${hasNotified ? 'fees-banner-action--hidden' : ''}`}>
+          <button className="fees-banner-btn" onClick={handleNotifyClick} tabIndex={hasNotified ? -1 : 0}>
+            <Bell size={18} />
+            Notify Me
+          </button>
+        </div>
+      </div>
       
       <ToastNotification 
         isVisible={showToast}
