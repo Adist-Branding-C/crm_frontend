@@ -35,11 +35,11 @@ const CompaniesTable: React.FC<CompaniesTableProps> = ({ data, selectedRows, onS
                 </div>
               </div>
             </td>
-            <td>
+           <td>
               <div className="contact-cell">
                 <div><User size={12} /> {company.contactPersonName}</div>
                 <div><Mail size={12} /> {company.email}</div>
-                <div><Phone size={12} /> {company.phone}</div>
+                <div><Phone size={12} /> {company.countryCode ? `${company.countryCode}\u00A0${company.phone}` : company.phone}</div>
               </div>
             </td>
             <td><div className="stat-cell"><Users size={14} /> {company.staffCount}</div></td>

@@ -1,8 +1,10 @@
+import { DEFAULT_COUNTRY_CODE } from '../../../../shared/constants/countryCodes';
 import type { ProfileFormData, ProfileData, ProfilePlan } from '../types';
 
 export const INITIAL_PROFILE_FORM: ProfileFormData = {
   name: '',
   email: '',
+  countryCode: DEFAULT_COUNTRY_CODE,
   mobile: '',
 };
 

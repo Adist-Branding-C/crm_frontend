@@ -3,7 +3,7 @@ import { AGENT_API_ENDPOINTS } from '../constants/agentApiEndpoints';
 import { buildQueryParams } from '../../../../shared/utils/queryParams.util';
 import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { sanitizePhoneDigits } from '../../../../shared/utils/phone.util';
-import type { AgentFormData, AgentResponse, GetAllAgentsParams, GetAllAgentsResponse, AgentListData, GetStaffMeResponse } from '../types/agent.types';
+import type { AgentFormData, AgentResponse, GetAllAgentsParams, GetAllAgentsResponse, AgentListData, GetStaffMeResponse, StaffDeletionDependenciesResponse } from '../types/agent.types';
 
 class AgentService {
   async getAllAgents(params: GetAllAgentsParams = {}): Promise<GetAllAgentsResponse> {
@@ -19,12 +19,13 @@ class AgentService {
     });
   }
 
-  async createAgent(data: Omit<AgentFormData, 'confirmPassword'>): Promise<AgentResponse> {
-    const { fullName, email, phone, password, designationId, departmentId, status, isAdmin } = data;
+async createAgent(data: Omit<AgentFormData, 'confirmPassword'>): Promise<AgentResponse> {
+    const { fullName, email, phone, countryCode, password, designationId, departmentId, status, isAdmin } = data;
     const payload = {
       fullName,
       email: email.trim(),
       phone_number: sanitizePhoneDigits(phone),
+      countryCode,
       password,
       designationId,
       departmentId,
@@ -41,15 +42,16 @@ class AgentService {
     });
   }
 
-  async updateAgent(
+async updateAgent(
     staffId: string,
     data: Omit<AgentFormData, 'password' | 'confirmPassword' | 'isAdmin'> & { password?: string },
   ): Promise<AgentResponse> {
-    const { fullName, email, phone, password, designationId, departmentId, status } = data;
+    const { fullName, email, phone, countryCode, password, designationId, departmentId, status } = data;
     const payload = {
       fullName,
       email: email.trim(),
       phone_number: sanitizePhoneDigits(phone),
+      countryCode,
       designationId,
       departmentId,
       status,

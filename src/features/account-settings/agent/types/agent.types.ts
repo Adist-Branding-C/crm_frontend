@@ -8,6 +8,7 @@ export interface AgentItem {
   phone_number?: string;
   phoneNumber?: string;
   mobile?: string;
+  countryCode?: string;
   designationId?: string;
   designation_id?: number | string;
   designation?: string;
@@ -17,9 +18,11 @@ export interface AgentItem {
   isAdmin?: boolean;
 }
 
+
 export interface AgentFormData {
   fullName: string;
   email: string;
+  countryCode: string;
   phone: string;
   password: string;
   confirmPassword: string;

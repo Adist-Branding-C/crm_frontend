@@ -8,10 +8,11 @@ class ProfileService {
     return response.data;
   }
 
-  async updateProfile(payload: ProfileFormData): Promise<UpdateProfileResponse> {
+async updateProfile(payload: ProfileFormData): Promise<UpdateProfileResponse> {
     const body: UpdateProfileRequest = {
       name: payload.name,
       email: payload.email,
+      countryCode: payload.countryCode,
       phone: payload.mobile,
     };
     const response = await axiosInstance.patch<UpdateProfileResponse>(PROFILE_API_ENDPOINTS.PROFILE, body);

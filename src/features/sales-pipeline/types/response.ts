@@ -11,6 +11,7 @@ export interface RawPipelineLead {
   leadId: string | null;
   name: string;
   phone: string;
+  countryCode?: string;
   email: string;
   status: { statusId: string; status: string } | null;
   source: { sourceId: string; source: string } | null;

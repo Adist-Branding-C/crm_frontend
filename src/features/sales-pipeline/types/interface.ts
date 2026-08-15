@@ -3,6 +3,7 @@ export interface Lead {
   leadId: string | null;
   name: string;
   phone: string;
+  countryCode?: string;
   email: string;
   status: string;
   source: string;
