@@ -34,6 +34,12 @@ const emailValidation = yup
   .max(255, 'Email must not exceed 255 characters')
   .required('Email is required');
 
+
+  const countryCodeValidation = yup
+  .string()
+  .required('Country code is required')
+  .matches(/^\+\d{1,3}$/, 'Enter a valid country code, e.g. +91');
+
 /**
  * Validation schema for creating a new staff member.
  *
@@ -51,6 +57,7 @@ const emailValidation = yup
 export const addAgentValidationSchema = yup.object({
   fullName: nameValidation,
   email: emailValidation,
+  countryCode: countryCodeValidation,
   phone: phoneValidation,
   password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
   confirmPassword: yup.string().oneOf([yup.ref('password')], 'Passwords do not match').required('Confirm password is required'),
@@ -59,7 +66,6 @@ export const addAgentValidationSchema = yup.object({
   status: yup.string().required('Please select a status'),
   isAdmin: yup.boolean().default(false),
 });
-
 /**
  * Validation schema for editing an existing staff member.
  *

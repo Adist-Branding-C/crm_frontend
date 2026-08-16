@@ -6,6 +6,7 @@ import ErrorMessage from '../../../../shared/components/ErrorMessage';
 import { sanitizePhoneDigits } from '../../../../shared/utils/phone.util';
 import { scrollToFirstError } from '../../../../shared/utils/scrollToError.util';
 import type { AddAgentDrawerProps } from '../types/add-agent-drawer.types';
+import { COUNTRY_CODES } from '../../../../shared/constants/countryCodes';
 
 const AddAgentDrawer = ({ visibility, form, status, designation, department }: AddAgentDrawerProps) => {
   const { isOpen, onClose } = visibility;
@@ -37,8 +38,7 @@ const AddAgentDrawer = ({ visibility, form, status, designation, department }: A
         validationSchema={validationSchema}
         onSubmit={onSubmit}
       >
-        {({ errors, touched, dirty, submitCount, isSubmitting, setFieldValue, setFieldTouched }) => {
-          if (submitCount > prevSubmitCountRef.current) {
+{({ errors, touched, dirty, submitCount, isSubmitting, values, handleBlur, setFieldValue, setFieldTouched }) => {          if (submitCount > prevSubmitCountRef.current) {
             prevSubmitCountRef.current = submitCount;
             if (Object.keys(errors).length > 0) {
               requestAnimationFrame(() => scrollToFirstError(drawerBodyRef.current));
@@ -59,30 +59,51 @@ const AddAgentDrawer = ({ visibility, form, status, designation, department }: A
                 {showError('fullName') && errors.fullName && <small className="field-error-text">{errors.fullName}</small>}
               </div>
 
-              <div className="form-group">
+           <div className="form-group">
                 <label>Phone Number <span className="text-danger">*</span></label>
-                <Field name="phone">
-                  {({ field }: { field: any }) => (
-                    <input
-                      {...field}
-                      type="text"
-                      maxLength={10}
-                      className={fieldClass('phone')}
-                      placeholder="Enter phone number"
-                      onChange={(e) => {
-                        const sanitized = sanitizePhoneDigits(e.target.value);
-                        setFieldValue('phone', sanitized);
-                      }}
-                      onBlur={(e) => {
-                        const sanitized = sanitizePhoneDigits(e.target.value);
-                        setFieldValue('phone', sanitized);
-                        setFieldTouched('phone', true);
-                      }}
-                    />
-                  )}
-                </Field>
+                <div className="phone-field-group">
+                  <select
+                    name="countryCode"
+                    value={values.countryCode}
+                    onChange={(e) => {
+                      setFieldValue('countryCode', e.target.value);
+                      setFieldTouched('countryCode', true, false);
+                    }}
+                    onBlur={handleBlur}
+                    className={`phone-country-code${showError('countryCode') && errors.countryCode ? ' error' : ''}`}
+                  >
+                    {COUNTRY_CODES.map(c => (
+                      <option key={`${c.country}-${c.code}`} value={c.code}>{c.code} {c.country}</option>
+                    ))}
+                  </select>
+                  <Field name="phone">
+                    {({ field }: { field: any }) => (
+                      <input
+                        {...field}
+                        type="text"
+                        maxLength={10}
+                        className={fieldClass('phone')}
+                        placeholder="Enter phone number"
+                        onChange={(e) => {
+                          const sanitized = sanitizePhoneDigits(e.target.value);
+                          setFieldValue('phone', sanitized);
+                        }}
+                        onBlur={(e) => {
+                          const sanitized = sanitizePhoneDigits(e.target.value);
+                          setFieldValue('phone', sanitized);
+                          setFieldTouched('phone', true);
+                        }}
+                      />
+                    )}
+                  </Field>
+                </div>
+                {showError('countryCode') && errors.countryCode && <small className="field-error-text">{errors.countryCode}</small>}
                 {showError('phone') && errors.phone && <small className="field-error-text">{errors.phone}</small>}
               </div>
+
+
+
+         
 
               <div className="form-group">
                 <label>Email <span className="text-danger">*</span></label>

@@ -18,6 +18,7 @@ export const addCompanyValidationSchema = (isEditing: boolean) => yup.object({
   contactPersonName: yup.string().trim().required('Contact person name is required'),
   email: yup.string().trim().email('Enter a valid email address').required('Email is required'),
   phoneNumber: yup.string().trim().required('Phone number is required'),
+  countryCode: yup.string().required('Country code is required'),
   address: yup.string().trim(),
   gstNumber: yup.string().trim(),
   dateOfRegistration: yup.string(),

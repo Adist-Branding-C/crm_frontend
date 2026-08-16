@@ -11,6 +11,7 @@ export function mapApiToUI(item: CompanyApiItem): Company {
     name: item.name,
     contactPersonName: item.contactPersonName,
     email: item.email,
+    countryCode: item.countryCode ?? '',
     phone: item.phoneNumber,
     address: item.address ?? '',
     gstNumber: item.gstNumber ?? '',

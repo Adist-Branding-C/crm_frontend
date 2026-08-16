@@ -23,6 +23,7 @@ export interface GLAPIRow {
   slNo: number;
   via: string;
   leadName: string;
+  countryCode: string;
   mobile: string;
   assignedTo: string;
   purpose: string;

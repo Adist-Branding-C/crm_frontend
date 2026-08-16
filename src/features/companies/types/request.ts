@@ -21,6 +21,7 @@ export interface CreateCompanyPayload {
   contactPersonName: string;
   email: string;
   phoneNumber: string;
+  countryCode: string;
   address?: string;
   gstNumber?: string;
   dateOfRegistration?: string;

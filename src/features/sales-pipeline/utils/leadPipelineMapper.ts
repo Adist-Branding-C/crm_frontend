@@ -7,6 +7,7 @@ export function mapPipelineLead(item: RawPipelineLead): Lead {
     leadId: item.leadId,
     name: item.name,
     phone: item.phone,
+    countryCode: item.countryCode ?? '',
     email: item.email,
     status: item.status?.status ?? '',
     source: item.source?.source ?? '',

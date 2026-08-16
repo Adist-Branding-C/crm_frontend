@@ -3,6 +3,7 @@ export interface Company {
   name: string;
   contactPersonName: string;
   email: string;
+  countryCode: string;
   phone: string;
   address: string;
   gstNumber: string;
@@ -33,6 +34,7 @@ export interface NewCompany {
   contactPersonName: string;
   email: string;
   phoneNumber: string;
+  countryCode: string;
   address: string;
   gstNumber: string;
   dateOfRegistration: string;
