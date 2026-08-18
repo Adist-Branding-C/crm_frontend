@@ -16,11 +16,12 @@ export const facebookLogin = () => {
   }
 
   const url =
-    `https://www.facebook.com/v25.0/dialog/oauth` +
-    `?client_id=${encodeURIComponent(appId)}` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&config_id=${encodeURIComponent(configId)}` +
-    `&response_type=code`;
+  `https://www.facebook.com/v25.0/dialog/oauth` +
+  `?client_id=${encodeURIComponent(appId)}` +
+  `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+  `&config_id=${encodeURIComponent(configId)}` +
+  `&response_type=code` +
+  `&override_default_response_type=true`;
 
   window.location.assign(url);
 };
