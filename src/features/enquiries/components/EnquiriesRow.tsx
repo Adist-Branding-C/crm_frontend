@@ -80,11 +80,11 @@ const getCellContent = (row: Lead, colKey: string) => {
     return { children: row.assignedTo || LABEL_NOT_ASSIGNED, isEmpty: !row.assignedTo };
   }
 
-if (colKey === 'phone') {
-  if (!row.phone) return { children: '-', isEmpty: true };
-  const display = row.countryCode ? `${row.countryCode}\u00A0${row.phone}` : row.phone;
-  return { children: display };
-}
+  if (colKey === 'phone') {
+    if (!row.phone) return { children: '-', isEmpty: true };
+    const display = row.countryCode ? `${row.countryCode}\u00A0${row.phone}` : row.phone;
+    return { children: display };
+  }
 
   if (LEAD_PROPERTY_KEYS.has(colKey)) {
     const value = (row as unknown as Record<string, string>)[colKey];
