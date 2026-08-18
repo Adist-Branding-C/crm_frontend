@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // import { ChevronDown, ChevronRight } from 'lucide-react';
 import './DashboardPage.css';
 import PageContainer from '../../../shared/components/layout/PageContainer';
+import FeesManagementBanner from '../components/widgets/FeesManagementBanner';
 import LeadStatusWidget from '../components/widgets/LeadStatusWidget';
 import LeadSourceWidget from '../components/widgets/LeadSourceWidget';
 import LeadPurposeWidget from '../components/widgets/LeadPurposeWidget';
@@ -51,6 +52,8 @@ const DashboardPage = () => {
 
   return (
     <PageContainer>
+      <FeesManagementBanner />
+      
       <div className="dashboard-header">
         <h1 className="dashboard-title">Dashboard</h1>
         <div className="dashboard-filters">
