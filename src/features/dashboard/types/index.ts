@@ -249,6 +249,7 @@ export interface GetLeadOverviewStatisticsParams {
   period: DashboardPeriod;
   fromDate?: string;
   toDate?: string;
+  timezoneOffsetMinutes?: number;
 }
 
 export interface LeadOverviewTypeCount {
@@ -265,6 +266,20 @@ export interface LeadOverviewStatisticsResponseData {
   myLeads: number;
   conversionRate: number;
   leadsByType: LeadOverviewTypeCount[];
+}
+
+export interface GetLeadDashboardStatisticsParams {
+  period: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+  timezoneOffsetMinutes?: number;
+}
+
+export interface LeadDashboardStatisticsResponseData {
+  overview: LeadOverviewStatisticsResponseData;
+  leadsByStatus: LeadStatusCountItem[];
+  leadsBySource: LeadSourceCountItem[];
+  leadsByPurpose: LeadPurposeCountItem[];
 }
 
 // GET /deals/statistics/pipeline - period/from/to naming matches the other

@@ -348,7 +348,9 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   <div className="leaddrawer-info-icon"><Phone size={14} /></div>
                   <div className="leaddrawer-info-content">
                     <span className="leaddrawer-info-label">Phone</span>
-                    <span className="leaddrawer-info-value">{lead.phone || '-'}</span>
+                    <span className="leaddrawer-info-value">
+                      {lead.phone ? (lead.countryCode ? `${lead.countryCode} ${lead.phone}` : lead.phone) : '-'}
+                    </span>
                   </div>
                 </div>
                 <div className="leaddrawer-info-item">

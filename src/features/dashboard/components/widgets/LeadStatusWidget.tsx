@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './WidgetStyles.css';
-import { useLeadStatusStatistics } from '../../hooks/useLeadStatusStatistics';
 import { ListRowsSkeleton } from './WidgetSkeletons';
-import type { LeadStatusWidgetProps } from '../../types';
+import type { LeadStatusCountItem } from '../../types';
 
-const LeadStatusWidget = ({ period, from, to }: LeadStatusWidgetProps) => {
-  const { items, isLoading, isError } = useLeadStatusStatistics(period, from, to);
+const STATUS_COLOR_PALETTE = ['#f472b6', '#38bdf8', '#eab308', '#fb7185', '#34d399', '#fbbf24'];
+const DEFAULT_STATUS_COLOR = '#38bdf8';
+
+function colorForIndex(index: number): string {
+  return STATUS_COLOR_PALETTE[index % STATUS_COLOR_PALETTE.length] ?? DEFAULT_STATUS_COLOR;
+}
+
+interface LeadStatusWidgetProps {
+  items?: LeadStatusCountItem[];
+  isLoading?: boolean;
+  isError?: boolean;
+}
+
+const LeadStatusWidget = ({ items = [], isLoading, isError }: LeadStatusWidgetProps) => {
+  const coloredItems = useMemo(() => {
+    return items.map((item, index) => ({
+      ...item,
+      color: colorForIndex(index),
+    }));
+  }, [items]);
 
   return (
     <div className="card widget-base">
@@ -14,11 +31,11 @@ const LeadStatusWidget = ({ period, from, to }: LeadStatusWidgetProps) => {
         <ListRowsSkeleton rows={3} />
       ) : isError ? (
         <div className="widget-status-text">Failed to load lead status statistics</div>
-      ) : items.length === 0 ? (
+      ) : coloredItems.length === 0 ? (
         <div className="widget-status-text">No leads in this period</div>
       ) : (
         <div className="list-container">
-          {items.map((item) => (
+          {coloredItems.map((item) => (
             <div key={item.statusId} className="list-item">
               <div className="list-item-left">
                 <div className="color-box" style={{ backgroundColor: item.color }}></div>

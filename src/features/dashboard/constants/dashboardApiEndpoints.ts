@@ -37,6 +37,8 @@ export enum DASHBOARD_API_ENDPOINTS {
   // leads", and conversion rate) for the top KPI cards. Not period-selector
   // driven - the backend always computes today/week/month/total together.
   LEAD_OVERVIEW_STATISTICS = '/statistics/lead',
+  // Aggregated dashboard endpoint that returns overview, status, source, and purpose stats.
+  LEAD_DASHBOARD_STATISTICS = '/statistics/dashboard',
   // Per-status deal counts + summed amount for the pipeline amount KPI card.
   // Response `data` is a flat array of { statusId, statusName, dealStage,
   // count, totalAmount } - see PipelineAmountItem.

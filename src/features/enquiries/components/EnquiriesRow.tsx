@@ -79,6 +79,15 @@ const getCellContent = (row: Lead, colKey: string) => {
   if (colKey === 'agentId') {
     return { children: row.assignedTo || LABEL_NOT_ASSIGNED, isEmpty: !row.assignedTo };
   }
+  if (colKey === 'phone') {
+    const phone = row.phone;
+    const countryCode = row.countryCode ? `${row.countryCode} ` : '';
+    const displayValue = phone ? `${countryCode}${phone}` : '-';
+    return { 
+      children: phone ? <span style={{ whiteSpace: 'nowrap' }}>{displayValue}</span> : '-', 
+      isEmpty: !phone 
+    };
+  }
   if (LEAD_PROPERTY_KEYS.has(colKey)) {
     const value = (row as unknown as Record<string, string>)[colKey];
     return { children: value || '-', isEmpty: !value };

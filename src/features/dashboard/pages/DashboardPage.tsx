@@ -19,7 +19,7 @@ import {
   CALL_LOGGED_ACTIVITY_TYPE,
   HOT_LEAD_TYPE_NAME,
 } from '../constants/dashboard.constants';
-import { useLeadOverviewStatistics } from '../hooks/useLeadOverviewStatistics';
+import { useLeadDashboardStatistics } from '../hooks/useLeadDashboardStatistics';
 import { usePipelineAmount } from '../hooks/usePipelineAmount';
 import { useFollowupStatistics } from '../../followup-required/hooks/useFollowupStatistics';
 import { useActivitiesStatistics } from '../hooks/useActivitiesStatistics';
@@ -40,7 +40,17 @@ const DashboardPage = () => {
   const effectiveFrom = isCustomRangeInvalid ? '' : customFrom;
   const effectiveTo = isCustomRangeInvalid ? '' : customTo;
 
-  const leadOverview = useLeadOverviewStatistics(period, effectiveFrom, effectiveTo);
+  const { stats: dashboardStats, isLoading: dashboardLoading, isError: dashboardError } = useLeadDashboardStatistics(period, effectiveFrom, effectiveTo);
+  const leadOverview = dashboardStats?.overview || {
+    todayLeads: 0,
+    totalLeads: 0,
+    conversionRate: 0,
+    leadsThisMonth: 0,
+    leadsThisWeek: 0,
+    myLeads: 0,
+    leadsByType: []
+  };
+  
   const pipelineAmount = usePipelineAmount(period, effectiveFrom, effectiveTo);
   const followupStats = useFollowupStatistics();
   const outboundCallsCount = useCallLogsCount(period, effectiveFrom, effectiveTo);
@@ -112,13 +122,13 @@ const DashboardPage = () => {
           title="Today's Leads"
           value={String(leadOverview.todayLeads)}
           isPrimary={true}
-          isLoading={leadOverview.isLoading}
+          isLoading={dashboardLoading}
         />
         <KpiCard
           title="Hot Leads"
           value={String(hotLeads)}
           isPrimary={true}
-          isLoading={leadOverview.isLoading}
+          isLoading={dashboardLoading}
         />
 
         <KpiCard
@@ -126,27 +136,27 @@ const DashboardPage = () => {
           value={`${leadOverview.conversionRate}%`}
           isPrimary={true}
           isHighlight={true}
-          isLoading={leadOverview.isLoading}
+          isLoading={dashboardLoading}
         />
 
         <KpiCard
           title="Leads This Month"
           value={String(leadOverview.leadsThisMonth)}
           isPrimary={true}
-          isLoading={leadOverview.isLoading}
+          isLoading={dashboardLoading}
         />
 
         <KpiCard
           title="Total Leads"
           value={String(leadOverview.totalLeads)}
           isPrimary={true}
-          isLoading={leadOverview.isLoading}
+          isLoading={dashboardLoading}
         />
 
         <KpiCard
           title="My Leads"
           value={String(leadOverview.myLeads)}
-          isLoading={leadOverview.isLoading}
+          isLoading={dashboardLoading}
         />
         <KpiCard
           title="Pipeline amount"
@@ -196,9 +206,9 @@ const DashboardPage = () => {
       </div>
 
       <div className="widgets-grid middle-cards-grid">
-        <LeadStatusWidget period={period} from={effectiveFrom} to={effectiveTo} />
-        <LeadSourceWidget period={period} from={effectiveFrom} to={effectiveTo} />
-        <LeadPurposeWidget period={period} from={effectiveFrom} to={effectiveTo} />
+        <LeadStatusWidget items={dashboardStats?.leadsByStatus} isLoading={dashboardLoading} isError={dashboardError} />
+        <LeadSourceWidget items={dashboardStats?.leadsBySource} isLoading={dashboardLoading} isError={dashboardError} />
+        <LeadPurposeWidget items={dashboardStats?.leadsByPurpose} isLoading={dashboardLoading} isError={dashboardError} />
         <DealPipelineWidget period={period} from={effectiveFrom} to={effectiveTo} />
       </div>
 

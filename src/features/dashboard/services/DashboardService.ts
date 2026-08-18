@@ -27,6 +27,8 @@ import type {
   LeadPurposeStatisticsResponseData,
   GetLeadOverviewStatisticsParams,
   LeadOverviewStatisticsResponseData,
+  GetLeadDashboardStatisticsParams,
+  LeadDashboardStatisticsResponseData,
   GetPipelineAmountParams,
   PipelineAmountResponseData,
   GetFollowupCountParams,
@@ -193,6 +195,20 @@ class DashboardService {
   ): Promise<ApiResponse<LeadOverviewStatisticsResponseData>> {
     const response = await axiosInstance.get<ApiResponse<LeadOverviewStatisticsResponseData>>(
       DASHBOARD_API_ENDPOINTS.LEAD_OVERVIEW_STATISTICS,
+      { params },
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getLeadDashboardStatistics(
+    params: GetLeadDashboardStatisticsParams,
+  ): Promise<ApiResponse<LeadDashboardStatisticsResponseData>> {
+    const response = await axiosInstance.get<ApiResponse<LeadDashboardStatisticsResponseData>>(
+      DASHBOARD_API_ENDPOINTS.LEAD_DASHBOARD_STATISTICS,
       { params },
     );
     return ServiceResponseUtil.successResponse({
