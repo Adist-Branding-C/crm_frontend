@@ -1,11 +1,31 @@
-import { Copy, Check, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Fragment } from 'react';
+import { Copy, Check, Eye, EyeOff, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useConnectApiData } from '../hooks/useConnectApiData';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { apiParameters, tabs } from '../constants';
 import type { Tab } from '../types';
+import type { LeadAdditionalApiItem } from '../../lead-settings/lead-additional/types/interface';
 import './ConnectApiPage.css';
 
 const MASKED_TOKEN = '•'.repeat(40);
+
+// Produces a plausible example value per field type for the sample curl -
+// dropdowns use the field's own first configured option so the example is
+// always something this company could actually submit.
+function sampleValueFor(field: LeadAdditionalApiItem): string {
+  switch (field.fieldType) {
+    case 'Number':
+      return '123';
+    case 'Date':
+      return '2026-08-01';
+    case 'DateTime':
+      return '2026-08-01T10:00:00Z';
+    case 'Dropdown':
+      return field.values[0] ?? 'Option 1';
+    default:
+      return 'Sample value';
+  }
+}
 
 const ConnectApiPage: React.FC = () => {
   const d = useConnectApiData();
@@ -88,31 +108,78 @@ const ConnectApiPage: React.FC = () => {
                 ))}
               </tbody>
             </table>
+
+            {d.additionalFields.length > 0 && (
+              <>
+                <h3>Your Additional Fields</h3>
+                <p>Custom fields configured for your account. Send these nested under an <code>additionalFields</code> object, keyed by field name (case-insensitive). All are optional through this API regardless of their required setting in the CRM.</p>
+                <table className="api-table">
+                  <thead>
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Type</th>
+                      <th>Required</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.additionalFields.map((field) => (
+                      <tr key={field.fieldId}>
+                        <td><code>additionalFields.{field.name}</code></td>
+                        <td>{field.fieldType}</td>
+                        <td><span className="required-badge no">No</span></td>
+                        <td>
+                          {field.fieldType === 'Dropdown' && field.values.length > 0
+                            ? `One of: ${field.values.join(', ')}`
+                            : `Your custom "${field.name}" field.`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
           </div>
         );
 
-      case 'example':
+      case 'example': {
+        const sampleBody: Record<string, unknown> = {
+          name: 'John Doe',
+          phone: '1234567890',
+          email: 'johndoe@email.com',
+          status: 'New',
+          source: 'Demo request',
+          purpose: 'Sales',
+          type: 'Individual',
+          agent: 'Jane Smith',
+          notes: 'Interested in the enterprise plan',
+        };
+        if (d.additionalFields.length > 0) {
+          sampleBody.additionalFields = Object.fromEntries(
+            d.additionalFields.map((field) => [field.name, sampleValueFor(field)])
+          );
+        }
+
         return (
           <div className="api-tab-content">
             <h3>Sample API Request</h3>
-            <p>You can use the following sample request to create a lead:</p>
+            <p>
+              You can use the following sample request to create a lead
+              {d.additionalFields.length > 0 ? ', including the additional fields configured for your account' : ''}:
+            </p>
 
             <pre className="code-block">{`curl -X POST https://app.leadistcrm.com/api/v1/integrations/leads \\
   -H "Authorization: Bearer your-api-token" \\
   -H "Content-Type: application/json" \\
-  -d '{
-    "name": "John Doe",
-    "phone": "1234567890",
-    "email": "johndoe@email.com",
-    "status": "New",
-    "source": "Demo request",
-    "purpose": "Sales",
-    "type": "Individual",
-    "agent": "Jane Smith",
-    "notes": "Interested in the enterprise plan"
-  }'`}</pre>
+  -d '${JSON.stringify(sampleBody, null, 4).replace(/\n/g, '\n  ')}'`}</pre>
+
+            <p>
+              <code>status</code>, <code>source</code>, <code>purpose</code>, and <code>type</code> above must match the actual
+              names you have configured in your account (case-insensitive) — the values shown here are just examples.
+            </p>
           </div>
         );
+      }
 
       case 'response':
         return (
@@ -144,12 +211,22 @@ const ConnectApiPage: React.FC = () => {
 }`}</pre>
 
             <h4>Unrecognized Status / Source / Purpose / Type / Agent</h4>
-            <p>Returned when a value doesn't match the name of one already configured in your account (or matches one that's been deleted).</p>
+            <p>Returned when a value doesn't match the name of any existing Status/Source/Purpose/Type/Agent in your account.</p>
             <pre className="code-block">{`{
   "status": false,
   "message": "Invalid value for field \\"status\\": \\"Unqualified\\"",
   "data": {
     "field": "status"
+  }
+}`}</pre>
+
+            <h4>Inactive Status / Source / Type</h4>
+            <p>Returned when a Status, Source, or Type name matches one that exists in your account but has been deactivated.</p>
+            <pre className="code-block">{`{
+  "status": false,
+  "message": "Source \\"Old Campaign\\" is inactive. Please reactivate it or choose another source.",
+  "data": {
+    "field": "source"
   }
 }`}</pre>
 
@@ -160,6 +237,93 @@ const ConnectApiPage: React.FC = () => {
   "message": "Unauthorized",
   "data": {}
 }`}</pre>
+          </div>
+        );
+
+      case 'request-log':
+        return (
+          <div className="api-tab-content">
+            <h3>Request Log</h3>
+            <p>Recent requests received through this API — only submissions made via <code>POST /integrations/leads</code>, not leads created in the CRM directly or through bulk import. Click a row to see the exact payload you sent and the exact response we sent back.</p>
+
+            {d.requestLogError && <p className="token-error">{d.requestLogError}</p>}
+
+            {d.requestLogLoading && d.requestLogItems.length === 0 ? (
+              <p><Loader2 size={16} className="spin" /> Loading...</p>
+            ) : d.requestLogItems.length === 0 ? (
+              <p>No requests received yet.</p>
+            ) : (
+              <>
+                <table className="api-table request-log-table">
+                  <thead>
+                    <tr>
+                      <th>Date/Time</th>
+                      <th>Status</th>
+                      <th>Name</th>
+                      <th>Phone</th>
+                      <th>Lead ID</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.requestLogItems.map((item) => (
+                      <Fragment key={item.id}>
+                        <tr className="request-log-row" onClick={() => d.toggleRequestLogRow(item.id)}>
+                          <td>{new Date(item.createdAt).toLocaleString()}</td>
+                          <td>
+                            <span className={`status-badge status-${item.status}`}>
+                              {item.status}
+                            </span>
+                          </td>
+                          <td>{item.name ?? '—'}</td>
+                          <td>{item.phone ?? '—'}</td>
+                          <td>{item.leadId ?? '—'}</td>
+                          <td>{d.expandedRequestLogId === item.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</td>
+                        </tr>
+                        {d.expandedRequestLogId === item.id && (
+                          <tr className="request-log-detail-row">
+                            <td colSpan={6}>
+                              <div className="request-log-detail">
+                                <div>
+                                  <h4>Payload received</h4>
+                                  <pre className="code-block">{JSON.stringify(item.payload, null, 2)}</pre>
+                                </div>
+                                <div>
+                                  <h4>Response sent{item.responseStatus ? ` (HTTP ${item.responseStatus})` : ''}</h4>
+                                  <pre className="code-block">
+                                    {item.response ? JSON.stringify(item.response, null, 2) : 'Not captured for this entry.'}
+                                  </pre>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+
+                {d.requestLogPagination && (
+                  <div className="request-log-pagination">
+                    <button
+                      className="btn btn-outline"
+                      disabled={!d.requestLogPagination.has_previous || d.requestLogLoading}
+                      onClick={() => d.handleRequestLogPageChange(d.requestLogPage - 1)}
+                    >
+                      Previous
+                    </button>
+                    <span>Page {d.requestLogPagination.page} of {d.requestLogPagination.total_pages}</span>
+                    <button
+                      className="btn btn-outline"
+                      disabled={!d.requestLogPagination.has_next || d.requestLogLoading}
+                      onClick={() => d.handleRequestLogPageChange(d.requestLogPage + 1)}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         );
 

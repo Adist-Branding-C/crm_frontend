@@ -14,6 +14,7 @@ export function mapAgentToFormData(item: AgentItem): AgentFormData {
   return {
     fullName: item.fullName || item.name || '',
     email: item.email || '',
+    countryCode: item.countryCode || '+91',
     phone: item.phone || item.phone_number || item.phoneNumber || item.mobile || '',
     password: '',
     confirmPassword: '',

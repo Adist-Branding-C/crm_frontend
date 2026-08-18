@@ -5,6 +5,7 @@ export interface CompanyApiItem {
   contactPersonName: string;
   email: string;
   phoneNumber: string;
+  countryCode?: string | null;
   address: string | null;
   gstNumber: string | null;
   dateOfRegistration: string | null;

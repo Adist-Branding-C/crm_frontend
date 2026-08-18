@@ -6,6 +6,7 @@ import { addCompanyValidationSchema } from '../validations/addCompany.validation
 import { COMPANY_STATUS_OPTIONS } from '../constants';
 import { CompanyStatus } from '../../../shared/constants/enums/companyStatus';
 import { getErrorMessage } from '../../../shared/utils/error';
+import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from '../../../shared/constants/countryCodes';
 import type { Company, NewCompany } from '../types';
 import type { CreateCompanyPayload } from '../types/request';
 
@@ -21,6 +22,7 @@ const BASE_INITIAL_VALUES: NewCompany = {
   contactPersonName: '',
   email: '',
   phoneNumber: '',
+  countryCode: DEFAULT_COUNTRY_CODE,
   address: '',
   gstNumber: '',
   dateOfRegistration: '',
@@ -40,6 +42,7 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
         contactPersonName: editingCompany.contactPersonName,
         email: editingCompany.email,
         phoneNumber: editingCompany.phone,
+        countryCode: DEFAULT_COUNTRY_CODE,
         address: editingCompany.address,
         gstNumber: editingCompany.gstNumber,
         dateOfRegistration: editingCompany.dateOfRegistration?.slice(0, 10) ?? '',
@@ -55,6 +58,7 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
       contactPersonName: values.contactPersonName.trim(),
       email: values.email.trim(),
       phoneNumber: values.phoneNumber.trim(),
+      countryCode: values.countryCode.trim(),
       status: values.status,
     };
     if (values.address.trim()) payload.address = values.address.trim();
@@ -126,17 +130,31 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
                     />
                     {errors.email && touched.email && <div className="error-text">{errors.email}</div>}
                   </div>
-                  <div className="form-group">
+                 <div className="form-group">
                     <label>Phone <span className="required">*</span></label>
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      placeholder="Enter phone number"
-                      value={values.phoneNumber}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className={errors.phoneNumber && touched.phoneNumber ? 'error' : ''}
-                    />
+                    <div className="phone-field-group">
+                      <select
+                        name="countryCode"
+                        value={values.countryCode}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className={`phone-country-code${errors.countryCode && touched.countryCode ? ' error' : ''}`}
+                      >
+                        {COUNTRY_CODES.map(c => (
+                          <option key={`${c.country}-${c.code}`} value={c.code}>{c.code} {c.country}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        placeholder="Enter phone number"
+                        value={values.phoneNumber}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className={errors.phoneNumber && touched.phoneNumber ? 'error' : ''}
+                      />
+                    </div>
+                    {errors.countryCode && touched.countryCode && <div className="error-text">{errors.countryCode}</div>}
                     {errors.phoneNumber && touched.phoneNumber && <div className="error-text">{errors.phoneNumber}</div>}
                   </div>
                   {!isEditing && (

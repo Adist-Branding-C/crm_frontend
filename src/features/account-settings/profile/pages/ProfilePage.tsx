@@ -7,6 +7,7 @@ import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import DrawerShell from '../../../../shared/components/crud/DrawerShell';
 import { Skeleton } from '../../../../shared/components/Skeleton';
 import './ProfilePage.css';
+import { COUNTRY_CODES } from '../../../../shared/constants/countryCodes';
 
 function formatDate(value: string): string {
   if (!value) return '—';
@@ -107,7 +108,7 @@ const ProfilePage = () => {
                   <ul className="contact-list">
                     <li>
                       <i className="fa fa-mobile"></i>
-                      {d.formData.mobile}
+                      {d.formData.countryCode ? `${d.formData.countryCode}\u00A0${d.formData.mobile}` : d.formData.mobile}
                     </li>
                     <li>
                       <i className="fa fa-envelope-o"></i>
@@ -150,12 +151,14 @@ const ProfilePage = () => {
                       <p className="detail-value">{d.formData.email}</p>
                     </div>
                   </div>
-                  <div className="detail-row">
+<div className="detail-row">
                     <div className="col-md-4">
                       <p className="detail-label">Mobile Number</p>
                     </div>
                     <div className="col-md-7">
-                      <p className="detail-value">{d.formData.mobile}</p>
+                      <p className="detail-value">
+                        {d.formData.countryCode ? `${d.formData.countryCode}\u00A0${d.formData.mobile}` : d.formData.mobile}
+                      </p>
                     </div>
                   </div>
                   <div className="detail-row">
@@ -188,7 +191,7 @@ const ProfilePage = () => {
           validationSchema={profileValidationSchema}
           onSubmit={d.handleSubmit}
         >
-          {({ errors, touched, dirty, submitCount, isSubmitting }) => {
+{({ errors, touched, dirty, submitCount, isSubmitting, values, handleBlur, setFieldValue, setFieldTouched }) => {
             const showError = (field: string) => (touched as Record<string, boolean>)[field] || submitCount > 0;
             const fieldClass = (name: string) => `form-control${showError(name) && (errors as Record<string, string>)[name] ? ' input-error' : ''}`;
 
@@ -206,7 +209,24 @@ const ProfilePage = () => {
                 </div>
                 <div className="form-group">
                   <label>Mobile Number</label>
-                  <Field type="tel" name="mobile" className={fieldClass('mobile')} />
+                  <div className="phone-field-group">
+                    <select
+                      name="countryCode"
+                      value={values.countryCode}
+                      onChange={(e) => {
+                        setFieldValue('countryCode', e.target.value);
+                        setFieldTouched('countryCode', true, false);
+                      }}
+                      onBlur={handleBlur}
+                      className={`phone-country-code${showError('countryCode') && errors.countryCode ? ' error' : ''}`}
+                    >
+                      {COUNTRY_CODES.map(c => (
+                        <option key={`${c.country}-${c.code}`} value={c.code}>{c.code} {c.country}</option>
+                      ))}
+                    </select>
+                    <Field type="tel" name="mobile" className={fieldClass('mobile')} />
+                  </div>
+{showError('countryCode') && errors.countryCode && <small className="field-error-text">{errors.countryCode}</small>}
                   {showError('mobile') && errors.mobile && <small className="field-error-text">{errors.mobile}</small>}
                 </div>
                 <div className="form-actions">

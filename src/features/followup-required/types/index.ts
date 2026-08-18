@@ -17,6 +17,7 @@ export interface FollowupLead {
   createdAt: string;
   updatedAt: string;
   nextFollowUp: string;
+   countryCode?: string;
 }
 
 export interface Filters {
@@ -42,6 +43,7 @@ export interface FollowupLeadApiItem {
   createdAt: string;
   updatedAt: string;
   nextFollowUpDate: string | null;
+   countryCode?: string;
 }
 
 export interface FollowupPaginationMeta {

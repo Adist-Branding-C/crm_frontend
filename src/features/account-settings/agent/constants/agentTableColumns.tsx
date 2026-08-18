@@ -6,7 +6,15 @@ import type { AgentItem } from '../types/agent.types';
 export const AGENT_TABLE_COLUMNS: Column<AgentItem>[] = [
   { key: 'fullName', label: 'Name', render: (item) => item.fullName || item.name || '-' },
   { key: 'email', label: 'Email' },
-  { key: 'mobile', label: 'Mobile', render: (item) => item.mobile || item.phone || item.phone_number || item.phoneNumber || '-' },
+{
+    key: 'mobile',
+    label: 'Mobile',
+    render: (item) => {
+      const phone = item.mobile || item.phone || item.phone_number || item.phoneNumber;
+      if (!phone) return '-';
+      return item.countryCode ? `${item.countryCode}\u00A0${phone}` : phone;
+    },
+  },
   {
     key: 'isAdmin',
     label: 'Admin',

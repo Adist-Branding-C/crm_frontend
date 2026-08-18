@@ -126,7 +126,7 @@ const LeadGLAPIHistoryReport = () => {
                 <td>{row.slNo}</td>
                 <td>{row.via}</td>
                 <td>{row.leadName}</td>
-                <td>{row.mobile}</td>
+                <td>{row.countryCode ? `${row.countryCode}\u00A0${row.mobile}` : row.mobile}</td>
                 <td>{row.assignedTo}</td>
                 <td>{row.purpose}</td>
                 <td>{row.source}</td>

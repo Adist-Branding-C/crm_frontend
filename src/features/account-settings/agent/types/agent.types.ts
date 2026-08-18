@@ -8,6 +8,7 @@ export interface AgentItem {
   phone_number?: string;
   phoneNumber?: string;
   mobile?: string;
+  countryCode?: string;
   designationId?: string;
   designation_id?: number | string;
   designation?: string;
@@ -17,9 +18,11 @@ export interface AgentItem {
   isAdmin?: boolean;
 }
 
+
 export interface AgentFormData {
   fullName: string;
   email: string;
+  countryCode: string;
   phone: string;
   password: string;
   confirmPassword: string;
@@ -57,6 +60,25 @@ export interface GetAllAgentsResponse {
 export interface DesignationOption {
   label: string;
   value: string;
+}
+
+export interface StaffAutomationReference {
+  id: number;
+  automationRuleId: number;
+  ruleName: string;
+  actionType: string;
+}
+
+export interface StaffDeletionDependencies {
+  leadCount: number;
+  taskCount: number;
+  automationActions: StaffAutomationReference[];
+}
+
+export interface StaffDeletionDependenciesResponse {
+  status: boolean;
+  message?: string;
+  data?: StaffDeletionDependencies;
 }
 
 export interface StaffProfile {

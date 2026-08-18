@@ -1,6 +1,7 @@
 export interface ProfileFormData {
   name: string;
   email: string;
+  countryCode: string;
   mobile: string;
 }
 
@@ -16,6 +17,7 @@ export interface ProfileStaff {
   name: string;
   email: string;
   phoneNumber: string;
+  countryCode?: string;
   designation: string;
   department: string | null;
   role: string;
@@ -53,6 +55,7 @@ export interface GetProfileResponse {
 export interface UpdateProfileRequest {
   name: string;
   email: string;
+  countryCode: string;
   phone: string;
 }
 

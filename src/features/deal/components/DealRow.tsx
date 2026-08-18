@@ -7,6 +7,7 @@ import { DEAL_STATUS_LABEL_MAP, DEAL_TYPE_LABEL_MAP } from '../../../shared/cons
 import { substituteTemplateVariables } from '../../../shared/utils/whatsappMessage.util';
 import type { DealRowProps } from '../types/component.types';
 import type { WhatsappTemplateItem } from '../../account-settings/whatsapp-template/types/whatsapp-template.types';
+import { splitMobileValue } from '../utils/mobileFormat';
 
 const getStatusBadge = (status: string) => {
   const colorMap: Record<string, string> = { win: '#10b981', lost: '#ef4444', pending: '#f59e0b', invoice: '#3b82f6' };
@@ -113,7 +114,14 @@ const DealRow: React.FC<DealRowProps> = ({
       </td>
       <td className="lead-name-cell">{deal.dealName}</td>
       <td>{deal.lead}</td>
-      <td>{deal.mobile || ''}</td>
+      <td>{deal.mobile || ''}</td><td>
+        {deal.mobile
+          ? (() => {
+              const { countryCode, number } = splitMobileValue(deal.mobile);
+              return `${countryCode}\u00A0${number}`;
+            })()
+          : ''}
+      </td>
       <td>{Number(deal.amount).toLocaleString()}</td>
       <td>{getStatusBadge(deal.status || '')}</td>
       <td>{getTypeBadge(deal.type || '')}</td>

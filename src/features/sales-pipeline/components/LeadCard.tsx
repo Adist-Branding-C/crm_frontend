@@ -18,10 +18,10 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId }) => {
       {...attributes}
       {...listeners}
     >
-      <div className="deal-title">{lead.name}</div>
+<div className="deal-title">{lead.name}</div>
       <div className="deal-value">
         <Phone size={14} />
-        {lead.phone}
+        {lead.countryCode ? `${lead.countryCode} ${lead.phone}` : lead.phone}
       </div>
       <div className="deal-footer">
         <div className="deal-contact">

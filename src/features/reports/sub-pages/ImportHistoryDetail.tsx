@@ -1,127 +1,185 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  RefreshCw, Search, ChevronDown, ChevronLeft, ChevronRight, Eye,
-  CheckCircle, XCircle, AlertCircle
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+
 import './ReportsSubPages.css';
+
 import { importDetailColumns as columns } from '../constants/historyReports.data';
 import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
-import { useTableData } from '../../../shared/hooks/useTableData';
-import { leadImportService } from '../services/leadImportService';
-import type { LeadImportEntryItem, LeadImportHistoryItem } from '../types';
+import { useImportHistoryDetail } from '../hooks/useImportHistoryDetail';
+import type { ImportEntryStatus } from '../types';
+
+type DetailTab = 'imported' | 'failed';
+
+const TAB_TO_STATUS: Record<DetailTab, ImportEntryStatus> = {
+  imported: 'success',
+  failed: 'failed',
+};
 
 const ImportHistoryDetail: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<'imported' | 'duplicate' | 'failed'>('imported');
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [detailInfo, setDetailInfo] = useState<LeadImportHistoryItem | null>(null);
+  const { id: importId } = useParams<{ id: string }>();
+
+  const [activeTab, setActiveTab] = useState<DetailTab>('imported');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const {
+    importHistory,
+    entries,
+    total,
+    totalPages,
+    isLoading,
+    fetchDetail,
+    fetchEntries,
+  } = useImportHistoryDetail();
 
   useEffect(() => {
-    if (id) {
-      leadImportService.getHistoryDetail(id).then(res => {
-        if (res.status && res.data) {
-          setDetailInfo(res.data);
-        }
-      });
-    }
-  }, [id]);
+    if (!importId) return;
 
-  const pagination = useTableData<LeadImportEntryItem>({
-    fetchFn: async (params) => {
-      if (!id) throw new Error('Import ID missing');
-      const response = await leadImportService.getHistoryEntries(id, { ...params, status: activeTab });
-      if (response.status) {
-        const data = response.data;
-        const items = data?.items ?? [];
-        return { items, total: data?.pagination?.total ?? items.length };
-      }
-      throw new Error(response.message || 'Failed to fetch import entries');
-    },
-  });
+    fetchDetail(importId);
 
-  // Re-fetch when activeTab changes
-  useEffect(() => {
-    pagination.setPageNumber(1);
-    pagination.refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [importId]);
 
-  const totalPages = Math.ceil(pagination.totalCount / pagination.limit) || 1;
-  const startIndex = (pagination.pageNumber - 1) * pagination.limit;
-  const paginatedData = pagination.list;
+  useEffect(() => {
+    if (!importId) return;
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) { setSelectedRows(paginatedData.map(item => item.id)); }
-    else { setSelectedRows([]); }
+    fetchEntries(
+      importId,
+      TAB_TO_STATUS[activeTab],
+      currentPage,
+      rowsPerPage,
+    );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importId, activeTab, currentPage, rowsPerPage]);
+
+  // Poll while the import is still being processed.
+  useEffect(() => {
+    if (!importId || !importHistory) return;
+
+    if (
+      importHistory.status !== 'pending' &&
+      importHistory.status !== 'processing'
+    ) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetchDetail(importId);
+      fetchEntries(
+        importId,
+        TAB_TO_STATUS[activeTab],
+        currentPage,
+        rowsPerPage,
+      );
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [
+    importId,
+    importHistory,
+    activeTab,
+    currentPage,
+    rowsPerPage,
+    fetchDetail,
+    fetchEntries,
+  ]);
+
+  const handleTabChange = (tab: DetailTab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
   };
 
-  const handleSelectRow = (rowId: string) => {
-    setSelectedRows(prev => prev.includes(rowId) ? prev.filter(i => i !== rowId) : [...prev, rowId]);
+  const handleRowsPerPageChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setRowsPerPage(Number(e.target.value));
+    setCurrentPage(1);
   };
 
-  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    pagination.handleRowsPerPageChange(Number(e.target.value));
+  const handleRefresh = () => {
+    if (!importId) return;
+
+    fetchDetail(importId);
+    fetchEntries(
+      importId,
+      TAB_TO_STATUS[activeTab],
+      currentPage,
+      rowsPerPage,
+    );
   };
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
 
   return (
     <div className="enquiries-page">
       <div className="report-page-header-simple">
-        <h1 className="header-title-simple">{detailInfo?.fileName || 'Loading...'}</h1>
+        <h1 className="header-title-simple">
+          {importHistory?.fileName ?? 'Import details'}
+        </h1>
       </div>
 
       <div className="stats-card-row">
         <div className="stat-card">
-          <span className="stat-number">{detailInfo?.totalRows || 0}</span>
+          <span className="stat-number">
+            {importHistory?.totalRows ?? 0}
+          </span>
           <span className="stat-label">Total Records</span>
         </div>
+
         <div className="stat-card stat-card-success">
           <CheckCircle size={24} className="stat-icon" />
-          <span className="stat-number">{detailInfo?.importedCount || 0}</span>
+          <span className="stat-number">
+            {importHistory?.successCount ?? 0}
+          </span>
           <span className="stat-label">Imported</span>
         </div>
-        <div className="stat-card stat-card-warning">
-          <AlertCircle size={24} className="stat-icon" />
-          <span className="stat-number">{detailInfo?.duplicateCount || 0}</span>
-          <span className="stat-label">Duplicates</span>
-        </div>
+
         <div className="stat-card stat-card-danger">
           <XCircle size={24} className="stat-icon" />
-          <span className="stat-number">{detailInfo?.failedCount || 0}</span>
+          <span className="stat-number">
+            {importHistory?.failedCount ?? 0}
+          </span>
           <span className="stat-label">Failed</span>
         </div>
       </div>
 
       <div className="tabs-container">
         <button
-          className={`tab-btn ${activeTab === 'imported' ? 'active' : ''}`}
-          onClick={() => setActiveTab('imported')}
+          className={`tab-btn ${
+            activeTab === 'imported' ? 'active' : ''
+          }`}
+          onClick={() => handleTabChange('imported')}
         >
-          Imported ({detailInfo?.importedCount || 0})
+          Imported ({importHistory?.successCount ?? 0})
         </button>
+
         <button
-          className={`tab-btn ${activeTab === 'duplicate' ? 'active' : ''}`}
-          onClick={() => setActiveTab('duplicate')}
+          className={`tab-btn ${
+            activeTab === 'failed' ? 'active' : ''
+          }`}
+          onClick={() => handleTabChange('failed')}
         >
-          Duplicates ({detailInfo?.duplicateCount || 0})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'failed' ? 'active' : ''}`}
-          onClick={() => setActiveTab('failed')}
-        >
-          Failed ({detailInfo?.failedCount || 0})
+          Failed ({importHistory?.failedCount ?? 0})
         </button>
       </div>
 
       <div className="enquiries-toolbar">
         <div className="toolbar-left">
-          <button className="btn btn-secondary" onClick={() => pagination.refresh()}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleRefresh}
+          >
             <RefreshCw size={16} />
             Refresh
           </button>
-        </div>
-        <div className="toolbar-right">
         </div>
       </div>
 
@@ -129,33 +187,72 @@ const ImportHistoryDetail: React.FC = () => {
         <table className="enquiries-table">
           <thead>
             <tr>
-              {columns.map(col => (
+              {columns.map((col) => (
                 <th key={col.key}>
-                  {col.key === 'checkbox' ? (
-                    <input type="checkbox" checked={paginatedData.length > 0 && selectedRows.length === paginatedData.length} onChange={handleSelectAll} />
-                  ) : (
-                    <>{col.label}</>
-                  )}
+                  {col.key === 'checkbox' ? null : col.label}
                 </th>
               ))}
             </tr>
           </thead>
+
           <tbody>
-            {paginatedData.map((row, index) => {
-              const rawData = row.rawData || {};
-              return (
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  style={{
+                    textAlign: 'center',
+                    padding: '2rem',
+                  }}
+                >
+                  Loading…
+                </td>
+              </tr>
+            ) : entries.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  style={{
+                    textAlign: 'center',
+                    padding: '2rem',
+                  }}
+                >
+                  No records
+                </td>
+              </tr>
+            ) : (
+              entries.map((row, index) => (
                 <tr key={row.id}>
-                  <td><input type="checkbox" checked={selectedRows.includes(row.id)} onChange={() => handleSelectRow(row.id)} /></td>
-                  <td>{row.rowNumber}</td>
-                  <td className="lead-name-cell">{rawData.name || '-'}</td>
-                  <td>{rawData.phone || '-'}</td>
-                  <td>{rawData.email || '-'}</td>
-                  <td>{row.errorReason || '-'}</td>
-                  <td>{detailInfo?.createdAt ? new Date(detailInfo.createdAt).toLocaleString() : '-'}</td>
-                  <td className="meta-cell">{JSON.stringify(rawData)}</td>
+                  <td></td>
+
+                  <td>{startIndex + index + 1}</td>
+
+                  <td className="lead-name-cell">
+                    {row.name ?? '-'}
+                  </td>
+
+                  <td>{row.phone ?? '-'}</td>
+
+                  <td>{row.source ?? '-'}</td>
+
+                  <td>{row.purpose ?? '-'}</td>
+
+                  <td>{row.assignedTo ?? '-'}</td>
+
+                  <td>{row.errorMessage ?? '-'}</td>
+
+                  <td>
+                    {new Date(row.createdAt).toLocaleString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </td>
                 </tr>
-              )
-            })}
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -163,17 +260,66 @@ const ImportHistoryDetail: React.FC = () => {
       <div className="pagination-container">
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
-          <select value={pagination.limit} onChange={handleRowsPerPageChange} className="rows-select">
-            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
+
+          <select
+            value={rowsPerPage}
+            onChange={handleRowsPerPageChange}
+            className="rows-select"
+          >
+            {ROWS_OPTIONS_10_25_50.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
           </select>
-          <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + pagination.limit, pagination.totalCount)} of {pagination.totalCount}</span>
+
+          <span className="pagination-info">
+            Showing{' '}
+            {total === 0 ? 0 : startIndex + 1}-
+            {Math.min(startIndex + rowsPerPage, total)} of {total}
+          </span>
         </div>
+
         <div className="pagination-right">
-          <button className="pagination-btn" disabled={pagination.pageNumber === 1} onClick={() => pagination.setPageNumber(1)}>First</button>
-          <button className="pagination-btn" disabled={pagination.pageNumber === 1} onClick={() => pagination.setPageNumber(prev => prev - 1)}><ChevronLeft size={16} /></button>
-          <span className="page-indicator">Page {pagination.pageNumber} of {totalPages}</span>
-          <button className="pagination-btn" disabled={pagination.pageNumber === totalPages} onClick={() => pagination.setPageNumber(prev => prev + 1)}><ChevronRight size={16} /></button>
-          <button className="pagination-btn" disabled={pagination.pageNumber === totalPages} onClick={() => pagination.setPageNumber(totalPages)}>Last</button>
+          <button
+            className="pagination-btn"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(1)}
+          >
+            First
+          </button>
+
+          <button
+            className="pagination-btn"
+            disabled={currentPage === 1}
+            onClick={() =>
+              setCurrentPage((prev) => prev - 1)
+            }
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          <span className="page-indicator">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            className="pagination-btn"
+            disabled={currentPage === totalPages}
+            onClick={() =>
+              setCurrentPage((prev) => prev + 1)
+            }
+          >
+            <ChevronRight size={16} />
+          </button>
+
+          <button
+            className="pagination-btn"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(totalPages)}
+          >
+            Last
+          </button>
         </div>
       </div>
     </div>

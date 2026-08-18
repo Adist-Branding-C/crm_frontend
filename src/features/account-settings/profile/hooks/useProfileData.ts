@@ -3,6 +3,7 @@ import type { FormikHelpers } from 'formik';
 import { profileService } from '../services/profile.service';
 import { INITIAL_PROFILE_FORM, INITIAL_PROFILE_DATA, INITIAL_PROFILE_PLAN } from '../constants';
 import type { ProfileFormData, ProfilePlan } from '../types';
+import { DEFAULT_COUNTRY_CODE } from '../../../../shared/constants/countryCodes';
 
 function getErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'response' in err) {
@@ -38,10 +39,11 @@ export function useProfileData() {
     setError(null);
     try {
       const response = await profileService.getProfile();
-      const { staff, plan } = response.data;
+const { staff, plan } = response.data;
       setFormData({
         name: staff.name || '',
         email: staff.email || '',
+        countryCode: staff.countryCode || DEFAULT_COUNTRY_CODE,
         mobile: staff.phoneNumber || '',
       });
       setProfileData({

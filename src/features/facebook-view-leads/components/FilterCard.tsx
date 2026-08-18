@@ -1,9 +1,8 @@
 import React from 'react';
-import { X, Calendar, Search, Filter } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import type { FilterCardProps } from '../types';
-import { workflowsList } from '../constants';
 
-const FilterCard: React.FC<FilterCardProps> = ({ filters, onFilterChange, onClearClick }) => (
+const FilterCard: React.FC<FilterCardProps> = ({ filters, workflows, onFilterChange, onClearClick }) => (
   <div className="filter-card">
     <h3 className="filter-card-title">Filter Options</h3>
     <div className="filter-grid">
@@ -19,21 +18,23 @@ const FilterCard: React.FC<FilterCardProps> = ({ filters, onFilterChange, onClea
       <div className="filter-group">
         <label>Workflow</label>
         <select value={filters.workflow} onChange={(e) => onFilterChange('workflow', e.target.value)}>
-          {workflowsList.map(w => (
-            <option key={w.id} value={w.id === 1 ? '' : w.name}>{w.name}</option>
+          <option value="">All Workflows</option>
+          {workflows.map((w) => (
+            <option key={w.id} value={w.id}>{w.name}</option>
           ))}
         </select>
       </div>
       <div className="filter-group">
-        <label>Search by Name or Phone</label>
-        <div className="search-input-wrapper">
-          <input type="text" placeholder="Enter at least 3 characters..." value={filters.search}
-            onChange={(e) => onFilterChange('search', e.target.value)} />
-          <button className="search-btn"><Search size={14} /></button>
-        </div>
+        <label>Status</label>
+        <select value={filters.status} onChange={(e) => onFilterChange('status', e.target.value)}>
+          <option value="">All Status</option>
+          <option value="received">Received</option>
+          <option value="processing">Processing</option>
+          <option value="processed">Processed</option>
+          <option value="failed">Failed</option>
+        </select>
       </div>
       <div className="filter-actions">
-        <button className="btn btn-primary"><Filter size={14} /> Filter</button>
         <button className="btn btn-secondary" onClick={onClearClick}><X size={14} /> Clear</button>
       </div>
     </div>
