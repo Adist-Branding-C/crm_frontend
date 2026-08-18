@@ -41,9 +41,10 @@ export function useDealPage() {
   const startIndex = (pageNumber - 1) * limit;
   const paginatedData = filteredData;
 
-  const handleRowsPerPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleRowsPerPageChange = useCallback((e: number | React.ChangeEvent<HTMLSelectElement>) => {
+    const limit = typeof e === 'number' ? e : Number(e.target.value);
     setPageNumber(1);
-    setLimit(Number(e.target.value));
+    setLimit(limit);
   }, [setPageNumber, setLimit]);
 
   const paginatedIds = useMemo(() => paginatedData.map(item => item.id), [paginatedData]);

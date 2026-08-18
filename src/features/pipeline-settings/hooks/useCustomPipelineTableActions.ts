@@ -27,8 +27,9 @@ export function useCustomPipelineTableActions({
   );
 
   const handleRowsPerPageChange = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      table.handleRowsPerPageChange(Number(e.target.value));
+    (e: number | ChangeEvent<HTMLSelectElement>) => {
+      const val = typeof e === 'number' ? e : Number(e.target.value);
+      table.handleRowsPerPageChange(val);
     },
     [table],
   );
