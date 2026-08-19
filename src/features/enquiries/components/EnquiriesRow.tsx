@@ -35,7 +35,7 @@ const EDITABLE_FIELD_CONFIG: Partial<Record<string, {
   label: string;
 }>> = {
   location: { payloadKey: 'location', type: 'text', label: 'Location' },
-  agentId: { payloadKey: 'agentId', type: 'select', optionsKey: 'staffOptions', label: 'Assigned To' },
+  assignedTo: { payloadKey: 'agentId', type: 'select', optionsKey: 'staffOptions', label: 'Assigned To' },
   purpose: { payloadKey: 'purposeId', type: 'select', optionsKey: 'purposeOptions', label: 'Purpose' },
   type: { payloadKey: 'typeId', type: 'select', optionsKey: 'typeOptions', label: 'Type' },
   status: { payloadKey: 'statusId', type: 'select', optionsKey: 'statusOptions', label: 'Status' },
@@ -76,7 +76,7 @@ const getCellContent = (row: Lead, colKey: string) => {
   if (colKey === 'nextFollowUpDate') {
     return { children: formatFollowUpDate(row.nextFollowUp) };
   }
-  if (colKey === 'agentId') {
+  if (colKey === 'assignedTo') {
     return { children: row.assignedTo || LABEL_NOT_ASSIGNED, isEmpty: !row.assignedTo };
   }
 
@@ -149,6 +149,35 @@ const EnquiriesRow: React.FC<EnquiriesRowProps> = ({ lead, columns, isSelected, 
 
         const cell = getCellContent(lead, col.key);
         const editable = EDITABLE_FIELD_CONFIG[col.key];
+        const isAlwaysEditable = col.key === 'assignedTo' || col.key === 'status';
+
+        if (isAlwaysEditable && editable) {
+          return (
+            <TCell key={col.key}>
+              {cell.isEmpty ? (
+                <span
+                  className="lead-cell-empty"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingCell({ colKey: col.key, rect: e.currentTarget.getBoundingClientRect() });
+                  }}
+                >
+                  None
+                </span>
+              ) : (
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingCell({ colKey: col.key, rect: e.currentTarget.getBoundingClientRect() });
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {cell.children}
+                </span>
+              )}
+            </TCell>
+          );
+        }
 
         if (cell.isEmpty && editable) {
           return (
@@ -170,16 +199,44 @@ const EnquiriesRow: React.FC<EnquiriesRowProps> = ({ lead, columns, isSelected, 
         );
       })}
 
-      {editingCell && editableConfig && (
-        <CellEditPopover
-          anchorRect={editingCell.rect}
-          label={editableConfig.label}
-          type={editableConfig.type}
-          {...(editableConfig.optionsKey ? { options: fieldOptions[editableConfig.optionsKey] } : {})}
-          onSave={(value) => onFieldSave(lead.leadId, { [editableConfig.payloadKey]: value })}
-          onClose={() => setEditingCell(null)}
-        />
-      )}
+      {editingCell && editableConfig && (() => {
+        const getInitialValue = () => {
+          if (editableConfig.type === 'select' && editableConfig.optionsKey) {
+            const options = fieldOptions[editableConfig.optionsKey] || [];
+            let currentLabel: string | undefined;
+            if (editingCell.colKey === 'assignedTo') currentLabel = lead.assignedTo;
+            else if (editingCell.colKey === 'status') currentLabel = lead.status;
+            else if (editingCell.colKey === 'type') currentLabel = lead.type;
+            else if (editingCell.colKey === 'source') currentLabel = lead.source;
+            else if (editingCell.colKey === 'purpose') currentLabel = lead.purpose;
+            else currentLabel = (lead as unknown as Record<string, string>)[editingCell.colKey];
+
+            if (currentLabel) {
+              const option = options.find(o => o.label === currentLabel);
+              if (option) return String(option.value);
+            }
+          } else {
+            if (LEAD_PROPERTY_KEYS.has(editingCell.colKey)) {
+              return (lead as unknown as Record<string, string>)[editingCell.colKey];
+            }
+            const af = lead.additionalFields.find(f => f.name === editingCell.colKey);
+            return af?.value;
+          }
+          return undefined;
+        };
+
+        return (
+          <CellEditPopover
+            anchorRect={editingCell.rect}
+            label={editableConfig.label}
+            type={editableConfig.type}
+            {...(editableConfig.optionsKey ? { options: fieldOptions[editableConfig.optionsKey] } : {})}
+            initialValue={getInitialValue()}
+            onSave={(value) => onFieldSave(lead.leadId, { [editableConfig.payloadKey]: value })}
+            onClose={() => setEditingCell(null)}
+          />
+        );
+      })()}
     </TRow>
   );
 };
