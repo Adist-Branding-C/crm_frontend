@@ -80,7 +80,18 @@ const SpotlightTableRow = memo(
         {row.name}
       </TCell>
       <TCell>{row.phone}</TCell>
-      <TCell>{row.assignedStaff?.name || emptyCell('assignedTo')}</TCell>
+      <TCell>
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditingField({ field: 'assignedTo', rect: e.currentTarget.getBoundingClientRect() });
+          }}
+          style={{ cursor: 'pointer' }}
+          title="Click to edit Assigned To"
+        >
+          {row.assignedStaff?.name || <span className="lead-cell-empty">None</span>}
+        </span>
+      </TCell>
       <TCell>{row.purpose?.purpose || emptyCell('purpose')}</TCell>
       <TCell>
         {row.type?.type ? (
@@ -90,11 +101,20 @@ const SpotlightTableRow = memo(
         ) : emptyCell('type')}
       </TCell>
       <TCell>
-        {row.status?.status ? (
-          <span className={`badge badge-${row.status.status.toLowerCase()}`}>
-            {row.status.status}
-          </span>
-        ) : emptyCell('status')}
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            setEditingField({ field: 'status', rect: e.currentTarget.getBoundingClientRect() });
+          }}
+          style={{ cursor: 'pointer', display: 'inline-block' }}
+          title="Click to edit Status"
+        >
+          {row.status?.status ? (
+            <span className={`badge badge-${row.status.status.toLowerCase()}`}>
+              {row.status.status}
+            </span>
+          ) : <span className="lead-cell-empty">None</span>}
+        </span>
       </TCell>
       <TCell>{row.source?.source || emptyCell('source')}</TCell>
       <TCell>{formatDateTime(row.createdAt)}</TCell>
@@ -108,6 +128,13 @@ const SpotlightTableRow = memo(
           label={editableConfig.label}
           type="select"
           options={fieldOptions[editableConfig.optionsKey]}
+          initialValue={
+            editingField.field === 'assignedTo' 
+              ? row.assignedStaff?.id 
+              : editingField.field === 'status' 
+              ? row.status?.id 
+              : undefined
+          }
           onSave={(value) => onFieldSave(String(row.id), { [editableConfig.payloadKey]: value })}
           onClose={() => setEditingField(null)}
         />

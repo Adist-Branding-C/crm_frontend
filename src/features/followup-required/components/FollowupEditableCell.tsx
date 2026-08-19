@@ -22,27 +22,41 @@ interface FollowupEditableCellProps {
 const FollowupEditableCell = ({ leadId, value, label, payloadKey, options, onFieldSave, renderValue }: FollowupEditableCellProps) => {
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
-  if (value) {
-    return <>{renderValue ? renderValue(value) : value}</>;
-  }
-
   return (
     <>
-      <span
-        className="lead-cell-empty"
-        onClick={(e) => {
-          e.stopPropagation();
-          setAnchorRect(e.currentTarget.getBoundingClientRect());
-        }}
-      >
-        None
-      </span>
+      {value ? (
+        (payloadKey === 'agentId' || payloadKey === 'statusId') ? (
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              setAnchorRect(e.currentTarget.getBoundingClientRect());
+            }}
+            style={{ cursor: 'pointer', display: 'inline-block' }}
+            title={`Click to edit ${label}`}
+          >
+            {renderValue ? renderValue(value) : value}
+          </span>
+        ) : (
+          <>{renderValue ? renderValue(value) : value}</>
+        )
+      ) : (
+        <span
+          className="lead-cell-empty"
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnchorRect(e.currentTarget.getBoundingClientRect());
+          }}
+        >
+          None
+        </span>
+      )}
       {anchorRect && (
         <CellEditPopover
           anchorRect={anchorRect}
           label={label}
           type="select"
           options={options}
+          initialValue={value ? String(options.find(o => o.label === value)?.value || '') : undefined}
           onSave={(v) => onFieldSave(leadId, { [payloadKey]: v })}
           onClose={() => setAnchorRect(null)}
         />

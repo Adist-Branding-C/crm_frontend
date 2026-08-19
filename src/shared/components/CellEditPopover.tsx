@@ -9,6 +9,7 @@ export interface CellEditPopoverProps {
   label: string;
   type: 'text' | 'select' | 'date';
   options?: LabelValuePair[];
+  initialValue?: string;
   onSave: (value: string) => Promise<boolean>;
   onClose: () => void;
 }
@@ -26,8 +27,8 @@ const POPOVER_WIDTH = 240;
  * - EnquiriesRow (Leads), SpotlightTableRow, FollowupTable, TaskRow, DealRow
  *   - all for their "Assigned To" empty-cell click-to-edit affordance.
  */
-const CellEditPopover = ({ anchorRect, label, type, options = [], onSave, onClose }: CellEditPopoverProps) => {
-  const [value, setValue] = useState('');
+const CellEditPopover = ({ anchorRect, label, type, options = [], initialValue, onSave, onClose }: CellEditPopoverProps) => {
+  const [value, setValue] = useState(initialValue || '');
   const [isSaving, setIsSaving] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
