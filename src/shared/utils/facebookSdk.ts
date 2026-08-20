@@ -1,79 +1,27 @@
-interface FacebookLoginResponse {
-  authResponse: { code?: string } | null;
-  status: 'connected' | 'not_authorized' | 'unknown';
-}
-
-interface FacebookSdk {
-  init: (params: { appId: string; cookie?: boolean; xfbml?: boolean; version: string }) => void;
-  login: (
-    callback: (response: FacebookLoginResponse) => void,
-    params: { scope: string; response_type: 'code' },
-  ) => void;
-}
-
-declare global {
-  interface Window {
-    FB?: FacebookSdk;
-    fbAsyncInit?: () => void;
-  }
-}
-
-const FACEBOOK_SDK_SRC = 'https://connect.facebook.net/en_US/sdk.js';
-
-const FACEBOOK_LOGIN_SCOPES = 'public_profile,pages_show_list,pages_read_engagement,pages_manage_metadata,leads_retrieval';
-
-let sdkLoadPromise: Promise<void> | null = null;
-
-const loadFacebookSdk = (): Promise<void> => {
-  if (window.FB) {
-    return Promise.resolve();
-  }
-
-  if (sdkLoadPromise) {
-    return sdkLoadPromise;
-  }
-
+export const facebookLogin = () => {
   const appId = import.meta.env.VITE_FACEBOOK_APP_ID;
-  const version = import.meta.env.VITE_FACEBOOK_SDK_VERSION;
+  const configId = import.meta.env.VITE_FACEBOOK_CONFIG_ID;
+  const redirectUri = import.meta.env.VITE_FACEBOOK_REDIRECT_URI;
 
   if (!appId) {
-    throw new Error('VITE_FACEBOOK_APP_ID is not configured.');
+    throw new Error("VITE_FACEBOOK_APP_ID is not configured.");
   }
 
-  if (!version) {
-    throw new Error('VITE_FACEBOOK_SDK_VERSION is not configured.');
+  if (!configId) {
+    throw new Error("VITE_FACEBOOK_CONFIG_ID is not configured.");
   }
 
-  sdkLoadPromise = new Promise((resolve, reject) => {
-    window.fbAsyncInit = () => {
-      window.FB!.init({ appId, cookie: true, xfbml: false, version });
-      resolve();
-    };
+  if (!redirectUri) {
+    throw new Error("VITE_FACEBOOK_REDIRECT_URI is not configured.");
+  }
 
-    const script = document.createElement('script');
-    script.src = FACEBOOK_SDK_SRC;
-    script.async = true;
-    script.defer = true;
-    script.onerror = () => reject(new Error('Failed to load the Facebook SDK.'));
-    document.body.appendChild(script);
-  });
+  const url =
+  `https://www.facebook.com/v25.0/dialog/oauth` +
+  `?client_id=${encodeURIComponent(appId)}` +
+  `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+  `&config_id=${encodeURIComponent(configId)}` +
+  `&response_type=code` +
+  `&override_default_response_type=true`;
 
-  return sdkLoadPromise;
-};
-
-export const facebookLogin = async (): Promise<string> => {
-  await loadFacebookSdk();
-
-  return new Promise((resolve, reject) => {
-    window.FB!.login(
-      (response) => {
-        if (response.authResponse?.code) {
-          resolve(response.authResponse.code);
-          return;
-        }
-        reject(new Error('cancelled'));
-      },
-      { scope: FACEBOOK_LOGIN_SCOPES, response_type: 'code' },
-    );
-  });
+  window.location.assign(url);
 };

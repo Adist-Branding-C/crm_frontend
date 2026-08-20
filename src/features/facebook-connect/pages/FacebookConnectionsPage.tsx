@@ -1,22 +1,18 @@
+import { useMemo } from 'react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import ToastNotification from '../../../shared/components/ToastNotification';
 import { useFacebookConnections } from '../hooks/useFacebookConnections';
+import { useFacebookOAuthCallback } from '../hooks/useFacebookOAuthCallback';
 import OAuthCallbackStatus from '../components/OAuthCallbackStatus';
 import '../../../pages/FacebookWorkflows.css';
 
 const FacebookConnectionsPage = () => {
-  const {
-    connections,
-    loading,
-    connect,
-    disconnect,
-    disconnectingId,
-    toast,
-    connectState,
-    connectError,
-    connectResult,
-    resetConnectState,
-  } = useFacebookConnections();
+  const { connections, loading, connect, disconnect, disconnectingId, toast, reload } = useFacebookConnections();
+  const oauthCallback = useFacebookOAuthCallback();
+  const isHandlingOAuthRedirect = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return Boolean(params.get('code') || params.get('error'));
+  }, []);
 
   return (
     <div className="facebook-workflows-page">
@@ -34,13 +30,16 @@ const FacebookConnectionsPage = () => {
         }
       />
 
-      {connectState !== 'idle' ? (
+      {isHandlingOAuthRedirect && oauthCallback.state !== 'idle' ? (
         <OAuthCallbackStatus
-          state={connectState}
-          errorMessage={connectError}
-          result={connectResult}
-          onSuccess={resetConnectState}
-          onRetry={resetConnectState}
+          state={oauthCallback.state}
+          errorMessage={oauthCallback.errorMessage}
+          result={oauthCallback.result}
+          onSuccess={() => {
+            oauthCallback.reset();
+            reload();
+          }}
+          onRetry={() => oauthCallback.reset()}
         />
       ) : loading ? (
         <p>Loading…</p>
