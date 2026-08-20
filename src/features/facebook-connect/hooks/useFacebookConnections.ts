@@ -2,13 +2,18 @@ import { useCallback, useEffect, useState } from 'react';
 import { facebookApi } from '../services/facebook.service';
 import { facebookLogin } from '../../../shared/utils/facebookSdk';
 import { useToast } from '../../../shared/hooks/useToast';
-import type { FacebookConnection } from '../types';
+import type { FacebookConnection, OAuthCallbackResult } from '../types';
+
+type ConnectState = 'idle' | 'connecting' | 'success' | 'cancelled' | 'error';
 
 export const useFacebookConnections = () => {
   const toast = useToast();
   const [connections, setConnections] = useState<FacebookConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+  const [connectState, setConnectState] = useState<ConnectState>('idle');
+  const [connectError, setConnectError] = useState('');
+  const [connectResult, setConnectResult] = useState<OAuthCallbackResult | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -27,8 +32,31 @@ export const useFacebookConnections = () => {
     load();
   }, [load]);
 
-  const connect = () => {
-    facebookLogin();
+  const connect = async () => {
+    let code: string;
+    try {
+      code = await facebookLogin();
+    } catch {
+      setConnectState('cancelled');
+      return;
+    }
+
+    setConnectState('connecting');
+    try {
+      const response = await facebookApi.handleOAuthCallback(code);
+      setConnectResult(response.data ?? null);
+      setConnectState('success');
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Connection failed, please try again.';
+      setConnectError(message);
+      setConnectState('error');
+    }
+  };
+
+  const resetConnectState = () => {
+    setConnectState('idle');
+    load();
   };
 
   const disconnect = async (connectionId: string) => {
@@ -44,5 +72,17 @@ export const useFacebookConnections = () => {
     }
   };
 
-  return { connections, loading, connect, disconnect, disconnectingId, toast, reload: load };
+  return {
+    connections,
+    loading,
+    connect,
+    disconnect,
+    disconnectingId,
+    toast,
+    reload: load,
+    connectState,
+    connectError,
+    connectResult,
+    resetConnectState,
+  };
 };

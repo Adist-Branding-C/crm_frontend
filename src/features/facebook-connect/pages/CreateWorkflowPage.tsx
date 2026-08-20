@@ -1,21 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useMemo } from 'react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import ToastNotification from '../../../shared/components/ToastNotification';
 import { useCreateWorkflowPage } from '../hooks/useCreateWorkflowPage';
-import { useFacebookOAuthCallback } from '../hooks/useFacebookOAuthCallback';
 import FieldMappingBuilder from '../components/FieldMappingBuilder';
 import DefaultValuesSection from '../components/DefaultValuesSection';
-import OAuthCallbackStatus from '../components/OAuthCallbackStatus';
 import '../../../pages/FacebookWorkflows.css';
 
 const CreateWorkflowPage = () => {
   const navigate = useNavigate();
-  const oauthCallback = useFacebookOAuthCallback();
-  const isHandlingOAuthRedirect = useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    return Boolean(params.get('code') || params.get('error'));
-  }, []);
 
   const {
     browse,
@@ -38,20 +30,6 @@ const CreateWorkflowPage = () => {
     handleSubmit,
     toast,
   } = useCreateWorkflowPage();
-
-  if (isHandlingOAuthRedirect && oauthCallback.state !== 'idle') {
-    return (
-      <div className="create-workflow-page">
-        <OAuthCallbackStatus
-          state={oauthCallback.state}
-          errorMessage={oauthCallback.errorMessage}
-          result={oauthCallback.result}
-          onSuccess={() => navigate('/facebook/connections')}
-          onRetry={() => navigate('/facebook/connections')}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="create-workflow-page">
