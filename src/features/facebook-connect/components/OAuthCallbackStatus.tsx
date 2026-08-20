@@ -8,9 +8,7 @@ interface OAuthCallbackStatusProps {
   onRetry: () => void;
 }
 
-// Shared across every page that can receive a Facebook OAuth redirect
-// (Create Workflow and Connections both can, since the exact redirect_uri
-// Facebook lands on isn't guaranteed to match one specific page).
+// Renders the state of the FB.login() popup connect flow on the Connections page.
 const OAuthCallbackStatus = ({ state, errorMessage, result, onSuccess, onRetry }: OAuthCallbackStatusProps) => {
   if (state === 'connecting') {
     return (
