@@ -144,7 +144,10 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
     hasLoadedRef.current = false;
   }, [lead]);
 
-  const handleSubmit = async (values: AddLeadFormValues & Record<string, string | string[]>) => {
+  const handleSubmit = async (
+    values: AddLeadFormValues & Record<string, string | string[]>,
+    formikHelpers: any
+  ) => {
     setSubmitError('');
     const trimmed = Object.fromEntries(
       Object.entries(values).map(([k, v]) => [k, typeof v === 'string' ? v.trim() : v])
@@ -234,7 +237,30 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
       onSaved?.(isEditing ? 'updated' : 'created');
       onClose();
     } catch (err: unknown) {
-      setSubmitError(getErrorMessage(err, 'An unexpected error occurred'));
+      const msg = getErrorMessage(err, 'An unexpected error occurred');
+      const messages = msg.split(';').map(s => s.trim());
+      let hasFieldError = false;
+
+      messages.forEach(m => {
+        const lowerM = m.toLowerCase();
+        if (lowerM.includes('phone') || lowerM.includes('mobile')) {
+          formikHelpers.setFieldError('phone', m);
+          formikHelpers.setFieldTouched('phone', true, false);
+          hasFieldError = true;
+        } else if (lowerM.includes('email')) {
+          formikHelpers.setFieldError('email', m);
+          formikHelpers.setFieldTouched('email', true, false);
+          hasFieldError = true;
+        } else if (lowerM.includes('name')) {
+          formikHelpers.setFieldError('name', m);
+          formikHelpers.setFieldTouched('name', true, false);
+          hasFieldError = true;
+        }
+      });
+
+      if (!hasFieldError) {
+        setSubmitError(msg);
+      }
     }
   };
 

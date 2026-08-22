@@ -126,7 +126,7 @@ const EnquiriesPage = () => {
         crud.refreshCurrentPage();
         return true;
       }
-      toast.showToastMessage(res.message || 'Failed to update lead', 'error');
+      toast.showToastMessage('Failed to update lead', 'error');
       return false;
     } catch {
       toast.showToastMessage('Failed to update lead', 'error');
