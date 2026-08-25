@@ -12,6 +12,7 @@ import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs'
 import DealDynamicAdditionalFields from './DealDynamicAdditionalFields';
 import { getTodayDateString } from '../utils/dealDateValidation';
 import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from '../../../shared/constants/countryCodes';
+import SelectSearch from '../../../shared/components/SelectSearch';
 import type { DealFormProps } from '../types';
 import '../../../shared/components/drawers/AddLeadDrawer.css';
 
@@ -176,7 +177,7 @@ const DealForm = ({
           // the start of this handler, so the second call's validation would see the
           // *stale* (pre-selection) id and could re-flash the "required" error right
           // after a valid selection.
-          const handleLeadChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+          const handleLeadChange = (e: any) => {
             const value = e.target.value;
             const match = leads.find(l => String(l.value) === String(value));
             setValues(prev => {
@@ -211,7 +212,7 @@ const DealForm = ({
             setFieldTouched('leadId', true, false);
           };
 
-          const handleAgentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+          const handleAgentChange = (e: any) => {
             const value = e.target.value;
             const match = staff.find(s => String(s.value) === String(value));
             agentEditedRef.current = true;
@@ -242,18 +243,16 @@ const DealForm = ({
 
               <div className="form-group">
                 <label>Lead <span className="text-danger">*</span></label>
-                <Field
-                  as="select"
+                <SelectSearch
                   name="leadId"
-                  className={fieldClass('leadId')}
-                  onChange={handleLeadChange}
+                  value={String(values.leadId || '')}
+                  options={leads}
                   disabled={isLoadingLeads || leadsEmpty}
-                >
-                  <option value="">{isLoadingLeads ? 'Loading...' : 'Select'}</option>
-                  {leads.map(l => (
-                    <option key={l.value} value={l.value}>{l.label}</option>
-                  ))}
-                </Field>
+                  placeholder={isLoadingLeads ? 'Loading...' : 'Select a lead'}
+                  onChange={handleLeadChange}
+                  onBlur={() => setFieldTouched('leadId', true)}
+                  className={touched.leadId && errors.leadId ? 'input-error' : ''}
+                />
                 {leadsEmpty ? (
                   <small className="field-error-text">
                     No leads found. Please add a lead first. <Link to="/leads">+ Add Lead</Link>
@@ -310,17 +309,19 @@ const DealForm = ({
 
               <div className="form-group">
                 <label>Status <span className="text-danger">*</span></label>
-                <Field
-                  as="select"
+                <SelectSearch
                   name="statusId"
-                  className={fieldClass('statusId')}
+                  value={String(values.statusId || '')}
+                  options={statuses}
                   disabled={isLoadingStatuses || statusesEmpty}
-                >
-                  <option value="">{isLoadingStatuses ? 'Loading...' : 'Select'}</option>
-                  {statuses.map(s => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </Field>
+                  placeholder={isLoadingStatuses ? 'Loading...' : 'Select a status'}
+                  onChange={(e: any) => {
+                    setFieldValue('statusId', e.target.value);
+                    setFieldTouched('statusId', true, false);
+                  }}
+                  onBlur={() => setFieldTouched('statusId', true)}
+                  className={touched.statusId && errors.statusId ? 'input-error' : ''}
+                />
                 {statusesEmpty ? (
                   <small className="field-error-text">
                     No statuses found. Please add a status first. <Link to="/user/deal-stages">+ Add Status</Link>
@@ -332,17 +333,19 @@ const DealForm = ({
 
               <div className="form-group">
                 <label>Type <span className="text-danger">*</span></label>
-                <Field
-                  as="select"
+                <SelectSearch
                   name="typeId"
-                  className={fieldClass('typeId')}
+                  value={String(values.typeId || '')}
+                  options={types}
                   disabled={isLoadingTypes || typesEmpty}
-                >
-                  <option value="">{isLoadingTypes ? 'Loading...' : 'Select'}</option>
-                  {types.map(t => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </Field>
+                  placeholder={isLoadingTypes ? 'Loading...' : 'Select a type'}
+                  onChange={(e: any) => {
+                    setFieldValue('typeId', e.target.value);
+                    setFieldTouched('typeId', true, false);
+                  }}
+                  onBlur={() => setFieldTouched('typeId', true)}
+                  className={touched.typeId && errors.typeId ? 'input-error' : ''}
+                />
                 {typesEmpty ? (
                   <small className="field-error-text">
                     No deal types found. Please add a type first. <Link to="/user/deal-types">+ Add Type</Link>
@@ -377,18 +380,16 @@ const DealForm = ({
 
               <div className="form-group">
                 <label>Assign Agent <span className="text-danger">*</span></label>
-                <Field
-                  as="select"
+                <SelectSearch
                   name="agentId"
-                  className={fieldClass('agentId')}
-                  onChange={handleAgentChange}
+                  value={String(values.agentId || '')}
+                  options={staff}
                   disabled={isLoadingStaff || staffEmpty}
-                >
-                  <option value="">{isLoadingStaff ? 'Loading...' : 'Select'}</option>
-                  {staff.map(s => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </Field>
+                  placeholder={isLoadingStaff ? 'Loading...' : 'Select a staff member'}
+                  onChange={handleAgentChange}
+                  onBlur={() => setFieldTouched('agentId', true)}
+                  className={touched.agentId && errors.agentId ? 'input-error' : ''}
+                />
                 {staffEmpty ? (
                   <small className="field-error-text">
                     No agents/staff found. Please add a staff member first.

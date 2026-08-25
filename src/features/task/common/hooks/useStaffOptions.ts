@@ -7,7 +7,7 @@ export function useStaffOptions() {
   const fetchStaff = useCallback(async (): Promise<StaffOption[]> => {
     const staffRes = await taskService.getStaff();
     if (staffRes.status && staffRes.data?.items) {
-      return staffRes.data.items.map((s: { id: number; name: string }) => ({ value: s.id, label: s.name }));
+      return staffRes.data.items.map((s: { id: number; name: string }) => ({ value: String(s.id), label: s.name }));
     }
     return [];
   }, []);

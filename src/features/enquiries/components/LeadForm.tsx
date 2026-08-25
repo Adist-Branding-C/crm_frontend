@@ -21,6 +21,7 @@ import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from '../../../shared/constants/c
 import DynamicAdditionalFields from '../../../shared/components/drawers/DynamicAdditionalFields';
 import type { LabelValuePair } from '../../../shared/types/common';
 import type { AddLeadFormValues } from '../../../shared/types/drawers';
+import SelectSearch from '../../../shared/components/SelectSearch';
 
 export interface PreviewData {
   sections: PreviewSection[];
@@ -451,51 +452,78 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
                 </div>
                 <div className="form-group">
                   <label>Assigned To</label>
-                  <Field as="select" name="agentId" className={errors.agentId && touched.agentId ? 'error' : ''}>
-                    <option value="">Select</option>
-                    {staffOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </Field>
+                  <SelectSearch
+                    name="agentId"
+                    value={values.agentId}
+                    options={staffOptions}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFieldTouched('agentId', true, false);
+                    }}
+                    onBlur={handleBlur}
+                    className={errors.agentId && touched.agentId ? 'error' : ''}
+                  />
                   <FormikError name="agentId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">
                   <label>Purpose</label>
-                  <select
+                  <SelectSearch
                     name="purposeId"
                     value={values.purposeId}
+                    options={purposeOptions}
                     onChange={(e) => {
                       handleChange(e);
+                      setFieldTouched('purposeId', true, false);
                       setActivePurposeId(e.target.value);
                     }}
                     onBlur={handleBlur}
                     className={errors.purposeId && touched.purposeId ? 'error' : ''}
-                  >
-                    <option value="">Select</option>
-                    {purposeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  />
                   <FormikError name="purposeId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">
                   <label>Type</label>
-                  <Field as="select" name="typeId" className={errors.typeId && touched.typeId ? 'error' : ''}>
-                    <option value="">Select</option>
-                    {typeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </Field>
+                  <SelectSearch
+                    name="typeId"
+                    value={values.typeId}
+                    options={typeOptions}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFieldTouched('typeId', true, false);
+                    }}
+                    onBlur={handleBlur}
+                    className={errors.typeId && touched.typeId ? 'error' : ''}
+                  />
                   <FormikError name="typeId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">
                   <label>Status</label>
-                  <Field as="select" name="statusId" className={errors.statusId && touched.statusId ? 'error' : ''}>
-                    <option value="">Select</option>
-                    {statusOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </Field>
+                  <SelectSearch
+                    name="statusId"
+                    value={values.statusId}
+                    options={statusOptions}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFieldTouched('statusId', true, false);
+                    }}
+                    onBlur={handleBlur}
+                    className={errors.statusId && touched.statusId ? 'error' : ''}
+                  />
                   <FormikError name="statusId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">
                   <label>Source <span className="required">*</span></label>
-                  <Field as="select" name="sourceId" className={errors.sourceId && touched.sourceId ? 'error' : ''}>
-                    <option value="">Select</option>
-                    {sourceOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </Field>
+                  <SelectSearch
+                    name="sourceId"
+                    value={values.sourceId}
+                    options={sourceOptions}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFieldTouched('sourceId', true, false);
+                    }}
+                    onBlur={handleBlur}
+                    className={errors.sourceId && touched.sourceId ? 'error' : ''}
+                  />
                   <FormikError name="sourceId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">

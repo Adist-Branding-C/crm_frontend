@@ -57,10 +57,12 @@ export const activityTypes: ActivityTypeOption[] = [
  * - useActivityFilters (initial state and reset target).
  */
 export const DEFAULT_FILTERS: Filters = {
-  date: '',
+  startDate: '',
+  endDate: '',
   startTime: '',
   endTime: '',
   staff: '',
+  type: '',
 };
 
 /**

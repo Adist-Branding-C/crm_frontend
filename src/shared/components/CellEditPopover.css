@@ -28,6 +28,44 @@
   background: var(--bg-main, #fff);
 }
 
+.cell-edit-popover-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cell-edit-popover-options {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--border-radius-sm, 6px);
+  background: var(--bg-main, #fff);
+}
+
+.cell-edit-popover-option {
+  padding: 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--text-main, #111827);
+}
+
+.cell-edit-popover-option:hover {
+  background: var(--bg-hover, #f3f4f6);
+}
+
+.cell-edit-popover-option.selected {
+  background: var(--bg-selected, #e0e7ff);
+  font-weight: 500;
+}
+
+.cell-edit-popover-option.empty {
+  color: var(--text-muted, #6b7280);
+  cursor: default;
+}
+.cell-edit-popover-option.empty:hover {
+  background: transparent;
+}
+
 .cell-edit-popover-actions {
   display: flex;
   justify-content: flex-end;

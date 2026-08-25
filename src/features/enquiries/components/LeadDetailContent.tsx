@@ -582,7 +582,6 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   onClose={() => { setShowDeleteRemarkModal(false); setRemarkToDelete(null); }}
                   isDeleting={isDeletingRemark}
                 />
-                <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
               </div>
             )}
 
@@ -612,7 +611,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                           <div className="leaddrawer-task-title">{task.title}</div>
                           <div className="leaddrawer-task-meta">
                             {task.scheduledDate && <span>{(task.scheduledTime ? `${task.scheduledDate} ${task.scheduledTime}` : task.scheduledDate)}</span>}
-                            <span>{task.assignedTo || '-'}</span>
+                            <span>{task.assignedTo?.name || '-'}</span>
                           </div>
                           {task.description && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{task.description}</p>}
                         </div>
@@ -678,6 +677,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
         </div>
       </div>
 
+      <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
       <AddLeadTaskDrawer
         isOpen={showTaskDrawer}
         onClose={() => { setShowTaskDrawer(false); setEditTask(null); }}

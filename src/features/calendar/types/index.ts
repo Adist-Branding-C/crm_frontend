@@ -103,4 +103,6 @@ export interface CalendarControlsProps {
   onSetShowAgentDropdown: (v: boolean) => void;
   searchQuery: string;
   onSearchChange: (v: string) => void;
+  taskTypeFilter: string;
+  onTaskTypeFilterChange: (type: string) => void;
 }

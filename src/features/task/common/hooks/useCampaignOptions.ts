@@ -7,7 +7,7 @@ export function useCampaignOptions() {
   const fetchCampaigns = useCallback(async (): Promise<CampaignOption[]> => {
     const campaignRes = await taskService.getCampaigns();
     if (campaignRes.status && campaignRes.data?.items) {
-      return campaignRes.data.items.map((c: { id: number; name: string }) => ({ value: c.id, label: c.name }));
+      return campaignRes.data.items.map((c: { id: number; campaignName?: string; name?: string }) => ({ value: String(c.id), label: c.campaignName ?? c.name ?? '' }));
     }
     return [];
   }, []);

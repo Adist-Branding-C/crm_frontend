@@ -35,10 +35,10 @@ export function toTaskUpdatePayload(data: LeadTaskFormData): TaskFormDataUpdate 
   return {
     title: data.title,
     description: data.description,
-    categoryId: data.category,
+    categoryId: data.category ? Number(data.category) : undefined,
     scheduledDate: data.scheduledDate,
     scheduledTime: data.scheduledTime,
-    assignedTo: data.assignedTo,
+    assignedTo: String(data.assignedTo),
     priority: data.priority,
     status: data.status,
   };
@@ -48,10 +48,10 @@ export function toTaskCreatePayload(data: LeadTaskFormData, leadId: number): Tas
   return {
     title: data.title,
     description: data.description,
-    categoryId: data.category,
+    categoryId: data.category ? Number(data.category) : undefined,
     scheduledDate: data.scheduledDate,
     scheduledTime: data.scheduledTime,
-    assignedTo: data.assignedTo,
+    assignedTo: String(data.assignedTo),
     leadId: String(leadId),
     priority: data.priority,
     status: data.status,

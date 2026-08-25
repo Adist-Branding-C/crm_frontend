@@ -19,7 +19,7 @@ import './CalendarPage.css';
 const CalendarPage = () => {
   const toast = useToast();
   const d = useCalendarData(toast.showToastMessage);
-  const addTask = useCalendarAddTask(d.refetch);
+  const addTask = useCalendarAddTask(d.refetch, toast.showToastMessage);
 
   const openAddTask = () => {
     const date = d.selectedDate ?? d.currentDate;
@@ -53,6 +53,8 @@ const CalendarPage = () => {
         onSetShowAgentDropdown={d.setShowAgentDropdown}
         searchQuery={d.searchQuery}
         onSearchChange={d.setSearchQuery}
+        taskTypeFilter={d.taskTypeFilter}
+        onTaskTypeFilterChange={d.setTaskTypeFilter}
       />
 
       {d.isError && (

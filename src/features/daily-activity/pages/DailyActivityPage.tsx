@@ -11,7 +11,6 @@ import { useActivityFilters } from '../hooks/useActivityFilters';
 import { useActivitiesFetch } from '../hooks/useActivitiesFetch';
 import ActivitySummaryCard from '../components/ActivitySummaryCard';
 import ActivityFilters from '../components/ActivityFilters';
-import ActivityTypeFilter from '../components/ActivityTypeFilter';
 import ActivityTimeline from '../components/ActivityTimeline';
 import ActivityPagination from '../components/ActivityPagination';
 import type { StaffOption } from '../types';
@@ -42,28 +41,21 @@ const DailyActivityPage = () => {
   }, [fetchActivities]);
 
   const handleApply = useCallback(() => {
-    const { appliedFilters, appliedActivityType } = activityFilters.applyFilters();
+    const { appliedFilters } = activityFilters.applyFilters();
     setCurrentPage(1);
-    fetchActivities(1, appliedFilters, appliedActivityType);
-  }, [activityFilters, fetchActivities]);
-
-  const handleActivityTypeChange = useCallback((value: string) => {
-    activityFilters.setActivityTypeFilter(value);
-    activityFilters.setAppliedActivityType(value);
-    setCurrentPage(1);
-    fetchActivities(1, activityFilters.appliedFilters, value);
+    fetchActivities(1, appliedFilters, appliedFilters.type);
   }, [activityFilters, fetchActivities]);
 
   const handleReset = useCallback(() => {
-    const { appliedFilters, appliedActivityType } = activityFilters.resetFilters();
+    const { appliedFilters } = activityFilters.resetFilters();
     setCurrentPage(1);
-    fetchActivities(1, appliedFilters, appliedActivityType);
+    fetchActivities(1, appliedFilters, appliedFilters.type);
   }, [activityFilters, fetchActivities]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
-    fetchActivities(page, activityFilters.appliedFilters, activityFilters.appliedActivityType);
-  }, [activityFilters.appliedFilters, activityFilters.appliedActivityType, fetchActivities]);
+    fetchActivities(page, activityFilters.appliedFilters, activityFilters.appliedFilters.type);
+  }, [activityFilters.appliedFilters, fetchActivities]);
 
   const handleStaffSelect = useCallback((staffId: string) => {
     activityFilters.handleFilterChange('staff', staffId);
@@ -114,13 +106,6 @@ const DailyActivityPage = () => {
           onStaffSearchQueryChange={staffSearch.setQuery}
         />
       </div>
-
-      <ActivityTypeFilter
-        activityTypeFilter={activityFilters.activityTypeFilter}
-        activityTypes={activityTypes}
-        isLoading={isLoading}
-        onChange={handleActivityTypeChange}
-      />
 
       <ActivityTimeline
         activities={activities}
