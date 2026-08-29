@@ -6,17 +6,12 @@ export interface ActivitySummaryCardProps {
 
 export interface ActivityFiltersProps {
   filters: Filters;
-  showStaffDropdown: boolean;
-  staffSearchQuery: string;
-  selectedStaffName: string;
   staffList: StaffOption[];
   isLoading: boolean;
   onFilterChange: (field: keyof Filters, value: string) => void;
   onStaffSelect: (staffId: string) => void;
   onApply: () => void;
   onReset: () => void;
-  onShowStaffDropdownChange: (show: boolean) => void;
-  onStaffSearchQueryChange: (query: string) => void;
 }
 
 export interface ActivityStaffDropdownItemProps {

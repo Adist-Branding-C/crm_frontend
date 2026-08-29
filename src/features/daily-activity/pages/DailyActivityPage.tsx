@@ -2,11 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import ToastNotification from '../../../shared/components/ToastNotification';
 import { useToast } from '../../../shared/hooks/useToast';
-import { useSearchFilter } from '../../../shared/hooks/useSearchFilter';
 import { activityTypes, PAGE_WINDOW, DEFAULT_FILTERS } from '../constants';
 import { computePageNumbers } from '../utils/activityHelpers';
 import { useStaffOptions } from '../hooks/useStaffOptions';
-import { useStaffDropdown } from '../hooks/useStaffDropdown';
 import { useActivityFilters } from '../hooks/useActivityFilters';
 import { useActivitiesFetch } from '../hooks/useActivitiesFetch';
 import ActivitySummaryCard from '../components/ActivitySummaryCard';
@@ -14,10 +12,7 @@ import ActivityFilters from '../components/ActivityFilters';
 import ActivityTypeFilter from '../components/ActivityTypeFilter';
 import ActivityTimeline from '../components/ActivityTimeline';
 import ActivityPagination from '../components/ActivityPagination';
-import type { StaffOption } from '../types';
 import './DailyActivityPage.css';
-
-const STAFF_SEARCH_FIELDS: (keyof StaffOption)[] = ['name'];
 
 const DailyActivityPage = () => {
   const toast = useToast();
@@ -27,8 +22,6 @@ const DailyActivityPage = () => {
   );
 
   const { staffOptions, fetchStaffOptions } = useStaffOptions(onError);
-  const staffSearch = useSearchFilter(staffOptions, STAFF_SEARCH_FIELDS);
-  const staffDropdown = useStaffDropdown();
 
   useEffect(() => {
     fetchStaffOptions();
@@ -67,16 +60,10 @@ const DailyActivityPage = () => {
 
   const handleStaffSelect = useCallback((staffId: string) => {
     activityFilters.handleFilterChange('staff', staffId);
-    staffDropdown.setIsOpen(false);
-  }, [activityFilters.handleFilterChange, staffDropdown.setIsOpen]);
+  }, [activityFilters.handleFilterChange]);
 
   const totalActivities = pagination?.total ?? 0;
   const totalPages = pagination?.total_pages ?? 1;
-
-  const selectedStaffName = useMemo(
-    () => staffOptions.find((s) => s.id === activityFilters.filters.staff)?.name || 'All Staff',
-    [staffOptions, activityFilters.filters.staff],
-  );
 
   const pageNumbers = useMemo(
     () => computePageNumbers(currentPage, totalPages, PAGE_WINDOW),
@@ -101,17 +88,12 @@ const DailyActivityPage = () => {
         <ActivitySummaryCard totalActivities={totalActivities} />
         <ActivityFilters
           filters={activityFilters.filters}
-          showStaffDropdown={staffDropdown.isOpen}
-          staffSearchQuery={staffSearch.query}
-          selectedStaffName={selectedStaffName}
-          staffList={staffSearch.filteredData}
+          staffList={staffOptions}
           isLoading={isLoading}
           onFilterChange={activityFilters.handleFilterChange}
           onStaffSelect={handleStaffSelect}
           onApply={handleApply}
           onReset={handleReset}
-          onShowStaffDropdownChange={staffDropdown.setIsOpen}
-          onStaffSearchQueryChange={staffSearch.setQuery}
         />
       </div>
 

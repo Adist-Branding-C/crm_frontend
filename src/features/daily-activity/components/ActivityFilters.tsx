@@ -1,25 +1,16 @@
-import { Search, Filter, RotateCcw, ChevronDown } from 'lucide-react';
-import { useClickOutside } from '../../../shared/hooks/useClickOutside';
-import ActivityStaffDropdownItem from './ActivityStaffDropdownItem';
+import { Filter, RotateCcw } from 'lucide-react';
 import type { ActivityFiltersProps } from '../types';
 import './ActivityFilters.css';
 
 const ActivityFilters = ({
   filters,
-  showStaffDropdown,
-  staffSearchQuery,
-  selectedStaffName,
   staffList,
   isLoading,
   onFilterChange,
   onStaffSelect,
   onApply,
   onReset,
-  onShowStaffDropdownChange,
-  onStaffSearchQueryChange,
 }: ActivityFiltersProps) => {
-  const dropdownRef = useClickOutside<HTMLDivElement>(() => onShowStaffDropdownChange(false));
-
   return (
     <div className="activity-filters-section">
       <div className="filter-group">
@@ -62,41 +53,20 @@ const ActivityFilters = ({
         />
       </div>
 
-      <div className="filter-group dropdown-group" ref={dropdownRef}>
+      <div className="filter-group">
         <label htmlFor="activity-staff-filter">Staff</label>
-        <button
-          type="button"
+        <select
           id="activity-staff-filter"
-          className="filter-select-trigger"
-          onClick={() => onShowStaffDropdownChange(!showStaffDropdown)}
+          className="filter-input"
+          value={filters.staff}
+          onChange={(e) => onStaffSelect(e.target.value)}
         >
-          <span>{selectedStaffName}</span>
-          <ChevronDown size={16} />
-        </button>
-
-        {showStaffDropdown && (
-          <div className="filter-dropdown">
-            <div className="dropdown-search">
-              <Search size={14} />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={staffSearchQuery}
-                onChange={(e) => onStaffSearchQueryChange(e.target.value)}
-              />
-            </div>
-            <div className="dropdown-list">
-              {staffList.map(staff => (
-                <ActivityStaffDropdownItem
-                  key={staff.id}
-                  staff={staff}
-                  isSelected={filters.staff === staff.id}
-                  onSelect={() => onStaffSelect(staff.id)}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+          {staffList.map(staff => (
+            <option key={staff.id} value={staff.id}>
+              {staff.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="filter-buttons">
