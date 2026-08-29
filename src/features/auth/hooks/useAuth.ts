@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import { AUTH_STORAGE_KEYS, AUTH_ROUTES } from '../constants/auth.constants';
 import type { AuthUser } from '../types/auth.types';
 import { authService } from '../services/AuthService';
-import { clearAuthTokens, getAccessTokenClaims } from '../utils/tokenStorage';
+import { setAuthTokens, clearAuthTokens, getAccessTokenClaims } from '../utils/tokenStorage';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -12,8 +12,35 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsAuthenticated(!!Cookies.get(AUTH_STORAGE_KEYS.ACCESS_TOKEN));
-    setIsLoading(false);
+    const initAuth = async () => {
+      if (Cookies.get(AUTH_STORAGE_KEYS.ACCESS_TOKEN)) {
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        return;
+      }
+
+      const refreshToken = Cookies.get(AUTH_STORAGE_KEYS.REFRESH_TOKEN);
+      if (refreshToken) {
+        try {
+          const data = await authService.refreshToken(refreshToken);
+          
+          if (data?.status && data?.data) {
+            const { accessToken: newAccess, refreshToken: newRefresh } = data.data;
+            setAuthTokens(newAccess, newRefresh);
+            setIsAuthenticated(true);
+            setIsLoading(false);
+            return;
+          }
+        } catch {
+          setIsAuthenticated(false);
+        }
+      }
+      
+      setIsAuthenticated(false);
+      setIsLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const logout = useCallback(async () => {

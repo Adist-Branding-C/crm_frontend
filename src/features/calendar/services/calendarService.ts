@@ -5,6 +5,7 @@ import type { CalendarApiDateItem } from '../types';
 export interface CalendarQueryParams {
   startDate: string;
   endDate: string;
+  type?: string;
 }
 
 class CalendarService {

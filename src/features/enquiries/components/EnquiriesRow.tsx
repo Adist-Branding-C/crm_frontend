@@ -73,7 +73,7 @@ const getCellContent = (row: Lead, colKey: string) => {
   if (colKey === 'createdAt' || colKey === 'updatedAt') {
     return { children: formatRelativeDate((row as unknown as Record<string, string>)[colKey]) };
   }
-  if (colKey === 'nextFollowUpDate') {
+  if (colKey === 'nextFollowUp') {
     return { children: formatFollowUpDate(row.nextFollowUp) };
   }
   if (colKey === 'assignedTo') {

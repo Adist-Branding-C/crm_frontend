@@ -17,8 +17,9 @@ export function useLeadTasks(leadId: number | undefined, isOpen: boolean, active
     try {
       const response = await taskDataService.getAll({ pageNumber: 1, limit: 100, leadId: String(leadId) });
       if (response.status) {
-        const items = (response.data as unknown as LeadTaskItem[]) || [];
-        setTasks(Array.isArray(items) ? items : []);
+        const payload = response.data as any;
+        const items = Array.isArray(payload) ? payload : (payload?.items || []);
+        setTasks(items);
 
       } else {
         setError(response.message || ERROR_MESSAGES.FETCH_TASKS);

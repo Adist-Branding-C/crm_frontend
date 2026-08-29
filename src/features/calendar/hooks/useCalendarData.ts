@@ -13,6 +13,7 @@ const TODAY = new Date();
 
 export function useCalendarData(showToastMessage: (message: string, type: ToastType) => void) {
   const [selectedAgent, setSelectedAgent] = useState(ALL_AGENTS_ID);
+  const [taskTypeFilter, setTaskTypeFilter] = useState('ALL');
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('month');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -130,6 +131,7 @@ export function useCalendarData(showToastMessage: (message: string, type: ToastT
       .getCalendar({
         startDate: toLocalDateString(start),
         endDate: toLocalDateString(end),
+        type: taskTypeFilter === 'ALL' ? undefined : taskTypeFilter,
       })
       .then((items) => {
         if (isCancelled()) return;
@@ -156,7 +158,7 @@ export function useCalendarData(showToastMessage: (message: string, type: ToastT
     return () => {
       cancelled = true;
     };
-  }, [rangeStart?.getTime(), rangeEnd?.getTime(), fetchCalendar]);
+  }, [rangeStart?.getTime(), rangeEnd?.getTime(), fetchCalendar, taskTypeFilter]);
 
   const isToday = useCallback((date: Date) => date.toDateString() === TODAY.toDateString(), []);
   const isCurrentMonth = useCallback((date: Date) => date.getMonth() === currentDate.getMonth(), [currentDate]);
@@ -265,6 +267,7 @@ export function useCalendarData(showToastMessage: (message: string, type: ToastT
   return {
     agents,
     selectedAgent, setSelectedAgent,
+    taskTypeFilter, setTaskTypeFilter,
     currentDate, setCurrentDate,
     viewMode, setViewMode,
     selectedDate, setSelectedDate,
