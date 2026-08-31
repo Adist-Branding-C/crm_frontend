@@ -34,18 +34,26 @@ const ForgotPasswordPage = () => {
               <CheckCircle size={48} />
             </div>
             <h1>Check Your Email</h1>
-            <p>If an account exists for phone number</p>
+            <p>{forgotPasswordData.successMessage}</p>
             <p className="phone-highlight">{forgotPasswordData.submittedPhone}</p>
-            <p>a password reset link has been sent to the registered email address.</p>
             <p className="resend-text">
               Didn&apos;t receive?{' '}
-              <button 
-                type="button" 
-                className="resend-link"
-                onClick={() => forgotPasswordData.setIsSent(false)}
+              <Formik
+                initialValues={{ phone: forgotPasswordData.submittedPhone }}
+                validationSchema={forgotPasswordData.validationSchema}
+                onSubmit={forgotPasswordData.handleSubmit}
+                enableReinitialize
               >
-                Resend
-              </button>
+                {({ isSubmitting }) => (
+                  <button
+                    type="submit"
+                    className="resend-link"
+                    disabled={isSubmitting || forgotPasswordData.isLoading}
+                  >
+                    {forgotPasswordData.isLoading ? 'Sending...' : 'Resend'}
+                  </button>
+                )}
+              </Formik>
             </p>
             <button className="auth-back-btn" onClick={() => navigate('/login')}>
               <ArrowLeft size={18} />
@@ -95,7 +103,7 @@ const ForgotPasswordPage = () => {
               return (
                 <Form className="auth-form">
                   {formError && <ErrorMessage message={formError} />}
-                  
+
                   <div className="auth-form-group">
                     <label htmlFor="phone">Phone Number</label>
                     <div className="input-wrapper-with-icon">
