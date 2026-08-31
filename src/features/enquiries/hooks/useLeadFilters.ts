@@ -50,7 +50,6 @@ export function useLeadFilters(
       params.additionalFieldFilters = JSON.stringify(additionalFieldFilters);
     }
     activeFiltersRef.current = params;
-    setShowFilters(false);
     onFetch(1, rowsPerPageRef.current, searchQueryRef.current, params);
   }, [filters, onFetch, searchQueryRef, rowsPerPageRef, additionalFields]);
 
