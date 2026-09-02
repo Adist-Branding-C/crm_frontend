@@ -64,7 +64,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
   const [showWhatsappTemplatePicker, setShowWhatsappTemplatePicker] = useState(false);
   const { hasTemplates: hasWhatsappTemplates, isLoading: whatsappTemplatesLoading, hasError: whatsappTemplatesError } = useActiveWhatsappTemplates();
 
-  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError } = useLeadActivities(lead.id, true);
+  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError, refresh: refreshActivities } = useLeadActivities(lead.id, true, activeTab);
   const {
     remarks,
     isLoading: isLoadingRemarks,
@@ -250,6 +250,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
       await addRemark(trimmed);
       setNewRemarkText('');
       showToastMessage(SUCCESS_MESSAGES.REMARK_ADDED, 'success');
+      refreshActivities();
       onLeadUpdated?.();
     } catch {
       showToastMessage(ERROR_MESSAGES.ADD_REMARK, 'error');
@@ -268,6 +269,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
       setShowDeleteRemarkModal(false);
       setRemarkToDelete(null);
       showToastMessage(SUCCESS_MESSAGES.REMARK_DELETED, 'success');
+      refreshActivities();
     } catch {
       showToastMessage(ERROR_MESSAGES.DELETE_REMARK, 'error');
     }
