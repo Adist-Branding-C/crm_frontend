@@ -41,7 +41,7 @@ export interface LeadFormProps {
 
 const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
   const { values, dirty } = useFormikContext<any>();
-  
+
   useEffect(() => {
     if (dirty) {
       const timeout = setTimeout(() => {
@@ -587,13 +587,13 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
                   handleBlur={handleBlur}
                   setFieldValue={setFieldValue}
                 />
-                <AutoSaveForm draftId={draftId} onDraftSaved={onDraftSaved} />
+                {!isEditing && <AutoSaveForm draftId={draftId} onDraftSaved={onDraftSaved} />}
               </Form>
             </div>
             <div className="drawer-footer">
               <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
               <button className="btn btn-primary" type="button" onClick={submitForm} disabled={isSubmitting || (isEditing && !hasChanges)}>
-                {isSubmitting ? <><Loader2 size={16} className="spin" /> {isEditing ? 'Updating...' : onPreviewRequest ? 'Preparing Preview...' : 'Saving...'}</> : onPreviewRequest ? 'Preview Lead' : isEditing ? 'Update Lead' : 'Save Lead'}
+                {isSubmitting ? <><Loader2 size={16} className="spin" /> {onPreviewRequest ? 'Preparing Preview...' : isEditing ? 'Updating...' : 'Saving...'}</> : onPreviewRequest ? (isEditing ? 'Preview Edit' : 'Preview Lead') : isEditing ? 'Update Lead' : 'Save Lead'}
               </button>
             </div>
           </>
