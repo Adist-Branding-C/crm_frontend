@@ -41,7 +41,7 @@ export interface LeadFormProps {
 
 const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
   const { values, dirty } = useFormikContext<any>();
-  
+
   useEffect(() => {
     if (dirty) {
       const timeout = setTimeout(() => {
@@ -235,6 +235,8 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
       } else {
         await leadDataService.createLead(payload);
       }
+
+      if (draftId) draftService.deleteDraft(draftId);
       onSaved?.(isEditing ? 'updated' : 'created');
       onClose();
     } catch (err: unknown) {
