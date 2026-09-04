@@ -126,7 +126,7 @@ const EnquiriesPage = () => {
         crud.refreshCurrentPage();
         return true;
       }
-      toast.showToastMessage(res.message || 'Failed to update lead', 'error');
+      toast.showToastMessage('Failed to update lead', 'error');
       return false;
     } catch {
       toast.showToastMessage('Failed to update lead', 'error');
@@ -174,7 +174,7 @@ const EnquiriesPage = () => {
       />
 
       {activeView === 'spotlight' && <SpotlightPanel />}
-      {activeView === 'followups' && <FollowupPanel />}
+      {activeView === 'followups' && <FollowupPanel initialFilters={activeFiltersRef.current} />}
       {activeView === 'drafts' && <DraftsList type="lead" onResumeDraft={(id) => { setActiveView('leads'); addDrawer.open({ draftId: id } as any); }} />}
 
       {activeView === 'leads' && (
@@ -218,7 +218,10 @@ const EnquiriesPage = () => {
               <EnquiriesFilters
                 filters={filtersHook.filters}
                 onFilterChange={filtersHook.setFilters}
-                onApplyFilters={filtersHook.handleApplyFilters}
+                onApplyFilters={() => {
+                  filtersHook.handleApplyFilters();
+                  pagination.resetPage();
+                }}
                 onClearFilters={clearFilters}
               />
             )}

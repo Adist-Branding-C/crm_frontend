@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import LeadDetailDrawer from '../../../components/LeadDetailDrawer';
+import type { Filters as LeadFilters } from '../../enquiries/types';
 import ListToolbar from '../../../shared/components/table/ListToolbar';
 import { useDebouncedSearch } from '../../../shared/hooks/useDebouncedSearch';
 import { useLeadFilterOptions } from '../../enquiries/hooks/useLeadFilterOptions';
@@ -27,13 +28,28 @@ import type { FollowupBucket } from '../types';
  * - FollowupRequiredPage (its dedicated route).
  * - EnquiriesPage (the "Follow Ups" header toggle, alongside Spotlight).
  */
-const FollowupPanel = () => {
+interface FollowupPanelProps {
+  initialFilters?: LeadFilters;
+}
+
+const FollowupPanel = ({ initialFilters }: FollowupPanelProps = {}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [committedSearch, setCommittedSearch] = useState('');
   const [activeBucket, setActiveBucket] = useState<FollowupBucket | null>(null);
 
-  const filtersState = useFollowupFilters();
+  const mappedInitialFilters = useMemo(() => {
+    if (!initialFilters) return undefined;
+    return {
+      type: initialFilters.typeId || '',
+      status: initialFilters.leadStatus || '',
+      source: initialFilters.sourceId || '',
+      assignedTo: initialFilters.assignedTo || '',
+      dateRange: initialFilters.dateRange || { startDate: '', endDate: '' },
+    };
+  }, [initialFilters]);
+
+  const filtersState = useFollowupFilters(mappedInitialFilters);
   const sortState = useFollowupSort();
   const drawerState = useFollowupDrawer();
   const { data, total, totalPages, isLoading, error, fetchFollowupLeads } = useFollowupFetch();

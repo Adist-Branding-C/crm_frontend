@@ -1,0 +1,121 @@
+.select-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.select-search-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background-color: white;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.875rem;
+  color: #111827;
+  transition: border-color 0.15s ease-in-out;
+  min-height: 2.25rem;
+}
+
+.select-search-container.error .select-search-value {
+  border-color: #ef4444;
+}
+
+.select-search-value.is-placeholder {
+  color: #6b7280;
+}
+
+.select-search-value:hover {
+  border-color: #9ca3af;
+}
+
+.select-search-value.open {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.select-search-container.disabled .select-search-value {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+}
+
+.select-search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.select-search-input-wrapper {
+  position: relative;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.select-search-input-wrapper .search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.select-search-input-wrapper .select-search-input {
+  width: 100%;
+  padding: 0.375rem 0.5rem 0.375rem 2.25rem !important;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 0.8125rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.select-search-input-wrapper .select-search-input:focus {
+  border-color: #3b82f6;
+}
+
+.select-search-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.select-search-option {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: #374151;
+}
+
+.select-search-option:hover {
+  background-color: #f3f4f6;
+}
+
+.select-search-option.selected {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 500;
+}
+
+.select-search-option.empty {
+  color: #6b7280;
+  cursor: default;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+.select-search-option.empty:hover {
+  background-color: transparent;
+}

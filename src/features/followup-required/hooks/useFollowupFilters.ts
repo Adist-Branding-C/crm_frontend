@@ -10,10 +10,11 @@ import type { Filters } from '../types';
  * Used by:
  * - FollowupRequiredPage (composed alongside fetch/sort/pagination).
  */
-export function useFollowupFilters() {
+export function useFollowupFilters(initial?: Partial<Filters>) {
+  const initialState = { ...INITIAL_FILTERS, ...initial };
   const [showFilters, setShowFilters] = useState(false);
-  const [draftFilters, setDraftFilters] = useState<Filters>(INITIAL_FILTERS);
-  const [appliedFilters, setAppliedFilters] = useState<Filters>(INITIAL_FILTERS);
+  const [draftFilters, setDraftFilters] = useState<Filters>(initialState);
+  const [appliedFilters, setAppliedFilters] = useState<Filters>(initialState);
 
   // Returns whether anything actually changed, so the caller can skip an
   // unnecessary refetch/page-reset when Apply is clicked with no edits.

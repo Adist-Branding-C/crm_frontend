@@ -11,14 +11,30 @@ const AddLeadTaskDrawer = ({ isOpen, onClose, onSubmit, task, isLoading, error, 
   const [formData, setFormData] = useState({
     title: task?.title || '',
     description: task?.description || '',
-    category: task?.category || '',
+    category: task?.category?.id ? String(task?.category?.id) : (task?.category || ''),
     scheduledDate: task?.scheduledDate || '',
     scheduledTime: task?.scheduledTime || '',
-    assignedTo: task?.assignedTo || '',
+    assignedTo: task?.assignedTo?.id ? String(task?.assignedTo?.id) : (task?.assignedTo || ''),
     priority: task?.priority || '',
     status: task?.status || 'Pending',
   });
   const [errors, setErrors] = useState({});
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        title: task?.title || '',
+        description: task?.description || '',
+        category: task?.category?.id ? String(task?.category?.id) : (task?.category || ''),
+        scheduledDate: task?.scheduledDate || '',
+        scheduledTime: task?.scheduledTime || '',
+        assignedTo: task?.assignedTo?.id ? String(task?.assignedTo?.id) : (task?.assignedTo || ''),
+        priority: task?.priority || '',
+        status: task?.status || 'Pending',
+      });
+      setErrors({});
+    }
+  }, [isOpen, task]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

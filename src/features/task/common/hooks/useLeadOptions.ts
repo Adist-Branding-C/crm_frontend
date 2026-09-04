@@ -7,7 +7,7 @@ export function useLeadOptions() {
   const fetchLeads = useCallback(async (): Promise<LeadOption[]> => {
     const leadRes = await taskService.getLeads();
     if (leadRes.status && leadRes.data?.items) {
-      return leadRes.data.items.map((l: { id: number; name: string }) => ({ value: l.id, label: l.name }));
+      return leadRes.data.items.map((l: { id: number; name: string }) => ({ value: String(l.id), label: l.name }));
     }
     return [];
   }, []);

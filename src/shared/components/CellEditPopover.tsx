@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Check, Loader2, X } from 'lucide-react';
 import type { LabelValuePair } from '../types/common';
@@ -9,6 +9,7 @@ export interface CellEditPopoverProps {
   label: string;
   type: 'text' | 'select' | 'date';
   options?: LabelValuePair[];
+  initialValue?: string;
   onSave: (value: string) => Promise<boolean>;
   onClose: () => void;
 }
@@ -26,10 +27,16 @@ const POPOVER_WIDTH = 240;
  * - EnquiriesRow (Leads), SpotlightTableRow, FollowupTable, TaskRow, DealRow
  *   - all for their "Assigned To" empty-cell click-to-edit affordance.
  */
-const CellEditPopover = ({ anchorRect, label, type, options = [], onSave, onClose }: CellEditPopoverProps) => {
-  const [value, setValue] = useState('');
+const CellEditPopover = ({ anchorRect, label, type, options = [], initialValue, onSave, onClose }: CellEditPopoverProps) => {
+  const [value, setValue] = useState(initialValue || '');
+  const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  const filteredOptions = useMemo(() => {
+    if (!search) return options;
+    return options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()));
+  }, [options, search]);
 
   const position = (() => {
     const margin = 8;
@@ -70,12 +77,28 @@ const CellEditPopover = ({ anchorRect, label, type, options = [], onSave, onClos
     <div ref={popoverRef} className="cell-edit-popover" style={{ top: position.top, left: position.left, width: POPOVER_WIDTH }}>
       <div className="cell-edit-popover-label">{label}</div>
       {type === 'select' ? (
-        <select autoFocus value={value} onChange={(e) => setValue(e.target.value)} disabled={isSaving}>
-          <option value="">Select {label}</option>
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <div className="cell-edit-popover-select">
+          <input
+            autoFocus
+            type="text"
+            placeholder={`Search ${label}...`}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            disabled={isSaving}
+          />
+          <div className="cell-edit-popover-options">
+            {filteredOptions.map((o) => (
+              <div
+                key={o.value}
+                className={`cell-edit-popover-option ${value === o.value ? 'selected' : ''}`}
+                onClick={() => setValue(o.value)}
+              >
+                {o.label}
+              </div>
+            ))}
+            {filteredOptions.length === 0 && <div className="cell-edit-popover-option empty">No results</div>}
+          </div>
+        </div>
       ) : (
         <input
           type={type === 'date' ? 'date' : 'text'}

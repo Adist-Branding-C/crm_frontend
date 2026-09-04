@@ -28,10 +28,12 @@ export type ActivityTypeOption = { value: string; label: string };
 
 // '' represents "All Staff" (no actorId filter applied).
 export interface Filters {
-  date: string;
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
   staff: string;
+  type: string;
 }
 
 export interface ActivityItem {

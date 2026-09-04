@@ -12,9 +12,7 @@ import type { Filters } from '../types';
  */
 export function useActivityFilters() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [activityTypeFilter, setActivityTypeFilter] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [appliedActivityType, setAppliedActivityType] = useState('');
 
   const handleFilterChange = useCallback((field: keyof Filters, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
@@ -22,25 +20,18 @@ export function useActivityFilters() {
 
   const applyFilters = useCallback(() => {
     setAppliedFilters(filters);
-    setAppliedActivityType(activityTypeFilter);
-    return { appliedFilters: filters, appliedActivityType: activityTypeFilter };
-  }, [filters, activityTypeFilter]);
+    return { appliedFilters: filters };
+  }, [filters]);
 
   const resetFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
     setAppliedFilters(DEFAULT_FILTERS);
-    setActivityTypeFilter('');
-    setAppliedActivityType('');
-    return { appliedFilters: DEFAULT_FILTERS, appliedActivityType: '' };
+    return { appliedFilters: DEFAULT_FILTERS };
   }, []);
 
   return {
     filters,
-    activityTypeFilter,
     appliedFilters,
-    appliedActivityType,
-    setActivityTypeFilter,
-    setAppliedActivityType,
     handleFilterChange,
     applyFilters,
     resetFilters,

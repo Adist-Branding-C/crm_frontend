@@ -21,16 +21,22 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
   const [loadedDraftValues, setLoadedDraftValues] = useState<any>(null);
 
   useEffect(() => {
-    if (initialDraftId && isOpen) {
+    if (!isOpen) {
+      setLoadedDraftValues(null);
+      setDraftId(null);
+      return;
+    }
+
+    if (initialDraftId) {
       const draft = draftService.getDrafts('lead').find(d => d.id === initialDraftId);
       if (draft) {
         setLoadedDraftValues(draft.payload);
         setDraftId(draft.id);
       }
-    } else if (!isOpen) {
-      setLoadedDraftValues(null);
-      setDraftId(null);
+      return;
     }
+
+    setDraftId(prev => prev ?? crypto.randomUUID());
   }, [initialDraftId, isOpen]);
   const [isSaving, setIsSaving] = useState(false);
 

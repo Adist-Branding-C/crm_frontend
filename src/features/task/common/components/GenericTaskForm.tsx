@@ -10,6 +10,7 @@ import { PRIORITY_OPTIONS } from '../constants/priorityOptions';
 import { STATUS_OPTIONS } from '../constants/statusOptions';
 import { getFieldClassName } from '../utils/fieldClassName';
 import type { GenericTaskFormProps } from '../types/genericTaskForm.types';
+import SelectSearch from '../../../../shared/components/SelectSearch';
 
 const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
   const { values, dirty } = useFormikContext<any>();
@@ -105,7 +106,8 @@ const GenericTaskForm = ({
           await onSubmit(values, helpers);
         }}
       >
-        {({ errors, touched, dirty, submitCount, isSubmitting }) => {
+        {(helpers) => {
+          const { values, errors, touched, dirty, submitCount, isSubmitting } = helpers;
           const fieldClass = (name: string) => getFieldClassName(
             name,
             touched as Record<string, boolean | undefined>,
@@ -132,17 +134,19 @@ const GenericTaskForm = ({
               {!hideCategory && categoryOptions && (
                 <div className="form-group">
                   <label>Category <span className="text-danger">*</span></label>
-                  <Field
-                    as="select"
+                  <SelectSearch
                     name="categoryId"
+                    value={values.categoryId}
+                    options={categoryOptions}
+                    onChange={(e) => {
+                      helpers.setFieldValue('categoryId', e.target.value);
+                      helpers.setFieldTouched('categoryId', true, false);
+                    }}
+                    onBlur={() => helpers.setFieldTouched('categoryId', true, false)}
                     className={fieldClass('categoryId')}
                     disabled={categoryLoading || categoryEmpty}
-                  >
-                    <option value="">{categoryLoading ? 'Loading...' : 'Select a category'}</option>
-                    {categoryOptions.map(cat => (
-                      <option key={cat.value} value={cat.value}>{cat.label}</option>
-                    ))}
-                  </Field>
+                    placeholder={categoryLoading ? 'Loading...' : 'Select a category'}
+                  />
                   {categoryEmpty ? (
                     <small className="field-error-text">
                       No task categories available. Please create a category first.
@@ -170,17 +174,19 @@ const GenericTaskForm = ({
 
               <div className="form-group">
                 <label>Assigned To <span className="text-danger">*</span></label>
-                <Field
-                  as="select"
+                <SelectSearch
                   name="assignedTo"
+                  value={values.assignedTo}
+                  options={staffOptions}
+                  onChange={(e) => {
+                    helpers.setFieldValue('assignedTo', e.target.value);
+                    helpers.setFieldTouched('assignedTo', true, false);
+                  }}
+                  onBlur={() => helpers.setFieldTouched('assignedTo', true, false)}
                   className={fieldClass('assignedTo')}
                   disabled={staffLoading || staffEmpty}
-                >
-                  <option value="">{staffLoading ? 'Loading staff...' : 'Select a staff member'}</option>
-                  {staffOptions.map(staff => (
-                    <option key={staff.value} value={staff.value}>{staff.label}</option>
-                  ))}
-                </Field>
+                  placeholder={staffLoading ? 'Loading staff...' : 'Select a staff member'}
+                />
                 {staffEmpty ? (
                   <small className="field-error-text">
                     No staff members available. Please add a staff member first.
@@ -192,17 +198,19 @@ const GenericTaskForm = ({
 
               <div className="form-group">
                 <label>{associationLabel} <span className="text-danger">*</span></label>
-                <Field
-                  as="select"
+                <SelectSearch
                   name={associationFieldName}
+                  value={values[associationFieldName]}
+                  options={resolvedAssociationOptions}
+                  onChange={(e) => {
+                    helpers.setFieldValue(associationFieldName, e.target.value);
+                    helpers.setFieldTouched(associationFieldName, true, false);
+                  }}
+                  onBlur={() => helpers.setFieldTouched(associationFieldName, true, false)}
                   className={fieldClass(associationFieldName)}
                   disabled={resolvedAssociationLoading || associationEmpty}
-                >
-                  <option value="">{resolvedAssociationLoading ? associationLoadingLabel : associationPlaceholder}</option>
-                  {resolvedAssociationOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </Field>
+                  placeholder={resolvedAssociationLoading ? associationLoadingLabel : associationPlaceholder}
+                />
                 {associationEmpty ? (
                   <small className="field-error-text">{associationEmptyMessage}</small>
                 ) : (

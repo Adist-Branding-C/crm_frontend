@@ -1,7 +1,18 @@
 import * as yup from 'yup';
 import type { LeadAdditionalApiItem } from '../../lead-settings/lead-additional/types';
 
-const BASE_VALIDATION_SHAPE: Record<string, yup.StringSchema> = {
+export const COUNTRY_PHONE_DIGIT_LENGTH: Record<string, number> = {
+  '+91': 10, '+1': 10, '+44': 10, '+971': 9, '+966': 9, '+974': 8, '+965': 8, '+968': 8, '+973': 8, '+20': 10,
+  '+998': 9, '+996': 9, '+992': 9, '+7': 10, '+995': 9, '+359': 9, '+49': 10, '+63': 10, '+880': 10, '+94': 9,
+  '+977': 10, '+92': 10, '+60': 9, '+65': 8, '+62': 10, '+234': 10, '+90': 10,
+};
+
+export function getExpectedPhoneDigitLength(countryCode?: string | null): number {
+  if (!countryCode) return 10;
+  return COUNTRY_PHONE_DIGIT_LENGTH[countryCode.trim()] ?? 10;
+}
+
+const BASE_VALIDATION_SHAPE: Record<string, yup.Schema> = {
   name: yup
     .string()
     .trim()
@@ -9,7 +20,16 @@ const BASE_VALIDATION_SHAPE: Record<string, yup.StringSchema> = {
   phone: yup
     .string()
     .trim()
-    .required('Phone is required'),
+    .required('Phone is required')
+    .test('is-valid-phone', function(value) {
+      if (!value) return true;
+      const { countryCode } = this.parent;
+      const expectedLength = getExpectedPhoneDigitLength(countryCode);
+      if (!new RegExp(`^\\d{${expectedLength}}$`).test(value)) {
+        return this.createError({ message: `Phone number must be exactly ${expectedLength} digits for country code ${countryCode || '+91'}` });
+      }
+      return true;
+    }),
   countryCode: yup
     .string()
     .required('Country code is required'),
@@ -24,7 +44,13 @@ const BASE_VALIDATION_SHAPE: Record<string, yup.StringSchema> = {
   purposeId: yup.string(),
   typeId: yup.string(),
   statusId: yup.string(),
-  nextFollowUp: yup.string(),
+  nextFollowUp: yup.string().test('is-future', 'Next follow-up date cannot be in the past', function(value) {
+    if (!value) return true;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(value);
+    return selectedDate >= today;
+  }),
   notes: yup.string().trim(),
   location: yup.string().trim(),
   address: yup.string().trim(),
