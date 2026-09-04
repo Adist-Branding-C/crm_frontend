@@ -36,6 +36,7 @@ class AuthService {
     return {
       status: response.data.status,
       message: response.data.message,
+      data: response.data.data,
     };
   }
 

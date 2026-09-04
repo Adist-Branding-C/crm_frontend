@@ -53,6 +53,7 @@ export interface ForgotPasswordRequest {
 export interface ForgotPasswordResponse {
   status: boolean
   message: string
+  data: { found: boolean }
 }
 
 export interface ResetPasswordRequest {
