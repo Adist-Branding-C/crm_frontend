@@ -33,7 +33,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId }) => {
           </div>
           <span>{lead.email}</span>
         </div>
-        <div className="deal-probability" style={{ color: '#6b7280' }}>
+        <div className="deal-probability" style={{ color: 'var(--text-tertiary)' }}>
           {typeof lead.source === 'object' && lead.source !== null
             ? (lead.source as any).source
             : lead.source}

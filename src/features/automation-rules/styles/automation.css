@@ -8,26 +8,26 @@
 }
 
 .btn-danger {
-  background-color: #dc2626;
-  color: white;
-  border-color: #dc2626;
+  background-color: var(--danger);
+  color: var(--text-on-accent);
+  border-color: var(--danger);
 }
 
 .btn-danger:hover {
-  background-color: #b91c1c;
+  background-color: var(--danger-text);
 }
 
 /* Trigger type badges */
-.badge-trigger-new-enquiry { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
-.badge-trigger-value-change { background: rgba(139, 92, 246, 0.12); color: #7c3aed; }
-.badge-trigger-reassign { background: rgba(249, 115, 22, 0.12); color: #ea580c; }
-.badge-trigger-notification { background: rgba(20, 184, 166, 0.12); color: #0d9488; }
+.badge-trigger-new-enquiry { background: var(--info-subtle); color: var(--info-text); }
+.badge-trigger-value-change { background: var(--category-purple-subtle); color: var(--category-purple-text); }
+.badge-trigger-reassign { background: var(--category-orange-subtle); color: var(--category-orange-text); }
+.badge-trigger-notification { background: var(--category-teal-subtle); color: var(--category-teal-text); }
 
 /* Execution status badges */
-.badge-exec-success { background: #d1fae5; color: #059669; }
-.badge-exec-failed { background: #fee2e2; color: #dc2626; }
-.badge-exec-dead { background: rgba(107, 114, 128, 0.15); color: #4b5563; }
-.badge-exec-queued { background: #dbeafe; color: #1d4ed8; position: relative; padding-left: 1.25rem; }
+.badge-exec-success { background: var(--success-subtle); color: var(--success-text); }
+.badge-exec-failed { background: var(--danger-subtle); color: var(--danger-text); }
+.badge-exec-dead { background: rgba(107, 114, 128, 0.15); color: var(--text-secondary); }
+.badge-exec-queued { background: var(--info-subtle); color: var(--info-text); position: relative; padding-left: 1.25rem; }
 .badge-exec-queued::before {
   content: '';
   position: absolute;
@@ -37,7 +37,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #1d4ed8;
+  background: var(--info-text);
   animation: automation-pulse 1.4s ease-in-out infinite;
 }
 
@@ -74,7 +74,7 @@
 
 .automation-icon-btn.danger:hover {
   background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
+  color: var(--danger-text);
 }
 
 /* Rule builder */
@@ -271,7 +271,7 @@
 }
 
 .automation-field-error {
-  color: #dc2626;
+  color: var(--danger-text);
   font-size: 0.75rem;
   margin-top: 0.25rem;
 }
@@ -294,7 +294,7 @@
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background-color: #d1d5db;
+  background-color: var(--border-strong);
   transition: 0.2s;
   border-radius: 999px;
 }
@@ -363,6 +363,6 @@
 }
 
 .automation-failure-count.warning {
-  color: #dc2626;
+  color: var(--danger-text);
 }
 

@@ -1,3 +1,5 @@
+import { CHART_PALETTE, CHART_PALETTE_DEFAULT } from '../../../shared/constants/chartPalette';
+
 // These have no backing API yet: no company-agnostic "qualified" status and
 // no closed-vs-pipeline flag on lead_statuses - see
 // COMPLETE_FEATURE_AND_RELATED_MODULE_INVESTIGATION_REPORT.md.
@@ -16,8 +18,8 @@ export const PIPELINE_LEADS_HARDCODED = { title: 'Pipeline Leads', value: '45', 
  * - Cycled by index via getColorForIndex (shared/utils/chartUtils.ts), one
  *   color per campaign status entry returned by the statistics API.
  */
-export const CAMPAIGN_STATUS_COLOR_PALETTE = ['#fbbf24', '#e0323e', '#3b82f6', '#10b981', '#8b5cf6'];
-export const DEFAULT_CAMPAIGN_STATUS_COLOR = '#3b82f6';
+export const CAMPAIGN_STATUS_COLOR_PALETTE = CHART_PALETTE;
+export const DEFAULT_CAMPAIGN_STATUS_COLOR = CHART_PALETTE_DEFAULT;
 
 /**
  * Activity-type key used to identify logged calls in the activities-by-type

@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
+import { CHART_PALETTE, CHART_PALETTE_DEFAULT } from '../../../shared/constants/chartPalette';
 import { dashboardService } from '../services/DashboardService';
 import type { DashboardPeriod, GetLeadSourceStatisticsParams, LeadSourceCountItem } from '../types';
 
-const SOURCE_COLOR_PALETTE = ['#e2e8f0', '#cbd5e1', '#e2e8f0', '#cbd5e1', '#e2e8f0', '#cbd5e1'];
-const DEFAULT_SOURCE_COLOR = '#cbd5e1';
 
 function colorForIndex(index: number): string {
-  return SOURCE_COLOR_PALETTE[index % SOURCE_COLOR_PALETTE.length] ?? DEFAULT_SOURCE_COLOR;
+  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE_DEFAULT;
 }
 
 export function useLeadSourceStatistics(period: DashboardPeriod, from?: string, to?: string) {

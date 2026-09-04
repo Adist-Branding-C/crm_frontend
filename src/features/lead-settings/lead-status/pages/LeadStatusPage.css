@@ -47,7 +47,7 @@
   align-items: center;
   justify-content: center;
   padding: 3rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .table-loading .spin {

@@ -33,21 +33,21 @@ const CompanyViewDrawer: React.FC<Props> = ({ isOpen, viewingCompany, onClose })
           <div className="tab-content">
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon" style={{ background: '#8b5cf620' }}><Users size={20} color="#8b5cf6" /></div>
+                <div className="stat-icon" style={{ background: '#8b5cf620' }}><Users size={20} color="var(--category-purple-text)" /></div>
                 <div className="stat-info">
                   <span className="stat-label">Staff Count</span>
                   <span className="stat-value">{viewingCompany.staffCount}</span>
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon" style={{ background: '#3b82f620' }}><Building size={20} color="#3b82f6" /></div>
+                <div className="stat-icon" style={{ background: '#3b82f620' }}><Building size={20} color="var(--info)" /></div>
                 <div className="stat-info">
                   <span className="stat-label">Total Leads</span>
                   <span className="stat-value">{viewingCompany.leads.toLocaleString()}</span>
                 </div>
               </div>
               <div className="stat-card">
-                <div className="stat-icon" style={{ background: '#10b98120' }}><DollarSign size={20} color="#10b981" /></div>
+                <div className="stat-icon" style={{ background: '#10b98120' }}><DollarSign size={20} color="var(--success)" /></div>
                 <div className="stat-info">
                   <span className="stat-label">Total Deals</span>
                   <span className="stat-value">{viewingCompany.deals}</span>

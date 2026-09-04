@@ -8,12 +8,12 @@
 }
 
 .empty-state-icon {
-  color: #9ca3af;
+  color: var(--text-tertiary);
   margin-bottom: 16px;
 }
 
 .empty-state-message {
   font-size: 15px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0;
 }

@@ -91,7 +91,7 @@ const ProfilePage = () => {
             <div className="col-lg-5 col-md-5">
               <div className="profile-sidebar-card">
                 <div className="user-avatar-section">
-                  <div className="profile-avatar" style={{ background: '#6167e6' }}>
+                  <div className="profile-avatar" style={{ background: 'var(--primary)' }}>
                     {d.profileData.firstLetter}
                   </div>
                 </div>

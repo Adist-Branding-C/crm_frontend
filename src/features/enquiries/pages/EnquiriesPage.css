@@ -35,13 +35,13 @@
 }
 
 .toast-success {
-  background: #22c55e;
-  color: #fff;
+  background: var(--success);
+  color: #ffffff;
 }
 
 .toast-error {
-  background: #dc2626;
-  color: #fff;
+  background: var(--danger-text);
+  color: #ffffff;
 }
 
 @keyframes toastSlideIn {

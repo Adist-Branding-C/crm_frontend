@@ -1,6 +1,6 @@
 .drafts-list-container {
   padding: 1.5rem;
-  background: var(--surface-bg, #f9fafb);
+  background: var(--surface-bg, var(--surface-2));
   border-radius: 0.5rem;
   min-height: calc(100vh - 200px);
 }
@@ -12,13 +12,13 @@
 .drafts-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-primary, #111827);
+  color: var(--text-primary, var(--text-primary));
   margin: 0 0 0.5rem 0;
 }
 
 .drafts-header p {
   font-size: 0.95rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary, var(--text-muted));
   margin: 0;
 }
 
@@ -29,8 +29,8 @@
 }
 
 .draft-card {
-  background: #ffffff;
-  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--surface-1);
+  border: 1px solid var(--border-color, var(--border-color));
   border-radius: 0.75rem;
   padding: 1.25rem;
   cursor: pointer;
@@ -40,7 +40,7 @@
 }
 
 .draft-card:hover {
-  border-color: var(--primary-color, #3b82f6);
+  border-color: var(--primary-color, var(--info));
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
@@ -55,7 +55,7 @@
 .draft-title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary, #111827);
+  color: var(--text-primary, var(--text-primary));
   margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -65,7 +65,7 @@
 .draft-delete-btn {
   background: transparent;
   border: none;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--text-tertiary, var(--text-tertiary));
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 0.375rem;
@@ -76,13 +76,13 @@
 }
 
 .draft-delete-btn:hover {
-  background: #fef2f2;
-  color: var(--error-color, #ef4444);
+  background: var(--danger-subtle);
+  color: var(--error-color, var(--danger));
 }
 
 .draft-subtitle {
   font-size: 0.9rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary, var(--text-muted));
   margin: 0 0 1.5rem 0;
 }
 
@@ -91,7 +91,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid var(--border-color, #e5e7eb);
+  border-top: 1px solid var(--border-color, var(--border-color));
   padding-top: 1rem;
 }
 
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 0.35rem;
   font-size: 0.75rem;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--text-tertiary, var(--text-tertiary));
 }
 
 .draft-resume {
@@ -109,7 +109,7 @@
   gap: 0.35rem;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--primary-color, #3b82f6);
+  color: var(--primary-color, var(--info));
   opacity: 0;
   transform: translateX(-5px);
   transition: all 0.2s ease;
@@ -126,34 +126,34 @@
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  background: #ffffff;
+  background: var(--surface-1);
   border-radius: 0.5rem;
-  border: 1px dashed var(--border-color, #e5e7eb);
+  border: 1px dashed var(--border-color, var(--border-color));
   text-align: center;
 }
 
 .drafts-empty-icon {
   width: 80px;
   height: 80px;
-  background: var(--bg-hover, #f3f4f6);
+  background: var(--bg-hover, var(--surface-2));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--text-tertiary, var(--text-tertiary));
   margin-bottom: 1.5rem;
 }
 
 .drafts-empty-state h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary, #111827);
+  color: var(--text-primary, var(--text-primary));
   margin: 0 0 0.5rem 0;
 }
 
 .drafts-empty-state p {
   font-size: 0.95rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary, var(--text-muted));
   margin: 0;
   max-width: 400px;
 }

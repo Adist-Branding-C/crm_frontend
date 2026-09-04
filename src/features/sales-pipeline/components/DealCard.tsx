@@ -45,10 +45,10 @@ const DealCard: React.FC<DealCardProps> = ({ deal, statusId }) => {
             style={{
               color:
                 deal.probability === 100
-                  ? '#10b981'
+                  ? 'var(--success)'
                   : deal.probability === 0
-                    ? '#ef4444'
-                    : '#6b7280',
+                    ? 'var(--danger)'
+                    : 'var(--text-tertiary)',
             }}
           >
             {deal.probability}%

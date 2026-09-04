@@ -22,8 +22,8 @@
 }
 
 .payment-plans-page .expiry-notice {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--warning-subtle);
+  color: var(--warning-text);
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
   font-size: 14px;
@@ -31,8 +31,8 @@
 }
 
 .payment-plans-page .btn-warning {
-  background: #fcd34d;
-  color: #78350f;
+  background: var(--warning);
+  color: var(--warning-text);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -44,8 +44,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #f1414f;
-  color: #fff;
+  background: var(--primary);
+  color: #ffffff;
   border: none;
   font-weight: 600;
   cursor: pointer;
@@ -59,7 +59,7 @@
 }
 
 .billing-sidebar {
-  background: #fff;
+  background: var(--surface-1);
   border-radius: 8px;
   padding: 1.5rem;
   height: fit-content;
@@ -68,27 +68,27 @@
 .logo-section .logo {
   font-size: 24px;
   font-weight: 700;
-  color: #f1414f;
+  color: var(--primary);
   margin: 0 0 0.5rem;
 }
 
 .logo-section .expiry-text {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .billing-step-card {
   margin-top: 2rem;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--surface-2);
   border-radius: 8px;
 }
 
 .step-badge {
   display: inline-block;
-  background: #f1414f;
-  color: #fff;
+  background: var(--primary);
+  color: #ffffff;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 12px;
@@ -100,13 +100,13 @@
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .step-content p {
   margin: 0.25rem 0 0;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .download-section {
@@ -130,15 +130,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface-1);
   font-size: 12px;
   cursor: pointer;
 }
 
 .center-content {
-  background: #fff;
+  background: var(--surface-1);
   border-radius: 8px;
   padding: 1.5rem;
 }
@@ -156,18 +156,18 @@
 .account-info {
   margin: 1rem 0 0;
   font-size: 14px;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .account-id {
-  color: #6b7280;
+  color: var(--text-muted);
   margin-left: 1rem;
 }
 
 .subtitle {
   margin: 0.5rem 0 0;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .plans-cards {
@@ -178,20 +178,20 @@
 }
 
 .plan-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.5rem;
 }
 
 .plan-card.existing-plan {
-  border-color: #f1414f;
+  border-color: var(--primary);
   border-width: 2px;
 }
 
 .card-badge {
   display: inline-block;
-  background: #f1414f;
-  color: #fff;
+  background: var(--primary);
+  color: #ffffff;
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 12px;
@@ -202,8 +202,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--warning-subtle);
+  color: var(--warning-text);
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
   font-size: 14px;
@@ -217,12 +217,12 @@
 .plan-meta p {
   margin: 0;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .price-divider {
   height: 1px;
-  background: #e5e7eb;
+  background: var(--border-color);
   margin: 1rem 0;
 }
 
@@ -232,13 +232,13 @@
 
 .plan-price .currency {
   font-size: 18px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .plan-price .amount {
   font-size: 32px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .customize-plan {
@@ -247,7 +247,7 @@
 }
 
 .customize-plan:hover {
-  border-color: #f1414f;
+  border-color: var(--primary);
 }
 
 .rocket-icon {
@@ -264,11 +264,11 @@
 .customize-plan p {
   margin: 0.5rem 0 0;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .pricing-summary {
-  background: #fff;
+  background: var(--surface-1);
   border-radius: 8px;
   padding: 1.5rem;
 }
@@ -288,7 +288,7 @@
   justify-content: space-between;
   padding: 0.5rem 0;
   font-size: 14px;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .price-row .row-value {
@@ -296,7 +296,7 @@
 }
 
 .price-row.promo-discount {
-  color: #22c55e;
+  color: var(--success);
 }
 
 .price-row.total {
@@ -311,7 +311,7 @@
 .coupon-link {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--info);
   font-size: 13px;
   cursor: pointer;
   padding: 0;
@@ -326,15 +326,15 @@
 .coupon-input input {
   flex: 1;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 14px;
 }
 
 .coupon-input .apply-btn {
   padding: 0.5rem 1rem;
-  background: #f1414f;
-  color: #fff;
+  background: var(--primary);
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -352,11 +352,11 @@
 }
 
 .coupon-message.success {
-  color: #22c55e;
+  color: var(--success);
 }
 
 .coupon-message.error {
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .payment-due {
@@ -364,14 +364,14 @@
   justify-content: space-between;
   margin-top: 1rem;
   padding: 1rem;
-  background: #fef3c7;
+  background: var(--warning-subtle);
   border-radius: 8px;
   font-weight: 600;
 }
 
 .due-amount {
   font-size: 18px;
-  color: #92400e;
+  color: var(--warning-text);
 }
 
 .btn-large {
@@ -405,9 +405,9 @@
 .user-counter button {
   width: 40px;
   height: 40px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface-1);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -429,22 +429,22 @@
 .billing-toggle button {
   flex: 1;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface-1);
   cursor: pointer;
   position: relative;
 }
 
 .billing-toggle button.active {
-  border-color: #f1414f;
-  color: #f1414f;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .save-tag {
   display: block;
   font-size: 11px;
-  color: #22c55e;
+  color: var(--success);
 }
 
 .addons-list {
@@ -458,20 +458,20 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   cursor: pointer;
 }
 
 .addon-item.selected {
-  border-color: #f1414f;
-  background: #fef2f2;
+  border-color: var(--primary);
+  background: var(--danger-subtle);
 }
 
 .addon-check {
   width: 20px;
   height: 20px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--border-strong);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -479,9 +479,9 @@
 }
 
 .addon-item.selected .addon-check {
-  background: #f1414f;
-  border-color: #f1414f;
-  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
 }
 
 .addon-info {
@@ -496,14 +496,14 @@
 
 .addon-price {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .custom-total {
   display: flex;
   justify-content: space-between;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--surface-2);
   border-radius: 6px;
   font-weight: 600;
 }
@@ -514,7 +514,7 @@
 
 .payment-summary {
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--surface-2);
   border-radius: 8px;
   margin-bottom: 1rem;
 }
@@ -527,7 +527,7 @@
 
 .payment-note {
   text-align: center;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 14px;
 }
 

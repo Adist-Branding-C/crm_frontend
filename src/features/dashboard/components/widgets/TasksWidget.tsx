@@ -47,7 +47,7 @@ const TasksWidget = ({ period, from, to }: TasksWidgetProps) => {
                 <span className="task-stat-value">{pending}</span>
               </div>
               <div className="task-bar-bg">
-                <div className="task-bar-fill" style={{ width: `${pendingPercent}%`, backgroundColor: '#f97316' }}></div>
+                <div className="task-bar-fill" style={{ width: `${pendingPercent}%`, backgroundColor: 'var(--chart-4)' }}></div>
               </div>
             </div>
 
@@ -57,7 +57,7 @@ const TasksWidget = ({ period, from, to }: TasksWidgetProps) => {
                 <span className="task-stat-value">{overdue}</span>
               </div>
               <div className="task-bar-bg">
-                <div className="task-bar-fill" style={{ width: `${overduePercent}%`, backgroundColor: '#8b5cf6' }}></div>
+                <div className="task-bar-fill" style={{ width: `${overduePercent}%`, backgroundColor: 'var(--chart-7)' }}></div>
               </div>
             </div>
           </div>

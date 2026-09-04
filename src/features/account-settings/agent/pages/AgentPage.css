@@ -10,17 +10,17 @@
 }
 
 .input-error {
-  border-color: #dc2626 !important;
+  border-color: var(--danger-text) !important;
 }
 
 .input-error:focus {
-  border-color: #dc2626 !important;
+  border-color: var(--danger-text) !important;
   box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15) !important;
 }
 
 .field-error-text {
   display: block;
-  color: #dc2626;
+  color: var(--danger-text);
   font-size: 0.75rem;
   margin-top: 0.25rem;
 }
@@ -43,13 +43,13 @@
 }
 
 .toast-success {
-  background: #22c55e;
-  color: #fff;
+  background: var(--success);
+  color: #ffffff;
 }
 
 .toast-error {
-  background: #dc2626;
-  color: #fff;
+  background: var(--danger-text);
+  color: #ffffff;
 }
 
 @keyframes toastSlideIn {

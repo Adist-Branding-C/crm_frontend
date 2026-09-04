@@ -1,83 +1,154 @@
+/**
+ * Primary application navigation.
+ *
+ * Renders as one of three presentations driven entirely by `useSidebar`:
+ *  - expanded rail (default): logo + wordmark, grouped icon/label links
+ *  - collapsed rail: icon-only, with a floating label tooltip on hover/focus
+ *  - mobile overlay: full-width drawer with a backdrop and a fixed open trigger
+ *
+ * This component is render-only; all state lives in `useSidebar`.
+ */
 import React, { useState } from 'react';
-import { CheckCircle, MessageCircle, Home, LayoutDashboard, DollarSign, CheckSquare, Megaphone, ListChecks, HeartPulse, Network, Users, BookOpen, Settings, UserCircle, Bell, FileText, Calendar, Activity, BarChart3, Kanban, Building } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { ChevronsLeft, Menu, X } from 'lucide-react';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
+import { useSidebar } from '../../hooks/useSidebar';
+import {
+  sidebarAdminItem,
+  sidebarNavGroups,
+  sidebarSettingsItem,
+} from '../../constants/sidebar';
+import type { SidebarNavGroup, SidebarNavItem } from '../../types/layout';
 import './Sidebar.css';
 
-interface TooltipState {
+interface TooltipTarget {
   label: string;
   top: number;
-  left: number;
 }
+
+interface SidebarLinkProps {
+  item: SidebarNavItem;
+  collapsed: boolean;
+  onNavigate: () => void;
+  onPeek: (label: string) => (event: React.SyntheticEvent<HTMLElement>) => void;
+  onPeekEnd: () => void;
+}
+
+const SidebarLink = ({ item, collapsed, onNavigate, onPeek, onPeekEnd }: SidebarLinkProps) => {
+  const Icon = item.icon;
+  return (
+    <NavLink
+      to={item.path}
+      end={item.path === sidebarSettingsItem.path}
+      className={({ isActive }) => `sidebar-item${isActive ? ' is-active' : ''}`}
+      aria-label={item.label}
+      onClick={onNavigate}
+      onMouseEnter={onPeek(item.label)}
+      onMouseLeave={onPeekEnd}
+      onFocus={onPeek(item.label)}
+      onBlur={onPeekEnd}
+    >
+      <span className="sidebar-item__icon">
+        <Icon size={20} />
+      </span>
+      <span className="sidebar-item__label">{item.label}</span>
+    </NavLink>
+  );
+};
 
 const Sidebar = () => {
   const { user } = useAuth();
-  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const { collapsed, isMobile, mobileOpen, toggleCollapsed, openMobile, closeMobile } = useSidebar();
+  const [tooltip, setTooltip] = useState<TooltipTarget | null>(null);
 
-  const showTooltip = (label: string) => (e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setTooltip({ label, top: rect.top + rect.height / 2, left: rect.right + 10 });
+  const groups: SidebarNavGroup[] = user?.isSuperAdmin
+    ? [...sidebarNavGroups, { heading: 'Admin', items: [sidebarAdminItem] }]
+    : sidebarNavGroups;
+
+  const handlePeek = (label: string) => (event: React.SyntheticEvent<HTMLElement>) => {
+    if (!collapsed) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltip({ label, top: rect.top + rect.height / 2 });
   };
-  const hideTooltip = () => setTooltip(null);
+  const handlePeekEnd = () => setTooltip(null);
 
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: MessageCircle, label: 'Leads', path: '/leads' },
-    // { icon: UserCircle, label: 'Enquiries', path: '/enquiries' },
-    { icon: DollarSign, label: 'Deals', path: '/user/deals' },
-    { icon: Kanban, label: 'Sales Pipeline', path: '/sales-pipeline' },
-    { icon: ListChecks, label: 'Tasks', path: '/user/tasks' },
-    { icon: Calendar, label: 'Calendar', path: '/calendar' },
-    { icon: Activity, label: 'Daily Activity', path: '/daily-activity' },
-    { icon: Megaphone, label: 'Campaigns', path: '/campaigns' },
-    { icon: FileText, label: 'Reports', path: '/reports' },
-    { icon: BarChart3, label: 'Staff Performance', path: '/staff-performance' },
-    ...(user?.isSuperAdmin ? [{ icon: Building, label: 'Companies', path: '/companies' }] : []),
-  ];
+  const linkProps = {
+    collapsed,
+    onNavigate: closeMobile,
+    onPeek: handlePeek,
+    onPeekEnd: handlePeekEnd,
+  };
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-logo">
-        <div className="logo-circle">
-          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
-        </div>
-      </div>
-      <div className="sidebar-nav">
-        {menuItems.map((item, index) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={index}
-              to={item.path}
-              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-              aria-label={item.label}
-              end={item.path === '/home'}
-              onMouseEnter={showTooltip(item.label)}
-              onMouseLeave={hideTooltip}
-            >
-              <Icon size={20} className="nav-icon" />
-            </NavLink>
-          );
-        })}
-
-        <NavLink
-          to="/settings"
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          aria-label="Settings"
-          end
-          onMouseEnter={showTooltip('Settings')}
-          onMouseLeave={hideTooltip}
+    <>
+      {isMobile && !mobileOpen && (
+        <button
+          type="button"
+          className="sidebar-trigger"
+          onClick={openMobile}
+          aria-label="Open navigation"
+          aria-controls="primary-sidebar"
+          aria-expanded={mobileOpen}
         >
-          <Settings size={20} className="nav-icon" />
-        </NavLink>
-      </div>
+          <Menu size={20} />
+        </button>
+      )}
+
+      {isMobile && mobileOpen && (
+        <div className="sidebar-backdrop" onClick={closeMobile} aria-hidden="true" />
+      )}
+
+      <aside
+        id="primary-sidebar"
+        className="sidebar"
+        data-collapsed={collapsed}
+        data-mobile={isMobile}
+        data-open={mobileOpen}
+      >
+        <div className="sidebar__header">
+          <NavLink to="/dashboard" className="sidebar__brand" onClick={closeMobile} aria-label="Go to dashboard">
+            <img src="/logo.png" alt="" className="sidebar__logo" />
+          </NavLink>
+
+          {isMobile ? (
+            <button type="button" className="sidebar__icon-btn" onClick={closeMobile} aria-label="Close navigation">
+              <X size={18} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="sidebar__icon-btn sidebar__collapse-btn"
+              onClick={toggleCollapsed}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-pressed={collapsed}
+            >
+              <ChevronsLeft size={18} />
+            </button>
+          )}
+        </div>
+
+        <nav className="sidebar__nav" aria-label="Primary">
+          {groups.map((group) => (
+            <div className="sidebar__group" key={group.heading}>
+              <p className="sidebar__group-heading">{group.heading}</p>
+              {group.items.map((item) => (
+                <SidebarLink key={item.path} item={item} {...linkProps} />
+              ))}
+            </div>
+          ))}
+        </nav>
+
+        <div className="sidebar__footer">
+          <SidebarLink item={sidebarSettingsItem} {...linkProps} />
+        </div>
+      </aside>
 
       {tooltip && (
-        <div className="nav-tooltip" style={{ top: tooltip.top, left: tooltip.left }}>
+        <div className="sidebar-tooltip" role="tooltip" style={{ top: tooltip.top }}>
           {tooltip.label}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

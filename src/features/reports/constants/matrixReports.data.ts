@@ -148,10 +148,10 @@ export const statusWiseData: StatusRow[] = [
 ];
 
 export const statusWiseStatsCards: StatsCard[] = [
-  { key: 'total', label: 'Total Leads', value: 1587, icon: Users, color: '#3b82f6', change: '+12%' },
-  { key: 'interested', label: 'Interested Leads', value: 323, icon: UserCheck, color: '#10b981', change: '+8%' },
-  { key: 'registered', label: 'Registered Leads', value: 185, icon: UserPlus, color: '#8b5cf6', change: '+15%' },
-  { key: 'notInterested', label: 'Not Interested', value: 117, icon: UserMinus, color: '#ef4444', change: '-5%' },
+  { key: 'total', label: 'Total Leads', value: 1587, icon: Users, color: 'var(--info)', change: '+12%' },
+  { key: 'interested', label: 'Interested Leads', value: 323, icon: UserCheck, color: 'var(--success)', change: '+8%' },
+  { key: 'registered', label: 'Registered Leads', value: 185, icon: UserPlus, color: 'var(--category-purple-text)', change: '+15%' },
+  { key: 'notInterested', label: 'Not Interested', value: 117, icon: UserMinus, color: 'var(--danger)', change: '-5%' },
 ];
 
 export const statusWiseColumns: Column[] = [

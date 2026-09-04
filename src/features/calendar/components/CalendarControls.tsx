@@ -44,7 +44,7 @@ const CalendarControls: React.FC<CalendarControlsProps> = ({
       </div>
       <div className="task-type-select-wrapper" style={{ marginLeft: '1rem', display: 'flex', alignItems: 'center' }}>
         <select 
-          style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid #e5e7eb', fontSize: '0.875rem', outline: 'none', background: 'var(--bg-main, #fff)', color: 'var(--text-main, #111827)' }}
+          style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--border-default)', fontSize: '0.875rem', outline: 'none', background: 'var(--bg-main, #fff)', color: 'var(--text-main, var(--text-primary))' }}
           value={taskTypeFilter}
           onChange={(e) => onTaskTypeFilterChange(e.target.value)}
         >

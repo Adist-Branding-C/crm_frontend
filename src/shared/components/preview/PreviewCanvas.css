@@ -48,12 +48,12 @@
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem 2rem;
-  background: var(--surface-bg, #f9fafb);
+  background: var(--surface-bg, var(--surface-2));
 }
 
 .preview-subtitle {
   font-size: 0.9rem;
-  color: var(--text-secondary, #6b7280);
+  color: var(--text-secondary, var(--text-muted));
   margin-bottom: 2rem;
 }
 
@@ -64,8 +64,8 @@
 }
 
 .preview-section {
-  background: #ffffff;
-  border: 1px solid var(--border-color, #e5e7eb);
+  background: var(--surface-1);
+  border: 1px solid var(--border-color, var(--border-color));
   border-radius: 0.5rem;
   padding: 1.5rem;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -74,10 +74,10 @@
 .preview-section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary, #111827);
+  color: var(--text-primary, var(--text-primary));
   margin: 0 0 1.25rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  border-bottom: 1px solid var(--border-color, var(--border-color));
 }
 
 .preview-grid {
@@ -97,18 +97,18 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--text-tertiary, var(--text-tertiary));
 }
 
 .preview-field-value {
   font-size: 0.9rem;
-  color: var(--text-primary, #111827);
+  color: var(--text-primary, var(--text-primary));
   font-weight: 500;
   word-break: break-word;
 }
 
 .preview-field-empty {
-  color: var(--text-tertiary, #9ca3af);
+  color: var(--text-tertiary, var(--text-tertiary));
   font-style: italic;
   font-weight: 400;
 }
@@ -116,8 +116,8 @@
 /* Footer & Actions */
 .preview-canvas-footer {
   padding: 1rem 2rem;
-  background: #ffffff;
-  border-top: 1px solid var(--border-color, #e5e7eb);
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-color, var(--border-color));
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -158,31 +158,31 @@
 
 .preview-btn-edit {
   background: transparent;
-  color: var(--text-secondary, #4b5563);
+  color: var(--text-secondary, var(--text-secondary));
 }
 
 .preview-btn-edit:hover:not(:disabled) {
-  background: var(--bg-hover, #f3f4f6);
-  color: var(--text-primary, #111827);
+  background: var(--bg-hover, var(--surface-2));
+  color: var(--text-primary, var(--text-primary));
 }
 
 .preview-btn-cancel {
   background: transparent;
-  color: var(--error-color, #ef4444);
-  border: 1px solid var(--error-border, #fca5a5);
+  color: var(--error-color, var(--danger));
+  border: 1px solid var(--error-border, var(--danger));
 }
 
 .preview-btn-cancel:hover:not(:disabled) {
-  background: #fef2f2;
+  background: var(--danger-subtle);
 }
 
 .preview-btn-save {
-  background: var(--primary-color, #3b82f6);
+  background: var(--primary-color, var(--info));
   color: white;
 }
 
 .preview-btn-save:hover:not(:disabled) {
-  background: var(--primary-hover, #2563eb);
+  background: var(--primary-hover, var(--info-text));
 }
 
 .preview-btn-edit:disabled,

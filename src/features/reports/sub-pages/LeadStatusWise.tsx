@@ -3,6 +3,7 @@ import {
   Download, Filter, Search, ChevronDown, ChevronLeft, ChevronRight,
   MoreHorizontal
 } from 'lucide-react';
+import { tint } from '../../../shared/utils/color';
 import './ReportsSubPages.css';
 import {
   statusWiseData as statusData, statusWiseStatsCards as statsCards,
@@ -112,14 +113,14 @@ const LeadStatusWise: React.FC = () => {
       <div className="stats-cards-grid">
         {statsCards.map((stat) => (
           <div key={stat.key} className="stats-card">
-            <div className="stats-card-icon" style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>
+            <div className="stats-card-icon" style={{ backgroundColor: tint(stat.color, 12), color: stat.color }}>
               <stat.icon size={20} />
             </div>
             <div className="stats-card-content">
               <span className="stats-card-value">{stat.value}</span>
               <span className="stats-card-label">{stat.label}</span>
             </div>
-            <span className="stats-card-change" style={{ color: stat.change.startsWith('+') ? '#10b981' : '#ef4444' }}>{stat.change}</span>
+            <span className="stats-card-change" style={{ color: stat.change.startsWith('+') ? 'var(--success)' : 'var(--danger)' }}>{stat.change}</span>
           </div>
         ))}
       </div>

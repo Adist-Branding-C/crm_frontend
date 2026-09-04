@@ -1,4 +1,5 @@
 import React from 'react';
+import { CHART_PALETTE, CHART_PALETTE_DEFAULT } from '../../../../shared/constants/chartPalette';
 import './WidgetStyles.css';
 import { useActivitiesStatistics } from '../../hooks/useActivitiesStatistics';
 import { ListRowsSkeleton } from './WidgetSkeletons';
@@ -10,11 +11,9 @@ interface ActivitiesStatisticsWidgetProps {
   to?: string;
 }
 
-const TYPE_COLOR_PALETTE = ['#3b82f6', '#fbbf24', '#ec4899', '#f97316', '#10b981', '#14b8a6', '#8b5cf6'];
-const DEFAULT_TYPE_COLOR = '#3b82f6';
 
 function colorForIndex(index: number): string {
-  return TYPE_COLOR_PALETTE[index % TYPE_COLOR_PALETTE.length] ?? DEFAULT_TYPE_COLOR;
+  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE_DEFAULT;
 }
 
 const ActivitiesStatisticsWidget = ({ period, from, to }: ActivitiesStatisticsWidgetProps) => {

@@ -1,10 +1,10 @@
 .cell-edit-popover {
   position: fixed;
   z-index: 9999;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: var(--border-radius-sm, 8px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--surface-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--elevation-2);
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
@@ -14,18 +14,25 @@
 .cell-edit-popover-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-muted, #6b7280);
+  color: var(--text-tertiary);
 }
 
 .cell-edit-popover select,
 .cell-edit-popover input {
   width: 100%;
   padding: 0.5rem 0.625rem;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: var(--border-radius-sm, 6px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-sm);
   font-size: 0.875rem;
-  color: var(--text-main, #111827);
-  background: var(--bg-main, #fff);
+  color: var(--text-main);
+  background: var(--surface-2);
+}
+
+.cell-edit-popover select:focus,
+.cell-edit-popover input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .cell-edit-popover-select {
@@ -37,29 +44,29 @@
 .cell-edit-popover-options {
   max-height: 150px;
   overflow-y: auto;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: var(--border-radius-sm, 6px);
-  background: var(--bg-main, #fff);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-sm);
+  background: var(--surface-2);
 }
 
 .cell-edit-popover-option {
   padding: 0.5rem 0.625rem;
   font-size: 0.875rem;
   cursor: pointer;
-  color: var(--text-main, #111827);
+  color: var(--text-main);
 }
 
 .cell-edit-popover-option:hover {
-  background: var(--bg-hover, #f3f4f6);
+  background: var(--surface-hover);
 }
 
 .cell-edit-popover-option.selected {
-  background: var(--bg-selected, #e0e7ff);
+  background: var(--accent-subtle);
   font-weight: 500;
 }
 
 .cell-edit-popover-option.empty {
-  color: var(--text-muted, #6b7280);
+  color: var(--text-tertiary);
   cursor: default;
 }
 .cell-edit-popover-option.empty:hover {
@@ -78,16 +85,16 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: var(--border-radius-sm, 6px);
-  background: var(--bg-main, #fff);
-  color: var(--text-main, #111827);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-sm);
+  background: var(--surface-2);
+  color: var(--text-main);
   cursor: pointer;
 }
 
 .cell-edit-popover-actions button:first-child {
-  color: #128c4a;
-  border-color: #25d366;
+  color: var(--success-text);
+  border-color: var(--success);
 }
 
 .cell-edit-popover-actions button:disabled {

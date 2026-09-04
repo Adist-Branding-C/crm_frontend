@@ -49,13 +49,13 @@
 
 .highlighted {
   background: linear-gradient(135deg, var(--primary) 0%, #ff6b6b 100%);
-  border-left: 4px solid #fff;
+  border-left: 4px solid #ffffff;
 }
 
 .highlighted .kpi-value,
 .highlighted .kpi-title,
 .highlighted .kpi-icon {
-  color: #fff;
+  color: #ffffff;
 }
 
 .highlighted .kpi-footer {

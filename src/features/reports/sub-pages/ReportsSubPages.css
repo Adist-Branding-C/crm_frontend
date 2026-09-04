@@ -280,7 +280,7 @@
 
 .report-menu-desc {
   font-size: 10px;
-  color: #6b7280;
+  color: var(--text-muted);
   line-height: 1.2;
 }
 
@@ -369,17 +369,17 @@
 
 .report-stat-icon.success {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--success);
 }
 
 .report-stat-icon.warning {
   background: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
+  color: var(--warning);
 }
 
 .report-stat-icon.info {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .report-stat-content {
@@ -428,8 +428,8 @@
   top: 60px;
   width: 280px;
   bottom: 0;
-  background: #fff;
-  border-right: 1px solid #e5e7eb;
+  background: var(--surface-1);
+  border-right: 1px solid var(--border-color);
   overflow-y: auto;
   z-index: 5;
   padding: 1rem 0;
@@ -445,7 +445,7 @@
   padding: 0.5rem 1rem 1rem;
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -455,14 +455,14 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  color: #1a1b1d;
+  color: var(--text-main);
   text-decoration: none;
   transition: all 0.2s;
   border-left: 3px solid transparent;
 }
 
 .lead-reports-menu a:hover {
-  background: #f9fafb;
+  background: var(--surface-2);
 }
 
 .lead-reports-menu a.active {
@@ -590,17 +590,17 @@
 
 .status-badge.present {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--success);
 }
 
 .status-badge.late {
   background: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
+  color: var(--warning);
 }
 
 .status-badge.interested {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--success);
 }
 
 .status-badge.registered {
@@ -610,12 +610,12 @@
 
 .status-badge.not-interested {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .status-badge.lost {
   background: rgba(107, 114, 128, 0.1);
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .multi-select-dropdown {
@@ -1179,8 +1179,8 @@
 }
 
 .upload-error-text {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--danger-subtle);
+  color: var(--danger-text);
   padding: 0.75rem 1rem;
   border-radius: var(--border-radius-sm);
   font-size: 0.8125rem;
@@ -1215,7 +1215,7 @@
 }
 
 .example-code {
-  background: #f3f4f6;
+  background: var(--surface-2);
   padding: 1rem;
   border-radius: var(--border-radius-sm);
   font-size: 0.75rem;
@@ -1227,7 +1227,7 @@
 }
 
 .format-note {
-  background: #fef3c7;
+  background: var(--warning-subtle);
   padding: 1rem;
   border-radius: var(--border-radius-sm);
   margin-bottom: 1.5rem;
@@ -1236,7 +1236,7 @@
 .format-note p {
   margin: 0 0 0.5rem 0;
   font-size: 0.8125rem;
-  color: #92400e;
+  color: var(--warning-text);
 }
 
 .format-note p:last-child {
@@ -1291,27 +1291,27 @@
 }
 
 .stat-card-success .stat-icon {
-  color: #10b981;
+  color: var(--success);
 }
 
 .stat-card-success .stat-number {
-  color: #10b981;
+  color: var(--success);
 }
 
 .stat-card-warning .stat-icon {
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .stat-card-warning .stat-number {
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .stat-card-danger .stat-icon {
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .stat-card-danger .stat-number {
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .tabs-container {
@@ -1498,7 +1498,7 @@
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  background: conic-gradient(#10b981 0deg 162deg, #ef4444 162deg 198.36deg, #ef4444 198.36deg 360deg);
+  background: conic-gradient(var(--success) 0deg 162deg, var(--danger) 162deg 198.36deg, var(--danger) 198.36deg 360deg);
   flex-shrink: 0;
 }
 

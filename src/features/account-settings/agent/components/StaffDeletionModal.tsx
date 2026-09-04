@@ -139,7 +139,7 @@ const StaffDeletionModal: React.FC<StaffDeletionModalProps> = ({ isOpen, staff, 
                 <div className="form-group" style={{ marginBottom: '1rem' }}>
                   <label>{dependencies.leadCount} lead(s) assigned to {staffName}</label>
                   {leadsResolved ? (
-                    <p style={{ color: 'var(--success, #16a34a)', fontSize: '0.875rem' }}>Reassigned ✓</p>
+                    <p style={{ color: 'var(--success, var(--success-text))', fontSize: '0.875rem' }}>Reassigned ✓</p>
                   ) : (
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <select value={leadsTarget} onChange={(e) => setLeadsTarget(e.target.value)} disabled={isReassigningLeads} style={{ flex: 1 }}>
@@ -158,7 +158,7 @@ const StaffDeletionModal: React.FC<StaffDeletionModalProps> = ({ isOpen, staff, 
                 <div className="form-group" style={{ marginBottom: '1rem' }}>
                   <label>{dependencies.taskCount} task(s) assigned to {staffName}</label>
                   {tasksResolved ? (
-                    <p style={{ color: 'var(--success, #16a34a)', fontSize: '0.875rem' }}>Resolved ✓</p>
+                    <p style={{ color: 'var(--success, var(--success-text))', fontSize: '0.875rem' }}>Resolved ✓</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       <div style={{ display: 'flex', gap: '1rem' }}>
@@ -192,7 +192,7 @@ const StaffDeletionModal: React.FC<StaffDeletionModalProps> = ({ isOpen, staff, 
 
               {hasAutomationRefs && (
                 <div className="form-group" style={{ marginBottom: '1rem' }}>
-                  <p style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: '#92400e', background: '#fef3c7', padding: '0.75rem', borderRadius: 'var(--border-radius-sm)' }}>
+                  <p style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', color: 'var(--warning-text)', background: 'var(--warning-subtle)', padding: '0.75rem', borderRadius: 'var(--border-radius-sm)' }}>
                     <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '0.125rem' }} />
                     <span>
                       {staffName} is still used in {dependencies!.automationActions.length} automation rule action(s):{' '}
@@ -205,7 +205,7 @@ const StaffDeletionModal: React.FC<StaffDeletionModalProps> = ({ isOpen, staff, 
             </>
           )}
 
-          {error && <p className="delete-warning" style={{ color: 'var(--danger, #dc2626)' }}>{error}</p>}
+          {error && <p className="delete-warning" style={{ color: 'var(--danger, var(--danger-text))' }}>{error}</p>}
         </div>
         <div className="modal-footer">
           <button type="button" className="btn btn-danger" onClick={handleFinalDelete} disabled={!canDelete || isDeleting}>

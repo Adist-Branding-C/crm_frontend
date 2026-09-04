@@ -30,6 +30,17 @@ export interface TopNavProps {
   onOpenDrawer: (type: string) => void;
 }
 
+export interface SidebarNavItem {
+  icon: ComponentType<{ size?: number; className?: string }>;
+  label: string;
+  path: string;
+}
+
+export interface SidebarNavGroup {
+  heading: string;
+  items: SidebarNavItem[];
+}
+
 export interface TabItem {
   id: string;
   title: string;

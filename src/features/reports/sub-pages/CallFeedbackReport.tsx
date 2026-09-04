@@ -17,7 +17,7 @@ const CallFeedbackReport = () => {
     { status: 'Lost', count: 2 },
   ];
 
-  const leadStatusColors = ['#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899'];
+  const leadStatusColors = ['var(--info)', 'var(--success)', 'var(--danger)', 'var(--warning)', 'var(--category-purple-text)', 'var(--chart-6)', 'var(--category-pink-text)'];
 
   const filteredData = useMemo(() => {
     let data = [...callFeedbackData];

@@ -1,15 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Grid, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone, UserCircle, Settings, Users, CreditCard, HelpCircle, LogOut, Building, Check, PhoneCall, Calendar, AlertCircle, Info, Layout, Link as LinkIcon, Clock } from 'lucide-react';
+
+/**
+ * Application header — a command-first top bar.
+ *
+ *  left    section context (where you are)
+ *  centre  the command bar: one ⌘K surface for search + create + navigate
+ *  right   a stable "New" menu, a notifications popover, the profile menu
+ *
+ * The heavy lifting (record search, quick-create, jump-to) lives in
+ * <CommandPalette>; this component only owns the bar, the two popovers and the
+ * profile menu. Opening the palette is also bound to ⌘K / Ctrl+K globally via
+ * useCommandPalette.
+ */
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  Search, Bell, Plus, ChevronDown, ChevronRight, X, User, DollarSign, ListChecks, Megaphone,
+  UserCircle, Settings, HelpCircle, LogOut, Building, Check, Calendar, AlertCircle,
+  Info, Sun, Moon, Monitor,
+} from 'lucide-react';
 import type { NotificationIconInfo, TopNavProps } from '../../types/layout';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
+import type { ThemeMode } from '../../constants/theme';
+import { useCommandPalette } from '../../hooks/useCommandPalette';
+import { sidebarAdminItem, sidebarNavGroups, sidebarSettingsItem } from '../../constants/sidebar';
 import { useCurrentStaff } from '../../../features/account-settings/agent/hooks/useCurrentStaff';
-import { useDebouncedSearch } from '../../hooks/useDebouncedSearch';
-import { useRecentSearches } from '../../hooks/useRecentSearches';
-import { useGlobalLeadSearch } from '../../../features/enquiries/hooks/useGlobalLeadSearch';
-import type { LeadSearchApiItem } from '../../../features/enquiries/types/response';
 import { useNotifications } from '../../../features/notifications/hooks/useNotifications';
 import { NotificationType } from '../../../features/notifications/types';
+import type { NotificationItem } from '../../../features/notifications/types';
+import { tint } from '../../utils/color';
+import CommandPalette from './CommandPalette';
 import './TopNav.css';
 
 const addOptions = [
@@ -19,46 +39,68 @@ const addOptions = [
   { id: 'campaign', name: 'Campaign', icon: Megaphone },
 ];
 
+const themeOptions: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
+];
+
 const notificationIcons: Record<string, NotificationIconInfo> = {
-  [NotificationType.NEW_LEAD_ASSIGNED]: { icon: User, color: '#3b82f6' },
-  [NotificationType.TASK_ASSIGNED]: { icon: ListChecks, color: '#f59e0b' },
-  [NotificationType.FOLLOWUP_REMINDER]: { icon: Calendar, color: '#8b5cf6' },
-  [NotificationType.DEAL_WON]: { icon: DollarSign, color: '#10b981' },
-  [NotificationType.DEAL_LOST]: { icon: AlertCircle, color: '#ef4444' },
-  [NotificationType.AUTOMATION_DIGEST]: { icon: Info, color: '#64748b' },
+  [NotificationType.NEW_LEAD_ASSIGNED]: { icon: User, color: 'var(--info)' },
+  [NotificationType.TASK_ASSIGNED]: { icon: ListChecks, color: 'var(--warning)' },
+  [NotificationType.FOLLOWUP_REMINDER]: { icon: Calendar, color: 'var(--category-purple-text)' },
+  [NotificationType.DEAL_WON]: { icon: DollarSign, color: 'var(--success)' },
+  [NotificationType.DEAL_LOST]: { icon: AlertCircle, color: 'var(--danger)' },
+  [NotificationType.AUTOMATION_DIGEST]: { icon: Info, color: 'var(--text-tertiary)' },
 };
 
-const getNotificationIcon = (type: string): NotificationIconInfo => {
-  return notificationIcons[type] || { icon: Bell, color: '#64748b' };
+const getNotificationIcon = (type: string): NotificationIconInfo =>
+  notificationIcons[type] || { icon: Bell, color: 'var(--text-tertiary)' };
+
+const SECTIONS = [
+  ...sidebarNavGroups.flatMap((g) => g.items),
+  sidebarAdminItem,
+  sidebarSettingsItem,
+];
+
+const titleCase = (seg: string): string =>
+  seg.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+/** Coarse app-bar breadcrumb: matched section, then any deeper path segments. */
+const crumbsFor = (pathname: string): string[] => {
+  const match = SECTIONS
+    .filter((s) => pathname === s.path || pathname.startsWith(s.path + '/'))
+    .sort((a, b) => b.path.length - a.path.length)[0];
+
+  const all = pathname.split('/').filter(Boolean);
+  if (match) {
+    const consumed = match.path.split('/').filter(Boolean).length;
+    return [match.label, ...all.slice(consumed).map(titleCase)].slice(0, 3);
+  }
+  return [titleCase(all[0] ?? 'Dashboard')];
 };
+
+const isMac = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/.test(navigator.userAgent);
 
 const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
   const { currentStaff, isLoading: isStaffLoading, clearCurrentStaff } = useCurrentStaff();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
-  const [committedQuery, setCommittedQuery] = useState('');
-  const { searchValue: searchQuery, handleSearchChange: setSearchQuery, resetSearch } = useDebouncedSearch(setCommittedQuery);
-  const { results: searchResults, isLoading: isSearchLoading } = useGlobalLeadSearch(committedQuery);
-  const { recent: recentSearches, addRecent } = useRecentSearches();
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [currentOptionIndex, setCurrentOptionIndex] = useState(0);
-  const [showAddDropdown, setShowAddDropdown] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [showNotificationsDrawer, setShowNotificationsDrawer] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
-  const notificationsRef = useRef<HTMLButtonElement>(null);
-  const notificationsDrawerRef = useRef<HTMLDivElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const { mode: themeMode, setMode: setThemeMode } = useTheme();
+  const palette = useCommandPalette();
 
+  const [openMenu, setOpenMenu] = useState<null | 'new' | 'notif' | 'profile'>(null);
+  const barRef = useRef<HTMLElement>(null);
+
+  const crumbs = useMemo(() => crumbsFor(location.pathname), [location.pathname]);
 
   const currentUser = {
     name: currentStaff?.name ?? '',
     email: currentStaff?.email ?? '',
     role: currentStaff?.isSuperAdmin ? 'SUPER ADMIN' : currentStaff?.isAdmin ? 'ADMIN' : 'STAFF',
-    avatar: null,
+    avatar: null as string | null,
     initial: currentStaff?.name ? currentStaff.name.charAt(0).toUpperCase() : '',
   };
 
@@ -68,325 +110,198 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setShowProfileDropdown(false);
-      }
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node) &&
-        notificationsDrawerRef.current &&
-        !notificationsDrawerRef.current.contains(event.target as Node)
-      ) {
-        setShowNotificationsDrawer(false);
-      }
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
+    const onDown = (event: MouseEvent) => {
+      if (barRef.current && !barRef.current.contains(event.target as Node)) setOpenMenu(null);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
   }, []);
 
-  const handleMarkAllRead = () => {
-    markAllAsRead();
+  useEffect(() => setOpenMenu(null), [location.pathname]);
+
+  const handleQuickCreate = (id: string) => {
+    setOpenMenu(null);
+    onOpenDrawer?.(id);
   };
 
-  const handleNotificationClick = (notification: any) => {
-    if (!notification.isRead) {
-      markAsRead([notification.id]);
-    }
-
+  const handleNotificationClick = (notification: NotificationItem) => {
+    if (!notification.isRead) markAsRead([notification.id]);
     let link = notification.link;
     if (!link) {
-      switch (notification.type) {
-        case NotificationType.NEW_LEAD_ASSIGNED:
-        case NotificationType.FOLLOWUP_REMINDER:
-          link = '/leads';
-          break;
-        case NotificationType.TASK_ASSIGNED:
-          link = '/tasks';
-          break;
-        case NotificationType.DEAL_WON:
-        case NotificationType.DEAL_LOST:
-          link = '/deals';
-          break;
-        default:
-          break;
-      }
+      if (notification.type === NotificationType.TASK_ASSIGNED) link = '/tasks';
+      else if (notification.type === NotificationType.DEAL_WON || notification.type === NotificationType.DEAL_LOST) link = '/deals';
+      else link = '/leads';
     }
-
-    if (link) {
-      navigate(link);
-      setShowNotificationsDrawer(false);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentOptionIndex((prev) => (prev + 1) % addOptions.length);
-        setIsAnimating(false);
-      }, 300);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const currentOption = addOptions[currentOptionIndex]!;
-
-  const navigateToLead = (phone: string) => {
-    navigate(`/leads?search=${encodeURIComponent(phone)}`);
-  };
-
-  const handleResultClick = (result: LeadSearchApiItem) => {
-    addRecent({ id: result.id, name: result.name, phone: result.phone });
-    setSearchQuery('');
-    resetSearch();
-    setShowSuggestions(false);
-    navigateToLead(result.phone);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, searchResults.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSelectedIndex(prev => Math.max(prev - 1, 0));
-    } else if (e.key === 'Enter' && selectedIndex >= 0) {
-      e.preventDefault();
-      if (searchResults[selectedIndex]) handleResultClick(searchResults[selectedIndex]);
-    } else if (e.key === 'Escape') {
-      setShowSuggestions(false);
-    }
-  };
-
-  interface AddOption {
-    id: string;
-    name: string;
-    icon: React.ComponentType<{ size?: number }>;
-  }
-
-  const handleAddClick = (option: AddOption) => {
-    if (onOpenDrawer) {
-      onOpenDrawer(option.id);
-    }
-    setShowAddDropdown(false);
+    setOpenMenu(null);
+    navigate(link);
   };
 
   return (
-    <div className="topnav">
-      <div className="search-container" ref={searchContainerRef}>
-        <div className="search-bar">
-          <Search size={18} className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search leads..."
-            className="search-input dashboard-search-input"
-            value={searchQuery}
-            onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); setSelectedIndex(-1); }}
-            onFocus={() => setShowSuggestions(true)}
-            onKeyDown={handleKeyDown}
-          />
-          {/* {searchQuery && (
-            <button className="clear-search" onClick={() => { setSearchQuery(''); setShowSuggestions(false); }}>
-              <X size={14} />
-            </button>
-          )} */}
-        </div>
-
-        {showSuggestions && searchQuery.length >= 2 && (
-          <div className="search-suggestions">
-            {isSearchLoading ? (
-              <div className="no-results">Searching...</div>
-            ) : searchResults.length > 0 ? (
-              <>
-                <div className="suggestion-category">
-                  Leads ({searchResults.length})
-                </div>
-                {searchResults.map((result, index) => (
-                  <div
-                    key={result.id}
-                    className={`suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
-                    onClick={() => handleResultClick(result)}
-                  >
-                    <div className="suggestion-icon">
-                      <User size={14} style={{ color: '#3b82f6' }} />
-                    </div>
-                    <div className="suggestion-content">
-                      <div className="suggestion-name">{result.name}</div>
-                      <div className="suggestion-desc">{result.phone}{result.source ? ` • ${result.source}` : ''}</div>
-                    </div>
-                    {result.status && (
-                      <div className="suggestion-category-label">{result.status}</div>
-                    )}
-                  </div>
-                ))}
-              </>
-            ) : (
-              <div className="no-results">No results found</div>
-            )}
-          </div>
-        )}
-
-        {showSuggestions && searchQuery.length < 2 && recentSearches.length > 0 && (
-          <div className="search-suggestions">
-            <div className="suggestion-category">Recent</div>
-            {recentSearches.map((entry) => (
-              <div
-                key={entry.id}
-                className="suggestion-item"
-                onClick={() => { setShowSuggestions(false); navigateToLead(entry.phone); }}
-              >
-                <div className="suggestion-icon">
-                  <Clock size={14} style={{ color: '#6b7280' }} />
-                </div>
-                <div className="suggestion-content">
-                  <div className="suggestion-name">{entry.name}</div>
-                  <div className="suggestion-desc">{entry.phone}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="topnav-actions">
-        <div className="add-button-group">
-          <button className="btn-add" onClick={() => setShowAddDropdown(!showAddDropdown)}>
-            <span className={`add-text-container ${isAnimating ? 'animating' : ''}`}>
-              <Plus size={16} />
-              <span className="add-text">Add {currentOption.name}</span>
+    <header className="topnav" ref={barRef}>
+      <nav className="topnav__section" aria-label="Breadcrumb">
+        {crumbs.map((crumb, i) => (
+          <React.Fragment key={`${crumb}-${i}`}>
+            {i > 0 && <ChevronRight size={15} className="topnav__crumb-sep" aria-hidden="true" />}
+            <span
+              className={`topnav__crumb${i === crumbs.length - 1 ? ' is-current' : ''}`}
+              aria-current={i === crumbs.length - 1 ? 'page' : undefined}
+            >
+              {crumb}
             </span>
+          </React.Fragment>
+        ))}
+      </nav>
+
+      <button
+        type="button"
+        className="topnav__command"
+        onClick={palette.open}
+        aria-haspopup="dialog"
+        aria-keyshortcuts={isMac ? 'Meta+K' : 'Control+K'}
+      >
+        <Search size={18} className="topnav__command-icon" />
+        <span className="topnav__command-text">Search, create, or jump to&hellip;</span>
+        <kbd className="topnav__kbd">{isMac ? '⌘' : 'Ctrl'} K</kbd>
+      </button>
+
+      <div className="topnav__actions">
+        <div className="topnav__menu-anchor">
+          <button
+            type="button"
+            className="topnav__new"
+            onClick={() => setOpenMenu((m) => (m === 'new' ? null : 'new'))}
+            aria-haspopup="menu"
+            aria-expanded={openMenu === 'new'}
+          >
+            <Plus size={16} />
+            <span className="topnav__new-label">New</span>
+            <ChevronDown size={14} className={`topnav__new-caret${openMenu === 'new' ? ' is-open' : ''}`} />
           </button>
-          <button className="btn-add-dropdown" onClick={() => setShowAddDropdown(!showAddDropdown)}>
-            <ChevronDown size={14} />
-          </button>
-          {showAddDropdown && (
-            <div className="add-dropdown">
-              {addOptions.map(option => {
+          {openMenu === 'new' && (
+            <div className="topnav__pop topnav__pop--menu" role="menu">
+              {addOptions.map((option) => {
                 const Icon = option.icon;
                 return (
-                  <div
+                  <button
                     key={option.id}
-                    className="add-dropdown-item"
-                    onClick={() => handleAddClick(option)}
+                    type="button"
+                    role="menuitem"
+                    className="topnav__menu-item"
+                    onClick={() => handleQuickCreate(option.id)}
                   >
-                    <Icon size={14} />
-                    <span>Add {option.name}</span>
-                  </div>
+                    <Icon size={15} />
+                    <span>New {option.name}</span>
+                  </button>
                 );
               })}
             </div>
           )}
         </div>
 
-        <div className="icon-btn-container">
+        <div className="topnav__menu-anchor">
           <button
-            className="icon-btn notification-btn"
-            ref={notificationsRef}
-            onClick={() => setShowNotificationsDrawer(!showNotificationsDrawer)}
+            type="button"
+            className="topnav__icon-btn"
+            onClick={() => setOpenMenu((m) => (m === 'notif' ? null : 'notif'))}
+            aria-haspopup="dialog"
+            aria-expanded={openMenu === 'notif'}
+            aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
           >
-            <Bell size={18} className="bell-icon" />
+            <Bell size={18} />
             {unreadCount > 0 && (
-              <span className="notification-badge">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
+              <span className="topnav__badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
             )}
           </button>
-        </div>
-
-        {showNotificationsDrawer && (
-          <div className="notifications-drawer">
-            <div className="notifications-backdrop" onClick={() => setShowNotificationsDrawer(false)} />
-            <div className="notifications-panel" ref={notificationsDrawerRef}>
-              <div className="notifications-header">
-                <h3>Notifications</h3>
-                <div className="notifications-header-actions">
+          {openMenu === 'notif' && (
+            <div className="topnav__pop topnav__pop--notif" role="dialog" aria-label="Notifications">
+              <div className="notif-head">
+                <span className="notif-head-title">Notifications</span>
+                <div className="notif-head-actions">
                   {unreadCount > 0 && (
-                    <button className="mark-all-read" onClick={handleMarkAllRead}>
-                      <Check size={14} />
-                      <span>Mark all read</span>
+                    <button type="button" className="notif-mark" onClick={() => markAllAsRead()}>
+                      <Check size={13} /> Mark all read
                     </button>
                   )}
-                  <button className="notifications-close" onClick={() => setShowNotificationsDrawer(false)}>
-                    <X size={18} />
+                  <button type="button" className="notif-close" aria-label="Close" onClick={() => setOpenMenu(null)}>
+                    <X size={16} />
                   </button>
                 </div>
               </div>
-              <div className="notifications-list">
+              <div className="notif-list">
                 {notifications.length === 0 ? (
-                  <div className="notifications-empty">No notifications</div>
+                  <div className="notif-empty">You&rsquo;re all caught up</div>
                 ) : (
-                  notifications.map(notification => {
+                  notifications.slice(0, 12).map((notification) => {
                     const { icon: Icon, color } = getNotificationIcon(notification.type);
                     return (
-                      <div
+                      <button
                         key={notification.id}
-                        className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+                        type="button"
+                        className={`notif-item${!notification.isRead ? ' is-unread' : ''}`}
                         onClick={() => handleNotificationClick(notification)}
                       >
-                        <div className="notification-indicator" style={{ backgroundColor: color }} />
-                        <div className="notification-icon" style={{ backgroundColor: `${color}15`, color }}>
-                          <Icon size={16} />
-                        </div>
-                        <div className="notification-content">
-                          <div className="notification-title">{notification.title}</div>
-                          <div className="notification-message">{notification.notification}</div>
-                          <div className="notification-time">{notification.time ? new Date(notification.time).toLocaleString() : ''}</div>
-                        </div>
-                        {!notification.isRead && <div className="notification-dot" />}
-                      </div>
+                        <span className="notif-item-icon" style={{ backgroundColor: tint(color, 14), color }}>
+                          <Icon size={15} />
+                        </span>
+                        <span className="notif-item-body">
+                          <span className="notif-item-title">{notification.title}</span>
+                          <span className="notif-item-msg">{notification.notification}</span>
+                          <span className="notif-item-time">
+                            {notification.time ? new Date(notification.time).toLocaleString() : ''}
+                          </span>
+                        </span>
+                        {!notification.isRead && <span className="notif-item-dot" />}
+                      </button>
                     );
                   })
                 )}
               </div>
-              <div className="notifications-footer">
-                <button className="view-all-btn" onClick={() => navigate('/user/notifications-users')}>
-                  View All Notifications
-                </button>
-              </div>
+              <button
+                type="button"
+                className="notif-foot"
+                onClick={() => { setOpenMenu(null); navigate('/user/notifications-users'); }}
+              >
+                View all notifications
+              </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        <div className="user-profile" ref={profileRef}>
-          <div
+        <div className="topnav__menu-anchor user-profile">
+          <button
+            type="button"
             className="user-profile-trigger"
-            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+            onClick={() => setOpenMenu((m) => (m === 'profile' ? null : 'profile'))}
+            aria-haspopup="menu"
+            aria-expanded={openMenu === 'profile'}
           >
             {isStaffLoading ? (
               <>
-                <div className="avatar avatar-skeleton" />
+                <span className="avatar avatar-skeleton" />
                 <span className="user-name user-name-skeleton" />
               </>
             ) : (
               <>
-                <div className="avatar">
+                <span className="avatar">
                   {currentUser.avatar ? (
-                    <img src={currentUser.avatar} alt={currentUser.name} />
+                    <img src={currentUser.avatar} alt="" />
                   ) : currentUser.initial ? (
                     <span className="avatar-initial">{currentUser.initial}</span>
                   ) : (
                     <UserIcon />
                   )}
-                </div>
+                </span>
                 <span className="user-name">{currentUser.name}</span>
               </>
             )}
             <ChevronDown size={14} className="dropdown-icon" />
-          </div>
+          </button>
 
-          {showProfileDropdown && (
+          {openMenu === 'profile' && (
             <div className="profile-dropdown">
               <div className="profile-dropdown-header">
                 <div className="profile-avatar-large">
-                  {currentUser.initial ? (
-                    <span className="avatar-initial">{currentUser.initial}</span>
-                  ) : (
-                    <UserIcon />
-                  )}
+                  {currentUser.initial ? <span className="avatar-initial">{currentUser.initial}</span> : <UserIcon />}
                 </div>
                 <div className="profile-info">
                   <div className="profile-name">{currentUser.name}</div>
@@ -398,57 +313,59 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
               <div className="profile-dropdown-divider" />
 
               <div className="profile-dropdown-links">
-                <div className="profile-dropdown-item" onClick={() => navigate('/account/profile')}>
+                <button type="button" className="profile-dropdown-item" onClick={() => { setOpenMenu(null); navigate('/account/profile'); }}>
                   <UserCircle size={16} />
                   <span>My Profile</span>
-                </div>
-                <div className="profile-dropdown-item" onClick={() => navigate('/account')}>
+                </button>
+                <button type="button" className="profile-dropdown-item" onClick={() => { setOpenMenu(null); navigate('/account'); }}>
                   <Settings size={16} />
                   <span>Account Settings</span>
-                </div>
-                {/* <div className="profile-dropdown-item" onClick={() => navigate('/setup')}>
-                  <Layout size={16} />
-                  <span>Setup</span>
-                </div> */}
-                {/* <div className="profile-dropdown-item" onClick={() => navigate('/user/connect')}>
-                  <LinkIcon size={16} />
-                  <span>Connect</span>
-                </div> */}
-                {/* <div className="profile-dropdown-item" onClick={() => navigate('/settings/staff')}>
-                  <Users size={16} />
-                  <span>Team Management</span>
-                </div> */}
-                {/* <div className="profile-dropdown-item" onClick={() => navigate('/settings/notifications')}>
-                  <Bell size={16} />
-                  <span>Notifications</span>
-                </div> */}
-                {/* <div className="profile-dropdown-item" onClick={() => navigate('/settings/billing')}>
-                  <CreditCard size={16} />
-                  <span>Billing</span>
-                </div> */}
-                <div className="profile-dropdown-item" onClick={() => navigate('/settings/help')}>
+                </button>
+                <button type="button" className="profile-dropdown-item" onClick={() => { setOpenMenu(null); navigate('/settings/help'); }}>
                   <HelpCircle size={16} />
                   <span>Help Center</span>
+                </button>
+              </div>
+
+              <div className="profile-dropdown-divider" />
+
+              <div className="profile-theme" role="group" aria-label="Appearance">
+                <span className="profile-theme__label">Appearance</span>
+                <div className="profile-theme__options">
+                  {themeOptions.map(({ value, label, icon: Icon }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`profile-theme__option${themeMode === value ? ' is-active' : ''}`}
+                      aria-pressed={themeMode === value}
+                      onClick={() => setThemeMode(value)}
+                    >
+                      <Icon size={15} />
+                      <span>{label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
               <div className="profile-dropdown-divider" />
 
               <div className="profile-dropdown-footer">
-                <div className="profile-dropdown-item logout-item" onClick={handleLogout}>
+                <button type="button" className="profile-dropdown-item logout-item" onClick={handleLogout}>
                   <LogOut size={16} />
                   <span>Logout</span>
-                </div>
-                <div className="profile-dropdown-item" onClick={() => console.log('Switch Workspace')}>
+                </button>
+                <button type="button" className="profile-dropdown-item" onClick={() => navigate('/companies')}>
                   <Building size={16} />
                   <span>Switch Workspace</span>
-                </div>
+                </button>
               </div>
             </div>
           )}
         </div>
       </div>
-    </div>
+
+      <CommandPalette isOpen={palette.isOpen} onClose={palette.close} onQuickCreate={(t) => onOpenDrawer?.(t)} />
+    </header>
   );
 };
 

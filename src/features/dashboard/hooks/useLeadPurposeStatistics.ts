@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
+import { CHART_PALETTE, CHART_PALETTE_DEFAULT } from '../../../shared/constants/chartPalette';
 import { dashboardService } from '../services/DashboardService';
 import type { DashboardPeriod, GetLeadPurposeStatisticsParams, LeadPurposeCountItem } from '../types';
 
-const PURPOSE_COLOR_PALETTE = ['#f97316', '#8b5cf6', '#e0323e', '#10b981', '#3b82f6'];
-const DEFAULT_PURPOSE_COLOR = '#8b5cf6';
 
 function colorForIndex(index: number): string {
-  return PURPOSE_COLOR_PALETTE[index % PURPOSE_COLOR_PALETTE.length] ?? DEFAULT_PURPOSE_COLOR;
+  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE_DEFAULT;
 }
 
 export function useLeadPurposeStatistics(period: DashboardPeriod, from?: string, to?: string) {

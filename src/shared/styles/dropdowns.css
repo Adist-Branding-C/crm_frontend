@@ -1,10 +1,10 @@
 /* Shared Dropdown / Popover Styles */
 
 .btn-secondary.active {
-  background: #fefefe;
+  background: var(--surface-2);
   border-color: var(--primary);
   color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(241, 65, 79, 0.1);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
 }
 
 .btn-secondary svg:first-child {
@@ -20,10 +20,10 @@
   position: absolute;
   top: calc(100% + 8px);
   min-width: 220px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--surface-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--elevation-menu);
   z-index: 1000;
   overflow: hidden;
   animation: dropdownSlideIn 0.2s ease forwards;
@@ -32,7 +32,7 @@
 @keyframes dropdownSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -43,7 +43,7 @@
 @keyframes dropdownSlideUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -58,11 +58,11 @@
 @keyframes dropdownSlideOut {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
   to {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(4px);
   }
 }
 
@@ -72,9 +72,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #9ca3af;
-  background: #fafafa;
-  border-bottom: 1px solid #f0f0f0;
+  color: var(--text-tertiary);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .premium-dropdown .dropdown-item {
@@ -87,18 +87,18 @@
   background: transparent;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s ease;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .premium-dropdown .dropdown-item:hover {
-  background: #f8f9fa;
+  background: var(--surface-hover);
 }
 
 .premium-dropdown .dropdown-item.selected {
-  background: #fef2f2;
+  background: var(--accent-subtle);
   color: var(--primary);
 }
 
@@ -108,12 +108,12 @@
 }
 
 .premium-dropdown .dropdown-item svg {
-  color: #9ca3af;
+  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
 .premium-dropdown .dropdown-item:hover svg {
-  color: #6b7280;
+  color: var(--text-secondary);
 }
 
 .premium-dropdown .dropdown-item.selected svg {
@@ -121,15 +121,15 @@
 }
 
 .premium-dropdown .dropdown-item.danger {
-  color: #dc2626;
+  color: var(--danger-text);
 }
 
 .premium-dropdown .dropdown-item.danger:hover {
-  background: #fef2f2;
+  background: var(--danger-subtle);
 }
 
 .premium-dropdown .dropdown-item.danger svg {
-  color: #dc2626;
+  color: var(--danger-text);
 }
 
 .check-icon {
@@ -138,7 +138,7 @@
 
 .dropdown-divider {
   height: 1px;
-  background: #e5e7eb;
+  background: var(--border-default);
   margin: 0.25rem 0;
 }
 
@@ -153,10 +153,10 @@
   top: 100%;
   margin-top: 8px;
   min-width: 180px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--surface-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--elevation-menu);
   z-index: 100;
   overflow: hidden;
   animation: actionDropdownSlide 0.2s ease forwards;
@@ -172,18 +172,18 @@
   background: transparent;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s ease;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .sort-dropdown button:hover {
-  background-color: #f8f9fa;
+  background-color: var(--surface-hover);
 }
 
 .sort-dropdown button.active {
-  background-color: #f0f4ff;
+  background-color: var(--accent-subtle);
   color: var(--primary);
 }
 
@@ -196,10 +196,10 @@
 .action-dropdown-portal {
   position: fixed;
   min-width: 220px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--surface-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--elevation-menu);
   z-index: 9999;
   overflow: hidden;
   animation: dropdownSlideIn 0.2s ease forwards;
@@ -219,26 +219,26 @@
   background: transparent;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s ease;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .action-dropdown-portal button:hover {
-  background-color: #f8f9fa;
+  background-color: var(--surface-hover);
 }
 
 .action-dropdown-portal button:active {
-  background-color: #f1f2f3;
+  background-color: var(--surface-selected);
 }
 
 .action-dropdown-portal button.delete {
-  color: #dc2626;
+  color: var(--danger-text);
 }
 
 .action-dropdown-portal button.delete:hover {
-  background-color: #fef2f2;
+  background-color: var(--danger-subtle);
 }
 
 .action-dropdown-portal button.whatsapp {
@@ -246,15 +246,15 @@
 }
 
 .action-dropdown-portal button.whatsapp:hover {
-  background-color: #e8f8ea;
+  background-color: rgba(37, 211, 102, 0.12);
 }
 
 .action-dropdown-portal button.message {
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .action-dropdown-portal button.message:hover {
-  background-color: #eff6ff;
+  background-color: var(--info-subtle);
 }
 
 .action-dropdown-portal button.order {
@@ -262,7 +262,7 @@
 }
 
 .action-dropdown-portal button.order:hover {
-  background-color: #f5f3ff;
+  background-color: rgba(139, 92, 246, 0.14);
 }
 
 /* Simple admin dropdown toggle/menu/item */
@@ -276,11 +276,12 @@
   background-color: var(--bg-card);
   cursor: pointer;
   color: var(--text-muted);
-  transition: all 0.2s;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .dropdown-toggle:hover {
-  background-color: var(--bg-main);
+  background-color: var(--surface-hover);
   color: var(--text-main);
 }
 
@@ -289,10 +290,10 @@
   right: 0;
   top: 100%;
   min-width: 150px;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background-color: var(--surface-3);
+  border: 1px solid var(--border-hairline);
   border-radius: var(--border-radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--elevation-menu);
   z-index: 10;
   margin-top: 4px;
 }
@@ -302,15 +303,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  font-size: 14px;
+  font-size: var(--text-base);
   color: var(--text-main);
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .dropdown-item:hover {
-  background-color: var(--bg-main);
+  background-color: var(--surface-hover);
 }
 
 .dropdown-item:first-child {
@@ -353,7 +354,7 @@
 @keyframes actionDropdownSlide {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -364,7 +365,7 @@
 @keyframes actionDropdownSlideUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -382,26 +383,26 @@
   background: transparent;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s ease;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .action-dropdown button:hover {
-  background-color: #f8f9fa;
+  background-color: var(--surface-hover);
 }
 
 .action-dropdown button:active {
-  background-color: #f1f2f3;
+  background-color: var(--surface-selected);
 }
 
 .action-dropdown button.delete {
-  color: #dc2626;
+  color: var(--danger-text);
 }
 
 .action-dropdown button.delete:hover {
-  background-color: #fef2f2;
+  background-color: var(--danger-subtle);
 }
 
 .action-dropdown button.whatsapp {
@@ -409,15 +410,15 @@
 }
 
 .action-dropdown button.whatsapp:hover {
-  background-color: #e8f8ea;
+  background-color: rgba(37, 211, 102, 0.12);
 }
 
 .action-dropdown button.message {
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .action-dropdown button.message:hover {
-  background-color: #eff6ff;
+  background-color: var(--info-subtle);
 }
 
 .action-dropdown button.order {
@@ -425,5 +426,5 @@
 }
 
 .action-dropdown button.order:hover {
-  background-color: #f5f3ff;
+  background-color: rgba(139, 92, 246, 0.14);
 }

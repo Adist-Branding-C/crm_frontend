@@ -67,22 +67,22 @@
 
 .plan-stat-item .stat-icon.status-icon {
   background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--success);
 }
 
 .plan-stat-item .stat-icon.plan-icon {
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
+  background: var(--category-indigo-subtle);
+  color: var(--category-indigo-text);
 }
 
 .plan-stat-item .stat-icon.expiry-icon {
   background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .plan-stat-item .stat-icon.renewal-icon {
-  background: rgba(236, 72, 153, 0.1);
-  color: #ec4899;
+  background: var(--category-pink-subtle);
+  color: var(--category-pink-text);
 }
 
 .plan-stat-item .stat-content {
@@ -129,7 +129,7 @@
   margin: 0 auto;
   font-size: 1.75rem;
   font-weight: 600;
-  color: #fff;
+  color: #ffffff;
 }
 
 .profile-name-section {
@@ -239,7 +239,7 @@
   border: none;
   border-radius: var(--border-radius-sm);
   background: var(--primary);
-  color: #fff;
+  color: #ffffff;
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
@@ -297,13 +297,13 @@
 }
 
 .toast-success {
-  background: #22c55e;
-  color: #fff;
+  background: var(--success);
+  color: #ffffff;
 }
 
 .toast-error {
-  background: #dc2626;
-  color: #fff;
+  background: var(--danger-text);
+  color: #ffffff;
 }
 
 @keyframes toastSlideIn {
@@ -325,7 +325,7 @@
   border-radius: var(--border-radius-md);
   border: 1px solid var(--border-color);
   background: var(--bg-card);
-  color: #dc2626;
+  color: var(--danger-text);
   font-size: 0.875rem;
 }
 

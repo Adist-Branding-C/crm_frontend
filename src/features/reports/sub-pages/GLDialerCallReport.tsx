@@ -4,6 +4,7 @@ import PageHeader from '../../../shared/components/layout/PageHeader';
 import { callHistoryData, agentStatsData } from '../constants';
 import { MOCK_STAFF_OPTIONS_WITH_IDS } from '../../../shared/constants/mockStaff';
 import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
+import { tint } from '../../../shared/utils/color';
 
 const GLDialerCallReport = () => {
   const [filters, setFilters] = useState({ dateFrom: '2024-01-01', dateTo: '2024-01-31', agent: '' });
@@ -14,12 +15,12 @@ const GLDialerCallReport = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const statsData = [
-    { label: 'Total Calls', value: 156, icon: Phone, color: '#3b82f6' },
-    { label: 'Incoming Calls', value: 89, icon: PhoneIncoming, color: '#8b5cf6' },
-    { label: 'Attended', value: 72, icon: PhoneCall, color: '#10b981' },
-    { label: 'Missed', value: 17, icon: PhoneMissed, color: '#ef4444' },
-    { label: 'Outbound', value: 67, icon: PhoneOutgoing, color: '#f59e0b' },
-    { label: 'Unique Numbers', value: 45, icon: Users, color: '#06b6d4' },
+    { label: 'Total Calls', value: 156, icon: Phone, color: 'var(--info)' },
+    { label: 'Incoming Calls', value: 89, icon: PhoneIncoming, color: 'var(--category-purple-text)' },
+    { label: 'Attended', value: 72, icon: PhoneCall, color: 'var(--success)' },
+    { label: 'Missed', value: 17, icon: PhoneMissed, color: 'var(--danger)' },
+    { label: 'Outbound', value: 67, icon: PhoneOutgoing, color: 'var(--warning)' },
+    { label: 'Unique Numbers', value: 45, icon: Users, color: 'var(--chart-6)' },
   ];
 
   const filteredData = useMemo(() => {
@@ -66,7 +67,7 @@ const GLDialerCallReport = () => {
       <div className="call-stats-grid">
         {statsData.map((stat, index) => (
           <div key={index} className="call-stat-card">
-            <div className="call-stat-icon" style={{ background: stat.color + '20' }}>
+            <div className="call-stat-icon" style={{ background: tint(stat.color) }}>
               <stat.icon size={20} color={stat.color} />
             </div>
             <div className="call-stat-info">
@@ -84,18 +85,18 @@ const GLDialerCallReport = () => {
             <div className="bar-chart">
               <div className="bar-item">
                 <span className="bar-label">Incoming</span>
-                <div className="bar-container"><div className="bar" style={{ width: '65%', background: '#3b82f6' }}></div></div>
+                <div className="bar-container"><div className="bar" style={{ width: '65%', background: 'var(--info)' }}></div></div>
                 <span className="bar-value">89</span>
               </div>
               <div className="bar-item">
                 <span className="bar-label">Outgoing</span>
-                <div className="bar-container"><div className="bar" style={{ width: '49%', background: '#f59e0b' }}></div></div>
+                <div className="bar-container"><div className="bar" style={{ width: '49%', background: 'var(--warning)' }}></div></div>
                 <span className="bar-value">67</span>
               </div>
             </div>
             <div className="chart-legend">
-              <span className="legend-item"><span className="legend-dot" style={{ background: '#3b82f6' }}></span> Incoming</span>
-              <span className="legend-item"><span className="legend-dot" style={{ background: '#f59e0b' }}></span> Outgoing</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--info)' }}></span> Incoming</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--warning)' }}></span> Outgoing</span>
             </div>
           </div>
         </div>
@@ -111,8 +112,8 @@ const GLDialerCallReport = () => {
               </div>
             </div>
             <div className="donut-legend">
-              <span className="legend-item"><span className="legend-dot" style={{ background: '#10b981' }}></span> Attended (72)</span>
-              <span className="legend-item"><span className="legend-dot" style={{ background: '#ef4444' }}></span> Missed (17)</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--success)' }}></span> Attended (72)</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--danger)' }}></span> Missed (17)</span>
             </div>
           </div>
         </div>

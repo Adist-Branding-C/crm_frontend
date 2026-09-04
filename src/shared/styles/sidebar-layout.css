@@ -35,13 +35,13 @@
 }
 
 .action-btn:hover {
-  background: var(--bg-main);
+  background: var(--surface-hover);
   color: var(--text-main);
 }
 
 .action-btn.active {
   background: var(--primary);
-  color: white;
+  color: var(--text-on-accent);
   border-color: var(--primary);
 }
 

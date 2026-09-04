@@ -5,9 +5,10 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--border-radius-lg);
   background-color: var(--bg-card);
+  box-shadow: var(--surface-raise-highlight);
   margin-bottom: 20px;
 }
 
@@ -27,27 +28,33 @@
 }
 
 .filter-group label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .filter-group select,
 .filter-group input {
+  min-height: 38px;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-  font-size: 0.875rem;
-  background-color: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-md);
+  font-size: var(--text-base);
+  background-color: var(--surface-2);
   color: var(--text-main);
   cursor: pointer;
   outline: none;
   width: 100%;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .filter-group select:focus,
 .filter-group input:focus {
-  border-color: var(--primary);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .filter-group input[type="date"] {
