@@ -39,22 +39,37 @@ export interface LeadFormProps {
   onClose: () => void;
 }
 
-const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
+const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId: string | null | undefined; onDraftSaved: ((id: string) => void) | undefined }) => {
   const { values, dirty } = useFormikContext<any>();
 
+  const persistDraft = useCallback(
+    (formValues: Record<string, unknown>, existingId: string | null | undefined) => {
+      const name = typeof formValues.name === 'string' ? formValues.name : '';
+      const phone = typeof formValues.phone === 'string' ? formValues.phone : '';
+      const countryCode = typeof formValues.countryCode === 'string' ? formValues.countryCode : '';
+      const title = name || 'Untitled Lead';
+      const subtitle = phone ? `${countryCode || DEFAULT_COUNTRY_CODE} ${phone}` : 'No phone';
+      const id = draftService.saveDraft('lead', formValues, title, subtitle, existingId || undefined);
+      if (id !== existingId) {
+        onDraftSaved?.(id);
+      }
+    },
+    [onDraftSaved],
+  );
+
+  // Debounced autosave while the form is open and being edited.
   useEffect(() => {
-    if (dirty) {
-      const timeout = setTimeout(() => {
-        const title = values.name ? values.name : 'Untitled Lead';
-        const subtitle = values.phone ? `${values.countryCode || DEFAULT_COUNTRY_CODE} ${values.phone}` : 'No phone';
-        const id = draftService.saveDraft('lead', values, title, subtitle, draftId || undefined);
-        if (id !== draftId) {
-          onDraftSaved?.(id);
-        }
-      }, 1000);
-      return () => clearTimeout(timeout);
-    }
-  }, [values, dirty, draftId, onDraftSaved]);
+    if (!dirty) return;
+    const timeout = setTimeout(() => persistDraft(values, draftId), 1000);
+    return () => clearTimeout(timeout);
+  }, [values, dirty, draftId, persistDraft]);
+
+
+  const flushRef = useRef<() => void>(() => { });
+  flushRef.current = () => {
+    if (dirty) persistDraft(values, draftId);
+  };
+  useEffect(() => () => flushRef.current(), []);
 
   return null;
 };
@@ -219,7 +234,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
         sections.push({
           title: 'Additional Info',
           fields: additionalFields.map(af => ({
-            label: visibleFieldDefs.find(f => f.name === af.name)?.label || af.name,
+            label: visibleFieldDefs.find(f => f.fieldId === af.fieldId)?.name || af.fieldId,
             value: af.value || ''
           }))
         });

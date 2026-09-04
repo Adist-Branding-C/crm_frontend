@@ -114,7 +114,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
         <LeadForm
           lead={lead}
           draftId={draftId}
-          initialDraftValues={loadedDraftValues || previewData?.formValues}
+          initialDraftValues={previewData?.formValues ?? loadedDraftValues}
           onDraftSaved={setDraftId}
           onSaved={onSaved}
           onPreviewRequest={handlePreviewRequest}
