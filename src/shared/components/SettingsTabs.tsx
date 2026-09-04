@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Building2, Clock, FileText, MapPinned, Mail, MessageSquare, User, Lock, Briefcase, Plus, Minus } from 'lucide-react';
+import { Users, Building2, Clock, FileText, MapPinned, Mail, MessageSquare, User, Lock, Briefcase, Shield, Plus, Minus } from 'lucide-react';
 import type { TabItem, SettingsTabsProps } from '../types/layout';
 
 const defaultTabs: TabItem[] = [
   { id: 'agent', title: 'Agent', link: '/account', icon: Users },
   { id: 'department', title: 'Departments', link: '/account/department', icon: Building2 },
+  { id: 'roles', title: 'Roles', link: '/account/roles', icon: Shield },
   { id: 'workmode', title: 'Staff Work Modes', link: '/account/workmode', icon: Clock },
   { id: 'checkout', title: 'Checkout Note', link: '/account/checkout', icon: FileText },
   { id: 'designation', title: 'Designations', link: '/account/designation', icon: Briefcase },

@@ -4,6 +4,7 @@ import { useTableData } from '../../../../shared/hooks/useTableData';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useAgentCrud, useAgentDesignationOptions, useAgentDepartmentOptions, useAgentDrawer, useAgentDeleteConfirm, useAgentFormSubmit } from '../hooks';
+import { useRoleOptions } from '../../roles/hooks';
 import { agentService } from '../services/agent.service';
 import AddAgentDrawer from '../components/AddAgentDrawer';
 import StaffDeletionModal from '../components/StaffDeletionModal';
@@ -31,6 +32,7 @@ const AgentPage = () => {
   const crud = useAgentCrud({ pagination, showToastMessage: toast.showToastMessage });
   const designation = useAgentDesignationOptions();
   const department = useAgentDepartmentOptions();
+  const role = useRoleOptions();
   const drawer = useAgentDrawer();
   const dropdown = useDropdownMenu<number>();
   const deleteConfirm = useAgentDeleteConfirm({ handleDeleteAgent: crud.handleDeleteAgent });
@@ -122,6 +124,7 @@ const AgentPage = () => {
         status={{ isLoading: pagination.isLoading, error: pagination.error }}
         designation={{ options: designation.designationOptions, onFetch: designation.fetchDesignations }}
         department={{ options: department.departmentOptions, onFetch: department.fetchDepartments }}
+        role={{ options: role.roleOptions, onFetch: role.fetchRoles }}
       />
       <StaffDeletionModal
         isOpen={!!deleteConfirm.deletingItem}

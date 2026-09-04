@@ -63,6 +63,7 @@ export const addAgentValidationSchema = yup.object({
   confirmPassword: yup.string().oneOf([yup.ref('password')], 'Passwords do not match').required('Confirm password is required'),
   designationId: yup.string().required('Please select a designation'),
   departmentId: yup.string().required('Please select a department'),
+  roleId: yup.string().required('Please select a role'),
   status: yup.string().required('Please select a status'),
   isAdmin: yup.boolean().default(false),
 });
@@ -86,6 +87,7 @@ export const editAgentValidationSchema = yup.object({
   phone: phoneValidation,
   designationId: yup.string().required('Please select a designation'),
   departmentId: yup.string().required('Please select a department'),
+  roleId: yup.string().required('Please select a role'),
   status: yup.string().required('Please select a status'),
 });
 

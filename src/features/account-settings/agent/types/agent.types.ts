@@ -14,6 +14,8 @@ export interface AgentItem {
   designation?: string;
   departmentId?: string;
   department_id?: number | string;
+  roleId?: string;
+  role_id?: number | string;
   status: string;
   isAdmin?: boolean;
 }
@@ -28,6 +30,7 @@ export interface AgentFormData {
   confirmPassword: string;
   designationId: string;
   departmentId: string;
+  roleId: string;
   status: string;
   isAdmin: boolean;
 }
