@@ -235,6 +235,8 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
       } else {
         await leadDataService.createLead(payload);
       }
+
+      if (draftId) draftService.deleteDraft(draftId);
       onSaved?.(isEditing ? 'updated' : 'created');
       onClose();
     } catch (err: unknown) {
