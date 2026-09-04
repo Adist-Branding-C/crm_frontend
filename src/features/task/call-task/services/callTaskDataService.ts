@@ -26,8 +26,19 @@ export class CallTaskDataService {
     });
   }
 
+  private cleanPayload(data: any): any {
+    const payload = { ...data };
+    ['leadId', 'dealId', 'campaignId', 'categoryId'].forEach(key => {
+      if (payload[key] === '') delete payload[key];
+      else if (payload[key] !== undefined && payload[key] !== null && key !== 'leadId') {
+        payload[key] = Number(payload[key]);
+      }
+    });
+    return payload;
+  }
+
   async create(data: CallTaskFormData): Promise<ApiResponse<CallTaskItem>> {
-    const response = await axiosInstance.post<ApiResponse<CallTaskItem>>(CALL_TASK_API_ENDPOINTS.CREATE, data);
+    const response = await axiosInstance.post<ApiResponse<CallTaskItem>>(CALL_TASK_API_ENDPOINTS.CREATE, this.cleanPayload(data));
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,
@@ -35,8 +46,8 @@ export class CallTaskDataService {
     });
   }
 
-  async update(id: number, data: CallTaskFormData): Promise<ApiResponse<CallTaskItem>> {
-    const response = await axiosInstance.patch<ApiResponse<CallTaskItem>>(CALL_TASK_API_ENDPOINTS.UPDATE(id), data);
+  async update(id: number, data: Partial<CallTaskFormData>): Promise<ApiResponse<CallTaskItem>> {
+    const response = await axiosInstance.patch<ApiResponse<CallTaskItem>>(CALL_TASK_API_ENDPOINTS.UPDATE(id), this.cleanPayload(data));
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,

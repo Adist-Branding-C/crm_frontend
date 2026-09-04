@@ -3,27 +3,28 @@ import { MoreHorizontal, Edit2, Trash2, Phone, MessageSquare } from 'lucide-reac
 import ActionMenuPortal from '../../../shared/components/ActionMenuPortal';
 import WhatsappTemplatePickerOverlay from '../../../shared/components/WhatsappTemplatePickerOverlay';
 import CellEditPopover from '../../../shared/components/CellEditPopover';
-import { DEAL_STATUS_LABEL_MAP, DEAL_TYPE_LABEL_MAP } from '../../../shared/constants/dealOptions';
+import { DEAL_STATUS_LABEL_MAP, DEAL_TYPE_LABEL_MAP, DEAL_STATUS_OPTIONS } from '../../../shared/constants/dealOptions';
 import { substituteTemplateVariables } from '../../../shared/utils/whatsappMessage.util';
 import type { DealRowProps } from '../types/component.types';
 import type { WhatsappTemplateItem } from '../../account-settings/whatsapp-template/types/whatsapp-template.types';
 import { splitMobileValue } from '../utils/mobileFormat';
+import { tint } from '../../../shared/utils/color';
 
 const getStatusBadge = (status: string) => {
-  const colorMap: Record<string, string> = { win: '#10b981', lost: '#ef4444', pending: '#f59e0b', invoice: '#3b82f6' };
-  const color = colorMap[status.toLowerCase()] || '#6b7280';
+  const colorMap: Record<string, string> = { win: 'var(--success)', lost: 'var(--danger)', pending: 'var(--warning)', invoice: 'var(--info)' };
+  const color = colorMap[status.toLowerCase()] || 'var(--text-tertiary)';
   const label = DEAL_STATUS_LABEL_MAP[status] || status;
-  return <span className="status-pill" style={{ background: `${color}20`, color }}>{label}</span>;
+  return <span className="status-pill" style={{ background: tint(color), color }}>{label}</span>;
 };
 
 const getTypeBadge = (type: string) => {
-  const colorMap: Record<string, string> = { sales: '#10b981', registration: '#8b5cf6', renewal: '#3b82f6', upsell: '#fb923c' };
-  const color = colorMap[type.toLowerCase()] || '#6b7280';
+  const colorMap: Record<string, string> = { sales: 'var(--success)', registration: 'var(--category-purple-text)', renewal: 'var(--info)', upsell: 'var(--category-orange-text)' };
+  const color = colorMap[type.toLowerCase()] || 'var(--text-tertiary)';
   const label = DEAL_TYPE_LABEL_MAP[type] || type;
-  return <span className="type-pill" style={{ background: `${color}20`, color }}>{label}</span>;
+  return <span className="type-pill" style={{ background: tint(color), color }}>{label}</span>;
 };
 
-type EditableField = 'agent' | 'startDate' | 'endDate';
+type EditableField = 'agent' | 'startDate' | 'endDate' | 'status';
 
 const DealRow: React.FC<DealRowProps> = ({
   deal,
@@ -114,7 +115,7 @@ const DealRow: React.FC<DealRowProps> = ({
       </td>
       <td className="lead-name-cell">{deal.dealName}</td>
       <td>{deal.lead}</td>
-      <td>{deal.mobile || ''}</td><td>
+      <td>
         {deal.mobile
           ? (() => {
               const { countryCode, number } = splitMobileValue(deal.mobile);
@@ -123,7 +124,13 @@ const DealRow: React.FC<DealRowProps> = ({
           : ''}
       </td>
       <td>{Number(deal.amount).toLocaleString()}</td>
-      <td>{getStatusBadge(deal.status || '')}</td>
+      <td
+        onClick={(e) => setEditingField({ field: 'status', rect: e.currentTarget.getBoundingClientRect() })}
+        style={{ cursor: 'pointer' }}
+        title="Click to edit status"
+      >
+        {getStatusBadge(deal.status || '')}
+      </td>
       <td>{getTypeBadge(deal.type || '')}</td>
       <td>{deal.startDate || emptyCell('startDate')}</td>
       <td>{deal.endDate || emptyCell('endDate')}</td>
@@ -160,6 +167,17 @@ const DealRow: React.FC<DealRowProps> = ({
         label="End Date"
         type="date"
         onSave={(value) => onFieldSave(String(deal.id), { endDate: value })}
+        onClose={() => setEditingField(null)}
+      />
+    )}
+    {editingField?.field === 'status' && (
+      <CellEditPopover
+        anchorRect={editingField.rect}
+        label="Status"
+        type="select"
+        options={DEAL_STATUS_OPTIONS}
+        initialValue={deal.status || ''}
+        onSave={(value) => onFieldSave(String(deal.id), { statusId: value })}
         onClose={() => setEditingField(null)}
       />
     )}

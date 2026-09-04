@@ -101,9 +101,9 @@ export const deletedLeadsSampleData: DeletedLead[] = [
 ];
 
 export const dealStageData: DealStageStat[] = [
-  { stage: 'Open', count: 45, amount: 125000, color: '#3b82f6' },
-  { stage: 'Close', count: 28, amount: 85000, color: '#f59e0b' },
-  { stage: 'Win', count: 18, amount: 62000, color: '#10b981' },
+  { stage: 'Open', count: 45, amount: 125000, color: 'var(--info)' },
+  { stage: 'Close', count: 28, amount: 85000, color: 'var(--warning)' },
+  { stage: 'Win', count: 18, amount: 62000, color: 'var(--success)' },
 ];
 
 export const dealAgentData: DealAgentStat[] = [

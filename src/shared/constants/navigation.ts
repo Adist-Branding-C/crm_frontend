@@ -29,22 +29,22 @@ export const initialNotifications: Notification[] = [
 ];
 
 export const notificationIcons: Record<string, NotificationIconInfo> = {
-  lead: { icon: User, color: '#3b82f6' },
-  task: { icon: ListChecks, color: '#f59e0b' },
-  reminder: { icon: Calendar, color: '#8b5cf6' },
-  payment: { icon: CreditCard, color: '#10b981' },
-  call: { icon: PhoneCall, color: '#14b8a6' },
-  system: { icon: Info, color: '#64748b' },
-  deal: { icon: DollarSign, color: '#10b981' },
+  lead: { icon: User, color: 'var(--info)' },
+  task: { icon: ListChecks, color: 'var(--warning)' },
+  reminder: { icon: Calendar, color: 'var(--category-purple-text)' },
+  payment: { icon: CreditCard, color: 'var(--success)' },
+  call: { icon: PhoneCall, color: 'var(--chart-6)' },
+  system: { icon: Info, color: 'var(--text-tertiary)' },
+  deal: { icon: DollarSign, color: 'var(--success)' },
 };
 
 export const searchCategories = [
-  { id: 'lead', name: 'Leads', icon: User, color: '#3b82f6' },
-  { id: 'deal', name: 'Deals', icon: DollarSign, color: '#10b981' },
-  { id: 'task', name: 'Tasks', icon: ListChecks, color: '#f59e0b' },
-  { id: 'campaign', name: 'Campaigns', icon: Megaphone, color: '#8b5cf6' },
-  { id: 'enquiry', name: 'Enquiries', icon: FileText, color: '#ec4899' },
-  { id: 'call', name: 'Calls', icon: Phone, color: '#14b8a6' },
+  { id: 'lead', name: 'Leads', icon: User, color: 'var(--info)' },
+  { id: 'deal', name: 'Deals', icon: DollarSign, color: 'var(--success)' },
+  { id: 'task', name: 'Tasks', icon: ListChecks, color: 'var(--warning)' },
+  { id: 'campaign', name: 'Campaigns', icon: Megaphone, color: 'var(--category-purple-text)' },
+  { id: 'enquiry', name: 'Enquiries', icon: FileText, color: 'var(--category-pink-text)' },
+  { id: 'call', name: 'Calls', icon: Phone, color: 'var(--chart-6)' },
 ];
 
 export const searchResults = [

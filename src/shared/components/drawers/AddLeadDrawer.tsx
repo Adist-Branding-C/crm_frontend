@@ -13,7 +13,7 @@ import './AddLeadDrawer.css';
 const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId }: AddLeadDrawerProps) => {
   const isEditing = !!lead;
   const { showToast, toastType, toastMessage, showToastMessage, setShowToast } = useToast();
-  
+
   // State for toggling between form and preview
   const [view, setView] = useState<'form' | 'preview'>('form');
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
@@ -21,16 +21,22 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
   const [loadedDraftValues, setLoadedDraftValues] = useState<any>(null);
 
   useEffect(() => {
-    if (initialDraftId && isOpen) {
+    if (!isOpen) {
+      setLoadedDraftValues(null);
+      setDraftId(null);
+      return;
+    }
+
+    if (initialDraftId) {
       const draft = draftService.getDrafts('lead').find(d => d.id === initialDraftId);
       if (draft) {
         setLoadedDraftValues(draft.payload);
         setDraftId(draft.id);
       }
-    } else if (!isOpen) {
-      setLoadedDraftValues(null);
-      setDraftId(null);
+      return;
     }
+
+    setDraftId(prev => prev ?? crypto.randomUUID());
   }, [initialDraftId, isOpen]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -52,7 +58,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
 
   const handleSave = async () => {
     if (!previewData) return;
-    
+
     setIsSaving(true);
     try {
       if (isEditing && lead) {
@@ -60,12 +66,12 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
       } else {
         await leadDataService.createLead(previewData.payload);
       }
-      
+
       // Clear draft on successful save
       if (draftId) {
         draftService.deleteDraft(draftId);
       }
-      
+
       onSaved?.(isEditing ? 'updated' : 'created');
       handleClose();
       showToastMessage(`Lead successfully ${isEditing ? 'updated' : 'created'}.`, 'success');
@@ -105,14 +111,14 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
         overlayClassName="drawer-overlay"
         panelClassName="drawer-panel"
       >
-        <LeadForm 
-          lead={lead} 
+        <LeadForm
+          lead={lead}
           draftId={draftId}
-          initialDraftValues={loadedDraftValues || previewData?.formValues}
+          initialDraftValues={previewData?.formValues ?? loadedDraftValues}
           onDraftSaved={setDraftId}
-          onSaved={onSaved} 
+          onSaved={onSaved}
           onPreviewRequest={handlePreviewRequest}
-          onClose={handleClose} 
+          onClose={handleClose}
         />
       </Drawer>
       <ToastNotification isVisible={showToast} type={toastType} message={toastMessage} onDismiss={() => setShowToast(false)} />

@@ -26,8 +26,19 @@ export class CampaignTaskDataService {
     });
   }
 
+  private cleanPayload(data: any): any {
+    const payload = { ...data };
+    ['leadId', 'dealId', 'campaignId', 'categoryId'].forEach(key => {
+      if (payload[key] === '') delete payload[key];
+      else if (payload[key] !== undefined && payload[key] !== null && key !== 'leadId') {
+        payload[key] = Number(payload[key]);
+      }
+    });
+    return payload;
+  }
+
   async create(data: CampaignTaskFormData): Promise<ApiResponse<CampaignTaskItem>> {
-    const response = await axiosInstance.post<ApiResponse<CampaignTaskItem>>(CAMPAIGN_TASK_API_ENDPOINTS.CREATE, data);
+    const response = await axiosInstance.post<ApiResponse<CampaignTaskItem>>(CAMPAIGN_TASK_API_ENDPOINTS.CREATE, this.cleanPayload(data));
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,
@@ -35,8 +46,8 @@ export class CampaignTaskDataService {
     });
   }
 
-  async update(id: number, data: CampaignTaskFormData): Promise<ApiResponse<CampaignTaskItem>> {
-    const response = await axiosInstance.patch<ApiResponse<CampaignTaskItem>>(CAMPAIGN_TASK_API_ENDPOINTS.UPDATE(id), data);
+  async update(id: number, data: Partial<CampaignTaskFormData>): Promise<ApiResponse<CampaignTaskItem>> {
+    const response = await axiosInstance.patch<ApiResponse<CampaignTaskItem>>(CAMPAIGN_TASK_API_ENDPOINTS.UPDATE(id), this.cleanPayload(data));
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,

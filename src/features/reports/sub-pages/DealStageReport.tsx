@@ -4,6 +4,7 @@ import PageHeader from '../../../shared/components/layout/PageHeader';
 import { dealStageData, dealAgentData } from '../constants';
 import { ROWS_OPTIONS_5_10_25 } from '../../../shared/constants/pagination';
 import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
+import { tint } from '../../../shared/utils/color';
 
 const DealStageReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,7 +39,7 @@ const DealStageReport = () => {
       <div className="deal-stage-stats">
         {dealStageData.map((item, index) => (
           <div key={index} className="deal-stage-card">
-            <div className="deal-stage-icon" style={{ background: item.color + '20' }}>
+            <div className="deal-stage-icon" style={{ background: tint(item.color) }}>
               <DollarSign size={20} color={item.color} />
             </div>
             <div className="deal-stage-info">

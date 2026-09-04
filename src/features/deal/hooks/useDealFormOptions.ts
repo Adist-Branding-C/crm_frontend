@@ -61,7 +61,7 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
         assignedStaff?: { staff_id?: string; name?: string } | null;
       }) => ({
         label: l.name || l.leadName || 'Unknown',
-        value: l.id,
+        value: String(l.id),
         phone: l.phone ?? null,
         countryCode: l.countryCode ?? null,
         agentId: l.agentId ?? l.assignedStaff?.staff_id ?? null,
@@ -74,7 +74,7 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
     ? (() => {
       const data = staffResult.value?.data;
       const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((s: { id?: string | number; staff_id?: string; name?: string; fullName?: string; staffName?: string }) => ({ label: s.name || s.fullName || s.staffName || 'Unknown', value: s.staff_id ?? s.id ?? '', rawId: s.id ?? null }));
+      return items.map((s: { id?: string | number; staff_id?: string; name?: string; fullName?: string; staffName?: string }) => ({ label: s.name || s.fullName || s.staffName || 'Unknown', value: String(s.staff_id ?? s.id ?? ''), rawId: s.id ?? null }));
     })()
     : [];
 
@@ -82,7 +82,7 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
     ? (() => {
       const data = statusesResult.value?.data;
       const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((s: { id: string | number; name?: string; dealStatus?: string }) => ({ label: s.name || s.dealStatus || 'Unknown', value: s.id }));
+      return items.map((s: { id: string | number; name?: string; dealStatus?: string }) => ({ label: s.name || s.dealStatus || 'Unknown', value: String(s.id) }));
     })()
     : [];
 
@@ -90,7 +90,7 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
     ? (() => {
       const data = typesResult.value?.data;
       const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((t: { id: string | number; name?: string; dealType?: string }) => ({ label: t.name || t.dealType || 'Unknown', value: t.id }));
+      return items.map((t: { id: string | number; name?: string; dealType?: string }) => ({ label: t.name || t.dealType || 'Unknown', value: String(t.id) }));
     })()
     : [];
 

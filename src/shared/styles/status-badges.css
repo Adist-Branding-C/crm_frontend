@@ -1,50 +1,51 @@
-/* Status badge color variants */
+/* Status badge color variants — translucent tint + status-colored label,
+ * theme-adaptive. See badges.css for the shared pattern. */
 .badge-status-completed {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background-color: var(--success-subtle);
+  color: var(--success-text);
 }
 
 .badge-status-pending {
-  background-color: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
+  background-color: var(--warning-subtle);
+  color: var(--warning-text);
 }
 
 .badge-status-overdue {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background-color: var(--danger-subtle);
+  color: var(--danger-text);
 }
 
 .badge-status-success {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--success-subtle);
+  color: var(--success-text);
 }
 
 .badge-status-failed {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--danger-subtle);
+  color: var(--danger-text);
 }
 
 .badge-status-active {
-  color: #22c55e;
+  color: var(--success-text);
   font-weight: 600;
 }
 
 .badge-status-inactive {
-  color: #ef4444;
+  color: var(--danger-text);
   font-weight: 600;
 }
 
 .badge-status-new {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--info-subtle);
+  color: var(--info-text);
 }
 
 .badge-status-existing {
-  background: #e0e7ff;
-  color: #4338ca;
+  background: var(--category-indigo-subtle);
+  color: var(--category-indigo-text);
 }
 
 .badge-status-duplicate {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--warning-subtle);
+  color: var(--warning-text);
 }

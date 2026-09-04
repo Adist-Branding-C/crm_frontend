@@ -2,17 +2,18 @@ import React from 'react';
 import { Eye, AlertCircle } from 'lucide-react';
 import type { LeadsTableProps } from '../types';
 import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { tint } from '../../../shared/utils/color';
 
 const STATUS_COLORS: Record<string, string> = {
-  processed: '#10b981',
-  failed: '#ef4444',
-  processing: '#f59e0b',
-  received: '#3b82f6',
+  processed: 'var(--success)',
+  failed: 'var(--danger)',
+  processing: 'var(--warning)',
+  received: 'var(--info)',
 };
 
 const getStatusBadge = (value: string) => {
-  const color = STATUS_COLORS[value] || '#6b7280';
-  return <span className="status-badge" style={{ background: `${color}20`, color }}>{value}</span>;
+  const color = STATUS_COLORS[value] || 'var(--text-tertiary)';
+  return <span className="status-badge" style={{ background: tint(color), color }}>{value}</span>;
 };
 
 // Best-effort guess at a display name from the raw Facebook answers - there's

@@ -14,7 +14,7 @@
 }
 
 .wa-picker-panel {
-  background: var(--bg-main, #fff);
+  background: var(--bg-main, #ffffff);
   width: min(900px, 100%);
   height: min(85vh, 800px);
   border-radius: var(--border-radius-md, 12px);
@@ -177,7 +177,7 @@
   border: none;
   border-radius: var(--border-radius-sm, 6px);
   background: #25d366;
-  color: #fff;
+  color: #ffffff;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;

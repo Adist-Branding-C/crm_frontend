@@ -9,6 +9,7 @@ const CalendarControls: React.FC<CalendarControlsProps> = ({
   agents, selectedAgent, onAgentChange, selectedAgentName,
   showAgentDropdown, onSetShowAgentDropdown,
   searchQuery, onSearchChange,
+  taskTypeFilter, onTaskTypeFilterChange,
 }) => {
   const filteredAgents = useMemo(() =>
     agents.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase())),
@@ -40,6 +41,19 @@ const CalendarControls: React.FC<CalendarControlsProps> = ({
             </div>
           </div>
         )}
+      </div>
+      <div className="task-type-select-wrapper" style={{ marginLeft: '1rem', display: 'flex', alignItems: 'center' }}>
+        <select 
+          style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--border-default)', fontSize: '0.875rem', outline: 'none', background: 'var(--bg-main, #fff)', color: 'var(--text-main, var(--text-primary))' }}
+          value={taskTypeFilter}
+          onChange={(e) => onTaskTypeFilterChange(e.target.value)}
+        >
+          <option value="ALL">All Types</option>
+          <option value="NORMAL">Normal Task</option>
+          <option value="CALL_TASK">Call Task</option>
+          <option value="CAMPAIGN_TASK">Campaign Task</option>
+          <option value="DEAL_TASK">Deal Task</option>
+        </select>
       </div>
     </div>
 

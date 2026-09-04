@@ -64,7 +64,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
   const [showWhatsappTemplatePicker, setShowWhatsappTemplatePicker] = useState(false);
   const { hasTemplates: hasWhatsappTemplates, isLoading: whatsappTemplatesLoading, hasError: whatsappTemplatesError } = useActiveWhatsappTemplates();
 
-  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError } = useLeadActivities(lead.id, true);
+  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError, refresh: refreshActivities } = useLeadActivities(lead.id, true, activeTab);
   const {
     remarks,
     isLoading: isLoadingRemarks,
@@ -250,6 +250,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
       await addRemark(trimmed);
       setNewRemarkText('');
       showToastMessage(SUCCESS_MESSAGES.REMARK_ADDED, 'success');
+      refreshActivities();
       onLeadUpdated?.();
     } catch {
       showToastMessage(ERROR_MESSAGES.ADD_REMARK, 'error');
@@ -268,6 +269,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
       setShowDeleteRemarkModal(false);
       setRemarkToDelete(null);
       showToastMessage(SUCCESS_MESSAGES.REMARK_DELETED, 'success');
+      refreshActivities();
     } catch {
       showToastMessage(ERROR_MESSAGES.DELETE_REMARK, 'error');
     }
@@ -582,7 +584,6 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   onClose={() => { setShowDeleteRemarkModal(false); setRemarkToDelete(null); }}
                   isDeleting={isDeletingRemark}
                 />
-                <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
               </div>
             )}
 
@@ -612,7 +613,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                           <div className="leaddrawer-task-title">{task.title}</div>
                           <div className="leaddrawer-task-meta">
                             {task.scheduledDate && <span>{(task.scheduledTime ? `${task.scheduledDate} ${task.scheduledTime}` : task.scheduledDate)}</span>}
-                            <span>{task.assignedTo || '-'}</span>
+                            <span>{task.assignedTo?.name || '-'}</span>
                           </div>
                           {task.description && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{task.description}</p>}
                         </div>
@@ -678,6 +679,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
         </div>
       </div>
 
+      <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
       <AddLeadTaskDrawer
         isOpen={showTaskDrawer}
         onClose={() => { setShowTaskDrawer(false); setEditTask(null); }}

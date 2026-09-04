@@ -36,6 +36,7 @@ class AuthService {
     return {
       status: response.data.status,
       message: response.data.message,
+      data: response.data.data,
     };
   }
 
@@ -54,6 +55,14 @@ class AuthService {
 
   async logout(): Promise<void> {
     await axiosInstance.post(AUTH_API_ENDPOINTS.LOGOUT);
+  }
+
+  async refreshToken(refreshToken: string): Promise<any> {
+    const response = await axiosInstance.post(
+      AUTH_API_ENDPOINTS.REFRESH,
+      { refreshToken }
+    );
+    return response.data;
   }
 }
 

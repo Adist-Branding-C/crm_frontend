@@ -25,7 +25,7 @@
 .card--editing .card-header {
   margin: -1.25rem -1.25rem 1rem;
   padding: 0.875rem 1.25rem;
-  background: rgba(241, 65, 79, 0.08);
+  background: var(--accent-subtle);
 }
 
 .card-header-icon {
@@ -48,7 +48,7 @@
 }
 
 .cancel-edit-btn:hover {
-  background: var(--bg-card);
+  background: var(--surface-hover);
   color: var(--text-main);
 }
 

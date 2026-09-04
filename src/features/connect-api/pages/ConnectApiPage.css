@@ -66,7 +66,7 @@
 
 .code-block {
   background: #1e293b;
-  color: #e2e8f0;
+  color: var(--border-default);
   padding: 1rem;
   border-radius: 6px;
   font-family: 'Monaco', 'Menlo', monospace;
@@ -120,13 +120,13 @@
 }
 
 .required-badge.yes {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--danger-subtle);
+  color: var(--danger-text);
 }
 
 .required-badge.no {
-  background: #f0fdf4;
-  color: #16a34a;
+  background: var(--success-subtle);
+  color: var(--success-text);
 }
 
 .status-badge {
@@ -138,18 +138,18 @@
 }
 
 .status-badge.status-success {
-  background: #f0fdf4;
-  color: #16a34a;
+  background: var(--success-subtle);
+  color: var(--success-text);
 }
 
 .status-badge.status-failed {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--danger-subtle);
+  color: var(--danger-text);
 }
 
 .status-badge.status-pending {
-  background: #fffbeb;
-  color: #b45309;
+  background: var(--warning-subtle);
+  color: var(--warning-text);
 }
 
 .token-reveal {
@@ -208,7 +208,7 @@
 
 .token-error {
   font-size: 0.8125rem;
-  color: #dc2626;
+  color: var(--danger-text);
   margin: -1rem 0 1.5rem;
 }
 

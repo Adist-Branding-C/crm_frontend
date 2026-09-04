@@ -18,31 +18,34 @@ const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 }) => {
   return (
     <div className="date-filter-wrapper" ref={filterRef}>
-      <button
-        className={`btn-filter ${showDateFilter ? 'active' : ''}`}
-        onClick={() => setShowDateFilter(!showDateFilter)}
-      >
-        <Filter size={18} />
-        Filter
-        {showDateFilter ? (
-          <ChevronDown size={16} />
-        ) : (
-          <ChevronRight size={16} />
-        )}
-      </button>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          className={`btn-filter ${showDateFilter ? 'active' : ''}`}
+          onClick={() => setShowDateFilter(!showDateFilter)}
+        >
+          <Filter size={18} />
+          Filter
+          {showDateFilter ? (
+            <ChevronDown size={16} />
+          ) : (
+            <ChevronRight size={16} />
+          )}
+        </button>
+        <button
+          className="btn-filter"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClearFilters();
+          }}
+          title="Clear Filters"
+        >
+          <X size={18} />
+        </button>
+      </div>
       {showDateFilter && (
         <div className="date-filter-dropdown">
           <div className="date-filter-header">
             <span>Filters</span>
-            <button
-              className="clear-filter"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClearFilters();
-              }}
-            >
-              <X size={14} />
-            </button>
           </div>
           <div className="date-filter-inputs">
             <div className="date-input-group">

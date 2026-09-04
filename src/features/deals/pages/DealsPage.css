@@ -31,33 +31,33 @@
 
 .stat-value {
   font-size: 0.875rem;
-  color: #10b981;
+  color: var(--success);
   font-weight: 600;
 }
 
 .badge-deal-win {
   background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--success);
 }
 
 .badge-deal-lost {
   background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--danger);
 }
 
 .badge-deal-invoice {
   background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .badge-deal-pending {
   background-color: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
+  color: var(--warning);
 }
 
 .badge-type-sales {
   background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  color: var(--success);
 }
 
 .badge-type-registration {
@@ -67,12 +67,12 @@
 
 .badge-type-renewal {
   background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .badge-type-upsell {
-  background-color: rgba(251, 146, 60, 0.1);
-  color: #fb923c;
+  background-color: var(--category-orange-subtle);
+  color: var(--category-orange-text);
 }
 
 @media (max-width: 768px) {

@@ -10,6 +10,7 @@ export function useForgotPasswordData() {
   const [submittedPhone, setSubmittedPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = useCallback(async (
@@ -22,21 +23,21 @@ export function useForgotPasswordData() {
     try {
       const response = await authService.forgotPassword({ phone: values.phone });
 
-      if (response.status) {
+      const found =
+        response.data?.found ??
+        /reset link|sent|successful|registered email/i.test(response.message || '');
+
+      if (response.status && found) {
         setSubmittedPhone(values.phone);
+        setSuccessMessage(response.message);
         setIsSent(true);
+      } else if (response.status && !found) {
+        setError(response.message || 'No account found with this phone number. Please check and try again.');
       } else {
-        setError(response.message || 'Failed to send reset link');
+        setError('Something went wrong. Please try again later.');
       }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to send reset link');
-      } else if (err && typeof err === 'object' && 'message' in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError('Network error. Please try again.');
-      }
+    } catch {
+      setError('Something went wrong. Please try again later.');
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -45,7 +46,7 @@ export function useForgotPasswordData() {
 
   return {
     submittedPhone,
-    isLoading, isSent, setIsSent, error,
+    isLoading, isSent, setIsSent, error, successMessage,
     handleSubmit,
     validationSchema: forgotPasswordValidationSchema as any,
     initialValues: forgotPasswordInitialValues,

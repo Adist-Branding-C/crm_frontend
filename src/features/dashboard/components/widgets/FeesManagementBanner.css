@@ -8,7 +8,7 @@
   padding: 1.5rem 2rem;
   margin-bottom: 2rem;
   box-shadow: var(--shadow-md);
-  color: #fff;
+  color: #ffffff;
   min-height: 180px; /* approximately 5cm depending on DPI, gives substantial visual weight */
   gap: 1.5rem;
 }
@@ -45,7 +45,7 @@
 
 .fees-banner-description {
   font-size: 1rem;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   margin: 0;
   line-height: 1.5;
   max-width: 600px;
@@ -71,7 +71,7 @@
 
 .fees-banner-btn {
   background-color: var(--primary);
-  color: #fff;
+  color: #ffffff;
   border: none;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;

@@ -38,10 +38,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           padding: '48px 24px',
           textAlign: 'center',
         }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: '20px', color: '#dc2626' }}>
+          <h2 style={{ margin: '0 0 8px', fontSize: '20px', color: 'var(--danger-text)' }}>
             Something went wrong
           </h2>
-          <p style={{ margin: '0 0 8px', color: '#6b7280', fontSize: '14px' }}>
+          <p style={{ margin: '0 0 8px', color: 'var(--text-tertiary)', fontSize: '14px' }}>
             {this.state.error?.message || 'An unexpected error occurred.'}
           </p>
           <button
@@ -51,9 +51,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               padding: '8px 20px',
               fontSize: '14px',
               borderRadius: '6px',
-              border: '1px solid #d1d5db',
+              border: '1px solid var(--border-strong)',
               background: '#fff',
-              color: '#374151',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
             }}
           >

@@ -23,7 +23,7 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
   if (!password) return { strength: 0, text: '', color: '' };
 
   if (STRONG_PASSWORD_REGEX.test(password)) {
-    return { strength: 4, text: 'Strong', color: '#22c55e' };
+    return { strength: 4, text: 'Strong', color: 'var(--success)' };
   }
 
   const criteriaMet = [
@@ -34,7 +34,7 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
     PASSWORD_SPECIAL_CHAR_REGEX.test(password),
   ].filter(Boolean).length;
 
-  if (criteriaMet <= 2) return { strength: 1, text: 'Weak', color: '#ef4444' };
-  if (criteriaMet === 3) return { strength: 2, text: 'Fair', color: '#f59e0b' };
-  return { strength: 3, text: 'Good', color: '#3b82f6' };
+  if (criteriaMet <= 2) return { strength: 1, text: 'Weak', color: 'var(--danger)' };
+  if (criteriaMet === 3) return { strength: 2, text: 'Fair', color: 'var(--warning)' };
+  return { strength: 3, text: 'Good', color: 'var(--info)' };
 }

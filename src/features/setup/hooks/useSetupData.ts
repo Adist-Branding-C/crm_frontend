@@ -14,7 +14,7 @@ export function useSetupData() {
     const newStage: Stage = {
       id: Date.now(),
       name: newStageName.trim(),
-      color: '#6366f1'
+      color: 'var(--primary)'
     };
     setStages(prev => [...prev, newStage]);
     setNewStageName('');

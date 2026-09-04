@@ -1,4 +1,7 @@
-import { Filter, RotateCcw } from 'lucide-react';
+import { Search, Filter, RotateCcw, ChevronDown } from 'lucide-react';
+import { useClickOutside } from '../../../shared/hooks/useClickOutside';
+import ActivityStaffDropdownItem from './ActivityStaffDropdownItem';
+import { activityTypes } from '../constants';
 import type { ActivityFiltersProps } from '../types';
 import './ActivityFilters.css';
 
@@ -14,14 +17,39 @@ const ActivityFilters = ({
   return (
     <div className="activity-filters-section">
       <div className="filter-group">
-        <label htmlFor="activity-date-filter">
-          Date
-        </label>
+        <label htmlFor="activity-type-filter">Type</label>
+        <select
+          id="activity-type-filter"
+          value={filters.type}
+          onChange={(e) => onFilterChange('type', e.target.value)}
+          className="filter-input"
+          style={{ width: '100%' }}
+        >
+          {activityTypes.map(type => (
+            <option key={type.value} value={type.value}>{type.label}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="filter-group">
+        <label htmlFor="activity-start-date-filter">From Date</label>
         <input
-          id="activity-date-filter"
+          id="activity-start-date-filter"
           type="date"
-          value={filters.date}
-          onChange={(e) => onFilterChange('date', e.target.value)}
+          value={filters.startDate}
+          onChange={(e) => onFilterChange('startDate', e.target.value)}
+          className="filter-input"
+          max={new Date().toISOString().split('T')[0]}
+        />
+      </div>
+
+      <div className="filter-group">
+        <label htmlFor="activity-end-date-filter">To Date</label>
+        <input
+          id="activity-end-date-filter"
+          type="date"
+          value={filters.endDate}
+          onChange={(e) => onFilterChange('endDate', e.target.value)}
           className="filter-input"
           max={new Date().toISOString().split('T')[0]}
         />

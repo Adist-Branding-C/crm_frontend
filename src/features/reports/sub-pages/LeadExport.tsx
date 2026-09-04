@@ -8,6 +8,7 @@ import { useToast } from '../../../shared/hooks/useToast';
 import { DATE_FILTER_OPTIONS } from '../../../shared/constants/dateFilterOptions';
 import { useLeadFilterOptions } from '../../enquiries/hooks/useLeadFilterOptions';
 import { useExportFieldOptions } from '../hooks/useExportFieldOptions';
+import DateRangePicker from '../../../shared/components/filters/DateRangePicker';
 import { leadExportService } from '../services/leadExportService';
 import { buildLeadExportPayload } from '../utils/buildLeadExportPayload';
 import { getErrorMessage } from '../../../shared/utils/error';
@@ -83,22 +84,11 @@ const LeadExport: React.FC = () => {
             <h3 className="section-title">Filters</h3>
 
             <div className="filter-row">
-              <div className="filter-group">
-                <label>Date Range</label>
-                <div className="date-range-input">
-                  <input
-                    type="date"
-                    value={filters.dateRange.start}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters({ ...filters, dateRange: { ...filters.dateRange, start: e.target.value } })}
-                  />
-                  <span>to</span>
-                  <input
-                    type="date"
-                    value={filters.dateRange.end}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilters({ ...filters, dateRange: { ...filters.dateRange, end: e.target.value } })}
-                  />
-                </div>
-              </div>
+              <DateRangePicker
+                label="Date Range"
+                value={filters.dateRange}
+                onChange={(dateRange) => setFilters({ ...filters, dateRange })}
+              />
               <div className="filter-group">
                 <label>Filter by Date</label>
                 <select value={filters.filterByDate} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, filterByDate: e.target.value })}>
