@@ -93,11 +93,11 @@
   padding: 1rem 1.25rem;
 }
 
-.summary-card.blue { background: #3b82f6; color: #fff; }
-.summary-card.green { background: #10b981; color: #fff; }
-.summary-card.red { background: #ef4444; color: #fff; }
-.summary-card.teal { background: #14b8a6; color: #fff; }
-.summary-card.yellow { background: #f59e0b; color: #fff; }
+.summary-card.blue { background: var(--info); color: #ffffff; }
+.summary-card.green { background: var(--success); color: #ffffff; }
+.summary-card.red { background: var(--danger); color: #ffffff; }
+.summary-card.teal { background: #14b8a6; color: #ffffff; }
+.summary-card.yellow { background: var(--warning); color: #ffffff; }
 
 .summary-content {
   display: flex;
@@ -216,9 +216,9 @@
   color: var(--primary);
 }
 
-.status-badge.success { background: #d1fae5; color: #059669; }
-.status-badge.failed { background: #fee2e2; color: #dc2626; }
-.status-badge.pending { background: #fef3c7; color: #b45309; }
+.status-badge.success { background: var(--success-subtle); color: var(--success-text); }
+.status-badge.failed { background: var(--danger-subtle); color: var(--danger-text); }
+.status-badge.pending { background: var(--warning-subtle); color: var(--warning-text); }
 
 .lead-status-badge {
   padding: 0.25rem 0.5rem;
@@ -227,9 +227,9 @@
   font-weight: 500;
 }
 
-.lead-status-badge.new { background: #dbeafe; color: #1d4ed8; }
-.lead-status-badge.existing { background: #e0e7ff; color: #4338ca; }
-.lead-status-badge.duplicate { background: #fef3c7; color: #b45309; }
+.lead-status-badge.new { background: var(--info-subtle); color: var(--info-text); }
+.lead-status-badge.existing { background: var(--category-indigo-subtle); color: var(--category-indigo-text); }
+.lead-status-badge.duplicate { background: var(--warning-subtle); color: var(--warning-text); }
 
 .empty-state {
   display: flex;
@@ -273,7 +273,7 @@
 
 .detail-json {
   background: #1e293b;
-  color: #e2e8f0;
+  color: var(--border-default);
   padding: 0.5rem;
   border-radius: 4px;
   font-family: monospace;

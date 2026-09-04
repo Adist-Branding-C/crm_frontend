@@ -39,7 +39,7 @@
   height: 2.5rem;
   border-radius: 50%;
   background: var(--primary);
-  color: #fff;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -154,43 +154,43 @@
 }
 
 .badge.lead {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--info-subtle);
+  color: var(--info-text);
 }
 
 .badge.deal {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--success-subtle);
+  color: var(--success-text);
 }
 
 .badge.task {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--warning-subtle);
+  color: var(--warning-text);
 }
 
 .badge.campaign {
-  background: #e0e7ff;
-  color: #4338ca;
+  background: var(--category-indigo-subtle);
+  color: var(--category-indigo-text);
 }
 
 .badge.staff {
-  background: #fce7f3;
-  color: #db2777;
+  background: var(--category-pink-subtle);
+  color: var(--category-pink-text);
 }
 
 .badge.remark {
-  background: #f3e8ff;
-  color: #7e22ce;
+  background: var(--category-purple-subtle);
+  color: var(--category-purple-text);
 }
 
 .badge.followup {
-  background: #ffe4e6;
-  color: #be123c;
+  background: var(--danger-subtle);
+  color: var(--danger-text);
 }
 
 .badge.call {
-  background: #ccfbf1;
-  color: #0f766e;
+  background: var(--success-subtle);
+  color: var(--success-text);
 }
 
 @media (max-width: 768px) {

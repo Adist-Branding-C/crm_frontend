@@ -5,9 +5,9 @@ import type { DashboardPeriod, GetDealStatisticsParams, PipelineDataItem } from 
 
 const STATUSES_PAGE_LIMIT = 100;
 
-const WIN_STAGE_COLOR = '#3b82f6';
-const LOSE_STAGE_COLOR = '#ec4899';
-const DEFAULT_STAGE_COLOR = '#fbbf24';
+const WIN_STAGE_COLOR = 'var(--success)';
+const LOSE_STAGE_COLOR = 'var(--danger)';
+const DEFAULT_STAGE_COLOR = 'var(--chart-2)';
 
 function colorForStage(stage: string): string {
   const key = stage.toLowerCase();

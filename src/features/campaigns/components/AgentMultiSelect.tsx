@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, ChevronDown, Check, Loader2 } from 'lucide-react';
 import type { AgentMultiSelectProps } from '../types';
 
-const AVATAR_COLORS = ['#f1414f', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+const AVATAR_COLORS = ['var(--primary)', 'var(--info)', 'var(--success)', 'var(--warning)', 'var(--category-purple-text)', 'var(--category-pink-text)', 'var(--chart-6)', 'var(--category-orange-text)'];
 
 function getInitials(name: string): string {
   return name

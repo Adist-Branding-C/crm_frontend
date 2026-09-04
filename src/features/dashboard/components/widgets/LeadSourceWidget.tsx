@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
+import { CHART_PALETTE, CHART_PALETTE_DEFAULT } from '../../../../shared/constants/chartPalette';
 import './WidgetStyles.css';
 import { ListRowsSkeleton } from './WidgetSkeletons';
 import type { LeadSourceCountItem } from '../../types';
 
-const SOURCE_COLOR_PALETTE = ['#f472b6', '#38bdf8', '#eab308', '#fb7185', '#34d399', '#fbbf24'];
-const DEFAULT_SOURCE_COLOR = '#38bdf8';
 
 function colorForIndex(index: number): string {
-  return SOURCE_COLOR_PALETTE[index % SOURCE_COLOR_PALETTE.length] ?? DEFAULT_SOURCE_COLOR;
+  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE_DEFAULT;
 }
 
 interface LeadSourceWidgetProps {

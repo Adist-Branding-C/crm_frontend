@@ -6,11 +6,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay);
+  backdrop-filter: blur(2px);
   display: flex;
   justify-content: flex-end;
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn var(--duration-base) var(--ease-standard);
 }
 
 @keyframes fadeIn {
@@ -26,11 +27,12 @@
   width: 520px;
   max-width: 100%;
   height: 100%;
-  background: var(--bg-card);
+  background: var(--surface-4);
+  border-left: 1px solid var(--border-hairline);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
-  animation: slideInRight 0.25s ease;
+  box-shadow: var(--elevation-overlay);
+  animation: slideInRight var(--duration-slow) var(--ease-entrance);
 }
 
 @keyframes slideInRight {
@@ -47,7 +49,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .drawer-title-section {
@@ -68,11 +70,11 @@
 }
 
 .drawer-title-section h2 {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
   color: var(--text-main);
   margin: 0;
-  line-height: 1.3;
+  line-height: var(--leading-tight);
 }
 
 .drawer-subtitle {
@@ -91,10 +93,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .drawer-close:hover {
-  background: var(--bg-main);
+  background: var(--surface-hover);
   color: var(--text-main);
 }
 
@@ -102,20 +106,21 @@
   display: flex;
   gap: 0;
   padding: 0 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .drawer-tabs .tab {
   padding: 0.875rem 1rem;
   border: none;
   background: transparent;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   color: var(--text-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
-  transition: all 0.2s;
+  transition: color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
 }
 
 .drawer-tabs .tab:hover {
@@ -125,6 +130,7 @@
 .drawer-tabs .tab.active {
   color: var(--primary);
   border-bottom-color: var(--primary);
+  font-weight: var(--weight-semibold);
 }
 
 .drawer-content {
@@ -151,9 +157,10 @@
   bottom: 0;
   width: 500px;
   max-width: 100%;
-  background: var(--bg-card);
-  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
-  animation: slideInRight 0.25s ease;
+  background: var(--surface-4);
+  border-left: 1px solid var(--border-hairline);
+  box-shadow: var(--elevation-overlay);
+  animation: slideInRight var(--duration-slow) var(--ease-entrance);
 }
 
 @keyframes slideInLeft {

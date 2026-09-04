@@ -30,7 +30,7 @@ const AddCalendarTaskDrawer = ({ addTask }: AddCalendarTaskDrawerProps) => (
       <label className="field-label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>Task Type</label>
       <select 
         className="field-input" 
-        style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #e5e7eb' }}
+        style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-default)' }}
         value={addTask.taskType} 
         onChange={(e) => addTask.setTaskType(e.target.value as any)}
       >

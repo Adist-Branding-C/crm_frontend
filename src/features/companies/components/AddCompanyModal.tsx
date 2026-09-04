@@ -177,7 +177,7 @@ const AddCompanyModal: React.FC<Props> = ({ isOpen, editingCompany, onSaved, onC
                           aria-label={showPassword ? 'Hide password' : 'Show password'}
                           style={{
                             position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)',
-                            background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: '#6b7280',
+                            background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: 'var(--text-tertiary)',
                           }}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}

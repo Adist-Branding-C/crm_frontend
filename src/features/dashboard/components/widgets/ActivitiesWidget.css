@@ -15,7 +15,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: #cbd5e1;
+  background-color: var(--border-strong);
   position: absolute;
   left: -24px;
   top: 4px;
@@ -33,7 +33,7 @@
   top: 16px;
   width: 2px;
   height: calc(100% - 10px);
-  background-color: #e2e8f0;
+  background-color: var(--border-default);
   z-index: 1;
 }
 

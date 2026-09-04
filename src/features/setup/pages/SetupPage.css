@@ -145,7 +145,7 @@
   justify-content: center;
   padding: 0.375rem;
   background: var(--primary);
-  color: #fff;
+  color: #ffffff;
   border: none;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
@@ -183,9 +183,9 @@
 }
 
 .stage-actions .delete-btn:hover {
-  background: #fef2f2;
-  border-color: #dc2626;
-  color: #dc2626;
+  background: var(--danger-subtle);
+  border-color: var(--danger-text);
+  color: var(--danger-text);
 }
 
 .stage-connector {
@@ -226,7 +226,7 @@
   gap: 0.375rem;
   padding: 0.5rem 1rem;
   background: var(--primary);
-  color: #fff;
+  color: #ffffff;
   border: none;
   border-radius: var(--border-radius-sm);
   font-size: 0.875rem;

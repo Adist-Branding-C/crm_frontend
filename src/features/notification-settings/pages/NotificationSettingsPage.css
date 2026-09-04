@@ -25,16 +25,16 @@
 
 .notification-settings-layout .entries-select label {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-right: 0.5rem;
 }
 
 .notification-settings-layout .entries-select select {
   padding: 0.375rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 14px;
-  background: #fff;
+  background: var(--surface-1);
   cursor: pointer;
 }
 
@@ -45,11 +45,11 @@
   padding: 0.5rem 0.75rem;
   border: none;
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface-1);
 }
 
 .notification-settings-layout .search-input svg {
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .notification-settings-layout .search-input input {
@@ -60,11 +60,11 @@
 }
 
 .notification-settings-layout .search-input input::placeholder {
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .notification-settings-layout .table-container {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -79,24 +79,24 @@
 }
 
 .notification-settings-layout .data-table th {
-  background: #f9fafb;
+  background: var(--surface-2);
   padding: 0.75rem 1rem;
   text-align: left;
   font-size: 14px;
   font-weight: 600;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .notification-settings-layout .data-table td {
   padding: 0.75rem 1rem;
   font-size: 14px;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .notification-settings-layout .data-table tr:hover {
-  background: #f9fafb;
+  background: var(--surface-2);
 }
 
 .notification-settings-layout .status-badge {
@@ -105,12 +105,12 @@
 }
 
 .notification-settings-layout .status-badge.active {
-  color: #22c55e;
+  color: var(--success);
   font-weight: 600;
 }
 
 .notification-settings-layout .status-badge.inactive {
-  color: #ef4444;
+  color: var(--danger);
   font-weight: 600;
 }
 
@@ -119,14 +119,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   flex-wrap: wrap;
   gap: 1rem;
 }
 
 .notification-settings-layout .table-info {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .notification-settings-layout .pagination {
@@ -140,17 +140,17 @@
   align-items: center;
   justify-content: center;
   padding: 0.375rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background-color: #fff;
-  color: #374151;
+  background-color: var(--surface-1);
+  color: var(--text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .notification-settings-layout .paginate-button:hover:not(.disabled) {
-  background-color: #f3f4f6;
+  background-color: var(--surface-2);
 }
 
 .notification-settings-layout .paginate-button.disabled {
@@ -159,9 +159,9 @@
 }
 
 .notification-settings-layout .paginate-button.current {
-  background-color: #f1414f;
-  border-color: #f1414f;
-  color: #fff;
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
 }
 
 .notification-settings-layout .dropdown-container {
@@ -177,15 +177,15 @@
 }
 
 .notification-settings-layout .dropdown-toggle:hover {
-  background: #f3f4f6;
+  background: var(--surface-2);
 }
 
 .notification-settings-layout .dropdown-menu {
   position: absolute;
   right: 0;
   top: 100%;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   z-index: 50;
@@ -198,13 +198,13 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   font-size: 14px;
-  color: #374151;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .notification-settings-layout .dropdown-item:hover {
-  background: #f3f4f6;
+  background: var(--surface-2);
 }
 
 @media (max-width: 1024px) {

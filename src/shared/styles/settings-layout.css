@@ -2,8 +2,10 @@
 .settings-menu {
   width: 220px;
   flex-shrink: 0;
-  background: #fff;
-  border-radius: 8px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--surface-raise-highlight);
   padding: 0.5rem;
   height: fit-content;
 }
@@ -16,28 +18,32 @@
   padding: 0.75rem 1rem;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
-  font-size: 14px;
-  color: #374151;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
   text-align: left;
-  transition: all 0.2s;
+  transition: background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .settings-menu .menu-item:hover {
-  background: #f3f4f6;
+  background: var(--surface-hover);
 }
 
 .settings-menu .menu-item.active {
-  background: #f3f4f6;
-  font-weight: 600;
-  color: #111827;
+  background: var(--accent-subtle);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 .settings-content {
   flex: 1;
-  background: #fff;
-  border-radius: 8px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--surface-raise-highlight);
   padding: 1.5rem;
 }
 

@@ -7,7 +7,7 @@ import type { FieldErrorMap, FieldErrorFallback } from '../../../../shared/types
  * Used by:
  * - LeadStatusPage (useEditDrawer, seeds the drawer in add mode)
  */
-export const EMPTY_LEAD_STATUS_FORM_DATA: LeadStatusFormData = { status: '', color: '#3b82f6', useForConversion: false };
+export const EMPTY_LEAD_STATUS_FORM_DATA: LeadStatusFormData = { status: '', color: 'var(--info)', useForConversion: false };
 
 /**
  * Toolbar button label for opening the add-lead-status drawer.

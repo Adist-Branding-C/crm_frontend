@@ -58,7 +58,7 @@
 
 .date-btn.active {
   background: var(--primary);
-  color: #fff;
+  color: #ffffff;
 }
 
 .custom-date-range {
@@ -83,7 +83,7 @@
 
 .date-range-error {
   font-size: 0.75rem;
-  color: #e0323e;
+  color: var(--primary-hover);
 }
 
 .filter-dropdown {

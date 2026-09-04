@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
+import { CHART_PALETTE, CHART_PALETTE_DEFAULT } from '../../../shared/constants/chartPalette';
 import { dashboardService } from '../services/DashboardService';
 import type { DashboardPeriod, DealStageCount, GetDealByStageParams } from '../types';
 
-const STAGE_COLOR_PALETTE = ['#3b82f6', '#fbbf24', '#ec4899', '#f97316', '#10b981', '#14b8a6', '#8b5cf6'];
-const DEFAULT_STAGE_COLOR = '#3b82f6';
 
 function colorForIndex(index: number): string {
-  return STAGE_COLOR_PALETTE[index % STAGE_COLOR_PALETTE.length] ?? DEFAULT_STAGE_COLOR;
+  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE_DEFAULT;
 }
 
 export function useDealByStage(period: DashboardPeriod, from?: string, to?: string) {

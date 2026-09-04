@@ -1,3 +1,5 @@
+@import './shared/styles/tokens.css';
+
 @font-face {
   font-family: 'Google Sans';
   src: url('/font/Google_Sans/static/GoogleSans-Regular.ttf') format('truetype');
@@ -40,41 +42,40 @@
   font-style: italic;
 }
 
-:root {
-  --font-family: 'Google Sans', sans-serif;
-  --bg-main: #f4f6fa;
-  --bg-card: #ffffff;
-  --text-main: #1a1b1d;
-  --text-muted: #6b7280;
-  
-  --sidebar-bg: #2b2f3a;
-  --sidebar-active: #f1414f;
-  
-  --primary: #f1414f;
-  --primary-hover: #e0323e;
-  
-  --chart-blue: #3b82f6;
-  --chart-yellow: #fbbf24;
-  --chart-pink: #ec4899;
-  --chart-orange: #f97316;
-  --chart-green: #10b981;
-  --chart-teal: #14b8a6;
-  --chart-purple: #8b5cf6;
-  
-  --border-radius-sm: 6px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-color: #e5e7eb;
-  
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-card: 0px 4px 15px rgba(0, 0, 0, 0.03);
-}
+/* Design tokens live in ./shared/styles/tokens.css */
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Visible keyboard focus on every surface, light or dark. Pointer clicks are
+   unaffected (:focus-visible only). */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+  border-radius: var(--border-radius-xs);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+::selection {
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 html, body, #root {
@@ -84,17 +85,22 @@ html, body, #root {
 
 body {
   font-family: var(--font-family);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  letter-spacing: -0.003em;
   background-color: var(--bg-main);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Utilities */
 .card {
   background: var(--bg-card);
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-hairline);
+  box-shadow: var(--surface-raise-highlight);
   padding: 1.25rem;
 }
 
@@ -126,16 +132,22 @@ body {
 
 /* Custom Scrollbar for inner areas */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: var(--border-strong);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-tertiary);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }

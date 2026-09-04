@@ -80,7 +80,7 @@ const AdminForm: React.FC<AdminFormProps> = ({ fields, formData, onChange, onSav
                   )}
                   {field.type === 'color' && (
                     <input type="color" name={field.name} className="form-control form-control-color"
-                      value={String(values[field.name] ?? '#3b82f6')}
+                      value={String(values[field.name] ?? 'var(--info)')}
                       onChange={syncOnChange} />
                   )}
                   {field.type === 'checkbox' && (

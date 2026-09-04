@@ -33,13 +33,13 @@
 
 .field-error-text {
   display: block;
-  color: #dc2626;
+  color: var(--danger-text);
   font-size: 12px;
   margin-top: 4px;
 }
 
 .form-control.input-error {
-  border-color: #dc2626;
+  border-color: var(--danger-text);
 }
 
 .form-control.input-error:focus {

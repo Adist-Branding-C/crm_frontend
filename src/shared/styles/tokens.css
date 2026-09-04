@@ -1,0 +1,363 @@
+/**
+ * Design tokens — single source of truth for color, elevation, radius and type.
+ *
+ * Three layers:
+ *   1. Semantic tokens (`--surface-*`, `--text-*`, `--border-*`, `--accent`,
+ *      `--success|warning|danger|info`) — the vocabulary components should use.
+ *   2. Compatibility aliases (`--bg-card`, `--text-main`, `--primary`, …) — the
+ *      names already used across the codebase, re-pointed at semantic tokens so
+ *      the existing ~2,900 references keep working and adapt to the theme for
+ *      free. New code should prefer the semantic names above.
+ *   3. Theme overrides — `:root` is the light theme; the dark theme is applied
+ *      either by the OS setting (`prefers-color-scheme`, unless the user forced
+ *      light) or by an explicit `data-theme="dark"` on <html> (the in-app
+ *      toggle, which wins in both directions). See `useTheme.ts`.
+ *
+ * Only semantic tokens change between themes; radius / type / z-index do not.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Typography ---- */
+  --font-family: 'Google Sans', sans-serif;
+
+  /* Type scale — theme-invariant. 1rem = 16px. Use these instead of raw
+     px / rem so density stays consistent across every surface. */
+  --text-2xs: 0.6875rem;   /* 11px — overline, dense meta                */
+  --text-xs: 0.75rem;      /* 12px — table headers, badges, captions     */
+  --text-sm: 0.8125rem;    /* 13px — secondary body, compact controls    */
+  --text-base: 0.875rem;   /* 14px — default body, inputs, buttons       */
+  --text-md: 0.9375rem;    /* 15px — emphasised body                     */
+  --text-lg: 1.0625rem;    /* 17px — card titles                         */
+  --text-xl: 1.25rem;      /* 20px — page titles                         */
+  --text-2xl: 1.5rem;      /* 24px — stat values, section display        */
+  --text-3xl: 1.875rem;    /* 30px — hero numbers                        */
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---- Motion — theme-invariant ---- */
+  --duration-fast: 120ms;   /* hover / press / colour swaps              */
+  --duration-base: 180ms;   /* entrances, tab / accordion transitions    */
+  --duration-slow: 260ms;   /* overlays, large surface moves             */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);   /* default, snappy in   */
+  --ease-entrance: cubic-bezier(0, 0, 0, 1);      /* decelerate on enter  */
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);        /* accelerate on leave  */
+
+  /* ---- Spacing — 4px grid, opt-in ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* ---- Surfaces / elevation ladder ---- */
+  --bg-app: #f4f6fa;
+  --surface-1: #ffffff;          /* page body, cards, table container         */
+  --surface-2: #f4f6fa;          /* table headers, inset panels, input fields  */
+  --surface-3: #ffffff;          /* dropdowns, popovers, menus                 */
+  --surface-4: #ffffff;          /* modals, drawers (highest)                  */
+  --surface-hover: #f1f5f9;      /* row / item hover                          */
+  --surface-selected: rgba(241, 65, 79, 0.08);
+  --overlay: rgba(15, 23, 42, 0.45);
+
+  /* Always-on 1px edge for any raised surface (card, table, menu, panel).
+     Softer than --border-default; pairs with the shadow rather than
+     replacing it. */
+  --border-hairline: rgba(15, 23, 42, 0.08);
+  /* Faint top-lit edge — layered as the first value of a box-shadow list. */
+  --surface-raise-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  /* ---- Text ---- */
+  --text-primary: #1a1b1d;
+  --text-secondary: #4b5563;
+  --text-tertiary: #6b7280;
+  --text-disabled: #9ca3af;
+  --text-on-accent: #ffffff;
+
+  /* ---- Borders ---- */
+  --border-subtle: #eef0f3;
+  --border-default: #e5e7eb;
+  --border-strong: #d1d5db;
+  --border-focus: var(--accent);
+
+  /* ---- Brand accent ---- */
+  --accent: #f1414f;
+  --accent-hover: #e0323e;
+  --accent-active: #c62838;
+  --accent-subtle: rgba(241, 65, 79, 0.10);
+  --accent-text: #e0323e;        /* accent used as link / inline text          */
+
+  /* ---- Semantic status ---- default fill · subtle bg · text/icon ---- */
+  --success: #059669;
+  --success-subtle: rgba(16, 185, 129, 0.12);
+  --success-text: #047857;
+  --warning: #d97706;
+  --warning-subtle: rgba(245, 158, 11, 0.14);
+  --warning-text: #b45309;
+  --danger: #dc2626;
+  --danger-subtle: rgba(239, 68, 68, 0.10);
+  --danger-text: #dc2626;
+  --info: #2563eb;
+  --info-subtle: rgba(59, 130, 246, 0.10);
+  --info-text: #1d4ed8;
+  --neutral-subtle: rgba(107, 114, 128, 0.12);
+  --neutral-text: var(--text-secondary);
+
+  /* ---- Category tints (non-semantic hues for entity/type badges) ---- */
+  --category-indigo-subtle: rgba(99, 102, 241, 0.12);
+  --category-indigo-text: #4338ca;
+  --category-pink-subtle: rgba(236, 72, 153, 0.12);
+  --category-pink-text: #be185d;
+  --category-purple-subtle: rgba(139, 92, 246, 0.12);
+  --category-purple-text: #7e22ce;
+  --category-orange-subtle: rgba(249, 115, 22, 0.12);
+  --category-orange-text: #c2410c;
+  --category-teal-subtle: rgba(20, 184, 166, 0.12);
+  --category-teal-text: #0f766e;
+
+  /* ---- Focus ring ---- */
+  --focus-ring: rgba(241, 65, 79, 0.45);
+
+  /* ---- Elevation (floating layers only) ---- */
+  --elevation-1: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --elevation-2: 0 6px 20px -4px rgba(15, 23, 42, 0.12);
+  --elevation-3: 0 18px 44px -8px rgba(15, 23, 42, 0.18);
+  /* Composites — one box-shadow value for menus / overlays: top highlight
+     first, then the drop shadow. */
+  --elevation-menu: var(--surface-raise-highlight), var(--elevation-2);
+  --elevation-overlay: var(--surface-raise-highlight), var(--elevation-3);
+
+  /* ---- Radius ---- */
+  --border-radius-xs: 4px;
+  --border-radius-sm: 6px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius: var(--border-radius-md);
+
+  /* ---- Sidebar (intentionally dark in both themes) ---- */
+  --sidebar-bg: color-mix(in srgb, var(--accent) 6%, #101013);
+  --sidebar-active: var(--accent);
+  --sidebar-fg: #9ba3b4;
+  --sidebar-fg-strong: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+
+  /* ---- Charts ---- */
+  --chart-1: #3b82f6;
+  --chart-2: #f59e0b;
+  --chart-3: #ec4899;
+  --chart-4: #f97316;
+  --chart-5: #10b981;
+  --chart-6: #14b8a6;
+  --chart-7: #8b5cf6;
+  --chart-grid: #eef0f3;
+  --chart-label: #6b7280;
+  --chart-blue: var(--chart-1);
+  --chart-yellow: var(--chart-2);
+  --chart-pink: var(--chart-3);
+  --chart-orange: var(--chart-4);
+  --chart-green: var(--chart-5);
+  --chart-teal: var(--chart-6);
+  --chart-purple: var(--chart-7);
+
+  /* ---- Legacy shadows (kept for existing references) ---- */
+  --shadow-sm: var(--elevation-1);
+  --shadow-md: var(--elevation-2);
+  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.03);
+
+  /* ================================================================
+   * Compatibility aliases — existing names → semantic tokens.
+   * ================================================================ */
+  --bg-main: var(--bg-app);
+  --bg-card: var(--surface-1);
+  --card-bg: var(--surface-1);
+  --surface-bg: var(--surface-1);
+  --bg-hover: var(--surface-hover);
+  --bg-selected: var(--surface-selected);
+
+  --text-main: var(--text-primary);
+  --text-muted: var(--text-tertiary);
+
+  --border-color: var(--border-default);
+  --error-color: var(--danger);
+  --error-border: var(--danger);
+
+  --primary: var(--accent);
+  --primary-color: var(--accent);
+  --primary-hover: var(--accent-hover);
+  --primary-dark: var(--accent-active);
+}
+
+/* ==================================================================
+ * DARK THEME
+ * Applied when the OS prefers dark and the user has not forced light,
+ * or when the in-app toggle sets data-theme="dark".
+ * The two selectors carry identical declarations by necessity (plain
+ * CSS cannot share a declaration block across a media query boundary).
+ * ================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg-app: #0e0f11;
+    --surface-1: #16181c;
+    --surface-2: #1e2126;
+    --surface-3: #24282e;
+    --surface-4: #2a2f37;
+    --surface-hover: rgba(255, 255, 255, 0.04);
+    --surface-selected: rgba(241, 65, 79, 0.16);
+    --overlay: rgba(0, 0, 0, 0.65);
+
+    --border-hairline: rgba(255, 255, 255, 0.08);
+    --surface-raise-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    --text-primary: #e8eaed;
+    --text-secondary: #adb2ba;
+    --text-tertiary: #868c95;
+    --text-disabled: #565b63;
+    --text-on-accent: #ffffff;
+
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-default: rgba(255, 255, 255, 0.11);
+    --border-strong: rgba(255, 255, 255, 0.18);
+
+    --accent: #f1414f;
+    --accent-hover: #f65964;
+    --accent-active: #d63643;
+    --accent-subtle: rgba(241, 65, 79, 0.18);
+    --accent-text: #ff7a83;
+
+    --success: #10b981;
+    --success-subtle: rgba(16, 185, 129, 0.16);
+    --success-text: #34d399;
+    --warning: #f59e0b;
+    --warning-subtle: rgba(245, 158, 11, 0.18);
+    --warning-text: #fbbf24;
+    --danger: #ef4444;
+    --danger-subtle: rgba(239, 68, 68, 0.18);
+    --danger-text: #f87171;
+    --info: #3b82f6;
+    --info-subtle: rgba(59, 130, 246, 0.18);
+    --info-text: #60a5fa;
+    --neutral-subtle: rgba(255, 255, 255, 0.09);
+    --neutral-text: var(--text-secondary);
+
+    --category-indigo-subtle: rgba(129, 140, 248, 0.20);
+    --category-indigo-text: #a5b4fc;
+    --category-pink-subtle: rgba(244, 114, 182, 0.20);
+    --category-pink-text: #f9a8d4;
+    --category-purple-subtle: rgba(167, 139, 250, 0.20);
+    --category-purple-text: #d8b4fe;
+    --category-orange-subtle: rgba(251, 146, 60, 0.20);
+    --category-orange-text: #fdba74;
+    --category-teal-subtle: rgba(45, 212, 191, 0.20);
+    --category-teal-text: #5eead4;
+
+    --focus-ring: rgba(255, 122, 131, 0.55);
+
+    --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.24);
+    --elevation-2: 0 6px 20px -4px rgba(0, 0, 0, 0.36);
+    --elevation-3: 0 18px 44px -8px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.30);
+
+    --sidebar-bg: #16181c;
+
+    --chart-1: #60a5fa;
+    --chart-2: #fbbf24;
+    --chart-3: #f472b6;
+    --chart-4: #fb923c;
+    --chart-5: #34d399;
+    --chart-6: #2dd4bf;
+    --chart-7: #a78bfa;
+    --chart-grid: rgba(255, 255, 255, 0.08);
+    --chart-label: #868c95;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-app: #0e0f11;
+  --surface-1: #16181c;
+  --surface-2: #1e2126;
+  --surface-3: #24282e;
+  --surface-4: #2a2f37;
+  --surface-hover: rgba(255, 255, 255, 0.04);
+  --surface-selected: rgba(241, 65, 79, 0.16);
+  --overlay: rgba(0, 0, 0, 0.65);
+
+  --border-hairline: rgba(255, 255, 255, 0.08);
+  --surface-raise-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  --text-primary: #e8eaed;
+  --text-secondary: #adb2ba;
+  --text-tertiary: #868c95;
+  --text-disabled: #565b63;
+  --text-on-accent: #ffffff;
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  --accent: #f1414f;
+  --accent-hover: #f65964;
+  --accent-active: #d63643;
+  --accent-subtle: rgba(241, 65, 79, 0.18);
+  --accent-text: #ff7a83;
+
+  --success: #10b981;
+  --success-subtle: rgba(16, 185, 129, 0.16);
+  --success-text: #34d399;
+  --warning: #f59e0b;
+  --warning-subtle: rgba(245, 158, 11, 0.18);
+  --warning-text: #fbbf24;
+  --danger: #ef4444;
+  --danger-subtle: rgba(239, 68, 68, 0.18);
+  --danger-text: #f87171;
+  --info: #3b82f6;
+  --info-subtle: rgba(59, 130, 246, 0.18);
+  --info-text: #60a5fa;
+  --neutral-subtle: rgba(255, 255, 255, 0.09);
+  --neutral-text: var(--text-secondary);
+
+  --category-indigo-subtle: rgba(129, 140, 248, 0.20);
+  --category-indigo-text: #a5b4fc;
+  --category-pink-subtle: rgba(244, 114, 182, 0.20);
+  --category-pink-text: #f9a8d4;
+  --category-purple-subtle: rgba(167, 139, 250, 0.20);
+  --category-purple-text: #d8b4fe;
+  --category-orange-subtle: rgba(251, 146, 60, 0.20);
+  --category-orange-text: #fdba74;
+  --category-teal-subtle: rgba(45, 212, 191, 0.20);
+  --category-teal-text: #5eead4;
+
+  --focus-ring: rgba(255, 122, 131, 0.55);
+
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --elevation-2: 0 6px 20px -4px rgba(0, 0, 0, 0.36);
+  --elevation-3: 0 18px 44px -8px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.30);
+
+  --sidebar-bg: #16181c;
+
+  --chart-1: #60a5fa;
+  --chart-2: #fbbf24;
+  --chart-3: #f472b6;
+  --chart-4: #fb923c;
+  --chart-5: #34d399;
+  --chart-6: #2dd4bf;
+  --chart-7: #a78bfa;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-label: #868c95;
+}

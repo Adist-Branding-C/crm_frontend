@@ -2,19 +2,20 @@ import React from 'react';
 import { ChevronUp, ChevronDown, MoreHorizontal, Eye, Edit2, Trash2, Phone, MessageSquare } from 'lucide-react';
 import type { DealItem, DealsTableProps } from '../types';
 import { DEAL_STATUS_MAP, DEAL_STATUS_LABEL_MAP, DEAL_TYPE_MAP, DEAL_TYPE_LABEL_MAP } from '../../../shared/constants/dealOptions';
+import { tint } from '../../../shared/utils/color';
 
 const getStatusBadge = (status: string) => {
-  const colorMap: Record<string, string> = { won: '#10b981', lost: '#ef4444', pending: '#f59e0b', 'in-progress': '#3b82f6' };
-  const color = colorMap[status.toLowerCase()] || '#6b7280';
+  const colorMap: Record<string, string> = { won: 'var(--success)', lost: 'var(--danger)', pending: 'var(--warning)', 'in-progress': 'var(--info)' };
+  const color = colorMap[status.toLowerCase()] || 'var(--text-tertiary)';
   const label = DEAL_STATUS_LABEL_MAP[status] || status;
-  return <span className="status-badge" style={{ background: `${color}20`, color }}>{label}</span>;
+  return <span className="status-badge" style={{ background: tint(color), color }}>{label}</span>;
 };
 
 const getTypeBadge = (type: string) => {
-  const colorMap: Record<string, string> = { 'new': '#8b5cf6', 'renewal': '#3b82f6', 'upgrade': '#10b981' };
-  const color = colorMap[type.toLowerCase()] || '#6b7280';
+  const colorMap: Record<string, string> = { 'new': 'var(--category-purple-text)', 'renewal': 'var(--info)', 'upgrade': 'var(--success)' };
+  const color = colorMap[type.toLowerCase()] || 'var(--text-tertiary)';
   const label = DEAL_TYPE_LABEL_MAP[type] || type;
-  return <span className="type-badge" style={{ background: `${color}20`, color }}>{label}</span>;
+  return <span className="type-badge" style={{ background: tint(color), color }}>{label}</span>;
 };
 
 const DealsTable: React.FC<DealsTableProps> = ({

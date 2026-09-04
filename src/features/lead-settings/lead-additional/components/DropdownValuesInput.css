@@ -29,8 +29,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.375rem 0.5rem;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
   border-radius: 4px;
   font-size: 0.875rem;
 }
@@ -38,7 +38,7 @@
 .remove-dropdown-value {
   background: none;
   border: none;
-  color: #dc3545;
+  color: var(--danger-text);
   cursor: pointer;
   padding: 2px;
   display: flex;
@@ -46,7 +46,7 @@
 }
 
 .remove-dropdown-value:hover {
-  color: #bd2130;
+  color: var(--danger-text);
 }
 
 @media (max-width: 768px) {
