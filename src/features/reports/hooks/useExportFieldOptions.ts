@@ -4,6 +4,7 @@ import { STANDARD_EXPORT_FIELDS } from '../constants/leadExport.data';
 import type { FieldOption } from '../constants/leadExport.data';
 
 const ADDITIONAL_FIELDS_PAGE_LIMIT = 200;
+const EXCLUDED_FIELD_KEYS = new Set(['notes']);
 
 let cachedFields: FieldOption[] | null = null;
 
@@ -31,7 +32,9 @@ export function useExportFieldOptions() {
           label: f.name,
         }));
 
-        const combined = [...STANDARD_EXPORT_FIELDS, ...additionalFields];
+        const combined = [...STANDARD_EXPORT_FIELDS, ...additionalFields].filter(
+          (f) => !EXCLUDED_FIELD_KEYS.has(f.key),
+        );
         cachedFields = combined;
         setFields(combined);
       } catch {

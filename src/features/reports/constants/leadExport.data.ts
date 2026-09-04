@@ -19,7 +19,6 @@ export const STANDARD_EXPORT_FIELDS: FieldOption[] = [
   { key: 'purpose', label: 'Purpose' },
   { key: 'agentId', label: 'Assigned To' },
   { key: 'nextFollowUpDate', label: 'Next Follow Up' },
-  { key: 'notes', label: 'Notes' },
   { key: 'createdAt', label: 'Created At' },
   { key: 'updatedAt', label: 'Updated At' },
 ];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Routes, Route, Navigate } from 'react-router-dom';
+import { NavLink, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import LeadReportsLanding from '../sub-pages/LeadReportsLanding';
@@ -33,10 +33,13 @@ import { callReportOptions } from '../constants';
 import './ReportsPage.css';
 
 const ReportsPage = () => {
+  const { pathname } = useLocation();
+  const isTopLevel = /^\/reports\/(lead|deal|task|call|checkin|attendance)$/.test(pathname);
+
   return (
     <div className="account-page">
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
-        <PageHeader title="Reports" breadcrumb={false} />
+        {isTopLevel && <PageHeader title="Reports" breadcrumb={false} />}
 
         <Routes>
           <Route path="lead/*" element={<LeadReportsRouter />} />
