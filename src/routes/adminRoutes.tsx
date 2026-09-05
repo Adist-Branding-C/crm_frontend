@@ -11,11 +11,14 @@ import BranchPage from '../features/account-settings/branch/pages/BranchPage';
 import ProfilePage from '../features/account-settings/profile/pages/ProfilePage';
 import PasswordPage from '../features/account-settings/password/pages/PasswordPage';
 import WhatsAppTemplatePage from '../features/account-settings/whatsapp-template/pages/WhatsappTemplatePage';
+import RolePage from '../features/account-settings/roles/pages/RolePage';
+import RequireAdmin from './RequireAdmin';
 
 export default (
   <>
     <Route path="account" element={<AccountPage />} />
     <Route path="account/department" element={<DepartmentPage />} />
+    <Route path="account/roles" element={<RequireAdmin><RolePage /></RequireAdmin>} />
     <Route path="account/workmode" element={<WorkModePage />} />
     <Route path="account/checkout" element={<CheckoutNotePage />} />
     <Route path="account/designation" element={<DesignationPage />} />

@@ -1,0 +1,86 @@
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/pagination.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/tabs.css';
+@import '../../../../shared/styles/sidebar-layout.css';
+@import '../../../../shared/styles/toolbars.css';
+
+/* Permission matrix inside AddRoleDrawer (account-settings/roles). */
+.role-permission-table {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.role-permission-head,
+.role-permission-row {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  align-items: center;
+}
+
+.role-permission-head {
+  background: var(--bg-main);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.role-permission-row {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-main);
+}
+
+.role-permission-row:last-child {
+  border-bottom: none;
+}
+
+.role-permission-module {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.role-permission-cell {
+  display: flex;
+  justify-content: center;
+}
+
+/* Native checkbox kept visible and sized to match shared forms.css checkboxes. */
+.role-checkbox-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+/* Small "Select all / Deselect all" toggle per module row. */
+.role-select-all {
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-size: 0.75rem;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.role-select-all:hover {
+  color: var(--primary-hover);
+}
+
+.role-select-all.active {
+  color: var(--text-muted);
+}
