@@ -1,16 +1,6 @@
-/**
- * Global command palette — the header's ⌘K surface.
- *
- * One keyboard-first list that unifies the three things a CRM user reaches for
- * all day: find a record, create a record, jump to a section.
- *  - empty query  → Quick create · Recent leads · Go to (all nav)
- *  - typing (2+)  → Lead search results · matching Go to · matching Quick create
- *
- * Arrow keys move the selection across the whole flat list, Enter activates,
- * Esc (or a backdrop click) closes. Focus is trapped to the dialog and restored
- * to the trigger on close.
- */
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, CornerDownLeft, Plus, ArrowRight, Clock, User,
@@ -148,7 +138,7 @@ const CommandPalette = ({ isOpen, onClose, onQuickCreate }: CommandPaletteProps)
 
   let runningIndex = -1;
 
-  return (
+  return createPortal(
     <div className="cmdk" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div
         className="cmdk__panel"
@@ -228,7 +218,8 @@ const CommandPalette = ({ isOpen, onClose, onQuickCreate }: CommandPaletteProps)
           <span><kbd>esc</kbd> close</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
