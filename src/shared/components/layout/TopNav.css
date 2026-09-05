@@ -17,38 +17,9 @@
   box-shadow: 0 10px 30px -22px rgba(0, 0, 0, 0.5);
 }
 
-/* ---- Left: app-bar breadcrumb ---- */
-.topnav__section {
-  display: flex;
-  align-items: center;
-  gap: 0.4375rem;
-  min-width: 0;
-}
 
-.topnav__crumb {
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-}
-
-.topnav__crumb.is-current {
-  font-size: 1.0625rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.topnav__crumb-sep {
-  color: var(--text-disabled);
-  flex-shrink: 0;
-}
-
-/* ---- Centre: command bar ----
-   Below 1200px it flows between the breadcrumb and the actions; at wider
-   widths it is absolutely centred on the header (see the media query below). */
 .topnav__command {
+  grid-column: 2;
   width: clamp(320px, 42vw, 620px);
   margin-inline: auto;
   display: flex;
@@ -104,6 +75,7 @@
 
 /* ---- Right: actions ---- */
 .topnav__actions {
+  grid-column: 3;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -197,8 +169,15 @@
 }
 
 @keyframes dropdownFadeIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .topnav__pop--menu {
@@ -483,8 +462,13 @@
 }
 
 @keyframes skeletonShimmer {
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0 50%; }
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
 }
 
 .dropdown-icon {
@@ -656,22 +640,11 @@
 
 /* ---- Responsive ---- */
 
-@media (max-width: 1100px) {
-  .topnav__section .topnav__crumb:not(.is-current),
-  .topnav__section .topnav__crumb-sep {
-    display: none;
-  }
-}
-
 @media (max-width: 900px) {
   .topnav {
     height: 60px;
     padding-left: 68px;
     gap: 0.875rem;
-  }
-
-  .topnav__section {
-    display: none;
   }
 
   .topnav__command {

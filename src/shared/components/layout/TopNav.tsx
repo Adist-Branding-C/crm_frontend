@@ -1,20 +1,9 @@
 
-/**
- * Application header — a command-first top bar.
- *
- *  left    section context (where you are)
- *  centre  the command bar: one ⌘K surface for search + create + navigate
- *  right   a stable "New" menu, a notifications popover, the profile menu
- *
- * The heavy lifting (record search, quick-create, jump-to) lives in
- * <CommandPalette>; this component only owns the bar, the two popovers and the
- * profile menu. Opening the palette is also bound to ⌘K / Ctrl+K globally via
- * useCommandPalette.
- */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Search, Bell, Plus, ChevronDown, ChevronRight, X, User, DollarSign, ListChecks, Megaphone,
+  Search, Bell, Plus, ChevronDown, X, User, DollarSign, ListChecks, Megaphone,
   UserCircle, Settings, HelpCircle, LogOut, Building, Check, Calendar, AlertCircle,
   Info, Sun, Moon, Monitor,
 } from 'lucide-react';
@@ -23,7 +12,6 @@ import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import type { ThemeMode } from '../../constants/theme';
 import { useCommandPalette } from '../../hooks/useCommandPalette';
-import { sidebarAdminItem, sidebarNavGroups, sidebarSettingsItem } from '../../constants/sidebar';
 import { useCurrentStaff } from '../../../features/account-settings/agent/hooks/useCurrentStaff';
 import { useNotifications } from '../../../features/notifications/hooks/useNotifications';
 import { NotificationType } from '../../../features/notifications/types';
@@ -57,29 +45,6 @@ const notificationIcons: Record<string, NotificationIconInfo> = {
 const getNotificationIcon = (type: string): NotificationIconInfo =>
   notificationIcons[type] || { icon: Bell, color: 'var(--text-tertiary)' };
 
-const SECTIONS = [
-  ...sidebarNavGroups.flatMap((g) => g.items),
-  sidebarAdminItem,
-  sidebarSettingsItem,
-];
-
-const titleCase = (seg: string): string =>
-  seg.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-
-/** Coarse app-bar breadcrumb: matched section, then any deeper path segments. */
-const crumbsFor = (pathname: string): string[] => {
-  const match = SECTIONS
-    .filter((s) => pathname === s.path || pathname.startsWith(s.path + '/'))
-    .sort((a, b) => b.path.length - a.path.length)[0];
-
-  const all = pathname.split('/').filter(Boolean);
-  if (match) {
-    const consumed = match.path.split('/').filter(Boolean).length;
-    return [match.label, ...all.slice(consumed).map(titleCase)].slice(0, 3);
-  }
-  return [titleCase(all[0] ?? 'Dashboard')];
-};
-
 const isMac = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/.test(navigator.userAgent);
 
 const TopNav = ({ onOpenDrawer }: TopNavProps) => {
@@ -93,8 +58,6 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
 
   const [openMenu, setOpenMenu] = useState<null | 'new' | 'notif' | 'profile'>(null);
   const barRef = useRef<HTMLElement>(null);
-
-  const crumbs = useMemo(() => crumbsFor(location.pathname), [location.pathname]);
 
   const currentUser = {
     name: currentStaff?.name ?? '',
@@ -138,20 +101,6 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
 
   return (
     <header className="topnav" ref={barRef}>
-      <nav className="topnav__section" aria-label="Breadcrumb">
-        {crumbs.map((crumb, i) => (
-          <React.Fragment key={`${crumb}-${i}`}>
-            {i > 0 && <ChevronRight size={15} className="topnav__crumb-sep" aria-hidden="true" />}
-            <span
-              className={`topnav__crumb${i === crumbs.length - 1 ? ' is-current' : ''}`}
-              aria-current={i === crumbs.length - 1 ? 'page' : undefined}
-            >
-              {crumb}
-            </span>
-          </React.Fragment>
-        ))}
-      </nav>
-
       <button
         type="button"
         className="topnav__command"

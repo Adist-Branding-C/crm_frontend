@@ -6,14 +6,7 @@
   justify-content: center;
   align-items: flex-start;
   padding: 12vh 1rem 1rem;
-  background: var(--overlay);
-  backdrop-filter: blur(3px);
-  animation: cmdk-fade 0.12s ease;
-}
 
-@keyframes cmdk-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .cmdk__panel {
@@ -31,8 +24,15 @@
 }
 
 @keyframes cmdk-rise {
-  from { opacity: 0; transform: translateY(-8px) scale(0.99); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ---- Field ---- */
@@ -91,7 +91,7 @@
   font-size: 0.875rem;
 }
 
-.cmdk__section + .cmdk__section {
+.cmdk__section+.cmdk__section {
   margin-top: 0.25rem;
 }
 
@@ -175,9 +175,17 @@
   color: var(--text-tertiary);
 }
 
-.cmdk__item-hint { opacity: 0; }
-.cmdk__item.is-active .cmdk__item-hint { opacity: 0; }
-.cmdk__item-enter { color: var(--accent-text); }
+.cmdk__item-hint {
+  opacity: 0;
+}
+
+.cmdk__item.is-active .cmdk__item-hint {
+  opacity: 0;
+}
+
+.cmdk__item-enter {
+  color: var(--accent-text);
+}
 
 /* ---- Footer ---- */
 .cmdk__foot {
@@ -196,6 +204,11 @@
 }
 
 @media (max-width: 640px) {
-  .cmdk { padding-top: 8vh; }
-  .cmdk__foot { display: none; }
+  .cmdk {
+    padding-top: 8vh;
+  }
+
+  .cmdk__foot {
+    display: none;
+  }
 }
