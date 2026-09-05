@@ -205,13 +205,14 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
                   })
                 )}
               </div>
-              <button
+              {/* Hidden: Notification Settings page disabled per client request (2026-09-04) */}
+              {/* <button
                 type="button"
                 className="notif-foot"
                 onClick={() => { setOpenMenu(null); navigate('/user/notifications-users'); }}
               >
                 View all notifications
-              </button>
+              </button> */}
             </div>
           )}
         </div>

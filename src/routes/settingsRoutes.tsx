@@ -8,7 +8,8 @@ import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSour
 import LeadTypesPage from '../features/lead-settings/lead-types/pages/LeadTypesPage';
 import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/LeadAdditionalPage';
 // import CustomPipelinePage from '../features/pipeline-settings/pages/CustomPipelinePage';
-import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
+// Hidden: Notification Settings page disabled per client request (2026-09-04)
+// import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
 // import PaymentPlansPage from '../features/payment-plans/pages/PaymentPlansPage';
 import ConnectPage from '../features/connect/pages/ConnectPage';
 import ConnectApiPage from '../features/connect-api/pages/ConnectApiPage';
@@ -29,7 +30,8 @@ export default (
     <Route path="settings/lead-settings/types" element={<ErrorBoundary><LeadTypesPage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/additional" element={<ErrorBoundary><LeadAdditionalPage /></ErrorBoundary>} />
     {/* <Route path="settings/custom-pipeline" element={<ErrorBoundary><CustomPipelinePage /></ErrorBoundary>} /> */}
-    <Route path="user/notifications-users" element={<NotificationSettingsPage />} />
+    {/* Hidden: Notification Settings page disabled per client request (2026-09-04) */}
+    {/* <Route path="user/notifications-users" element={<NotificationSettingsPage />} /> */}
     {/* <Route path="user/payment-plans" element={<PaymentPlansPage />} /> */}
     <Route path="user/connect" element={<ConnectPage />} />
     <Route path="user/connect/api" element={<ConnectApiPage />} />
