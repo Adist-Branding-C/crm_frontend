@@ -255,7 +255,17 @@ const EnquiriesPage = () => {
                 </TRow>
               </THead>
               <TBody>
-                {crud.leads.length === 0 ? (
+                {crud.isLoading ? (
+                  Array.from({ length: 5 }).map((_, rowIndex) => (
+                    <TRow key={rowIndex}>
+                      {columns.map(col => (
+                        <TCell key={col.key}>
+                          <div className="skeleton-box" />
+                        </TCell>
+                      ))}
+                    </TRow>
+                  ))
+                ) : crud.leads.length === 0 ? (
                   <EmptyState colSpan={columns.length} message={LABEL_NO_DATA} />
                 ) : (
                   crud.leads.map(lead => (
@@ -280,8 +290,6 @@ const EnquiriesPage = () => {
                 )}
               </TBody>
             </Table>
-
-            {crud.isLoading && <div className="table-loading">Loading...</div>}
 
             <Pagination
               currentPage={pagination.currentPage}
