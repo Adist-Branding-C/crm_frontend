@@ -19,6 +19,13 @@ import { useDealDeleteConfirm } from '../hooks/useDealDeleteConfirm';
 import { useDealActionMenu } from '../hooks/useDealActionMenu';
 import { useDealRowActions } from '../hooks/useDealRowActions';
 import { useDrafts } from '../../../shared/hooks/useDrafts';
+import { useDrawer } from '../../../shared/hooks/useDrawer';
+import { useTableSelection } from '../../../shared/hooks/useTableSelection';
+import DealDetailDrawer from '../../../shared/components/drawers/DealDetailDrawer';
+import DealBulkActionsDropdown from '../components/DealBulkActionsDropdown';
+import BulkChangeStageModal from '../components/BulkChangeStageModal';
+import BulkReassignOwnerModal from '../components/BulkReassignOwnerModal';
+import { useDealBulkActions } from '../hooks/useDealBulkActions';
 import { useDealClearFilters } from '../hooks/useDealClearFilters';
 import { useDealCrud } from '../hooks/useDealCrud';
 import { useDealDrawer } from '../hooks/useDealDrawer';
@@ -45,7 +52,11 @@ import type { DealFormData } from '../../../shared/types/drawers';
 import type { DealItem } from '../types/interface';
 import './DealPage.css';
 
-const DealPage = () => {
+export interface DealPageProps {
+  headerExtra?: React.ReactNode;
+}
+
+const DealPage = ({ headerExtra }: DealPageProps) => {
   const toast = useToast();
   const list = useDealList(toast.showToastMessage);
   const { staff: formStaff } = useDealFormOptions();
@@ -88,9 +99,23 @@ const DealPage = () => {
     showToastMessage: toast.showToastMessage,
   });
   const drawer = useDealDrawer();
+  const detailDrawer = useDrawer<DealItem>();
   const deleteConfirm = useDealDeleteConfirm(crud.handleDeleteDeal);
   const actionMenu = useDealActionMenu();
-  const rowActions = useDealRowActions(actionMenu, drawer, deleteConfirm);
+  const rowActions = useDealRowActions(actionMenu, detailDrawer, deleteConfirm);
+
+  const handleEditFromDetail = useCallback((deal: DealItem) => {
+    detailDrawer.close();
+    drawer.openEditDrawer(deal);
+  }, [detailDrawer.close, drawer.openEditDrawer]);
+
+  const selection = useTableSelection<string>();
+  const bulkActions = useDealBulkActions({
+    selectedIds: selection.selectedIds,
+    onRefresh: () => list.refreshCurrentPage(),
+    onShowToast: toast.showToastMessage,
+    onClearSelection: () => selection.setSelectedIds([]),
+  });
 
   const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
   const { staff } = useStaffList();
@@ -170,10 +195,13 @@ const DealPage = () => {
       amount: String(drawer.editingItem.amount || '').replace(/\.00$/, ''),
       status: drawer.editingItem.status || '',
       statusId: drawer.editingItem.statusId || '',
+      pipelineId: drawer.editingItem.pipelineId || '',
+      stageId: drawer.editingItem.stageId || drawer.editingItem.statusId || '',
+      priority: drawer.editingItem.priority || '',
       type: drawer.editingItem.type || '',
-      typeId: drawer.editingItem.typeId || '',
       startDate: drawer.editingItem.startDate || '',
       endDate: drawer.editingItem.endDate || '',
+      closeDate: drawer.editingItem.closeDate || drawer.editingItem.endDate || '',
       assignAgent: agentMatch?.label ?? (drawer.editingItem.agent || ''),
       agentId: agentMatch ? agentMatch.value : (rawAgentId || ''),
       ...additionalFieldValues,
@@ -237,6 +265,14 @@ const DealPage = () => {
     }
   }, [list.dealList, drawer.editingItem, drawer.openEditDrawer]);
 
+  useEffect(() => {
+    if (!detailDrawer.item) return;
+    const updated = list.dealList.find(d => d.id === detailDrawer.item!.id);
+    if (updated && updated.createdAt !== detailDrawer.item!.createdAt) {
+      detailDrawer.open(updated);
+    }
+  }, [list.dealList, detailDrawer.item, detailDrawer.open]);
+
   const paginatedIds = useMemo(() => getDealIds(list.dealList), [list.dealList]);
 
   const clearFilters = useDealClearFilters(filtersHook, dealSearch, pagination, sortHook, list.fetchDeals, rowsPerPageRef);
@@ -280,14 +316,17 @@ const DealPage = () => {
         title="Deals"
         description="Track sales opportunities, aiding management and conversion of potential customers."
         action={
-          drafts.length > 0 && (
-            <button
-              className={`btn ${activeView === 'drafts' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setActiveView(activeView === 'drafts' ? 'deals' : 'drafts')}
-            >
-              {activeView === 'drafts' ? <><Briefcase size={16} /> Back to Deals</> : <><FileText size={16} /> Drafts</>}
-            </button>
-          )
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            {headerExtra}
+            {drafts.length > 0 && (
+              <button
+                className={`btn ${activeView === 'drafts' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setActiveView(activeView === 'drafts' ? 'deals' : 'drafts')}
+              >
+                {activeView === 'drafts' ? <><Briefcase size={16} /> Back to Deals</> : <><FileText size={16} /> Drafts</>}
+              </button>
+            )}
+          </div>
         }
       />
 
@@ -322,6 +361,12 @@ const DealPage = () => {
               }}
             />
 
+            <DealBulkActionsDropdown
+              selectedCount={selection.selectedIds.length}
+              onChangeStage={bulkActions.handleChangeStageClick}
+              onReassignOwner={bulkActions.handleReassignOwnerClick}
+            />
+
             <button
               className="btn btn-secondary"
               onClick={() => handleExportCSV(dealSearch.searchQuery, activeFiltersRef.current)}
@@ -354,9 +399,19 @@ const DealPage = () => {
                   className={col.sortable ? 'sortable' : ''}
                   onClick={col.sortable ? () => sortHook.handleSort(col.key) : undefined}
                 >
-                  {col.label}
-                  {col.sortable && sortHook.sortConfig.key === col.key && (
-                    sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                  {col.key === 'checkbox' ? (
+                    <input
+                      type="checkbox"
+                      checked={list.dealList.length > 0 && selection.selectedIds.length === list.dealList.length}
+                      onChange={(e) => selection.handleSelectAll(list.dealList.map(d => String(d.id)), e.target.checked)}
+                    />
+                  ) : (
+                    <>
+                      {col.label}
+                      {col.sortable && sortHook.sortConfig.key === col.key && (
+                        sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                      )}
+                    </>
                   )}
                 </TCell>
               ))}
@@ -374,14 +429,15 @@ const DealPage = () => {
                   deal={deal}
                   columns={columns}
                   additionalFieldColumns={additionalFieldColumnNames}
-                  isSelected={false}
-                  onSelectRow={() => {}}
+                  isSelected={selection.isSelected(String(deal.id))}
+                  onSelectRow={() => selection.handleSelectRow(String(deal.id))}
                   actionMenu={{
                     isOpen: actionMenu.openId === deal.id,
                     buttonRect: actionMenu.openId === deal.id ? actionMenu.buttonRect : null,
                     onOpen: actionMenu.open,
                     onClose: actionMenu.close,
                   }}
+                  onViewDeal={detailDrawer.open}
                   onEditDeal={drawer.openEditDrawer}
                   onDeleteDeal={rowActions.handleDeleteFromRow}
                   onSendWhatsapp={handleSendWhatsapp}
@@ -447,6 +503,31 @@ const DealPage = () => {
         error={formError}
         onConfirm={deleteConfirm.handleConfirmDelete}
         onClose={() => { setFormError(''); deleteConfirm.closeDeleteModal(); }}
+      />
+
+      <BulkChangeStageModal
+        isOpen={bulkActions.showChangeStageModal}
+        selectedCount={selection.selectedIds.length}
+        isProcessing={bulkActions.isProcessing}
+        onConfirm={bulkActions.handleConfirmChangeStage}
+        onClose={() => bulkActions.setShowChangeStageModal(false)}
+      />
+
+      <BulkReassignOwnerModal
+        isOpen={bulkActions.showReassignOwnerModal}
+        selectedCount={selection.selectedIds.length}
+        isProcessing={bulkActions.isProcessing}
+        onConfirm={bulkActions.handleConfirmReassignOwner}
+        onClose={() => bulkActions.setShowReassignOwnerModal(false)}
+      />
+
+      <DealDetailDrawer
+        deal={detailDrawer.item}
+        isOpen={detailDrawer.isOpen}
+        onClose={detailDrawer.close}
+        onDealUpdated={list.refreshCurrentPage}
+        onEditDeal={handleEditFromDetail}
+        onDeleteDeal={rowActions.handleDeleteFromDrawer}
       />
 
       <Toast

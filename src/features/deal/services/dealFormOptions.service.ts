@@ -28,14 +28,6 @@ class DealFormOptionsService {
     };
   }
 
-  async getTypes(pageNumber = 1, limit = 10) {
-    const response = await axiosInstance.get(`/deal-settings/types?pageNumber=${pageNumber}&limit=${limit}`);
-    return {
-      status: response.data.status,
-      message: response.data.message,
-      data: response.data.data,
-    };
-  }
 }
 
 export const dealFormOptionsService = new DealFormOptionsService();

@@ -1,0 +1,81 @@
+.stage-node {
+  width: 200px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-3);
+  border: 1px solid var(--border-default);
+  border-left-width: 4px;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--elevation-1);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.stage-node--selected {
+  border-color: var(--accent);
+  box-shadow: var(--elevation-2);
+}
+
+.stage-node--inactive {
+  opacity: 0.6;
+}
+
+.stage-node__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.stage-node__name {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stage-node__outcome {
+  flex-shrink: 0;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.125rem var(--space-2);
+  border-radius: 999px;
+}
+
+.stage-node__outcome--open {
+  background: var(--info-subtle);
+  color: var(--info-text);
+}
+
+.stage-node__outcome--won {
+  background: var(--success-subtle);
+  color: var(--success-text);
+}
+
+.stage-node__outcome--lost {
+  background: var(--danger-subtle);
+  color: var(--danger-text);
+}
+
+.stage-node__probability {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.stage-node__inactive-badge {
+  margin-top: var(--space-1);
+  font-size: var(--text-2xs);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.stage-node__handle {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border: 2px solid var(--surface-3);
+}

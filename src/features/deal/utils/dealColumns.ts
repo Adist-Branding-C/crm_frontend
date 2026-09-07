@@ -2,6 +2,7 @@ import type { DealItem } from '../types/interface';
 
 export function getDealColumns(deals: DealItem[]): Array<{ key: string; label: string; sortable?: boolean }> {
   const baseColumns = [
+    { key: 'checkbox', label: '' },
     { key: 'action', label: 'Action' },
     { key: 'dealName', label: 'Deal Name', sortable: true },
     { key: 'lead', label: 'Lead', sortable: true },

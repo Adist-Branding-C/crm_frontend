@@ -14,6 +14,7 @@ import { getTodayDateString } from '../utils/dealDateValidation';
 import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from '../../../shared/constants/countryCodes';
 import SelectSearch from '../../../shared/components/SelectSearch';
 import type { DealFormProps } from '../types';
+import { DEAL_LOST_REASON_OPTIONS } from '../constants/dealLostReasons';
 import '../../../shared/components/drawers/AddLeadDrawer.css';
 
 /**
@@ -69,8 +70,8 @@ const DealForm = ({
   const mobileEditedRef = useRef(false);
   const agentEditedRef = useRef(false);
   const {
-    leads, staff, statuses, types,
-    isLoadingLeads, isLoadingStaff, isLoadingStatuses, isLoadingTypes,
+    leads, staff, statuses, pipelines,
+    isLoadingLeads, isLoadingStaff, isLoadingStatuses, isLoadingPipelines,
   } = useDealFormOptions();
   const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
   const isEditing = !!editingItem;
@@ -102,11 +103,14 @@ const DealForm = ({
               {
                 title: 'Details',
                 fields: [
-                  { label: 'Status', value: statuses.find(s => String(s.value) === String(values.statusId))?.label || '' },
-                  { label: 'Type', value: types.find(t => String(t.value) === String(values.typeId))?.label || '' },
+                  { label: 'Pipeline', value: pipelines.find(p => String(p.id) === String(values.pipelineId))?.name || '' },
+                  { label: 'Stage', value: statuses.find(s => String(s.value) === String(values.stageId))?.label || '' },
+                  { label: 'Priority', value: values.priority },
+                  { label: 'Type', value: values.type },
+                  ...((values as any).lostReason ? [{ label: 'Lost Reason', value: (values as any).lostReason }] : []),
                   { label: 'Start Date', value: values.startDate },
-                  { label: 'End Date', value: values.endDate },
-                  { label: 'Agent', value: staff.find(s => String(s.value) === String(values.agentId))?.label || '' },
+                  { label: 'Close Date', value: values.closeDate },
+                  { label: 'Deal Owner', value: staff.find(s => String(s.value) === String(values.agentId))?.label || '' },
                 ]
               }
             ];
@@ -128,21 +132,43 @@ const DealForm = ({
             `form-control${touched[name as keyof typeof touched] && errors[name as keyof typeof errors] ? ' input-error' : ''}`;
 
           const leadsEmpty = !isLoadingLeads && leads.length === 0;
-          const statusesEmpty = !isLoadingStatuses && statuses.length === 0;
-          const typesEmpty = !isLoadingTypes && types.length === 0;
+          const pipelinesEmpty = !isLoadingPipelines && pipelines.length === 0;
+          // Stage options are scoped to whichever pipeline is currently
+          // selected - the same company-wide list backs every pipeline's
+          // picker, filtered client-side by each stage's own pipelineId.
+          const stagesForPipeline = statuses.filter(
+            (s) => !values.pipelineId || String(s.pipelineId) === String(values.pipelineId),
+          );
+          const statusesEmpty = !isLoadingStatuses && stagesForPipeline.length === 0;
           const staffEmpty = !isLoadingStaff && staff.length === 0;
+          // Lost Reason is only asked for when the selected stage's outcome
+          // is LOST - the backend requires it in that case (see
+          // deals.service.ts's LOST_REASON_REQUIRED guard).
+          const selectedStageIsLost = stagesForPipeline.find(
+            (s) => String(s.value) === String(values.stageId),
+          )?.outcome === 'LOST';
 
           const todayStr = getTodayDateString();
-          const endDateMin = values.startDate && values.startDate > todayStr ? values.startDate : todayStr;
+          const closeDateMin = values.startDate && values.startDate > todayStr ? values.startDate : todayStr;
 
           const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
             setFieldValue('startDate', value);
             setFieldTouched('startDate', true, false);
-            if (values.endDate && value && values.endDate < value) {
-              setFieldValue('endDate', '');
-              setFieldTouched('endDate', true, false);
+            if (values.closeDate && value && values.closeDate < value) {
+              setFieldValue('closeDate', '');
+              setFieldTouched('closeDate', true, false);
             }
+          };
+
+          // Changing pipeline invalidates whatever stage was picked (stages
+          // belong to exactly one pipeline) - reset it rather than leave a
+          // stale, now-mismatched stageId selected.
+          const handlePipelineChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+            const value = e.target.value;
+            setFieldValue('pipelineId', value);
+            setFieldValue('stageId', '');
+            setFieldTouched('pipelineId', true, false);
           };
 
           // Formik's <Field name="mobile"> rendered a DOM `name`/`id` of "mobile",
@@ -308,55 +334,105 @@ const DealForm = ({
               </div>
 
               <div className="form-group">
-                <label>Status <span className="text-danger">*</span></label>
-                <SelectSearch
-                  name="statusId"
-                  value={String(values.statusId || '')}
-                  options={statuses}
-                  disabled={isLoadingStatuses || statusesEmpty}
-                  placeholder={isLoadingStatuses ? 'Loading...' : 'Select a status'}
-                  onChange={(e: any) => {
-                    setFieldValue('statusId', e.target.value);
-                    setFieldTouched('statusId', true, false);
-                  }}
-                  onBlur={() => setFieldTouched('statusId', true)}
-                  className={touched.statusId && errors.statusId ? 'input-error' : ''}
-                />
-                {statusesEmpty ? (
+                <label>Pipeline <span className="text-danger">*</span></label>
+                <select
+                  name="pipelineId"
+                  value={String(values.pipelineId || '')}
+                  disabled={isLoadingPipelines || pipelinesEmpty}
+                  onChange={handlePipelineChange}
+                  onBlur={() => setFieldTouched('pipelineId', true)}
+                  className={fieldClass('pipelineId')}
+                >
+                  <option value="">{isLoadingPipelines ? 'Loading...' : 'Select a pipeline'}</option>
+                  {pipelines.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}{p.isDefault ? ' (Default)' : ''}</option>
+                  ))}
+                </select>
+                {pipelinesEmpty ? (
                   <small className="field-error-text">
-                    No statuses found. Please add a status first. <Link to="/user/deal-stages">+ Add Status</Link>
+                    No pipelines found. Please create one first. <Link to="/settings/deal-pipelines">+ Create Pipeline</Link>
                   </small>
                 ) : (
-                  <FormikError name="statusId" component="small" className="field-error-text" />
+                  <FormikError name="pipelineId" component="small" className="field-error-text" />
                 )}
+              </div>
+
+              <div className="form-group">
+                <label>Stage <span className="text-danger">*</span></label>
+                <SelectSearch
+                  name="stageId"
+                  value={String(values.stageId || '')}
+                  options={stagesForPipeline}
+                  disabled={isLoadingStatuses || statusesEmpty || !values.pipelineId}
+                  placeholder={!values.pipelineId ? 'Select a pipeline first' : isLoadingStatuses ? 'Loading...' : 'Select a stage'}
+                  onChange={(e: any) => {
+                    setFieldValue('stageId', e.target.value);
+                    setFieldTouched('stageId', true, false);
+                  }}
+                  onBlur={() => setFieldTouched('stageId', true)}
+                  className={touched.stageId && errors.stageId ? 'input-error' : ''}
+                />
+                {statusesEmpty && values.pipelineId ? (
+                  <small className="field-error-text">
+                    No stages in this pipeline yet. <Link to="/settings/deal-pipelines">+ Add a stage</Link>
+                  </small>
+                ) : (
+                  <FormikError name="stageId" component="small" className="field-error-text" />
+                )}
+              </div>
+
+              {selectedStageIsLost && (
+                <div className="form-group">
+                  <label>Lost Reason <span className="text-danger">*</span></label>
+                  <select
+                    name="lostReason"
+                    value={(values as any).lostReason || ''}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={fieldClass('lostReason')}
+                  >
+                    <option value="">Select a reason</option>
+                    {DEAL_LOST_REASON_OPTIONS.map((reason) => (
+                      <option key={reason} value={reason}>{reason}</option>
+                    ))}
+                  </select>
+                  <FormikError name="lostReason" component="small" className="field-error-text" />
+                </div>
+              )}
+
+              <div className="form-group">
+                <label>Priority <span className="text-danger">*</span></label>
+                <select
+                  name="priority"
+                  value={(values as any).priority || ''}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={fieldClass('priority')}
+                >
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+                <FormikError name="priority" component="small" className="field-error-text" />
               </div>
 
               <div className="form-group">
                 <label>Type <span className="text-danger">*</span></label>
-                <SelectSearch
-                  name="typeId"
-                  value={String(values.typeId || '')}
-                  options={types}
-                  disabled={isLoadingTypes || typesEmpty}
-                  placeholder={isLoadingTypes ? 'Loading...' : 'Select a type'}
-                  onChange={(e: any) => {
-                    setFieldValue('typeId', e.target.value);
-                    setFieldTouched('typeId', true, false);
-                  }}
-                  onBlur={() => setFieldTouched('typeId', true)}
-                  className={touched.typeId && errors.typeId ? 'input-error' : ''}
-                />
-                {typesEmpty ? (
-                  <small className="field-error-text">
-                    No deal types found. Please add a type first. <Link to="/user/deal-types">+ Add Type</Link>
-                  </small>
-                ) : (
-                  <FormikError name="typeId" component="small" className="field-error-text" />
-                )}
+                <select
+                  name="type"
+                  value={(values as any).type || ''}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={fieldClass('type')}
+                >
+                  <option value="New">New</option>
+                  <option value="Existing">Existing</option>
+                </select>
+                <FormikError name="type" component="small" className="field-error-text" />
               </div>
 
               <div className="form-group">
-                <label>Start Date <span className="text-danger">*</span></label>
+                <label>Start Date</label>
                 <Field
                   type="date"
                   name="startDate"
@@ -368,18 +444,18 @@ const DealForm = ({
               </div>
 
               <div className="form-group">
-                <label>End Date <span className="text-danger">*</span></label>
+                <label>Close Date <span className="text-danger">*</span></label>
                 <Field
                   type="date"
-                  name="endDate"
-                  min={endDateMin}
-                  className={fieldClass('endDate')}
+                  name="closeDate"
+                  min={closeDateMin}
+                  className={fieldClass('closeDate')}
                 />
-                <FormikError name="endDate" component="small" className="field-error-text" />
+                <FormikError name="closeDate" component="small" className="field-error-text" />
               </div>
 
               <div className="form-group">
-                <label>Assign Agent <span className="text-danger">*</span></label>
+                <label>Deal Owner <span className="text-danger">*</span></label>
                 <SelectSearch
                   name="agentId"
                   value={String(values.agentId || '')}

@@ -43,6 +43,28 @@ class DealService {
     };
   }
 
+  async bulkChangeStage(dealIds: string[], stageId: number, lostReason?: string) {
+    const response = await axiosInstance.patch('/deals/bulk/stage', {
+      dealIds,
+      stageId,
+      ...(lostReason ? { lostReason } : {}),
+    });
+    return {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  }
+
+  async bulkReassignOwner(dealIds: string[], agentId: string) {
+    const response = await axiosInstance.patch('/deals/bulk/owner', { dealIds, agentId });
+    return {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  }
+
   async deleteDeal(dealId: string) {
     const response = await axiosInstance.delete(DEAL_API_ENDPOINTS.DELETE(dealId));
     return {

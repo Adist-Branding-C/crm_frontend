@@ -14,7 +14,11 @@ export function useDealCrud({ pagination, showToastMessage }: UseDealCrudParams)
       const response = await dealService.createDeal(values);
       if (response.status) {
         pagination.refresh();
-        showToastMessage(SUCCESS_MESSAGES.DEAL_CREATED, 'success');
+        // Duplicate-deal warning (Phase 8 backlog): informational only, never
+        // blocked the create - the backend already saved the deal, this just
+        // surfaces the heads-up alongside the usual success toast.
+        const warning = (response.data as { warning?: string } | undefined)?.warning;
+        showToastMessage(warning ? `${SUCCESS_MESSAGES.DEAL_CREATED} ${warning}.` : SUCCESS_MESSAGES.DEAL_CREATED, 'success');
         return true;
       }
       const message = response.message || ERROR_MESSAGES.CREATE_DEAL;

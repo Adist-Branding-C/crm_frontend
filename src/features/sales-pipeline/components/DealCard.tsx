@@ -5,7 +5,13 @@ import { formatDate } from '../../../shared/utils/dateUtils';
 import { hashStringToColor } from '../utils/pipelineColor.util';
 import type { DealCardProps } from '../types';
 
-const DealCard: React.FC<DealCardProps> = ({ deal, statusId }) => {
+const PRIORITY_COLOR: Record<string, string> = {
+  High: 'var(--danger-text)',
+  Medium: 'var(--warning-text)',
+  Low: 'var(--text-tertiary)',
+};
+
+const DealCard: React.FC<DealCardProps> = ({ deal, statusId, probability }) => {
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id: `deal-${deal.id}`,
     data: { type: 'deal', deal, statusId },
@@ -25,9 +31,17 @@ const DealCard: React.FC<DealCardProps> = ({ deal, statusId }) => {
         </div>
       )}
       <div className="deal-title">{deal.dealName}</div>
+      {deal.priority && (
+        <span
+          className="deal-priority-badge"
+          style={{ color: PRIORITY_COLOR[deal.priority] ?? 'var(--text-tertiary)' }}
+        >
+          {deal.priority}
+        </span>
+      )}
       <div className="deal-value">
         <DollarSign size={14} />
-        {deal.amount.toLocaleString()}
+        {Number(deal.amount).toLocaleString()}
       </div>
       <div className="deal-footer">
         <div className="deal-contact">
@@ -39,19 +53,19 @@ const DealCard: React.FC<DealCardProps> = ({ deal, statusId }) => {
           </div>
           <span>{deal.agent || 'Unassigned'}</span>
         </div>
-        {typeof deal.probability === 'number' && (
+        {typeof probability === 'number' && (
           <div
             className="deal-probability"
             style={{
               color:
-                deal.probability === 100
+                probability === 100
                   ? 'var(--success)'
-                  : deal.probability === 0
+                  : probability === 0
                     ? 'var(--danger)'
                     : 'var(--text-tertiary)',
             }}
           >
-            {deal.probability}%
+            {probability}%
           </div>
         )}
       </div>

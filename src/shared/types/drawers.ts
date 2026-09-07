@@ -54,10 +54,23 @@ export interface DealFormData {
   amount: string;
   status: string;
   statusId?: string | number;
+  // Deal Pipeline Redesign (Phase 5): pipelineId/stageId replace status/
+  // statusId going forward - status/statusId are kept only for the read-only
+  // table/column display code that hasn't been migrated yet, not written by
+  // the form anymore.
+  pipelineId?: string | number;
+  stageId?: string | number;
+  priority?: string;
+  // Required only when stageId's outcome is LOST - enforced server-side
+  // (see deals.service.ts's LOST_REASON_REQUIRED guard), not by this form's
+  // Yup schema, since Yup has no visibility into the selected stage's outcome.
+  lostReason?: string;
+  // `type` is now a fixed Existing/New select (was a dynamic dropdown bound
+  // to typeId) - typeId is dropped from the form entirely.
   type: string;
-  typeId?: string | number;
   startDate: string;
   endDate: string;
+  closeDate?: string;
   assignAgent: string;
   agentId?: string | number;
 }
@@ -126,6 +139,16 @@ export interface ActivityLogItem {
   actorName: string;
   description: string;
   createdAt: string;
+}
+
+import type { DealItem } from '../../features/deal/types/interface';
+
+export interface DealDetailDrawerProps {
+  deal: DealItem | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onDealUpdated?: () => void;
+  onDeleteDeal?: (deal: DealItem) => void;
 }
 
 export interface LeadDetailDrawerProps {

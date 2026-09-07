@@ -92,7 +92,11 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, draftId: initialDraftId, 
         onDraftSaved={setDraftId}
         onPreviewRequest={handlePreviewRequest}
         validationSchema={dealValidationSchema}
-        initialValues={deal ?? { dealName: '', lead: '', mobile: '', mobileCountryCode: DEFAULT_COUNTRY_CODE, mobileNumber: '', amount: '', status: '', type: '', startDate: '', endDate: '', assignAgent: '' }}
+        initialValues={deal ?? {
+          dealName: '', lead: '', mobile: '', mobileCountryCode: DEFAULT_COUNTRY_CODE, mobileNumber: '',
+          amount: '', status: '', pipelineId: '', stageId: '', priority: 'Medium', type: 'New',
+          startDate: '', endDate: '', closeDate: '', assignAgent: '',
+        }}
         onSubmit={async (values) => {
           await onSave({ ...values, mobile: combineMobileValue(values.mobileCountryCode, values.mobileNumber) });
           handleClose();

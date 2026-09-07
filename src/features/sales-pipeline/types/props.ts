@@ -17,6 +17,9 @@ export interface TaskCardProps {
 export interface DealCardProps {
   deal: PipelineDeal;
   statusId: number;
+  // Sourced from the deal's column (stage), not the deal itself - a deal
+  // has no probability of its own until the v1.1 per-deal override ships.
+  probability?: number | undefined;
 }
 
 export interface LeadCardProps {

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { dealFormOptionsService } from '../services/dealFormOptions.service';
+import { dealPipelineService } from '../../deal-pipeline-builder/services/dealPipeline.service';
 import type { LabelValuePair } from '../../../shared/types/common';
+import type { DealPipelineItem } from '../../deal-pipeline-builder/types/interface';
 
 // Carries the lead's own phone/countryCode/agent data alongside the option
 // label/value so DealForm can auto-fill Mobile and Assign Agent on selection
@@ -16,38 +18,49 @@ export interface DealStaffOption extends LabelValuePair {
   rawId?: string | number | null;
 }
 
+// Stages come back company-wide (the legacy deal-settings/status endpoint
+// isn't pipeline-scoped) - pipelineId lets DealForm filter to the ones that
+// belong to whichever pipeline is currently selected.
+export interface DealStageOption extends LabelValuePair {
+  pipelineId: number;
+  outcome?: 'OPEN' | 'WON' | 'LOST';
+}
+
 interface UseDealFormOptionsReturn {
   leads: DealLeadOption[];
   staff: DealStaffOption[];
-  statuses: LabelValuePair[];
-  types: LabelValuePair[];
+  statuses: DealStageOption[];
+  pipelines: DealPipelineItem[];
   isLoadingLeads: boolean;
   isLoadingStaff: boolean;
   isLoadingStatuses: boolean;
-  isLoadingTypes: boolean;
+  isLoadingPipelines: boolean;
 }
 
 interface DealFormOptionsData {
   leads: DealLeadOption[];
   staff: DealStaffOption[];
-  statuses: LabelValuePair[];
-  types: LabelValuePair[];
+  statuses: DealStageOption[];
+  pipelines: DealPipelineItem[];
 }
 
-const EMPTY_OPTIONS: DealFormOptionsData = { leads: [], staff: [], statuses: [], types: [] };
+const EMPTY_OPTIONS: DealFormOptionsData = { leads: [], staff: [], statuses: [], pipelines: [] };
 
 // Module-scoped cache: shared across every DealForm/drawer mount for the lifetime of
-// the page, so leads/staff/statuses/types are fetched only once instead of on every
+// the page, so leads/staff/statuses/pipelines are fetched only once instead of on every
 // Add/Edit Deal drawer opening.
 let dealFormOptionsCache: DealFormOptionsData | null = null;
 let dealFormOptionsRequest: Promise<DealFormOptionsData> | null = null;
 
 async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
-  const [leadsResult, staffResult, statusesResult, typesResult] = await Promise.allSettled([
+  const [leadsResult, staffResult, statusesResult, pipelinesResult] = await Promise.allSettled([
     dealFormOptionsService.getLeads(1, 100),
     dealFormOptionsService.getStaff(1, 100),
-    dealFormOptionsService.getStatuses(1, 10),
-    dealFormOptionsService.getTypes(1, 10),
+    // A company's stages are split across pipelines now, not one flat list -
+    // 200 comfortably covers realistic multi-pipeline stage counts (the old
+    // limit of 10 assumed a single flat list and would silently truncate).
+    dealFormOptionsService.getStatuses(1, 200),
+    dealPipelineService.getAllPipelines(),
   ]);
 
   const leads = leadsResult.status === 'fulfilled'
@@ -82,19 +95,18 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
     ? (() => {
       const data = statusesResult.value?.data;
       const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((s: { id: string | number; name?: string; dealStatus?: string }) => ({ label: s.name || s.dealStatus || 'Unknown', value: String(s.id) }));
+      return items.map((s: { id: string | number; name?: string; dealStatus?: string; pipelineId: number; outcome?: 'OPEN' | 'WON' | 'LOST' }) => ({
+        label: s.name || s.dealStatus || 'Unknown',
+        value: String(s.id),
+        pipelineId: s.pipelineId,
+        outcome: s.outcome,
+      }));
     })()
     : [];
 
-  const types = typesResult.status === 'fulfilled'
-    ? (() => {
-      const data = typesResult.value?.data;
-      const items = Array.isArray(data) ? data : data?.items ?? [];
-      return items.map((t: { id: string | number; name?: string; dealType?: string }) => ({ label: t.name || t.dealType || 'Unknown', value: String(t.id) }));
-    })()
-    : [];
+  const pipelines = pipelinesResult.status === 'fulfilled' ? pipelinesResult.value : [];
 
-  return { leads, staff, statuses, types };
+  return { leads, staff, statuses, pipelines };
 }
 
 export function useDealFormOptions(): UseDealFormOptionsReturn {
@@ -131,10 +143,10 @@ export function useDealFormOptions(): UseDealFormOptionsReturn {
     leads: data.leads,
     staff: data.staff,
     statuses: data.statuses,
-    types: data.types,
+    pipelines: data.pipelines,
     isLoadingLeads: isLoading,
     isLoadingStaff: isLoading,
     isLoadingStatuses: isLoading,
-    isLoadingTypes: isLoading,
+    isLoadingPipelines: isLoading,
   };
 }

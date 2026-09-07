@@ -1,0 +1,37 @@
+/* Retheme React Flow's own CSS variables onto this project's design
+ * tokens, scoped to the canvas container so it stays correct across the
+ * light/dark toggle without touching @xyflow/react's stylesheet directly. */
+.pipeline-canvas {
+  --xy-background-color: var(--surface-2);
+  --xy-background-pattern-color: var(--border-default);
+
+  --xy-edge-stroke: var(--border-strong);
+  --xy-edge-stroke-width: 2;
+  --xy-edge-stroke-selected: var(--accent);
+
+  --xy-connectionline-stroke: var(--accent);
+  --xy-connectionline-stroke-width: 2;
+
+  --xy-handle-background-color: var(--accent);
+  --xy-handle-border-color: var(--surface-3);
+
+  --xy-controls-button-background-color: var(--surface-3);
+  --xy-controls-button-background-color-hover: var(--surface-hover);
+  --xy-controls-button-color: var(--text-secondary);
+  --xy-controls-button-color-hover: var(--text-primary);
+  --xy-controls-button-border-color: var(--border-default);
+  --xy-controls-box-shadow: var(--elevation-1);
+
+  --xy-minimap-background-color: var(--surface-3);
+  --xy-minimap-mask-background-color: var(--surface-selected);
+  --xy-minimap-node-background-color-default: var(--border-strong);
+
+  --xy-attribution-background-color: transparent;
+
+  width: 100%;
+  height: calc(100vh - 220px);
+  min-height: 480px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}

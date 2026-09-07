@@ -47,6 +47,7 @@ export interface DealActionMenuProps {
   onToggle: () => void;
   onClose: () => void;
   row: DealItem;
+  onView: (item: DealItem) => void;
   onEdit: (item: DealItem) => void;
   onDelete: (id: number) => void;
   onWhatsApp: (item: DealItem) => void;
@@ -73,13 +74,14 @@ export interface DealRowProps {
   columns: Array<{ key: string; label: string; sortable?: boolean }>;
   additionalFieldColumns: string[];
   isSelected: boolean;
-  onSelectRow: (id: string, checked: boolean) => void;
+  onSelectRow: (id: string) => void;
   actionMenu: {
     isOpen: boolean;
     buttonRect: DOMRect | null;
     onOpen: (id: number, rect: DOMRect) => void;
     onClose: () => void;
   };
+  onViewDeal: (item: DealItem) => void;
   onEditDeal: (item: DealItem) => void;
   onDeleteDeal: (deal: DealItem) => void;
   onSendWhatsapp: (item: DealItem, message?: string) => void;

@@ -9,13 +9,16 @@ export interface DealItem {
   amount?: number;
   status?: string;
   statusId?: string | number;
+  pipelineId?: string | number;
+  stageId?: string | number;
   type?: string;
-  typeId?: string | number;
   stage?: string;
   priority?: string;
+  lostReason?: string;
   assignedTo?: string;
   startDate?: string;
   endDate?: string;
+  closeDate?: string;
   agent?: string;
   agentId?: string | number;
   createdBy?: string;
@@ -31,14 +34,17 @@ export interface DealFormData {
   amount: string;
   status: string;
   statusId?: string | number;
+  pipelineId?: string | number;
+  stageId?: string | number;
   type: string;
-  typeId?: string | number;
   stage: string;
   priority: string;
+  lostReason?: string;
   assignedTo: string;
   agentId?: string | number;
   startDate: string;
   endDate: string;
+  closeDate?: string;
   notes: string;
   additionalFields?: { fieldId: string; value: string }[];
 }

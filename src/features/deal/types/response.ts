@@ -10,10 +10,12 @@ export interface DealApiItem {
   amount?: number;
   status?: string | { id?: string | number; name?: string; dealStatus?: string };
   statusId?: string | number;
+  pipelineId?: string | number;
+  stageId?: string | number;
   type?: string | { id?: string | number; name?: string; dealType?: string };
-  typeId?: string | number;
   stage?: string;
   priority?: string;
+  lostReason?: string | null;
   assignedTo?: string;
   agent?: string | { id?: string | number; name?: string; staff_id?: string };
   agentId?: string | number;
@@ -21,6 +23,7 @@ export interface DealApiItem {
   createdByType?: string;
   startDate?: string;
   endDate?: string;
+  closeDate?: string;
   createdAt?: string;
   additionalFields?: DealAdditionalField[];
 }
@@ -45,4 +48,21 @@ export interface DealResponse {
   status: boolean;
   message: string;
   data?: unknown;
+}
+
+export interface DealCallLogItem {
+  id: number;
+  leadId: string;
+  callStatus?: string | null;
+  leadStatus?: string | null;
+  purpose?: string | null;
+  agentName?: string | null;
+  remark?: string | null;
+  nextFollowUpDate?: string | null;
+  createdAt?: string;
+}
+
+export interface DealCallLogListData {
+  items: DealCallLogItem[];
+  pagination: PaginationInfo;
 }

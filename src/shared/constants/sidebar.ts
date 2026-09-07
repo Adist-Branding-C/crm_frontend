@@ -17,6 +17,7 @@ import {
   Megaphone,
   FileText,
   BarChart3,
+  TrendingUp,
   Building,
   Settings,
 } from 'lucide-react';
@@ -45,6 +46,7 @@ export const sidebarNavGroups: SidebarNavGroup[] = [
     heading: 'Growth',
     items: [
       { icon: Megaphone, label: 'Campaigns', path: '/campaigns' },
+      { icon: TrendingUp, label: 'Deal Analytics', path: '/user/deal-analytics' },
       { icon: FileText, label: 'Reports', path: '/reports' },
       { icon: BarChart3, label: 'Staff Performance', path: '/staff-performance' },
     ],
