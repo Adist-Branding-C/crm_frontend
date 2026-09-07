@@ -1,24 +1,22 @@
 import type { DealBoardStats } from '../hooks/useDealBoardStats';
+import { CURRENCY_OPTIONS, currencySymbol, DEFAULT_CURRENCY } from '../../../shared/constants/currencies';
 import './DealBoardStatsBar.css';
 
 interface DealBoardStatsBarProps {
   stats: DealBoardStats;
-  currency?: string;
+  currency: string;
+  onCurrencyChange: (currency: string) => void;
 }
 
 function formatCurrency(value: number, currency: string): string {
-  return `${currency} ${Math.round(value).toLocaleString()}`;
+  return `${currencySymbol(currency)}${Math.round(value).toLocaleString()}`;
 }
 
-/**
- * Three-stat summary strip (open deals, total value, weighted forecast)
- * shown above the board. Client-computed from the loaded Kanban data - see
- * useDealBoardStats for the accuracy caveat on large pipelines.
- *
- * Used by:
- * - DealBoardPage
- */
-function DealBoardStatsBar({ stats, currency = '$' }: DealBoardStatsBarProps) {
+function DealBoardStatsBar({ stats, currency, onCurrencyChange }: DealBoardStatsBarProps) {
+  const options = CURRENCY_OPTIONS.filter(
+    (c) => c.code === DEFAULT_CURRENCY || c.code === currency || stats.currencies.includes(c.code),
+  );
+
   return (
     <div className="deal-board-stats-bar">
       <div className="deal-board-stat">
@@ -33,6 +31,18 @@ function DealBoardStatsBar({ stats, currency = '$' }: DealBoardStatsBarProps) {
         <span className="deal-board-stat__label">Weighted Forecast</span>
         <span className="deal-board-stat__value">{formatCurrency(stats.weightedForecast, currency)}</span>
       </div>
+      <label className="deal-board-stat deal-board-stat--currency">
+        <span className="deal-board-stat__label">Currency</span>
+        <select
+          className="deal-board-stat__currency-select"
+          value={currency}
+          onChange={(e) => onCurrencyChange(e.target.value)}
+        >
+          {options.map((c) => (
+            <option key={c.code} value={c.code}>{c.code}</option>
+          ))}
+        </select>
+      </label>
     </div>
   );
 }

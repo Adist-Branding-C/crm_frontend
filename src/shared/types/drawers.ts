@@ -52,6 +52,7 @@ export interface DealFormData {
   mobileCountryCode?: string;
   mobileNumber?: string;
   amount: string;
+  currency: string;
   status: string;
   statusId?: string | number;
   // Deal Pipeline Redesign (Phase 5): pipelineId/stageId replace status/

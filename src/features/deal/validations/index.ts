@@ -78,6 +78,7 @@ function getBaseValidationShape(original?: DealOriginalDates) {
         }
         return true;
       }),
+    currency: yup.string().trim().required('Currency is required'),
     pipelineId: yup.string().required('Pipeline is required'),
     stageId: yup.string().required('Stage is required'),
     priority: yup.string().required('Priority is required'),

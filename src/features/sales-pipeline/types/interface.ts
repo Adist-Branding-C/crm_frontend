@@ -36,6 +36,7 @@ export interface PipelineDeal {
   id: number;
   dealName: string;
   amount: number;
+  currency?: string;
   status: string;
   stageId: number;
   startDate: string | null;

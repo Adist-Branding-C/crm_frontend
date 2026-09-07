@@ -6,20 +6,23 @@ import PageContainer from '../../../shared/components/layout/PageContainer';
 import EmptyState from '../../../shared/components/EmptyState';
 import ToastNotification from '../../../shared/components/ToastNotification';
 import { useToast } from '../../../shared/hooks/useToast';
+import { useDrawer } from '../../../shared/hooks/useDrawer';
+import { DEFAULT_CURRENCY } from '../../../shared/constants/currencies';
 import { useDealsPipeline } from '../../sales-pipeline/hooks/useDealsPipeline';
 import { usePipelineDragDrop } from '../../sales-pipeline/hooks/usePipelineDragDrop';
 import DealPipelineBoard from '../../sales-pipeline/components/DealPipelineBoard';
 import DealPage from '../../deal/pages/DealPage';
+import DealDetailDrawer from '../../../shared/components/drawers/DealDetailDrawer';
+import { dealService } from '../../deal/services/deal.service';
+import { mapApiToUI } from '../../deal/utils/dealMapper';
+import type { DealItem } from '../../deal/types/interface';
 import { useSelectedPipeline } from '../hooks/useSelectedPipeline';
 import { useDealBoardStats } from '../hooks/useDealBoardStats';
 import PipelinePicker from '../components/PipelinePicker';
 import ViewToggle from '../components/ViewToggle';
 import DealBoardStatsBar from '../components/DealBoardStatsBar';
 import { DEAL_BOARD_VIEW_STORAGE_KEY, type DealBoardView } from '../constants/dealBoard.constants';
-import type { LeadStatusGroup, TaskStatusGroup } from '../../sales-pipeline/types/interface';
-// DealPipelineBoard/DealCard/column styles (.pipeline-board, .column-header,
-// .deal-card, etc.) live here, not in a component-local stylesheet - shared
-// with SalesPipelinePage, which is why this page must import it too.
+import type { LeadStatusGroup, TaskStatusGroup, PipelineDeal } from '../../sales-pipeline/types/interface';
 import '../../sales-pipeline/pages/SalesPipelinePage.css';
 import './DealBoardPage.css';
 
@@ -32,19 +35,13 @@ function readStoredView(): DealBoardView {
   }
 }
 
-/**
- * Unified deal list: one page, Kanban ⇄ Table toggle, scoped to a picked
- * pipeline. Composes existing, already-tested pieces rather than
- * duplicating them - the Kanban side reuses DealPipelineBoard/DealCard/
- * usePipelineDragDrop from sales-pipeline (unchanged for Lead/Task, which
- * still live on SalesPipelinePage), and the Table side embeds the existing
- * DealPage exactly as it is, filters/sort/export/drafts and all.
- *
- * Used by:
- * - salesRoutes (/user/deals)
- */
 function DealBoardPage() {
   const [view, setViewState] = useState<DealBoardView>(readStoredView);
+  const [summaryCurrency, setSummaryCurrency] = useState<string>(DEFAULT_CURRENCY);
+  const [openingDealId, setOpeningDealId] = useState<number | null>(null);
+  const [tableInitialAction, setTableInitialAction] = useState<
+    { deal: DealItem; type: 'edit' | 'delete' } | null
+  >(null);
   const toast = useToast();
   const reportError = useCallback(
     (message: string) => toast.showToastMessage(message, 'error'),
@@ -54,15 +51,18 @@ function DealBoardPage() {
   const { pipelines, selectedPipelineId, setSelectedPipelineId, isLoading: pipelinesLoading } =
     useSelectedPipeline();
   const deals = useDealsPipeline(reportError);
+  const detailDrawer = useDrawer<DealItem>();
 
-  // usePipelineDragDrop is shared with Lead/Task on SalesPipelinePage - this
-  // page only ever renders the 'deal' branch, but the hook's signature
-  // needs all three setters. Unused local state, never rendered.
   const [, setLeadGroups] = useState<LeadStatusGroup[]>([]);
   const [, setTaskGroups] = useState<TaskStatusGroup[]>([]);
   const dragDrop = usePipelineDragDrop(deals.setStatusGroups, setLeadGroups, setTaskGroups, reportError);
 
-  const stats = useDealBoardStats(deals.statusGroups);
+  const stats = useDealBoardStats(deals.statusGroups, summaryCurrency);
+
+  const refetchBoard = useCallback(() => {
+    if (selectedPipelineId !== null) deals.fetchDeals({ pipelineId: selectedPipelineId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPipelineId, deals.fetchDeals]);
 
   useEffect(() => {
     if (selectedPipelineId === null) return;
@@ -79,13 +79,55 @@ function DealBoardPage() {
     }
   }, []);
 
+  const handleDealCardClick = useCallback(async (deal: PipelineDeal) => {
+    setOpeningDealId(deal.id);
+    try {
+      const res = await dealService.getDealById(String(deal.id));
+      if (res.status && res.data) {
+        detailDrawer.open(mapApiToUI(res.data as never));
+      } else {
+        reportError(res.message || 'Failed to open deal');
+      }
+    } catch {
+      reportError('Failed to open deal');
+    } finally {
+      setOpeningDealId(null);
+    }
+  }, [detailDrawer.open, reportError]);
+
+  const handleEditFromKanban = useCallback((deal: DealItem) => {
+    detailDrawer.close();
+    setTableInitialAction({ deal, type: 'edit' });
+    handleViewChange('table');
+  }, [detailDrawer.close, handleViewChange]);
+
+  const handleDeleteFromKanban = useCallback((deal: DealItem) => {
+    detailDrawer.close();
+    setTableInitialAction({ deal, type: 'delete' });
+    handleViewChange('table');
+  }, [detailDrawer.close, handleViewChange]);
+
+  const statsBar =
+    !pipelinesLoading && !deals.isLoading && deals.statusGroups.length > 0 ? (
+      <DealBoardStatsBar
+        stats={stats}
+        currency={summaryCurrency}
+        onCurrencyChange={setSummaryCurrency}
+      />
+    ) : null;
+
   if (view === 'table') {
     // We inject the pipeline picker and view toggle directly into DealPage's
-    // header via the headerExtra prop, keeping the table view experience
-    // seamlessly integrated without overlapping elements.
+    // header via the headerExtra prop, and the summary bar via belowHeader
+    // (rendered under DealPage's own "Deals" title, not above it), keeping
+    // the table view experience seamlessly integrated.
     return (
       <div className="deal-board-table-view">
         <DealPage
+          pipelineId={selectedPipelineId ?? undefined}
+          initialAction={tableInitialAction}
+          onInitialActionHandled={() => setTableInitialAction(null)}
+          belowHeader={statsBar}
           headerExtra={
             <>
               <PipelinePicker
@@ -118,9 +160,7 @@ function DealBoardPage() {
         }
       />
 
-      {!pipelinesLoading && !deals.isLoading && deals.statusGroups.length > 0 && (
-        <DealBoardStatsBar stats={stats} />
-      )}
+      {statsBar}
 
       <DndContext
         sensors={dragDrop.sensors}
@@ -137,7 +177,7 @@ function DealBoardPage() {
                 type="button"
                 className="btn btn-secondary"
                 style={{ marginTop: '1rem' }}
-                onClick={() => selectedPipelineId !== null && deals.fetchDeals({ pipelineId: selectedPipelineId })}
+                onClick={refetchBoard}
               >
                 Retry
               </button>
@@ -150,6 +190,8 @@ function DealBoardPage() {
             filteredStatusGroups={deals.statusGroups}
             loadingStatusId={deals.loadingStatusId}
             loadMoreDeals={deals.loadMoreDeals}
+            onDealClick={handleDealCardClick}
+            openingDealId={openingDealId}
           />
         )}
 
@@ -161,6 +203,15 @@ function DealBoardPage() {
           )}
         </DragOverlay>
       </DndContext>
+
+      <DealDetailDrawer
+        deal={detailDrawer.item}
+        isOpen={detailDrawer.isOpen}
+        onClose={detailDrawer.close}
+        onDealUpdated={refetchBoard}
+        onEditDeal={handleEditFromKanban}
+        onDeleteDeal={handleDeleteFromKanban}
+      />
 
       <ToastNotification
         isVisible={toast.showToast}

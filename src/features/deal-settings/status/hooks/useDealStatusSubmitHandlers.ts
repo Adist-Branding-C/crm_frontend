@@ -49,7 +49,7 @@ export function useDealStatusSubmitHandlers(
       if (response.status) {
         fetch.refresh();
         resetForm();
-        toast.showToastMessage('Deal status added successfully', 'success');
+        toast.showToastMessage('Deal stage added successfully', 'success');
         config.onAddSuccess();
         return true;
       }
@@ -64,7 +64,7 @@ export function useDealStatusSubmitHandlers(
       if (errorField) {
         scrollAndFocusError();
       } else {
-        fetch.setError(response.message || 'Failed to add deal status');
+        fetch.setError(response.message || 'Failed to add deal stage');
         scrollToTop();
       }
       return false;
@@ -101,7 +101,7 @@ export function useDealStatusSubmitHandlers(
 
       if (response.status) {
         fetch.refresh();
-        toast.showToastMessage('Deal status updated successfully', 'success');
+        toast.showToastMessage('Deal stage updated successfully', 'success');
         config.onEditSuccess();
         return true;
       }
@@ -116,7 +116,7 @@ export function useDealStatusSubmitHandlers(
       if (errorField) {
         scrollAndFocusError();
       } else {
-        fetch.setError(response.message || 'Failed to update deal status');
+        fetch.setError(response.message || 'Failed to update deal stage');
         scrollToTop();
       }
       return false;
@@ -150,7 +150,7 @@ export function useDealStatusSubmitHandlers(
         fetch.refresh();
         config.onDeleteSuccess();
       } else {
-        toast.showToastMessage(response.message || 'Failed to delete deal status', 'error');
+        toast.showToastMessage(response.message || 'Failed to delete deal stage', 'error');
       }
     } catch (err: unknown) {
       const parsed = parseApiError(err);

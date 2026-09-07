@@ -1,7 +1,8 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { MoreHorizontal, DollarSign, Calendar } from 'lucide-react';
+import { MoreHorizontal, Calendar, Loader2 } from 'lucide-react';
 import { formatDate } from '../../../shared/utils/dateUtils';
+import { currencySymbol } from '../../../shared/constants/currencies';
 import { hashStringToColor } from '../utils/pipelineColor.util';
 import type { DealCardProps } from '../types';
 
@@ -11,24 +12,33 @@ const PRIORITY_COLOR: Record<string, string> = {
   Low: 'var(--text-tertiary)',
 };
 
-const DealCard: React.FC<DealCardProps> = ({ deal, statusId, probability }) => {
+const DealCard: React.FC<DealCardProps> = ({ deal, statusId, probability, onDealClick, isOpening }) => {
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id: `deal-${deal.id}`,
     data: { type: 'deal', deal, statusId },
   });
 
+  const handleClick = () => {
+    if (isDragging || !onDealClick) return;
+    onDealClick(deal);
+  };
+
   return (
     <div
       ref={setNodeRef}
-      className={`deal-card${isDragging ? ' deal-card--dragging' : ''}`}
+      className={`deal-card${isDragging ? ' deal-card--dragging' : ''}${onDealClick ? ' deal-card--clickable' : ''}`}
       {...attributes}
       {...listeners}
+      onClick={handleClick}
     >
       {deal.company && (
         <div className="deal-header">
           <span className="deal-company">{deal.company}</span>
           <MoreHorizontal size={16} className="deal-menu" />
         </div>
+      )}
+      {isOpening && (
+        <div className="deal-card__opening"><Loader2 size={14} className="spin" /></div>
       )}
       <div className="deal-title">{deal.dealName}</div>
       {deal.priority && (
@@ -40,7 +50,7 @@ const DealCard: React.FC<DealCardProps> = ({ deal, statusId, probability }) => {
         </span>
       )}
       <div className="deal-value">
-        <DollarSign size={14} />
+        {currencySymbol(deal.currency)}
         {Number(deal.amount).toLocaleString()}
       </div>
       <div className="deal-footer">

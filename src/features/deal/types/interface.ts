@@ -7,6 +7,7 @@ export interface DealItem {
   leadId?: string | number;
   mobile?: string;
   amount?: number;
+  currency?: string;
   status?: string;
   statusId?: string | number;
   pipelineId?: string | number;

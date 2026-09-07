@@ -63,7 +63,7 @@ const DealStatusForm = ({
 
             <div className="form-group">
               <label>Name <span className="text-danger">*</span></label>
-              <Field type="text" name="name" className={fieldClass('name')} placeholder="Enter deal status name" />
+              <Field type="text" name="name" className={fieldClass('name')} placeholder="Enter deal stage name" />
               <FormikError name="name" component="small" className="field-error-text" />
             </div>
 

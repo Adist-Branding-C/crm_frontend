@@ -26,3 +26,18 @@
   font-weight: 700;
   color: var(--text-primary);
 }
+
+.deal-board-stat--currency {
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.deal-board-stat__currency-select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-sm);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

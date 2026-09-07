@@ -23,10 +23,10 @@ export function useDealStatusCrud({ editingItem, formData, closeDrawer, setError
         closeDrawer();
         refresh();
       } else {
-        setError(response.message || `Failed to ${editingItem ? 'update' : 'add'} deal status`);
+        setError(response.message || `Failed to ${editingItem ? 'update' : 'add'} deal stage`);
       }
     } catch {
-      setError(`Network error. Failed to ${editingItem ? 'update' : 'add'} deal status.`);
+      setError(`Network error. Failed to ${editingItem ? 'update' : 'add'} deal stage.`);
     }
   }, [editingItem, formData, closeDrawer, refresh, setError]);
 
@@ -37,10 +37,10 @@ export function useDealStatusCrud({ editingItem, formData, closeDrawer, setError
         refresh();
         return true;
       }
-      setError(response.message || 'Failed to delete deal status');
+      setError(response.message || 'Failed to delete deal stage');
       return false;
     } catch {
-      setError('Network error. Failed to delete deal status.');
+      setError('Network error. Failed to delete deal stage.');
       return false;
     }
   }, [refresh, setError]);

@@ -2,12 +2,6 @@ import type { DealApiItem } from '../types/response';
 import type { DealItem } from '../types/interface';
 
 export function mapApiToUI(item: DealApiItem): DealItem {
-  // The deal-list/detail endpoints send the deal's stage as a nested object
-  // under `stage` (dealStatus/dealStage/id/...), not as the flat `status`
-  // string this mapper's `status`/`stage` fields were originally written
-  // against - extracting it once here keeps both fields (status stays for
-  // legacy read-only display code, see DealFormData's comment) populated
-  // with the real label instead of '' or the raw object itself.
   const stageLabel = typeof item.stage === 'object'
     ? (item.stage as { dealStatus?: string; name?: string })?.dealStatus ?? (item.stage as { name?: string })?.name ?? ''
     : item.stage ?? '';
@@ -21,6 +15,7 @@ export function mapApiToUI(item: DealApiItem): DealItem {
     leadId: typeof item.lead === 'object' ? (item.lead as { id?: string | number })?.id ?? item.leadId ?? '' : item.leadId ?? '',
     mobile: item.mobile ?? '',
     amount: item.amount ?? 0,
+    currency: item.currency ?? '',
     status: stageLabel || (typeof item.status === 'string' ? item.status : ''),
     statusId: item.statusId ?? stageObjId ?? '',
     pipelineId: item.pipelineId ?? '',

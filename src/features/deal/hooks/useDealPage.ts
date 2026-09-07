@@ -82,7 +82,7 @@ export function useDealPage() {
   }, [drawer.editingItem, actions.handleEditSubmit, actions.handleSubmit]);
 
   const handleExportCSV = useCallback(() => {
-    const headers = ['Deal Id', 'Deal Name', 'Lead', 'Amount', 'Status', 'Type', 'Start Date', 'End Date', 'Agent', 'Created By', 'Created At'];
+    const headers = ['Deal Id', 'Deal Name', 'Lead', 'Amount', 'Stage', 'Type', 'Start Date', 'End Date', 'Agent', 'Created By', 'Created At'];
     const csvContent = [
       headers.join(','),
       ...filteredData.map(d =>

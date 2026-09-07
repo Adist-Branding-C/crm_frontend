@@ -9,6 +9,7 @@ import type { DealRowProps } from '../types/component.types';
 import type { WhatsappTemplateItem } from '../../account-settings/whatsapp-template/types/whatsapp-template.types';
 import { splitMobileValue } from '../utils/mobileFormat';
 import { tint } from '../../../shared/utils/color';
+import { currencySymbol } from '../../../shared/constants/currencies';
 
 const getStatusBadge = (status: string) => {
   const colorMap: Record<string, string> = { win: 'var(--success)', lost: 'var(--danger)', pending: 'var(--warning)', invoice: 'var(--info)' };
@@ -132,11 +133,11 @@ const DealRow: React.FC<DealRowProps> = ({
             })()
           : ''}
       </td>
-      <td>{Number(deal.amount).toLocaleString()}</td>
+      <td>{`${currencySymbol(deal.currency)}${Number(deal.amount).toLocaleString()}`}</td>
       <td
         onClick={(e) => setEditingField({ field: 'status', rect: e.currentTarget.getBoundingClientRect() })}
         style={{ cursor: 'pointer' }}
-        title="Click to edit status"
+        title="Click to edit stage"
       >
         {getStatusBadge(deal.status || '')}
       </td>
@@ -182,7 +183,7 @@ const DealRow: React.FC<DealRowProps> = ({
     {editingField?.field === 'status' && (
       <CellEditPopover
         anchorRect={editingField.rect}
-        label="Status"
+        label="Stage"
         type="select"
         options={DEAL_STATUS_OPTIONS}
         initialValue={deal.status || ''}

@@ -12,6 +12,7 @@ import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs'
 import DealDynamicAdditionalFields from './DealDynamicAdditionalFields';
 import { getTodayDateString } from '../utils/dealDateValidation';
 import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from '../../../shared/constants/countryCodes';
+import { CURRENCY_OPTIONS, currencySymbol } from '../../../shared/constants/currencies';
 import SelectSearch from '../../../shared/components/SelectSearch';
 import type { DealFormProps } from '../types';
 import { DEAL_LOST_REASON_OPTIONS } from '../constants/dealLostReasons';
@@ -36,7 +37,7 @@ const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDr
     if (dirty) {
       const timeout = setTimeout(() => {
         const title = values.dealName ? values.dealName : 'Untitled Deal';
-        const subtitle = values.amount ? `$${values.amount}` : 'No amount';
+        const subtitle = values.amount ? `${currencySymbol(values.currency)}${values.amount}` : 'No amount';
         const id = draftService.saveDraft('deal', values, title, subtitle, draftId || undefined);
         if (id !== draftId) {
           onDraftSaved?.(id);
@@ -97,7 +98,7 @@ const DealForm = ({
                   { label: 'Deal Name', value: values.dealName },
                   { label: 'Lead', value: leads.find(l => String(l.value) === String(values.leadId))?.label || '' },
                   { label: 'Mobile', value: values.mobileNumber ? `${values.mobileCountryCode} ${values.mobileNumber}` : '' },
-                  { label: 'Amount', value: values.amount },
+                  { label: 'Amount', value: values.amount ? `${currencySymbol(values.currency as string)}${values.amount}` : '' },
                 ]
               },
               {
@@ -323,13 +324,27 @@ const DealForm = ({
               </div>
 
               <div className="form-group">
-                <label>Amount (₹) <span className="text-danger">*</span></label>
-                <Field
-                  type="number"
-                  name="amount"
-                  className={fieldClass('amount')}
-                  placeholder="Enter amount"
-                />
+                <label>Amount ({currencySymbol(values.currency as string)}) <span className="text-danger">*</span></label>
+                <div className="phone-field-group">
+                  <select
+                    name="currency"
+                    value={values.currency as string}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`phone-country-code${errors.currency && touched.currency ? ' input-error' : ''}`}
+                  >
+                    {CURRENCY_OPTIONS.map((c) => (
+                      <option key={c.code} value={c.code}>{c.code} {c.symbol}</option>
+                    ))}
+                  </select>
+                  <Field
+                    type="number"
+                    name="amount"
+                    className={fieldClass('amount')}
+                    placeholder="Enter amount"
+                  />
+                </div>
+                <FormikError name="currency" component="small" className="field-error-text" />
                 <FormikError name="amount" component="small" className="field-error-text" />
               </div>
 

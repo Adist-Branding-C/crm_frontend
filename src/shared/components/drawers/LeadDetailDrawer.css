@@ -586,6 +586,22 @@
   margin-bottom: 0.75rem;
 }
 
+/* Deal drawer "Other Deals" tab: each sibling deal is a clickable card. */
+button.leaddrawer-note-card--button {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+button.leaddrawer-note-card--button:hover {
+  border-color: var(--primary);
+  background-color: var(--bg-card);
+}
+
 .leaddrawer-note-avatar {
   width: 40px;
   height: 40px;

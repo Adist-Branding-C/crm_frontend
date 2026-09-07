@@ -4,6 +4,8 @@ import PageHeader from '../../../shared/components/layout/PageHeader';
 import PageContainer from '../../../shared/components/layout/PageContainer';
 import ErrorMessage from '../../../shared/components/ErrorMessage';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
+import SettingsTabs from '../../../shared/components/SettingsTabs';
+import { dealSettingsTabs } from '../../deal-settings/shared/dealSettingsTabs';
 import { useDealPipelineList } from '../hooks/useDealPipelineList';
 import { useDrawer } from '../../../shared/hooks/useDrawer';
 import { useToast } from '../../task-settings/hooks/useToast';
@@ -70,6 +72,8 @@ function DealPipelineListPage() {
           </button>
         }
       />
+
+      <SettingsTabs items={dealSettingsTabs} />
 
       {error && <ErrorMessage message={error} />}
 

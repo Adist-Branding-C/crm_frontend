@@ -20,6 +20,11 @@ export interface DealCardProps {
   // Sourced from the deal's column (stage), not the deal itself - a deal
   // has no probability of its own until the v1.1 per-deal override ships.
   probability?: number | undefined;
+  // Opens the deal detail drawer. Optional - SalesPipelinePage renders the
+  // board without a drawer, DealBoardPage wires it up.
+  onDealClick?: ((deal: PipelineDeal) => void) | undefined;
+  // Marks the card that's currently loading its full detail record.
+  isOpening?: boolean | undefined;
 }
 
 export interface LeadCardProps {
@@ -56,6 +61,8 @@ export interface DealPipelineBoardProps {
   filteredStatusGroups: PipelineStatusGroup[];
   loadingStatusId: number | null;
   loadMoreDeals: (statusId: number) => void;
+  onDealClick?: ((deal: PipelineDeal) => void) | undefined;
+  openingDealId?: number | null | undefined;
 }
 
 export interface LeadPipelineBoardProps {

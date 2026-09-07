@@ -1,10 +1,9 @@
-import { Settings, Users, DollarSign, Clock, CreditCard, Link as LinkIcon, Kanban, Workflow } from 'lucide-react';
+import { Settings, Users, Clock, CreditCard, Link as LinkIcon, Kanban, Workflow } from 'lucide-react';
 
 export const settingsItems = [
   { id: 'account', title: 'Account', description: 'Manage your login credentials, settings, and preferences', link: '/account', icon: <Settings size={24} /> },
   { id: 'leads', title: 'Lead Settings', description: 'Configure status, source, purpose, and custom fields for seamless management', link: '/settings/lead-settings/types', icon: <Users size={24} /> },
-  { id: 'deals', title: 'Deal Settings', description: 'Adjust Deal settings, and custom fields for streamlined management', link: '/user/deal-stages', icon: <DollarSign size={24} /> },
-  { id: 'deal-pipelines', title: 'Deal Pipelines', description: 'Design the stages a deal moves through and their win probabilities', link: '/settings/deal-pipelines', icon: <Kanban size={24} /> },
+  { id: 'deals', title: 'Deal Settings', description: 'Design deal pipelines and stages, and configure custom fields', link: '/settings/deal-pipelines', icon: <Kanban size={24} /> },
   { id: 'tasks', title: 'Task Settings', description: 'Organize task categories, priorities, and customizations for improved productivity', link: '/user/call_status', icon: <Clock size={24} /> },
   // { id: 'custom-pipeline', title: 'Custom Pipeline', description: 'Define custom pipeline structures and grouping for leads, deals, and tasks', link: '/settings/custom-pipeline', icon: <Kanban size={24} /> },
   { id: 'automation', title: 'Automation Rules', description: 'Automate lead assignment, tasks, notifications, and webhooks', link: '/automation-rules', icon: <Workflow size={24} /> },

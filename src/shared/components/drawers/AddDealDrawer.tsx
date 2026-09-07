@@ -4,6 +4,7 @@ import DealForm from '../../../features/deal/components/DealForm';
 import { dealValidationSchema } from '../../../features/deal/validations';
 import { combineMobileValue } from '../../../features/deal/utils/mobileFormat';
 import { DEFAULT_COUNTRY_CODE } from '../../constants/countryCodes';
+import { DEFAULT_CURRENCY } from '../../constants/currencies';
 import type { AddDealDrawerProps } from '../../types/drawers';
 import PreviewCanvas, { PreviewSection } from '../preview/PreviewCanvas';
 import { dealDataService } from '../../../features/deal/services/dealDataService';
@@ -94,7 +95,7 @@ const AddDealDrawer = ({ isOpen, onClose, deal = null, draftId: initialDraftId, 
         validationSchema={dealValidationSchema}
         initialValues={deal ?? {
           dealName: '', lead: '', mobile: '', mobileCountryCode: DEFAULT_COUNTRY_CODE, mobileNumber: '',
-          amount: '', status: '', pipelineId: '', stageId: '', priority: 'Medium', type: 'New',
+          amount: '', currency: DEFAULT_CURRENCY, status: '', pipelineId: '', stageId: '', priority: 'Medium', type: 'New',
           startDate: '', endDate: '', closeDate: '', assignAgent: '',
         }}
         onSubmit={async (values) => {

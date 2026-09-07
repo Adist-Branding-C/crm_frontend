@@ -8,21 +8,13 @@ export interface BulkChangeStageModalProps {
   isOpen: boolean;
   selectedCount: number;
   isProcessing: boolean;
+  pipelineId?: string | number | undefined;
   onConfirm: (stageId: string, lostReason?: string) => void;
   onClose: () => void;
 }
 
-/**
- * Bulk stage-change modal for the Deals table's "Actions" toolbar. Offers
- * every company stage (labelled with its pipeline) rather than one
- * pipeline's stages only - a selection can span pipelines, and the backend
- * validates each deal against its own pipeline individually, reporting any
- * mismatches back as per-deal failures rather than rejecting the whole batch.
- *
- * Used by:
- * - DealPage (composed alongside DealBulkActionsDropdown)
- */
-const BulkChangeStageModal: React.FC<BulkChangeStageModalProps> = ({ isOpen, selectedCount, isProcessing, onConfirm, onClose }) => {
+
+const BulkChangeStageModal: React.FC<BulkChangeStageModalProps> = ({ isOpen, selectedCount, isProcessing, pipelineId, onConfirm, onClose }) => {
   const { statuses, pipelines, isLoadingStatuses } = useDealFormOptions();
   const [selectedStageId, setSelectedStageId] = useState('');
   const [lostReason, setLostReason] = useState('');
@@ -34,9 +26,14 @@ const BulkChangeStageModal: React.FC<BulkChangeStageModalProps> = ({ isOpen, sel
     }
   }, [isOpen]);
 
-  const selectedStageIsLost = statuses.find((s) => s.value === selectedStageId)?.outcome === 'LOST';
+  const scopedToPipeline = pipelineId !== undefined && pipelineId !== null && pipelineId !== '';
+  const visibleStages = scopedToPipeline
+    ? statuses.filter((s) => String(s.pipelineId) === String(pipelineId))
+    : statuses;
 
-  const pipelineName = (pipelineId: number) => pipelines.find((p) => Number(p.id) === pipelineId)?.name ?? '';
+  const selectedStageIsLost = visibleStages.find((s) => s.value === selectedStageId)?.outcome === 'LOST';
+
+  const pipelineName = (pid: number) => pipelines.find((p) => Number(p.id) === pid)?.name ?? '';
 
   return (
     <Modal isOpen={isOpen} onClose={() => { if (!isProcessing) onClose(); }} title="Change Stage">
@@ -51,9 +48,9 @@ const BulkChangeStageModal: React.FC<BulkChangeStageModalProps> = ({ isOpen, sel
             {isLoadingStatuses ? (
               <option value="" disabled>Loading...</option>
             ) : (
-              statuses.map((s) => (
+              visibleStages.map((s) => (
                 <option key={s.value} value={s.value}>
-                  {s.label} ({pipelineName(s.pipelineId)})
+                  {scopedToPipeline ? s.label : `${s.label} (${pipelineName(s.pipelineId)})`}
                 </option>
               ))
             )}

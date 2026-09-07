@@ -8,6 +8,7 @@ export interface DealApiItem {
   leadId?: string | number;
   mobile?: string;
   amount?: number;
+  currency?: string;
   status?: string | { id?: string | number; name?: string; dealStatus?: string };
   statusId?: string | number;
   pipelineId?: string | number;
@@ -48,21 +49,4 @@ export interface DealResponse {
   status: boolean;
   message: string;
   data?: unknown;
-}
-
-export interface DealCallLogItem {
-  id: number;
-  leadId: string;
-  callStatus?: string | null;
-  leadStatus?: string | null;
-  purpose?: string | null;
-  agentName?: string | null;
-  remark?: string | null;
-  nextFollowUpDate?: string | null;
-  createdAt?: string;
-}
-
-export interface DealCallLogListData {
-  items: DealCallLogItem[];
-  pagination: PaginationInfo;
 }

@@ -9,6 +9,8 @@ const DealPipelineBoard: React.FC<DealPipelineBoardProps> = ({
   filteredStatusGroups,
   loadingStatusId,
   loadMoreDeals,
+  onDealClick,
+  openingDealId,
 }) => {
   return (
     <div className="pipeline-board">
@@ -40,6 +42,8 @@ const DealPipelineBoard: React.FC<DealPipelineBoardProps> = ({
                   deal={deal}
                   statusId={group.statusId}
                   probability={group.probability}
+                  onDealClick={onDealClick}
+                  isOpening={openingDealId === deal.id}
                 />
               ))
             )}

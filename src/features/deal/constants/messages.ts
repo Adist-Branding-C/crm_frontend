@@ -3,7 +3,7 @@ export const SUCCESS_MESSAGES = {
   DEAL_UPDATED: 'Deal updated successfully',
   DEAL_DELETED: 'Deal deleted successfully',
   DEALS_DELETED: (count: number) => `${count} deal(s) deleted successfully.`,
-  STATUS_UPDATED: (count: number) => `Status updated for ${count} deal(s).`,
+  STATUS_UPDATED: (count: number) => `Stage updated for ${count} deal(s).`,
   STAFF_ASSIGNED: (count: number) => `Staff assigned to ${count} deal(s).`,
   DEALS_EXPORTED: 'Deals exported successfully.',
 };

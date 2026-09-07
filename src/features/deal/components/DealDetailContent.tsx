@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Phone, MessageSquare, Trash2, ArrowLeft, Edit2, Calendar, User, Briefcase, Clock, FileText, PhoneCall, Loader2 } from 'lucide-react';
+import { X, Phone, Mail, MapPin, MessageSquare, Trash2, ArrowLeft, Edit2, Calendar, User, Briefcase, Clock, FileText, Layers, Loader2 } from 'lucide-react';
 import Toast from '../../../shared/components/Toast';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import EditableDetailField from '../../../shared/components/drawers/EditableDetailField';
@@ -10,9 +10,11 @@ import { buildWhatsappUrl } from '../../../shared/utils/whatsappMessage.util';
 import { formatDateTime } from '../../../shared/utils/dateUtils';
 import { badgeClass } from '../../../shared/utils/badgeUtils';
 import { splitMobileValue } from '../utils/mobileFormat';
+import { currencySymbol } from '../../../shared/constants/currencies';
 import { useDealActivities } from '../hooks/useDealActivities';
 import { useDealRemarks } from '../hooks/useDealRemarks';
-import { useDealCallLogs } from '../hooks/useDealCallLogs';
+import { useDealLead } from '../hooks/useDealLead';
+import { useDealLeadDeals } from '../hooks/useDealLeadDeals';
 import { useDealFormOptions } from '../hooks/useDealFormOptions';
 import { dealService } from '../services/deal.service';
 import { DEAL_LOST_REASON_OPTIONS } from '../constants/dealLostReasons';
@@ -42,20 +44,21 @@ export interface DealDetailContentProps {
 
 /**
  * All deal-detail business content: profile header, Basic Info/Contact/More
- * Info sections (with inline-editable fields), and the Activity/Notes/Call/Lead
- * tabs. Mirrors LeadDetailContent's layout and conventions exactly, reusing
- * the same generic `/activities` and `/remarks` endpoints (entityType 'deal'/
- * 'DEAL' instead of 'lead'/'LEAD') and the same `leaddrawer-*` styling.
+ * Info sections (with inline-editable fields), and the Activity / Notes /
+ * Other Deals / Lead tabs. Mirrors LeadDetailContent's layout and
+ * conventions exactly, reusing the same generic `/activities` and `/remarks`
+ * endpoints (entityType 'deal'/'DEAL' instead of 'lead'/'LEAD') and the same
+ * `leaddrawer-*` styling.
  *
- * The "Call" tab has no deal-scoped equivalent - calls are always logged
- * against the parent Lead - so it reuses that Lead's call history instead of
- * inventing a deal-scoped call concept.
+ * "Other Deals" lists the parent lead's other deals (server-filtered by
+ * leadId); clicking one re-points the drawer at that deal. "Lead" shows the
+ * parent lead's full profile.
  *
  * Used by:
  * - DealDetailDrawer (composed inside the shared Drawer shell)
  */
 const DealDetailContent = ({ deal: dealProp, onClose, onDealUpdated, onEditDeal, onDeleteDeal }: DealDetailContentProps) => {
-  const [activeTab, setActiveTab] = useState<'activity' | 'note' | 'call' | 'lead'>('activity');
+  const [activeTab, setActiveTab] = useState<'activity' | 'note' | 'deals' | 'lead'>('activity');
   const [newRemarkText, setNewRemarkText] = useState('');
   const [showDeleteRemarkModal, setShowDeleteRemarkModal] = useState(false);
   const [remarkToDelete, setRemarkToDelete] = useState<{ id: number } | null>(null);
@@ -87,12 +90,16 @@ const DealDetailContent = ({ deal: dealProp, onClose, onDealUpdated, onEditDeal,
   } = useDealRemarks(deal.id, true, activeTab);
 
   const {
-    callLogs,
-    isLoading: isLoadingCallLogs,
-    error: callLogsError,
-    hasMore: hasMoreCallLogs,
-    loadMore: loadMoreCallLogs,
-  } = useDealCallLogs(deal.leadId, true, activeTab);
+    deals: leadDeals,
+    isLoading: isLoadingLeadDeals,
+    error: leadDealsError,
+  } = useDealLeadDeals(deal.leadId, deal.id, true, activeTab);
+
+  const {
+    lead: leadProfile,
+    isLoading: isLoadingLeadProfile,
+    error: leadProfileError,
+  } = useDealLead(deal.leadId, true, activeTab);
 
   const { statuses, pipelines, staff } = useDealFormOptions();
 
@@ -294,7 +301,7 @@ const DealDetailContent = ({ deal: dealProp, onClose, onDealUpdated, onEditDeal,
                 />
                 <EditableDetailField
                   label="Amount"
-                  displayValue={deal.amount != null ? `₹${Number(deal.amount).toLocaleString()}` : ''}
+                  displayValue={deal.amount != null ? `${currencySymbol(deal.currency)}${Number(deal.amount).toLocaleString()}` : ''}
                   editValue={deal.amount != null ? String(deal.amount) : ''}
                   type="text"
                   onSave={(v) => saveDealField({ amount: v as string }, { amount: Number(v) })}
@@ -329,8 +336,8 @@ const DealDetailContent = ({ deal: dealProp, onClose, onDealUpdated, onEditDeal,
             <button className={`leaddrawer-tab ${activeTab === 'note' ? 'active' : ''}`} onClick={() => setActiveTab('note')}>
               <FileText size={14} /> Notes
             </button>
-            <button className={`leaddrawer-tab ${activeTab === 'call' ? 'active' : ''}`} onClick={() => setActiveTab('call')}>
-              <PhoneCall size={14} /> Call
+            <button className={`leaddrawer-tab ${activeTab === 'deals' ? 'active' : ''}`} onClick={() => setActiveTab('deals')}>
+              <Layers size={14} /> Other Deals
             </button>
             <button className={`leaddrawer-tab ${activeTab === 'lead' ? 'active' : ''}`} onClick={() => setActiveTab('lead')}>
               <Briefcase size={14} /> Lead
@@ -450,47 +457,49 @@ const DealDetailContent = ({ deal: dealProp, onClose, onDealUpdated, onEditDeal,
               </div>
             )}
 
-            {activeTab === 'call' && (
+            {activeTab === 'deals' && (
               <div>
                 <div className="leaddrawer-tab-header">
-                  <h3 className="leaddrawer-tab-heading">Call History</h3>
+                  <h3 className="leaddrawer-tab-heading">Other Deals for {deal.lead || 'this lead'}</h3>
                 </div>
-                {isLoadingCallLogs ? (
-                  <div className="leaddrawer-loading">Loading call history...</div>
-                ) : callLogsError ? (
-                  <div className="leaddrawer-error">{callLogsError}</div>
-                ) : callLogs.length === 0 ? (
+                {isLoadingLeadDeals ? (
+                  <div className="leaddrawer-loading">Loading deals...</div>
+                ) : leadDealsError ? (
+                  <div className="leaddrawer-error">{leadDealsError}</div>
+                ) : leadDeals.length === 0 ? (
                   <div className="leaddrawer-empty-state">
-                    <div className="leaddrawer-empty-icon"><PhoneCall size={24} /></div>
-                    <h4 className="leaddrawer-empty-title">No calls yet</h4>
-                    <p className="leaddrawer-empty-text">Calls logged against this deal's lead will show up here.</p>
+                    <div className="leaddrawer-empty-icon"><Layers size={24} /></div>
+                    <h4 className="leaddrawer-empty-title">No other deals</h4>
+                    <p className="leaddrawer-empty-text">This lead has no other deals yet.</p>
                   </div>
                 ) : (
                   <div>
-                    {callLogs.map((call) => (
-                      <div key={call.id} className="leaddrawer-note-card">
+                    {leadDeals.map((other) => (
+                      <button
+                        key={other.id}
+                        type="button"
+                        className="leaddrawer-note-card leaddrawer-note-card--button"
+                        onClick={() => { setDeal(other); setActiveTab('activity'); }}
+                      >
                         <div className="leaddrawer-note-avatar">
-                          {(call.agentName || '?').charAt(0).toUpperCase()}
+                          {(other.dealName || 'D').charAt(0).toUpperCase()}
                         </div>
                         <div className="leaddrawer-note-content">
                           <div className="leaddrawer-note-header">
-                            <span className="leaddrawer-note-user">{call.agentName || 'Unknown'}</span>
-                            <span className="leaddrawer-note-time">{formatDateTime(call.createdAt)}</span>
+                            <span className="leaddrawer-note-user">{other.dealName || 'Untitled deal'}</span>
+                            {(other.stage || other.status) && (
+                              <span className={`leaddrawer-badge ${badgeClass(other.stage || other.status || '')}`}>
+                                {other.stage || other.status}
+                              </span>
+                            )}
                           </div>
                           <p className="leaddrawer-note-text">
-                            {call.callStatus || '-'}{call.purpose ? ` · ${call.purpose}` : ''}
+                            {other.amount != null ? `${currencySymbol(other.currency)}${Number(other.amount).toLocaleString()}` : '-'}
+                            {other.agent ? ` · ${other.agent}` : ''}
                           </p>
-                          {call.remark && <p className="leaddrawer-note-text">{call.remark}</p>}
                         </div>
-                      </div>
+                      </button>
                     ))}
-                    {hasMoreCallLogs && (
-                      <div className="leaddrawer-load-more" style={{ textAlign: 'center', marginTop: '1rem' }}>
-                        <button className="btn btn-secondary btn-sm" onClick={loadMoreCallLogs} disabled={isLoadingCallLogs}>
-                          {isLoadingCallLogs ? <><Loader2 size={14} className="spin" /> Loading...</> : 'Load More'}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -501,20 +510,116 @@ const DealDetailContent = ({ deal: dealProp, onClose, onDealUpdated, onEditDeal,
                 <div className="leaddrawer-tab-header">
                   <h3 className="leaddrawer-tab-heading">Parent Lead</h3>
                 </div>
-                <div className="leaddrawer-note-card">
-                  <div className="leaddrawer-note-avatar">
-                    {(deal.lead || '?').charAt(0).toUpperCase()}
+                {isLoadingLeadProfile ? (
+                  <div className="leaddrawer-loading">Loading lead profile...</div>
+                ) : leadProfileError ? (
+                  <div className="leaddrawer-error">{leadProfileError}</div>
+                ) : !leadProfile ? (
+                  <div className="leaddrawer-empty-state">
+                    <div className="leaddrawer-empty-icon"><User size={24} /></div>
+                    <h4 className="leaddrawer-empty-title">Lead unavailable</h4>
+                    <p className="leaddrawer-empty-text">This deal isn't linked to a lead.</p>
                   </div>
-                  <div className="leaddrawer-note-content">
-                    <div className="leaddrawer-note-header">
-                      <span className="leaddrawer-note-user">{deal.lead || 'Unknown lead'}</span>
+                ) : (
+                  <div className="leaddrawer-lead-profile">
+                    <div className="leaddrawer-profile">
+                      <div className="leaddrawer-avatar">
+                        {(leadProfile.name || '?').charAt(0).toUpperCase()}
+                      </div>
+                      <h2 className="leaddrawer-name">{leadProfile.name || 'Unknown lead'}</h2>
+                      <div className="leaddrawer-badges">
+                        {leadProfile.status?.status && (
+                          <span className={`leaddrawer-badge ${badgeClass(leadProfile.status.status)}`}>{leadProfile.status.status}</span>
+                        )}
+                        {leadProfile.source?.source && (
+                          <span className="leaddrawer-badge">{leadProfile.source.source}</span>
+                        )}
+                      </div>
                     </div>
-                    {deal.mobile && <p className="leaddrawer-note-text">{splitMobileValue(deal.mobile).number}</p>}
+
+                    <div className="leaddrawer-section">
+                      <div className="leaddrawer-section-title">Contact</div>
+                      <div className="leaddrawer-info-grid">
+                        <div className="leaddrawer-info-item">
+                          <div className="leaddrawer-info-icon"><Phone size={14} /></div>
+                          <div className="leaddrawer-info-content">
+                            <span className="leaddrawer-info-label">Phone</span>
+                            <span className="leaddrawer-info-value">
+                              {leadProfile.phone ? `${leadProfile.countryCode ? `${leadProfile.countryCode} ` : ''}${leadProfile.phone}` : '-'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="leaddrawer-info-item">
+                          <div className="leaddrawer-info-icon"><Mail size={14} /></div>
+                          <div className="leaddrawer-info-content">
+                            <span className="leaddrawer-info-label">Email</span>
+                            <span className="leaddrawer-info-value">{leadProfile.email || '-'}</span>
+                          </div>
+                        </div>
+                        <div className="leaddrawer-info-item">
+                          <div className="leaddrawer-info-icon"><MapPin size={14} /></div>
+                          <div className="leaddrawer-info-content">
+                            <span className="leaddrawer-info-label">Address</span>
+                            <span className="leaddrawer-info-value">
+                              {[leadProfile.address, leadProfile.location].filter(Boolean).join(', ') || '-'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="leaddrawer-section">
+                      <div className="leaddrawer-section-title">More Info</div>
+                      <div className="leaddrawer-details-grid">
+                        <div className="leaddrawer-detail-card">
+                          <div className="leaddrawer-detail-label">Owner</div>
+                          <div className="leaddrawer-detail-value"><span>{leadProfile.assignedStaff?.name || '-'}</span></div>
+                        </div>
+                        <div className="leaddrawer-detail-card">
+                          <div className="leaddrawer-detail-label">Type</div>
+                          <div className="leaddrawer-detail-value"><span>{leadProfile.type?.type || '-'}</span></div>
+                        </div>
+                        <div className="leaddrawer-detail-card">
+                          <div className="leaddrawer-detail-label">Purpose</div>
+                          <div className="leaddrawer-detail-value"><span>{leadProfile.purpose?.purpose || '-'}</span></div>
+                        </div>
+                        <div className="leaddrawer-detail-card">
+                          <div className="leaddrawer-detail-label">Next Follow-up</div>
+                          <div className="leaddrawer-detail-value"><span>{leadProfile.nextFollowUpDate ? formatDateTime(leadProfile.nextFollowUpDate) : '-'}</span></div>
+                        </div>
+                        <div className="leaddrawer-detail-card">
+                          <div className="leaddrawer-detail-label">Created By</div>
+                          <div className="leaddrawer-detail-value"><span>{leadProfile.createdByName || '-'}</span></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {(leadProfile.additionalFields?.length ?? 0) > 0 && (
+                      <div className="leaddrawer-section">
+                        <div className="leaddrawer-section-title">Additional Fields</div>
+                        <div className="leaddrawer-details-grid">
+                          {leadProfile.additionalFields!.map((f) => (
+                            <div key={f.fieldId} className="leaddrawer-detail-card">
+                              <div className="leaddrawer-detail-label">{f.name}</div>
+                              <div className="leaddrawer-detail-value"><span>{f.value || '-'}</span></div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {leadProfile.notes && (
+                      <div className="leaddrawer-section">
+                        <div className="leaddrawer-section-title">Notes</div>
+                        <p className="leaddrawer-note-text">{leadProfile.notes}</p>
+                      </div>
+                    )}
+
+                    <a href="/leads" className="btn btn-secondary btn-sm" style={{ marginTop: '1rem', display: 'inline-block' }}>
+                      View in Leads
+                    </a>
                   </div>
-                </div>
-                <a href="/leads" className="btn btn-secondary btn-sm" style={{ marginTop: '1rem', display: 'inline-block' }}>
-                  View All Leads
-                </a>
+                )}
               </div>
             )}
           </div>
