@@ -72,7 +72,7 @@ export interface DealPageProps {
    * deletion right after the view flips to the table (the Kanban detail
    * drawer has no edit form of its own).
    */
-  initialAction?: { deal: DealItem; type: 'edit' | 'delete' } | null | undefined;
+  initialAction?: { deal?: DealItem; type: 'edit' | 'delete' | 'add' } | null | undefined;
   /** Called once `initialAction` has been consumed. */
   onInitialActionHandled?: (() => void) | undefined;
 }
@@ -143,11 +143,13 @@ const DealPage = ({ headerExtra, belowHeader, pipelineId, initialAction, onIniti
   const handledInitialActionRef = useRef<DealItem | null>(null);
   useEffect(() => {
     if (!initialAction || handledInitialActionRef.current === initialAction.deal) return;
-    handledInitialActionRef.current = initialAction.deal;
-    if (initialAction.type === 'edit') {
+    handledInitialActionRef.current = initialAction.deal || null;
+    if (initialAction.type === 'edit' && initialAction.deal) {
       drawer.openEditDrawer(initialAction.deal);
-    } else {
+    } else if (initialAction.type === 'delete' && initialAction.deal) {
       deleteConfirm.handleDeleteClick(initialAction.deal);
+    } else if (initialAction.type === 'add') {
+      drawer.openAddDrawer();
     }
     onInitialActionHandled?.();
   }, [initialAction, drawer.openEditDrawer, deleteConfirm.handleDeleteClick, onInitialActionHandled]);

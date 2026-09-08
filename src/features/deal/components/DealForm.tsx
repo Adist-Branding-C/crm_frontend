@@ -255,8 +255,6 @@ const DealForm = ({
             <Form noValidate>
               {error && <ErrorMessage message={error} />}
 
-              <div className="form-section-title">Deal Information</div>
-
               <div className="form-group">
                 <label>Deal Name <span className="text-danger">*</span></label>
                 <Field

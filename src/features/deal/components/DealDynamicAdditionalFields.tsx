@@ -25,7 +25,7 @@ const DealDynamicAdditionalFields: React.FC<DealDynamicAdditionalFieldsProps> = 
         return (
           <div className="form-group" key={field.fieldId}>
             <label>
-              {field.fieldName}
+              {field.fieldName || (field as any).name}
               {field.isRequired && <span className="required"> *</span>}
             </label>
 
@@ -33,7 +33,7 @@ const DealDynamicAdditionalFields: React.FC<DealDynamicAdditionalFieldsProps> = 
               <input
                 type={fieldType === 'number' ? 'number' : 'text'}
                 name={key}
-                placeholder={`Enter ${field.fieldName}`}
+                placeholder={`Enter ${field.fieldName || (field as any).name}`}
                 value={value}
                 onChange={handleChange}
                 onBlur={handleBlur}

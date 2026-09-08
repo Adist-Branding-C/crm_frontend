@@ -40,7 +40,7 @@ function DealBoardPage() {
   const [summaryCurrency, setSummaryCurrency] = useState<string>(DEFAULT_CURRENCY);
   const [openingDealId, setOpeningDealId] = useState<number | null>(null);
   const [tableInitialAction, setTableInitialAction] = useState<
-    { deal: DealItem; type: 'edit' | 'delete' } | null
+    { deal?: DealItem; type: 'edit' | 'delete' | 'add' } | null
   >(null);
   const toast = useToast();
   const reportError = useCallback(
@@ -107,6 +107,11 @@ function DealBoardPage() {
     handleViewChange('table');
   }, [detailDrawer.close, handleViewChange]);
 
+  const handleAddDealFromKanban = useCallback(() => {
+    setTableInitialAction({ type: 'add' });
+    handleViewChange('table');
+  }, [handleViewChange]);
+
   const statsBar =
     !pipelinesLoading && !deals.isLoading && deals.statusGroups.length > 0 ? (
       <DealBoardStatsBar
@@ -156,6 +161,9 @@ function DealBoardPage() {
               onChange={setSelectedPipelineId}
             />
             <ViewToggle view={view} onChange={handleViewChange} />
+            <button className="btn btn-primary" onClick={handleAddDealFromKanban}>
+              Add Deal
+            </button>
           </div>
         }
       />

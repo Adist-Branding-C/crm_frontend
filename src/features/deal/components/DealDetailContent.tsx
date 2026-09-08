@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { X, Phone, Mail, MapPin, MessageSquare, Trash2, ArrowLeft, Edit2, Calendar, User, Briefcase, Clock, FileText, Layers, Loader2 } from 'lucide-react';
 import Toast from '../../../shared/components/Toast';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
@@ -615,9 +616,9 @@ const DealDetailContent = ({ deal: dealProp, onClose, onDealUpdated, onEditDeal,
                       </div>
                     )}
 
-                    <a href="/leads" className="btn btn-secondary btn-sm" style={{ marginTop: '1rem', display: 'inline-block' }}>
+                    <Link to="/leads" className="btn btn-primary" style={{ marginTop: '1.5rem', width: '100%', textAlign: 'center' }}>
                       View in Leads
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
