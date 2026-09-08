@@ -16,6 +16,7 @@ import { StatCard, KpiCard } from '../components/widgets/Cards';
 import WonDealsCard from '../components/widgets/WonDealsCard';
 import LostDealsCard from '../components/widgets/LostDealsCard';
 import InProgressDealsCard from '../components/widgets/InProgressDealsCard';
+import DealAnalyticsSection from '../../deal-analytics/components/DealAnalyticsSection';
 import {
   CALL_LOGGED_ACTIVITY_TYPE,
   HOT_LEAD_TYPE_NAME,
@@ -225,6 +226,8 @@ const DashboardPage = () => {
       <div className="widgets-grid bottom-cards-grid">
         <ActivitiesStatisticsWidget period={period} from={effectiveFrom} to={effectiveTo} />
       </div>
+
+      <DealAnalyticsSection period={period} from={effectiveFrom} to={effectiveTo} />
 
     </PageContainer>
   );

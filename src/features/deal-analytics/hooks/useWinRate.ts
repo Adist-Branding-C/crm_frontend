@@ -19,9 +19,12 @@ export function useWinRate(period: AnalyticsPeriod, from?: string, to?: string) 
     setIsLoading(true);
     setIsError(false);
 
+    const rangeFrom = period === 'custom' ? from : undefined;
+    const rangeTo = period === 'custom' ? to : undefined;
+
     (async () => {
       try {
-        const response = await dealAnalyticsService.getWinRate(period, from, to);
+        const response = await dealAnalyticsService.getWinRate(period, rangeFrom, rangeTo);
         if (cancelled) return;
         if (!response.status || !response.data) {
           setIsError(true);

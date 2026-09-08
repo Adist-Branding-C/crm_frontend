@@ -1,18 +1,3 @@
-export interface ForecastByPipeline {
-  pipelineId: number;
-  pipelineName: string;
-  openCount: number;
-  openAmount: string;
-  weightedAmount: string;
-}
-
-export interface ForecastData {
-  openAmount: number;
-  weightedAmount: number;
-  openCount: number;
-  byPipeline: ForecastByPipeline[];
-}
-
 export interface WinRateData {
   winRate: number;
   total: number;
@@ -32,17 +17,6 @@ export interface StageFunnelStage {
 export interface StageFunnelData {
   pipelineId: number;
   stages: StageFunnelStage[];
-}
-
-export interface OwnerLeaderboardRow {
-  agentId: number;
-  agentName: string;
-  totalDeals: number;
-  wonDeals: number;
-  lostDeals: number;
-  totalAmount: string;
-  wonAmount: string;
-  winRate: number;
 }
 
 export type AnalyticsPeriod = 'today' | 'week' | 'month' | 'custom';

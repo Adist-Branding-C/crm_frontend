@@ -5,7 +5,6 @@ import { DEFAULT_CURRENCY } from '../../../shared/constants/currencies';
 export interface DealBoardStats {
   openCount: number;
   totalValue: number;
-  weightedForecast: number;
   /** Currency codes present across the loaded deals, for the summary toggle. */
   currencies: string[];
 }
@@ -18,7 +17,6 @@ export function useDealBoardStats(
   return useMemo(() => {
     let openCount = 0;
     let totalValue = 0;
-    let weightedForecast = 0;
     const currencies = new Set<string>();
 
     for (const group of statusGroups) {
@@ -28,15 +26,10 @@ export function useDealBoardStats(
         const dealCurrency = deal.currency || DEFAULT_CURRENCY;
         currencies.add(dealCurrency);
         if (dealCurrency !== currency) continue;
-        const amount = Number(deal.amount);
-        totalValue += amount;
-        if (isOpen) {
-          const probability = group.probability ?? 0;
-          weightedForecast += (amount * probability) / 100;
-        }
+        totalValue += Number(deal.amount);
       }
     }
 
-    return { openCount, totalValue, weightedForecast, currencies: [...currencies] };
+    return { openCount, totalValue, currencies: [...currencies] };
   }, [statusGroups, currency]);
 }

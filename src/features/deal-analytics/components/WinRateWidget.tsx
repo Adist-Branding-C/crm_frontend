@@ -9,14 +9,17 @@ const REMAINING_COLOR = 'var(--chart-grid)';
 
 interface WinRateWidgetProps {
   period: AnalyticsPeriod;
+  from?: string;
+  to?: string;
 }
 
 /**
  * Win rate: won ÷ total deals, scoped to the caller's own visibility -
- * shown as a donut with the exact won/total counts underneath.
+ * shown as a donut with the exact won/total counts underneath. Follows the
+ * dashboard's shared period / custom-range filter.
  */
-const WinRateWidget = ({ period }: WinRateWidgetProps) => {
-  const { data, isLoading, isError } = useWinRate(period);
+const WinRateWidget = ({ period, from, to }: WinRateWidgetProps) => {
+  const { data, isLoading, isError } = useWinRate(period, from, to);
 
   const chartData = data
     ? [

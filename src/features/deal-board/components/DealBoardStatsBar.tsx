@@ -27,10 +27,6 @@ function DealBoardStatsBar({ stats, currency, onCurrencyChange }: DealBoardStats
         <span className="deal-board-stat__label">Pipeline Value</span>
         <span className="deal-board-stat__value">{formatCurrency(stats.totalValue, currency)}</span>
       </div>
-      <div className="deal-board-stat">
-        <span className="deal-board-stat__label">Weighted Forecast</span>
-        <span className="deal-board-stat__value">{formatCurrency(stats.weightedForecast, currency)}</span>
-      </div>
       <label className="deal-board-stat deal-board-stat--currency">
         <span className="deal-board-stat__label">Currency</span>
         <select
