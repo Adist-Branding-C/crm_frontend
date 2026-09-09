@@ -27,7 +27,7 @@ const DealStatusPage = () => {
   const pagination = useTableData<DealStatusItem>({
     fetchFn: async (params) => {
       const response = await dealStatusService.getAllDealStatuses(params);
-      if (!response.status) throw new Error(response.message || 'Failed to fetch deal statuses');
+      if (!response.status) throw new Error(response.message || 'Failed to fetch deal stages');
       return DealStatusMapper.toListResult(response);
     },
   });
@@ -77,7 +77,7 @@ const DealStatusPage = () => {
             <Download size={16} /> Export
           </button> */}
           <button className="btn btn-primary" onClick={() => addDrawer.open()} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Plus size={16} /> Add Deal Status
+            <Plus size={16} /> Add Deal Stage
           </button>
         </TableNav>
 
@@ -120,7 +120,7 @@ const DealStatusPage = () => {
         />
       </div>
 
-      <Drawer ref={formBodyRef} isOpen={addDrawer.isOpen} onClose={addDrawer.close} title="Add Deal Status">
+      <Drawer ref={formBodyRef} isOpen={addDrawer.isOpen} onClose={addDrawer.close} title="Add Deal Stage">
         <DealStatusForm
           editingItem={null}
           initialValues={ADD_DEAL_STATUS_INITIAL_VALUES}
@@ -132,7 +132,7 @@ const DealStatusPage = () => {
         />
       </Drawer>
 
-      <Drawer ref={formBodyRef} isOpen={editDrawer.isOpen} onClose={editDrawer.close} title="Edit Deal Status">
+      <Drawer ref={formBodyRef} isOpen={editDrawer.isOpen} onClose={editDrawer.close} title="Edit Deal Stage">
         <DealStatusForm
           editingItem={editDrawer.item}
           initialValues={editInitialValues}

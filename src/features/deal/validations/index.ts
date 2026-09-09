@@ -13,6 +13,7 @@ import { getPhoneLengthErrorMessage, isValidPhoneForCountry } from '../constants
 interface DealOriginalDates {
   startDate?: string | undefined;
   endDate?: string | undefined;
+  closeDate?: string | undefined;
 }
 
 /**
@@ -77,31 +78,38 @@ function getBaseValidationShape(original?: DealOriginalDates) {
         }
         return true;
       }),
-    statusId: yup.string().required('Status is required'),
-    typeId: yup.string().required('Type is required'),
+    currency: yup.string().trim().required('Currency is required'),
+    pipelineId: yup.string().required('Pipeline is required'),
+    stageId: yup.string().required('Stage is required'),
+    priority: yup.string().required('Priority is required'),
+    type: yup.string().required('Type is required'),
+    // Q7 (Deal Pipeline Redesign): start date is no longer required now that
+    // Close Date is the deal's real target-close concept - kept as an
+    // optional field, still can't be in the past if the user does set one.
     startDate: yup
       .string()
-      .required('Start date is required')
+      .notRequired()
       .test('not-in-past', 'Start date cannot be in the past', (value) => {
         if (!value) return true;
         if (original?.startDate && value === original.startDate) return true;
         return !isPastDate(value);
       }),
-    endDate: yup
+    closeDate: yup
       .string()
-      .required('End date is required')
-      .test('not-in-past', 'End date cannot be in the past', (value) => {
+      .required('Close date is required')
+      .test('not-in-past', 'Close date cannot be in the past', (value) => {
         if (!value) return true;
+        if (original?.closeDate && value === original.closeDate) return true;
         if (original?.endDate && value === original.endDate) return true;
         return !isPastDate(value);
       })
-      .test('is-after-start', 'End date must be on or after start date', function (value) {
+      .test('is-after-start', 'Close date must be on or after start date', function (value) {
         const { startDate } = this.parent;
         if (!startDate || !value) return true;
         return new Date(value) >= new Date(startDate);
       }),
     assignAgent: yup.string().notRequired(),
-    agentId: yup.string().required('Assign agent is required'),
+    agentId: yup.string().required('Deal Owner is required'),
   };
 }
 

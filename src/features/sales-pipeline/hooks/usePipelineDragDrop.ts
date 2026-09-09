@@ -27,7 +27,7 @@ function moveDeal(
   fromStatusId: number,
   toStatusId: number,
 ): PipelineStatusGroup[] {
-  const updatedDeal = { ...deal, statusId: toStatusId };
+  const updatedDeal = { ...deal, stageId: toStatusId };
   return groups.map((group) => {
     if (group.statusId === fromStatusId) {
       return {
@@ -132,7 +132,14 @@ export function usePipelineDragDrop(
       if (payload.type === 'deal') {
         const { deal } = payload;
         const targetStatusId = over.data.current?.statusId as number;
-        const sourceStatusId = deal.statusId;
+        // PipelineDeal carries the deal's own stage as `stageId` (renamed
+        // from `statusId` in the Deal Pipeline Redesign) - reading
+        // `deal.statusId` here was always undefined, so the "still in its
+        // old column" branch of moveDeal below never matched and the deal
+        // was only ever added to the target column, never removed from the
+        // source one. That's why a drag showed the card in both columns
+        // until a full refetch (which rebuilds groups from stageId) fixed it.
+        const sourceStatusId = deal.stageId;
         if (targetStatusId === undefined || sourceStatusId === targetStatusId)
           return;
 
@@ -141,12 +148,12 @@ export function usePipelineDragDrop(
         );
 
         dealService
-          .updateDeal(String(deal.id), { statusId: targetStatusId })
+          .updateDeal(String(deal.id), { stageId: targetStatusId })
           .catch(() => {
             setStatusGroups((prev) =>
               moveDeal(
                 prev,
-                { ...deal, statusId: targetStatusId },
+                { ...deal, stageId: targetStatusId },
                 targetStatusId,
                 sourceStatusId,
               ),

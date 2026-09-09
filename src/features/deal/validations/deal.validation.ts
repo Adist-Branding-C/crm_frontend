@@ -5,11 +5,13 @@ export const addDealValidationSchema = yup.object({
   leadId: yup.string().trim().required('Lead is required'),
   mobile: yup.string().trim().required('Mobile is required'),
   amount: yup.string().trim().required('Amount is required'),
-  statusId: yup.string().required('Status is required'),
-  typeId: yup.string().required('Type is required'),
-  agentId: yup.string().required('Assign Agent is required'),
+  pipelineId: yup.string().required('Pipeline is required'),
+  stageId: yup.string().required('Stage is required'),
+  priority: yup.string().required('Priority is required'),
+  type: yup.string().required('Type is required'),
+  agentId: yup.string().required('Deal Owner is required'),
   startDate: yup.string().notRequired(),
-  endDate: yup.string().notRequired(),
+  closeDate: yup.string().notRequired(),
 });
 
 export const editDealValidationSchema = yup.object({
@@ -17,9 +19,11 @@ export const editDealValidationSchema = yup.object({
   leadId: yup.string().trim().required('Lead is required'),
   mobile: yup.string().trim().required('Mobile is required'),
   amount: yup.string().trim().required('Amount is required'),
-  statusId: yup.string().required('Status is required'),
-  typeId: yup.string().required('Type is required'),
-  agentId: yup.string().required('Assign Agent is required'),
+  pipelineId: yup.string().required('Pipeline is required'),
+  stageId: yup.string().required('Stage is required'),
+  priority: yup.string().required('Priority is required'),
+  type: yup.string().required('Type is required'),
+  agentId: yup.string().required('Deal Owner is required'),
   startDate: yup.string().notRequired(),
-  endDate: yup.string().notRequired(),
+  closeDate: yup.string().notRequired(),
 });

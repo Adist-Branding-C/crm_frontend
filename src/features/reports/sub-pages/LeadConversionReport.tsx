@@ -38,7 +38,7 @@ const LeadConversionReport = () => {
   const handleExport = (type: string) => {
     const headers = type === 'lead'
       ? ['Total Leads', 'Total Deals', 'Open', 'Win', 'Lose']
-      : ['SL No', 'Deal Code', 'Deal Name', 'Lead Name', 'Mobile Number', 'Deal Amount', 'Deal Status', 'Lead Source', 'Lost Reason', 'Start Date', 'End Date', 'Staff Name', 'Created By', 'Updated At'];
+      : ['SL No', 'Deal Code', 'Deal Name', 'Lead Name', 'Mobile Number', 'Deal Amount', 'Deal Stage', 'Lead Source', 'Lost Reason', 'Start Date', 'End Date', 'Staff Name', 'Created By', 'Updated At'];
     const rows = type === 'lead'
       ? [[leadSummary.totalLeads, leadSummary.totalDeals, leadSummary.open, leadSummary.win, leadSummary.lose]]
       : filteredDealData.map(d => [d.id, d.dealCode, d.dealName, d.leadName, d.mobile, d.dealAmount, d.dealStatus, d.leadSource, d.lostReason, d.startDate, d.endDate, d.staffName, d.createdBy, d.updatedAt]);
@@ -82,7 +82,7 @@ const LeadConversionReport = () => {
         <div className="section-header"><h3>Deal Summary</h3><button className="btn btn-primary" onClick={() => handleExport('deal')}><Download size={16} /> Export</button></div>
         <div className="table-container">
           <table className="enquiries-table">
-            <thead><tr><th>SL No</th><th>Deal Code</th><th>Deal Name</th><th>Lead Name</th><th>Mobile Number</th><th>Deal Amount</th><th>Deal Status</th><th>Lead Source</th><th>Lost Reason</th><th>Start Date</th><th>End Date</th><th>Staff Name</th><th>Created By</th><th>Updated At</th></tr></thead>
+            <thead><tr><th>SL No</th><th>Deal Code</th><th>Deal Name</th><th>Lead Name</th><th>Mobile Number</th><th>Deal Amount</th><th>Deal Stage</th><th>Lead Source</th><th>Lost Reason</th><th>Start Date</th><th>End Date</th><th>Staff Name</th><th>Created By</th><th>Updated At</th></tr></thead>
             <tbody>
               {paginatedData.map(row => (
                 <tr key={row.id}>

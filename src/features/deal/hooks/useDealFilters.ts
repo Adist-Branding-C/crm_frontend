@@ -25,7 +25,7 @@ export function useDealFilters(
   const handleApplyFilters = useCallback(() => {
     const params: Record<string, string | number> = {};
     if (filters.status) params.statusId = filters.status;
-    if (filters.type) params.typeId = filters.type;
+    if (filters.type) params.type = filters.type;
     if (filters.assignedTo) params.assignedTo = filters.assignedTo;
     if (filters.dateRange.start && filters.dateRange.end) {
       params.startDate = filters.dateRange.start;

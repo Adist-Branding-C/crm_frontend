@@ -30,7 +30,7 @@ const DealFilters: React.FC<DealFiltersProps> = ({ filters, onFilterChange, onAp
           </select>
         </div>
         <div className="filter-group">
-          <label>Status</label>
+          <label>Stage</label>
           <select value={filters.status} onChange={(e) => onFilterChange({ ...filters, status: e.target.value })} disabled={isLoading}>
             <option value="">Select</option>
             {statusOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}

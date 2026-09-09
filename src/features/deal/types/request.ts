@@ -4,6 +4,8 @@ export interface GetDealsParams {
   search?: string;
   sortBy?: string;
   sortOrder?: string;
+  leadId?: string | number;
+  pipelineId?: string | number;
   statusId?: string;
   typeId?: string;
   assignedTo?: string;

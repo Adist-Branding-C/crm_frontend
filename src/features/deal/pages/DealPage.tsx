@@ -19,13 +19,19 @@ import { useDealDeleteConfirm } from '../hooks/useDealDeleteConfirm';
 import { useDealActionMenu } from '../hooks/useDealActionMenu';
 import { useDealRowActions } from '../hooks/useDealRowActions';
 import { useDrafts } from '../../../shared/hooks/useDrafts';
+import { useDrawer } from '../../../shared/hooks/useDrawer';
+import { useTableSelection } from '../../../shared/hooks/useTableSelection';
+import DealDetailDrawer from '../../../shared/components/drawers/DealDetailDrawer';
+import DealBulkActionsDropdown from '../components/DealBulkActionsDropdown';
+import BulkChangeStageModal from '../components/BulkChangeStageModal';
+import BulkReassignOwnerModal from '../components/BulkReassignOwnerModal';
+import { useDealBulkActions } from '../hooks/useDealBulkActions';
 import { useDealClearFilters } from '../hooks/useDealClearFilters';
 import { useDealCrud } from '../hooks/useDealCrud';
 import { useDealDrawer } from '../hooks/useDealDrawer';
 import { useDealFormSubmit } from '../hooks/useDealFormSubmit';
 import { useDealAdditionalFieldDefs } from '../hooks/useDealAdditionalFieldDefs';
 import { useDealFormOptions } from '../hooks/useDealFormOptions';
-import { useDealExport } from '../hooks/useDealExport';
 import { useStaffList } from '../hooks/useStaffList';
 import { dealService } from '../services/deal.service';
 import { useActiveWhatsappTemplates } from '../../../shared/hooks/useActiveWhatsappTemplates';
@@ -41,26 +47,60 @@ import DealSortDropdown from '../components/DealSortDropdown';
 import DealForm from '../components/DealForm';
 import { LABEL_NO_DATA } from '../../../shared/constants/labels';
 import { DEAL_FORM_DEFAULT_VALUES } from '../constants/dealFormDefaults';
+import { DEFAULT_CURRENCY } from '../../../shared/constants/currencies';
 import type { DealFormData } from '../../../shared/types/drawers';
 import type { DealItem } from '../types/interface';
 import './DealPage.css';
 
-const DealPage = () => {
+export interface DealPageProps {
+  headerExtra?: React.ReactNode;
+  /**
+   * Rendered directly under the "Deals" page header (e.g. the unified
+   * board's summary/currency bar) - a separate slot from `headerExtra`
+   * (which sits inline in the header itself) so callers can't accidentally
+   * render content above the header.
+   */
+  belowHeader?: React.ReactNode;
+  /**
+   * When set, "Actions → Change Stage" only offers this pipeline's stages
+   * (the unified board passes its currently-selected pipeline). Left unset
+   * for standalone use, where a selection can span pipelines.
+   */
+  pipelineId?: string | number | undefined;
+  /**
+   * One-shot instruction from the Kanban board to open a deal for editing or
+   * deletion right after the view flips to the table (the Kanban detail
+   * drawer has no edit form of its own).
+   */
+  initialAction?: { deal?: DealItem; type: 'edit' | 'delete' | 'add' } | null | undefined;
+  /** Called once `initialAction` has been consumed. */
+  onInitialActionHandled?: (() => void) | undefined;
+}
+
+const DealPage = ({ headerExtra, belowHeader, pipelineId, initialAction, onInitialActionHandled }: DealPageProps) => {
   const toast = useToast();
   const list = useDealList(toast.showToastMessage);
   const { staff: formStaff } = useDealFormOptions();
 
+  const fetchDealsScoped = useCallback(
+    (page: number, limit: number, search: string, extraParams: Record<string, string | number> = {}) => {
+      const merged = pipelineId !== undefined ? { ...extraParams, pipelineId } : extraParams;
+      list.fetchDeals(page, limit, search, merged);
+    },
+    [list.fetchDeals, pipelineId],
+  );
+
   const rowsPerPageRef = useRef(10);
   const searchQueryRef = useRef('');
-  const resetPageRef = useRef<() => void>(() => {});
+  const resetPageRef = useRef<() => void>(() => { });
   const resetPage = useCallback(() => resetPageRef.current(), []);
 
-  const filtersHook = useDealFilters(list.fetchDeals, searchQueryRef, rowsPerPageRef, resetPage);
+  const filtersHook = useDealFilters(fetchDealsScoped, searchQueryRef, rowsPerPageRef, resetPage);
   const { activeFiltersRef } = filtersHook;
 
-  const sortHook = useDealSort(list.fetchDeals, activeFiltersRef, searchQueryRef, rowsPerPageRef, resetPage);
+  const sortHook = useDealSort(fetchDealsScoped, activeFiltersRef, searchQueryRef, rowsPerPageRef, resetPage);
 
-  const pagination = useDealPagination(list.fetchDeals, activeFiltersRef, searchQueryRef, list.totalCount, list.totalPages);
+  const pagination = useDealPagination(fetchDealsScoped, activeFiltersRef, searchQueryRef, list.totalCount, list.totalPages);
 
   const [activeView, setActiveView] = useState<'deals' | 'drafts'>('deals');
   const [draftId, setDraftId] = useState<string | null>(null);
@@ -74,7 +114,7 @@ const DealPage = () => {
     }
   }, [activeView, drafts.length]);
 
-  const dealSearch = useDealSearch(list.fetchDeals, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
+  const dealSearch = useDealSearch(fetchDealsScoped, activeFiltersRef, rowsPerPageRef, pagination.resetPage);
 
   useEffect(() => {
     rowsPerPageRef.current = pagination.rowsPerPage;
@@ -88,9 +128,39 @@ const DealPage = () => {
     showToastMessage: toast.showToastMessage,
   });
   const drawer = useDealDrawer();
+  const detailDrawer = useDrawer<DealItem>();
   const deleteConfirm = useDealDeleteConfirm(crud.handleDeleteDeal);
   const actionMenu = useDealActionMenu();
-  const rowActions = useDealRowActions(actionMenu, drawer, deleteConfirm);
+  const rowActions = useDealRowActions(actionMenu, detailDrawer, deleteConfirm);
+
+  const handleEditFromDetail = useCallback((deal: DealItem) => {
+    detailDrawer.close();
+    drawer.openEditDrawer(deal);
+  }, [detailDrawer.close, drawer.openEditDrawer]);
+
+  // The Kanban board has no edit form of its own, so it flips to this table
+  // view and hands us the deal to open. Consume the instruction once.
+  const handledInitialActionRef = useRef<DealItem | null>(null);
+  useEffect(() => {
+    if (!initialAction || handledInitialActionRef.current === initialAction.deal) return;
+    handledInitialActionRef.current = initialAction.deal || null;
+    if (initialAction.type === 'edit' && initialAction.deal) {
+      drawer.openEditDrawer(initialAction.deal);
+    } else if (initialAction.type === 'delete' && initialAction.deal) {
+      deleteConfirm.handleDeleteClick(initialAction.deal);
+    } else if (initialAction.type === 'add') {
+      drawer.openAddDrawer();
+    }
+    onInitialActionHandled?.();
+  }, [initialAction, drawer.openEditDrawer, deleteConfirm.handleDeleteClick, onInitialActionHandled]);
+
+  const selection = useTableSelection<string>();
+  const bulkActions = useDealBulkActions({
+    selectedIds: selection.selectedIds,
+    onRefresh: () => list.refreshCurrentPage(),
+    onShowToast: toast.showToastMessage,
+    onClearSelection: () => selection.setSelectedIds([]),
+  });
 
   const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
   const { staff } = useStaffList();
@@ -168,12 +238,16 @@ const DealPage = () => {
       mobileCountryCode,
       mobileNumber,
       amount: String(drawer.editingItem.amount || '').replace(/\.00$/, ''),
+      currency: drawer.editingItem.currency || DEFAULT_CURRENCY,
       status: drawer.editingItem.status || '',
       statusId: drawer.editingItem.statusId || '',
+      pipelineId: drawer.editingItem.pipelineId || '',
+      stageId: drawer.editingItem.stageId || drawer.editingItem.statusId || '',
+      priority: drawer.editingItem.priority || '',
       type: drawer.editingItem.type || '',
-      typeId: drawer.editingItem.typeId || '',
       startDate: drawer.editingItem.startDate || '',
       endDate: drawer.editingItem.endDate || '',
+      closeDate: drawer.editingItem.closeDate || drawer.editingItem.endDate || '',
       assignAgent: agentMatch?.label ?? (drawer.editingItem.agent || ''),
       agentId: agentMatch ? agentMatch.value : (rawAgentId || ''),
       ...additionalFieldValues,
@@ -200,11 +274,11 @@ const DealPage = () => {
     setIsPreviewSaving(true);
     try {
       const values = previewData.payload;
-      const helpers = { setSubmitting: () => {} } as any;
+      const helpers = { setSubmitting: () => { } } as any;
       const success = drawer.editingItem
         ? await formSubmit.handleEditSubmit(values, helpers)
         : await formSubmit.handleAddSubmit(values, helpers);
-      
+
       if (success) {
         if (draftId) draftService.deleteDraft(draftId);
         setPreviewData(null);
@@ -222,12 +296,25 @@ const DealPage = () => {
     drawer.closeDrawer();
   };
 
+  // Fetches on mount, then again whenever the board's selected pipeline
+  // changes (pipelineId starts undefined/null while the picker's own
+  // pipelines list is still loading, then resolves to a number - both count
+  // as "changed" so the table re-scopes as soon as a pipeline is picked).
   const initialFetchDone = useRef(false);
+  const prevPipelineIdRef = useRef(pipelineId);
   useEffect(() => {
-    if (initialFetchDone.current) return;
-    initialFetchDone.current = true;
-    list.fetchDeals(1, 10, '', {});
-  }, []);
+    if (!initialFetchDone.current) {
+      initialFetchDone.current = true;
+      prevPipelineIdRef.current = pipelineId;
+      fetchDealsScoped(1, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
+      return;
+    }
+    if (prevPipelineIdRef.current === pipelineId) return;
+    prevPipelineIdRef.current = pipelineId;
+    resetPage();
+    fetchDealsScoped(1, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pipelineId, fetchDealsScoped]);
 
   useEffect(() => {
     if (!drawer.editingItem) return;
@@ -237,11 +324,17 @@ const DealPage = () => {
     }
   }, [list.dealList, drawer.editingItem, drawer.openEditDrawer]);
 
+  useEffect(() => {
+    if (!detailDrawer.item) return;
+    const updated = list.dealList.find(d => d.id === detailDrawer.item!.id);
+    if (updated && updated.createdAt !== detailDrawer.item!.createdAt) {
+      detailDrawer.open(updated);
+    }
+  }, [list.dealList, detailDrawer.item, detailDrawer.open]);
+
   const paginatedIds = useMemo(() => getDealIds(list.dealList), [list.dealList]);
 
-  const clearFilters = useDealClearFilters(filtersHook, dealSearch, pagination, sortHook, list.fetchDeals, rowsPerPageRef);
-
-  const { isExporting, handleExportCSV } = useDealExport(toast.showToastMessage);
+  const clearFilters = useDealClearFilters(filtersHook, dealSearch, pagination, sortHook, fetchDealsScoped, rowsPerPageRef);
 
   const columns = useMemo(() => getDealColumns(list.dealList), [list.dealList]);
 
@@ -280,21 +373,26 @@ const DealPage = () => {
         title="Deals"
         description="Track sales opportunities, aiding management and conversion of potential customers."
         action={
-          drafts.length > 0 && (
-            <button
-              className={`btn ${activeView === 'drafts' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setActiveView(activeView === 'drafts' ? 'deals' : 'drafts')}
-            >
-              {activeView === 'drafts' ? <><Briefcase size={16} /> Back to Deals</> : <><FileText size={16} /> Drafts</>}
-            </button>
-          )
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            {headerExtra}
+            {drafts.length > 0 && (
+              <button
+                className={`btn ${activeView === 'drafts' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setActiveView(activeView === 'drafts' ? 'deals' : 'drafts')}
+              >
+                {activeView === 'drafts' ? <><Briefcase size={16} /> Back to Deals</> : <><FileText size={16} /> Drafts</>}
+              </button>
+            )}
+          </div>
         }
       />
+
+      {belowHeader}
 
       {list.error && !drawer.showDrawer && activeView === 'deals' && (
         <div className="error-banner">
           <span>{list.error}</span>
-          <button className="btn btn-sm btn-secondary" onClick={() => list.fetchDeals(pagination.currentPage, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current)}>Retry</button>
+          <button className="btn btn-sm btn-secondary" onClick={() => fetchDealsScoped(pagination.currentPage, rowsPerPageRef.current, searchQueryRef.current, activeFiltersRef.current)}>Retry</button>
         </div>
       )}
 
@@ -322,13 +420,11 @@ const DealPage = () => {
               }}
             />
 
-            <button
-              className="btn btn-secondary"
-              onClick={() => handleExportCSV(dealSearch.searchQuery, activeFiltersRef.current)}
-              disabled={isExporting}
-            >
-              {isExporting ? 'Exporting...' : 'Export'}
-            </button>
+            <DealBulkActionsDropdown
+              selectedCount={selection.selectedIds.length}
+              onChangeStage={bulkActions.handleChangeStageClick}
+              onReassignOwner={bulkActions.handleReassignOwnerClick}
+            />
 
             <button className="btn btn-primary" onClick={() => { filtersHook.setShowFilters(false); setDraftId(null); drawer.openAddDrawer(); }}>
               <Plus size={16} /> Add Deal
@@ -336,77 +432,88 @@ const DealPage = () => {
           </TableNav>
 
           {filtersHook.showFilters && (
-          <DealFilters
-            filters={filtersHook.filters}
-            onFilterChange={filtersHook.setFilters}
-            onApplyFilters={filtersHook.handleApplyFilters}
-            onClearFilters={clearFilters}
+            <DealFilters
+              filters={filtersHook.filters}
+              onFilterChange={filtersHook.setFilters}
+              onApplyFilters={filtersHook.handleApplyFilters}
+              onClearFilters={clearFilters}
+            />
+          )}
+
+          <Table wrapperClassName="table-scroll" className="enquiries-table">
+            <THead>
+              <TRow>
+                {columns.map(col => (
+                  <TCell
+                    key={col.key}
+                    variant="th"
+                    className={col.sortable ? 'sortable' : ''}
+                    onClick={col.sortable ? () => sortHook.handleSort(col.key) : undefined}
+                  >
+                    {col.key === 'checkbox' ? (
+                      <input
+                        type="checkbox"
+                        checked={list.dealList.length > 0 && selection.selectedIds.length === list.dealList.length}
+                        onChange={(e) => selection.handleSelectAll(list.dealList.map(d => String(d.id)), e.target.checked)}
+                      />
+                    ) : (
+                      <>
+                        {col.label}
+                        {col.sortable && sortHook.sortConfig.key === col.key && (
+                          sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                        )}
+                      </>
+                    )}
+                  </TCell>
+                ))}
+              </TRow>
+            </THead>
+            <TBody>
+              {list.error && !list.isLoading ? (
+                <EmptyState colSpan={columns.length} message={list.error} />
+              ) : list.dealList.length === 0 && !list.isLoading ? (
+                <EmptyState colSpan={columns.length} message={LABEL_NO_DATA} />
+              ) : (
+                list.dealList.map(deal => (
+                  <DealRow
+                    key={deal.id}
+                    deal={deal}
+                    columns={columns}
+                    additionalFieldColumns={additionalFieldColumnNames}
+                    isSelected={selection.isSelected(String(deal.id))}
+                    onSelectRow={() => selection.handleSelectRow(String(deal.id))}
+                    actionMenu={{
+                      isOpen: actionMenu.openId === deal.id,
+                      buttonRect: actionMenu.openId === deal.id ? actionMenu.buttonRect : null,
+                      onOpen: actionMenu.open,
+                      onClose: actionMenu.close,
+                    }}
+                    onViewDeal={detailDrawer.open}
+                    onEditDeal={drawer.openEditDrawer}
+                    onDeleteDeal={rowActions.handleDeleteFromRow}
+                    onSendWhatsapp={handleSendWhatsapp}
+                    onMessage={handleMessage}
+                    hasWhatsappTemplates={hasWhatsappTemplates}
+                    whatsappTemplatesLoading={whatsappTemplatesLoading}
+                    whatsappTemplatesError={whatsappTemplatesError}
+                    staffOptions={staffOptions}
+                    onFieldSave={handleFieldSave}
+                  />
+                ))
+              )}
+            </TBody>
+          </Table>
+
+          {list.isLoading && <div className="table-loading">Loading...</div>}
+
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={list.totalPages}
+            totalItems={pagination.totalItems}
+            rowsPerPage={pagination.rowsPerPage}
+            onPageChange={pagination.handleSetCurrentPage}
           />
-        )}
-
-        <Table wrapperClassName="table-scroll" className="enquiries-table">
-          <THead>
-            <TRow>
-              {columns.map(col => (
-                <TCell
-                  key={col.key}
-                  variant="th"
-                  className={col.sortable ? 'sortable' : ''}
-                  onClick={col.sortable ? () => sortHook.handleSort(col.key) : undefined}
-                >
-                  {col.label}
-                  {col.sortable && sortHook.sortConfig.key === col.key && (
-                    sortHook.sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
-                  )}
-                </TCell>
-              ))}
-            </TRow>
-          </THead>
-          <TBody>
-            {list.error && !list.isLoading ? (
-              <EmptyState colSpan={columns.length} message={list.error} />
-            ) : list.dealList.length === 0 && !list.isLoading ? (
-              <EmptyState colSpan={columns.length} message={LABEL_NO_DATA} />
-            ) : (
-              list.dealList.map(deal => (
-                <DealRow
-                  key={deal.id}
-                  deal={deal}
-                  columns={columns}
-                  additionalFieldColumns={additionalFieldColumnNames}
-                  isSelected={false}
-                  onSelectRow={() => {}}
-                  actionMenu={{
-                    isOpen: actionMenu.openId === deal.id,
-                    buttonRect: actionMenu.openId === deal.id ? actionMenu.buttonRect : null,
-                    onOpen: actionMenu.open,
-                    onClose: actionMenu.close,
-                  }}
-                  onEditDeal={drawer.openEditDrawer}
-                  onDeleteDeal={rowActions.handleDeleteFromRow}
-                  onSendWhatsapp={handleSendWhatsapp}
-                  onMessage={handleMessage}
-                  hasWhatsappTemplates={hasWhatsappTemplates}
-                  whatsappTemplatesLoading={whatsappTemplatesLoading}
-                  whatsappTemplatesError={whatsappTemplatesError}
-                  staffOptions={staffOptions}
-                  onFieldSave={handleFieldSave}
-                />
-              ))
-            )}
-          </TBody>
-        </Table>
-
-        {list.isLoading && <div className="table-loading">Loading...</div>}
-
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalPages={list.totalPages}
-          totalItems={pagination.totalItems}
-          rowsPerPage={pagination.rowsPerPage}
-          onPageChange={pagination.handleSetCurrentPage}
-        />
-      </div>
+        </div>
       )}
 
       {previewData ? (
@@ -447,6 +554,32 @@ const DealPage = () => {
         error={formError}
         onConfirm={deleteConfirm.handleConfirmDelete}
         onClose={() => { setFormError(''); deleteConfirm.closeDeleteModal(); }}
+      />
+
+      <BulkChangeStageModal
+        isOpen={bulkActions.showChangeStageModal}
+        selectedCount={selection.selectedIds.length}
+        isProcessing={bulkActions.isProcessing}
+        pipelineId={pipelineId}
+        onConfirm={bulkActions.handleConfirmChangeStage}
+        onClose={() => bulkActions.setShowChangeStageModal(false)}
+      />
+
+      <BulkReassignOwnerModal
+        isOpen={bulkActions.showReassignOwnerModal}
+        selectedCount={selection.selectedIds.length}
+        isProcessing={bulkActions.isProcessing}
+        onConfirm={bulkActions.handleConfirmReassignOwner}
+        onClose={() => bulkActions.setShowReassignOwnerModal(false)}
+      />
+
+      <DealDetailDrawer
+        deal={detailDrawer.item}
+        isOpen={detailDrawer.isOpen}
+        onClose={detailDrawer.close}
+        onDealUpdated={list.refreshCurrentPage}
+        onEditDeal={handleEditFromDetail}
+        onDeleteDeal={rowActions.handleDeleteFromDrawer}
       />
 
       <Toast

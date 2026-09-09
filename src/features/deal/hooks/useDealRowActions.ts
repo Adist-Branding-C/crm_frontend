@@ -7,7 +7,7 @@ interface DeleteConfirm {
 }
 
 interface DetailDrawer {
-  closeDrawer: () => void;
+  close: () => void;
 }
 
 export function useDealRowActions(
@@ -21,9 +21,9 @@ export function useDealRowActions(
   }, [actionMenu.close, deleteConfirm.handleDeleteClick]);
 
   const handleDeleteFromDrawer = useCallback((deal: DealItem) => {
-    detailDrawer.closeDrawer();
+    detailDrawer.close();
     deleteConfirm.handleDeleteClick(deal);
-  }, [detailDrawer.closeDrawer, deleteConfirm.handleDeleteClick]);
+  }, [detailDrawer.close, deleteConfirm.handleDeleteClick]);
 
   return { handleDeleteFromRow, handleDeleteFromDrawer };
 }

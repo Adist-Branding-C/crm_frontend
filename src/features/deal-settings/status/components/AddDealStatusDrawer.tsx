@@ -7,7 +7,7 @@ import type { AddDealStatusDrawerProps } from '../types/add-deal-status-drawer.t
 const AddDealStatusDrawer: React.FC<AddDealStatusDrawerProps> = ({
   isOpen, formData, onChange, onSave, onClose, isEditing,
 }) => (
-  <AdminFormDrawer isOpen={isOpen} title="Deal Status" fields={DEAL_STATUS_FORM_FIELDS}
+  <AdminFormDrawer isOpen={isOpen} title="Deal Stage" fields={DEAL_STATUS_FORM_FIELDS}
     formData={formData} onChange={onChange} onSave={onSave}
     onClose={onClose} isEditing={isEditing} validationSchema={dealStatusValidationSchema} />
 );

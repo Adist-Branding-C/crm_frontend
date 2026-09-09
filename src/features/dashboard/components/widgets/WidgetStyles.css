@@ -61,6 +61,31 @@
   color: var(--text-muted);
 }
 
+/* Title + inline control (e.g. a currency toggle) on one row. Carries the
+   same bottom spacing .widget-title has on its own. */
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.widget-header .widget-title {
+  margin-bottom: 0;
+}
+
+.widget-inline-select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 
 .activities-statistics-widget {
   grid-column: 1 / -1;

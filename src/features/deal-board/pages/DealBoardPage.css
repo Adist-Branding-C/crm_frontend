@@ -1,0 +1,8 @@
+/* DealBoardPage-specific overrides only - shared Kanban/card styles come
+ * from sales-pipeline/pages/SalesPipelinePage.css (imported alongside). */
+
+.deal-board-table-view {
+  position: relative;
+}
+
+

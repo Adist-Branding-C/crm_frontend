@@ -8,12 +8,15 @@ export interface DealApiItem {
   leadId?: string | number;
   mobile?: string;
   amount?: number;
+  currency?: string;
   status?: string | { id?: string | number; name?: string; dealStatus?: string };
   statusId?: string | number;
+  pipelineId?: string | number;
+  stageId?: string | number;
   type?: string | { id?: string | number; name?: string; dealType?: string };
-  typeId?: string | number;
   stage?: string;
   priority?: string;
+  lostReason?: string | null;
   assignedTo?: string;
   agent?: string | { id?: string | number; name?: string; staff_id?: string };
   agentId?: string | number;
@@ -21,6 +24,7 @@ export interface DealApiItem {
   createdByType?: string;
   startDate?: string;
   endDate?: string;
+  closeDate?: string;
   createdAt?: string;
   additionalFields?: DealAdditionalField[];
 }

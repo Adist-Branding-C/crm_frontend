@@ -30,7 +30,7 @@ export const DEAL_STATUS_STATUS_OPTIONS = [
  * - AddDealStatusDrawer.tsx (legacy — replaced by DealStatusForm.tsx)
  */
 export const DEAL_STATUS_FORM_FIELDS = [
-  { name: 'name', label: 'Name', type: 'text' as const, required: true, placeholder: 'Enter deal status name' },
+  { name: 'name', label: 'Name', type: 'text' as const, required: true, placeholder: 'Enter deal stage name' },
   { name: 'stage', label: 'Stage', type: 'select' as const, required: true, options: DEAL_STATUS_STAGE_OPTIONS },
   { name: 'status', label: 'Status', type: 'select' as const, required: true, options: DEAL_STATUS_STATUS_OPTIONS },
 ];

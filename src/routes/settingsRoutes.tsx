@@ -7,6 +7,8 @@ import LeadStatusPage from '../features/lead-settings/lead-status/pages/LeadStat
 import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSourcePage';
 import LeadTypesPage from '../features/lead-settings/lead-types/pages/LeadTypesPage';
 import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/LeadAdditionalPage';
+import DealPipelineListPage from '../features/deal-pipeline-builder/pages/DealPipelineListPage';
+import DealPipelineCanvasPage from '../features/deal-pipeline-builder/pages/DealPipelineCanvasPage';
 // import CustomPipelinePage from '../features/pipeline-settings/pages/CustomPipelinePage';
 // Hidden: Notification Settings page disabled per client request (2026-09-04)
 // import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
@@ -29,6 +31,8 @@ export default (
     <Route path="settings/lead-settings/source" element={<ErrorBoundary><LeadSourcePage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/types" element={<ErrorBoundary><LeadTypesPage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/additional" element={<ErrorBoundary><LeadAdditionalPage /></ErrorBoundary>} />
+    <Route path="settings/deal-pipelines" element={<ErrorBoundary><DealPipelineListPage /></ErrorBoundary>} />
+    <Route path="settings/deal-pipelines/:pipelineId" element={<ErrorBoundary><DealPipelineCanvasPage /></ErrorBoundary>} />
     {/* <Route path="settings/custom-pipeline" element={<ErrorBoundary><CustomPipelinePage /></ErrorBoundary>} /> */}
     {/* Hidden: Notification Settings page disabled per client request (2026-09-04) */}
     {/* <Route path="user/notifications-users" element={<NotificationSettingsPage />} /> */}

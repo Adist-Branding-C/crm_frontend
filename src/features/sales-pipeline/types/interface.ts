@@ -36,8 +36,9 @@ export interface PipelineDeal {
   id: number;
   dealName: string;
   amount: number;
+  currency?: string;
   status: string;
-  statusId: number;
+  stageId: number;
   startDate: string | null;
   endDate: string | null;
   companyId: number;
@@ -45,12 +46,19 @@ export interface PipelineDeal {
   createdAt?: string;
   company?: string;
   probability?: number;
+  priority?: 'High' | 'Medium' | 'Low';
   contact?: string;
 }
 
 export interface PipelineStatusGroup {
   statusId: number;
   status: string;
+  // Populated from the stage's own data (Deal Pipeline Redesign) - null/0
+  // for a company that hasn't set a color/probability yet.
+  probability?: number;
+  outcome?: 'OPEN' | 'WON' | 'LOST';
+  color?: string | null;
+  sortOrder?: number;
   count: number;
   deals: PipelineDeal[];
 }

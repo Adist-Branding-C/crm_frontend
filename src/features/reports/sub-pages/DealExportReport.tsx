@@ -6,32 +6,22 @@ import { MOCK_STAFF_SHORT } from '../../../shared/constants/mockStaff';
 
 const DealExportReport = () => {
   const [filters, setFilters] = useState({
-    dateRange: { start: '', end: '' }, dateBy: '', filterByDate: '', dealStatus: [] as string[],
+    dateRange: { start: '', end: '' }, dateBy: '', filterByDate: '',
     dealStage: '', dealType: '', agent: '', createdBy: '', completedBy: '', enquirySource: '',
     sortBy: 'createdDate', fileName: ''
   });
-  const [selectedFields, setSelectedFields] = useState(['dealCode', 'dealName', 'dealAmount', 'dealStatus']);
+  const [selectedFields, setSelectedFields] = useState(['dealCode', 'dealName', 'dealAmount', 'dealStage']);
 
-  const dealStatusOptions = ['New', 'Create Papers', 'Invoice', 'In Progress', 'Final Stage', 'Deal Win', 'Deal Lost'];
   const fieldOptions = [
     { key: 'dateTime', label: 'Date & Time' }, { key: 'updatedDateTime', label: 'Updated Date & Time' },
     { key: 'dealCode', label: 'Deal Code' }, { key: 'dealName', label: 'Deal Name' },
     { key: 'dealAmount', label: 'Deal Amount' }, { key: 'dealType', label: 'Deal Type' },
-    { key: 'dealStatus', label: 'Deal Status' }, { key: 'dealStage', label: 'Deal Stage' },
+    { key: 'dealStage', label: 'Deal Stage' },
     { key: 'leadName', label: 'Lead Name' }, { key: 'companyName', label: 'Company Name' },
     { key: 'mobileNo', label: 'Mobile No' }, { key: 'staffName', label: 'Staff Name' },
     { key: 'startDate', label: 'Start Date' }, { key: 'endDate', label: 'End Date' },
     { key: 'createdBy', label: 'Created By' },
   ];
-
-  const handleStatusToggle = (status: string) => {
-    setFilters(prev => ({
-      ...prev,
-      dealStatus: prev.dealStatus.includes(status)
-        ? prev.dealStatus.filter(s => s !== status)
-        : [...prev.dealStatus, status]
-    }));
-  };
 
   const handleFieldToggle = (fieldKey: string) => {
     setSelectedFields(prev =>
@@ -79,14 +69,6 @@ const DealExportReport = () => {
           <div className="form-section">
             <h3 className="section-title">Deal Filters</h3>
             <div className="filter-row">
-              <div className="filter-group">
-                <label>Deal Status</label>
-                <div className="multi-select-dropdown" style={{ position: 'relative' }}>
-                  <div className="multi-select-trigger" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', padding: '0.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius-sm)', minHeight: '42px', cursor: 'pointer' }}>
-                    {filters.dealStatus.length === 0 ? <span style={{ color: 'var(--text-muted)' }}>Select</span> : filters.dealStatus.map(s => <span key={s} className="multi-select-tag">{s}</span>)}
-                  </div>
-                </div>
-              </div>
               <div className="filter-group">
                 <label>Deal Stage</label>
                 <select value={filters.dealStage} onChange={(e) => setFilters({ ...filters, dealStage: e.target.value })}>

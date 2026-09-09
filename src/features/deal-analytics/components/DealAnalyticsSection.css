@@ -1,0 +1,35 @@
+.deal-analytics-section {
+  margin-bottom: 20px;
+}
+
+.deal-analytics-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.deal-analytics-section__header:empty {
+  display: none;
+}
+
+.deal-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+/* These widgets (forecast summary + 220px chart, vertical stage funnel) are
+   taller than the dashboard's default 300px widget box - let them size to
+   their content instead of clipping / overflowing onto the next row. */
+.deal-analytics-grid > .widget-base {
+  height: auto;
+  min-height: 300px;
+}
+
+@media (max-width: 900px) {
+  .deal-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}

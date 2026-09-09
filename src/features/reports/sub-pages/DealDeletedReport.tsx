@@ -17,7 +17,7 @@ const DealDeletedReport = () => {
 
   const fieldOptions = [
     { key: 'dealName', label: 'Deal Name' }, { key: 'deletedBy', label: 'Deleted By' }, { key: 'leadName', label: 'Lead' },
-    { key: 'mobile', label: 'Mobile' }, { key: 'amount', label: 'Amount' }, { key: 'status', label: 'Status' },
+    { key: 'mobile', label: 'Mobile' }, { key: 'amount', label: 'Amount' }, { key: 'status', label: 'Stage' },
     { key: 'type', label: 'Type' }, { key: 'startDate', label: 'Start Date' }, { key: 'endDate', label: 'End Date' },
     { key: 'agent', label: 'Agent' }, { key: 'createdBy', label: 'Created By' }, { key: 'createdAt', label: 'Created At' },
     { key: 'deletedAt', label: 'Deleted At' }, { key: 'lostReason', label: 'Lost Reason' },
@@ -89,7 +89,7 @@ const DealDeletedReport = () => {
           <thead>
             <tr>
               <th><input type="checkbox" checked={paginatedData.length > 0 && selectedRows.length === paginatedData.length} onChange={handleSelectAll} /></th>
-              <th>Deal Name</th><th>Deleted By</th><th>Lead</th><th>Mobile</th><th>Amount</th><th>Status</th><th>Type</th>
+              <th>Deal Name</th><th>Deleted By</th><th>Lead</th><th>Mobile</th><th>Amount</th><th>Stage</th><th>Type</th>
               <th>Start Date</th><th>End Date</th><th>Agent</th><th>Created By</th><th>Created At</th><th>Deleted At</th><th>Lost Reason</th>
             </tr>
           </thead>
