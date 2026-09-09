@@ -20,6 +20,14 @@
   align-items: start;
 }
 
+/* These widgets (forecast summary + 220px chart, vertical stage funnel) are
+   taller than the dashboard's default 300px widget box - let them size to
+   their content instead of clipping / overflowing onto the next row. */
+.deal-analytics-grid > .widget-base {
+  height: auto;
+  min-height: 300px;
+}
+
 @media (max-width: 900px) {
   .deal-analytics-grid {
     grid-template-columns: 1fr;

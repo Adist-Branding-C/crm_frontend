@@ -1,6 +1,7 @@
 import PipelinePicker from '../../deal-board/components/PipelinePicker';
 import { useSelectedPipeline } from '../../deal-board/hooks/useSelectedPipeline';
 import type { DashboardPeriod } from '../../dashboard/types';
+import ForecastWidget from './ForecastWidget';
 import WinRateWidget from './WinRateWidget';
 import StageFunnelWidget from './StageFunnelWidget';
 import './DealAnalyticsSection.css';
@@ -17,8 +18,9 @@ interface DealAnalyticsSectionProps {
  * standalone page).
  *
  * Win rate follows the dashboard's shared period / custom-range filter. The
- * stage funnel is a current-snapshot metric scoped to a single pipeline, so
- * the section carries one pipeline picker that scopes it.
+ * weighted forecast is a current-snapshot metric broken down across every
+ * pipeline; the stage funnel is scoped to a single pipeline, so the section
+ * carries one pipeline picker that scopes it.
  */
 const DealAnalyticsSection = ({ period, from, to }: DealAnalyticsSectionProps) => {
   const { pipelines, selectedPipelineId, setSelectedPipelineId } = useSelectedPipeline();
@@ -34,6 +36,7 @@ const DealAnalyticsSection = ({ period, from, to }: DealAnalyticsSectionProps) =
       </header>
 
       <div className="deal-analytics-grid">
+        <ForecastWidget />
         <WinRateWidget period={period} from={from} to={to} />
         <StageFunnelWidget pipelineId={selectedPipelineId ?? undefined} />
       </div>
