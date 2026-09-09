@@ -8,7 +8,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
  * - Reusable across any search box that drives a server-side fetch (pass the fetch hook's own
  *   search setter, e.g. useTableData's `handleSearchChange`, as `onSearchChange`).
  */
-export function useDebouncedSearch(onSearchChange: (value: string) => void, delay = 400) {
+export function useDebouncedSearch(onSearchChange: (value: string) => void, delay = 250) {
   const [searchValue, setSearchValue] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const onSearchChangeRef = useRef(onSearchChange);

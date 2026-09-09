@@ -12,6 +12,7 @@ countryCode: DEFAULT_COUNTRY_CODE,
   confirmPassword: '',
   designationId: '',
   departmentId: '',
+  roleId: '',
   status: '',
   isAdmin: false,
 };
@@ -31,6 +32,7 @@ export const AGENT_FIELD_MAP: FieldErrorMap = {
   full_name: 'fullName',
   confirm_password: 'confirmPassword',
   country_code: 'countryCode',
+  role_id: 'roleId',
 };
 
 /**
@@ -46,4 +48,5 @@ export const AGENT_FIELD_ERROR_FALLBACKS: FieldErrorFallback[] = [
   { keyword: 'phone', field: 'phone' },
   { keyword: 'password', field: 'password' },
   { keyword: 'name', field: 'fullName' },
+  { keyword: 'role', field: 'roleId' },
 ];

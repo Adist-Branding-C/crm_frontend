@@ -1,6 +1,7 @@
 import type { FormikHelpers } from 'formik';
 import type { Schema } from 'yup';
 import type { AgentFormData, DesignationOption, DepartmentOption } from './agent.types';
+import type { RoleOption } from '../../roles/types/role.types';
 
 export interface AddAgentDrawerVisibility {
   isOpen: boolean;
@@ -29,10 +30,16 @@ export interface AddAgentDrawerDepartment {
   onFetch: () => void;
 }
 
+export interface AddAgentDrawerRole {
+  options: RoleOption[];
+  onFetch: () => void;
+}
+
 export interface AddAgentDrawerProps {
   visibility: AddAgentDrawerVisibility;
   form: AddAgentDrawerForm;
   status: AddAgentDrawerStatus;
   designation: AddAgentDrawerDesignation;
   department: AddAgentDrawerDepartment;
+  role: AddAgentDrawerRole;
 }
