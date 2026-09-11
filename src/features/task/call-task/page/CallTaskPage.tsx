@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
 import { useToast } from '../../../../shared/hooks/useToast';
@@ -23,16 +24,39 @@ import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import { taskTabs } from '../../common/taskTabs';
+import TaskViewToggle from '../../kanban/components/TaskViewToggle';
+import TaskKanbanView from '../../kanban/components/TaskKanbanView';
+import { TASK_BOARD_VIEW_STORAGE_KEY } from '../../kanban/constants/taskBoard.constants';
+import type { TaskBoardView } from '../../kanban/types/kanban.types';
 import type { CallTaskItem } from '../types/index';
 import './CallTaskPage.css';
 
+function readStoredView(): TaskBoardView {
+  try {
+    const stored = localStorage.getItem(TASK_BOARD_VIEW_STORAGE_KEY);
+    return stored === 'table' ? 'table' : 'kanban';
+  } catch {
+    return 'kanban';
+  }
+}
+
 const CallTaskPage = () => {
+  const [boardView, setBoardViewState] = useState<TaskBoardView>(readStoredView);
   const pagination = useTableData<CallTaskItem>({
     fetchFn: async (params) => {
       const response = await callTaskDataService.fetchAll({ ...params, type: 'CALL_TASK' });
       return ListResponseMapper.toPagedResult<CallTaskItem>(response);
     },
   });
+
+  const handleViewChange = useCallback((next: TaskBoardView) => {
+    setBoardViewState(next);
+    try {
+      localStorage.setItem(TASK_BOARD_VIEW_STORAGE_KEY, next);
+    } catch {
+      // Non-fatal
+    }
+  }, []);
   const toast = useToast();
   const crud = useCallTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
   const staff = useStaffOptions();
@@ -50,10 +74,22 @@ const CallTaskPage = () => {
 
   return (
     <div className="task-settings-page">
-      <PageHeader title="Call Task" description="Manage your call tasks" />
+      <PageHeader
+        title="Call Task"
+        description="Manage your call tasks"
+        action={
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            <TaskViewToggle view={boardView} onChange={handleViewChange} />
+          </div>
+        }
+      />
       <SettingsTabs items={taskTabs} />
       <div className="account-content">
-        <div className="table-container">
+        {boardView === 'kanban' ? (
+          <TaskKanbanView taskType="CALL_TASK" onViewChange={handleViewChange} onAddTask={drawer.openAddDrawer} addLabel="Add Call Task" />
+        ) : (
+          <>
+            <div className="table-container">
           <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={16} /> Add Call Task
@@ -67,19 +103,22 @@ const CallTaskPage = () => {
                 <TCell variant="th">Description</TCell>
                 <TCell variant="th">Scheduled Date</TCell>
                 <TCell variant="th">Scheduled Time</TCell>
+                <TCell variant="th">Workflow</TCell>
+                <TCell variant="th">Stage</TCell>
                 <TCell variant="th">Assigned To</TCell>
                 <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
+                <TCell variant="th">Repeat</TCell>
                 <TCell variant="th">Lead</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
               {pagination.isLoading && pagination.list.length === 0 ? (
-                <TaskListLoadingRow colSpan={11} />
+                <TaskListLoadingRow colSpan={14} />
               ) : !pagination.isLoading && pagination.list.length === 0 ? (
-                <EmptyState colSpan={11} message={LABEL_NO_DATA} />
+                <EmptyState colSpan={14} message={LABEL_NO_DATA} />
               ) : pagination.list.map((item, idx) => (
                 <TaskItemRow
                   key={item.id}
@@ -101,6 +140,8 @@ const CallTaskPage = () => {
             onPageChange={pagination.setPageNumber}
           />
         </div>
+          </>
+        )}
         <Drawer isOpen={drawer.showDrawer} onClose={drawer.closeDrawer} title={drawer.editingItem ? 'Edit Call Task' : 'Add Call Task'}>
           <GenericTaskForm
             validationSchema={drawer.editingItem ? editCallTaskValidationSchema : addCallTaskValidationSchema}

@@ -17,4 +17,6 @@ export const ADD_DEAL_TASK_INITIAL_VALUES: DealTaskFormData = {
   dealId: '',
   priority: '',
   status: '',
+  repeatType: 'Never',
+  repeatConfig: undefined,
 };

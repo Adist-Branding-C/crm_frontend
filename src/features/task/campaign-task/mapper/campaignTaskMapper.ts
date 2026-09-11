@@ -17,9 +17,13 @@ export class CampaignTaskMapper {
       scheduledDate: item.scheduledDate || '',
       scheduledTime: toHHmm(item.scheduledTime),
       assignedTo: toIdString(item.assignedTo),
-      campaignId: toIdString(item.leadId),
+      campaignId: toIdString(item.campaignId),
       priority: item.priority || '',
       status: item.status || '',
+      workflowId: item.workflowId != null ? String(item.workflowId) : '',
+      stageId: item.stageId != null ? String(item.stageId) : '',
+      repeatType: item.repeatType || 'Never',
+      repeatConfig: item.repeatConfig,
     };
   }
 }

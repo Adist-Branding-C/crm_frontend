@@ -17,4 +17,6 @@ export const ADD_CALL_TASK_INITIAL_VALUES: CallTaskFormData = {
   leadId: '',
   priority: '',
   status: '',
+  repeatType: 'Never',
+  repeatConfig: undefined,
 };

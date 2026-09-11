@@ -26,14 +26,36 @@ export class CampaignTaskDataService {
     });
   }
 
+  async getById(id: number): Promise<ApiResponse<CampaignTaskItem>> {
+    const response = await axiosInstance.get<ApiResponse<CampaignTaskItem>>(
+      CAMPAIGN_TASK_API_ENDPOINTS.GET_BY_ID(id),
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
   private cleanPayload(data: any): any {
     const payload = { ...data };
-    ['leadId', 'dealId', 'campaignId', 'categoryId'].forEach(key => {
+    ['leadId', 'dealId', 'campaignId', 'categoryId', 'workflowId', 'stageId'].forEach(key => {
       if (payload[key] === '') delete payload[key];
       else if (payload[key] !== undefined && payload[key] !== null && key !== 'leadId') {
         payload[key] = Number(payload[key]);
       }
     });
+    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== 'Never' && payload.repeatType !== 'Daily') {
+      const config = payload.repeatConfig;
+      if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
+        config.dayOfWeek = Number(config.dayOfWeek);
+      }
+      if (config.dayOfMonth !== undefined && config.dayOfMonth !== null && config.dayOfMonth !== '' && config.dayOfMonth !== 'last') {
+        config.dayOfMonth = Number(config.dayOfMonth);
+      }
+    } else {
+      delete payload.repeatConfig;
+    }
     return payload;
   }
 

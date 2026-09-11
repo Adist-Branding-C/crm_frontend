@@ -17,4 +17,6 @@ export const ADD_CAMPAIGN_TASK_INITIAL_VALUES: CampaignTaskFormData = {
   campaignId: '',
   priority: '',
   status: '',
+  repeatType: 'Never',
+  repeatConfig: undefined,
 };

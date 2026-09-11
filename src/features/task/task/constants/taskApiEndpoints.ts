@@ -12,6 +12,8 @@
 export const TASK_API_ENDPOINTS = {
   GET_ALL: '/tasks',
   CREATE: '/tasks',
+  GET_BY_ID: (id: number) => `/tasks/${id}`,
   UPDATE: (id: number) => `/tasks/${id}`,
   DELETE: (id: number) => `/tasks/${id}`,
+  RECURRENCE_CHAIN: (id: number) => `/tasks/${id}/recurrence-chain`,
 };

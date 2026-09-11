@@ -4,7 +4,7 @@ import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { TASK_API_ENDPOINTS } from '../constants/taskApiEndpoints';
 import type { ApiResponse } from '../../../../shared/types/common';
 import type { TaskListParams } from '../../common/types/listParams';
-import type { TaskItem, TaskFormData, TaskFormDataUpdate } from '../types';
+import type { TaskItem, TaskFormData, TaskFormDataUpdate, RecurrenceChainItem } from '../types';
 
 /**
  * HTTP client for the Task API - communicates with the backend only.
@@ -27,14 +27,36 @@ export class TaskDataService {
     });
   }
 
+  async getById(id: number): Promise<ApiResponse<TaskItem>> {
+    const response = await axiosInstance.get<ApiResponse<TaskItem>>(
+      TASK_API_ENDPOINTS.GET_BY_ID(id),
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
   private cleanPayload(data: any): any {
     const payload = { ...data };
-    ['leadId', 'dealId', 'campaignId', 'categoryId'].forEach(key => {
+    ['leadId', 'dealId', 'campaignId', 'categoryId', 'workflowId', 'stageId'].forEach(key => {
       if (payload[key] === '') delete payload[key];
       else if (payload[key] !== undefined && payload[key] !== null && key !== 'leadId') {
         payload[key] = Number(payload[key]);
       }
     });
+    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== 'Never' && payload.repeatType !== 'Daily') {
+      const config = payload.repeatConfig;
+      if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
+        config.dayOfWeek = Number(config.dayOfWeek);
+      }
+      if (config.dayOfMonth !== undefined && config.dayOfMonth !== null && config.dayOfMonth !== '' && config.dayOfMonth !== 'last') {
+        config.dayOfMonth = Number(config.dayOfMonth);
+      }
+    } else {
+      delete payload.repeatConfig;
+    }
     return payload;
   }
 
@@ -58,6 +80,17 @@ export class TaskDataService {
 
   async delete(id: number): Promise<ApiResponse<null>> {
     const response = await axiosInstance.delete<ApiResponse<null>>(TASK_API_ENDPOINTS.DELETE(id));
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getRecurrenceChain(id: number): Promise<ApiResponse<RecurrenceChainItem[]>> {
+    const response = await axiosInstance.get<ApiResponse<RecurrenceChainItem[]>>(
+      TASK_API_ENDPOINTS.RECURRENCE_CHAIN(id),
+    );
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,

@@ -1,3 +1,5 @@
+import type { RepeatType, RepeatConfig } from '../../task/types/interface';
+
 export interface TaskItemRowShape {
   id: number;
   title: string;
@@ -8,6 +10,11 @@ export interface TaskItemRowShape {
   assignedBy?: { name: string } | null;
   priority: string;
   status: string;
+  workflowName?: string | null;
+  stageName?: string | null;
+  stageColor?: string | null;
+  repeatType?: RepeatType | null;
+  repeatConfig?: RepeatConfig | null;
   leadId?: { id: number; name: string } | null;
 }
 

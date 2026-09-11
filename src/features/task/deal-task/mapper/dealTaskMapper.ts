@@ -20,6 +20,10 @@ export class DealTaskMapper {
       dealId: toIdString(item.dealId),
       priority: item.priority || '',
       status: item.status || '',
+      workflowId: item.workflowId != null ? String(item.workflowId) : '',
+      stageId: item.stageId != null ? String(item.stageId) : '',
+      repeatType: item.repeatType || 'Never',
+      repeatConfig: item.repeatConfig,
     };
   }
 }

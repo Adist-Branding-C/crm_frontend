@@ -3,6 +3,8 @@ import { TRow, TCell } from '../../../../shared/components/table';
 import StatusBadge from '../../../../shared/components/StatusBadge';
 import RowActions from '../../common/components/RowActions';
 import CellEditPopover from '../../../../shared/components/CellEditPopover';
+import WorkflowStageCells from '../../common/components/WorkflowStageCells';
+import TaskRepeatCell from '../../common/components/TaskRepeatCell';
 import { formatTime12hr } from '../../../../shared/utils/dateUtils';
 import type { TaskRowProps, TaskFieldOptions } from '../types/component.types';
 import type { TaskFormDataUpdate } from '../types/request';
@@ -41,10 +43,12 @@ const TaskRow = ({ item, index, dropdownOpen, onToggleDropdown, onEdit, onDelete
         <TCell>{item.category?.name || emptyCell('category')}</TCell>
         <TCell>{item.scheduledDate}</TCell>
         <TCell>{formatTime12hr(item.scheduledTime)}</TCell>
+        <WorkflowStageCells workflowName={item.workflowName} stageName={item.stageName} stageColor={item.stageColor} />
         <TCell>{item.assignedTo?.name || emptyCell('assignedTo')}</TCell>
         <TCell>{item.assignedBy?.name ?? '-'}</TCell>
         <TCell><StatusBadge value={item.priority} /></TCell>
         <TCell><StatusBadge value={item.status} /></TCell>
+        <TaskRepeatCell repeatType={item.repeatType} repeatConfig={item.repeatConfig} />
         <TCell>{item.leadId?.name || emptyCell('leadId')}</TCell>
         <TCell>
           <RowActions item={item} dropdownOpen={dropdownOpen} onToggleDropdown={onToggleDropdown} onEdit={onEdit} onDelete={onDelete} />

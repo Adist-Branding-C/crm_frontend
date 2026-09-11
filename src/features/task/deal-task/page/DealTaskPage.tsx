@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
 import { useToast } from '../../../../shared/hooks/useToast';
@@ -23,16 +24,39 @@ import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import { taskTabs } from '../../common/taskTabs';
+import TaskViewToggle from '../../kanban/components/TaskViewToggle';
+import TaskKanbanView from '../../kanban/components/TaskKanbanView';
+import { TASK_BOARD_VIEW_STORAGE_KEY } from '../../kanban/constants/taskBoard.constants';
+import type { TaskBoardView } from '../../kanban/types/kanban.types';
 import type { DealTaskItem } from '../types/index';
 import './DealTaskPage.css';
 
+function readStoredView(): TaskBoardView {
+  try {
+    const stored = localStorage.getItem(TASK_BOARD_VIEW_STORAGE_KEY);
+    return stored === 'table' ? 'table' : 'kanban';
+  } catch {
+    return 'kanban';
+  }
+}
+
 const DealTaskPage = () => {
+  const [boardView, setBoardViewState] = useState<TaskBoardView>(readStoredView);
   const pagination = useTableData<DealTaskItem>({
     fetchFn: async (params) => {
       const response = await dealTaskDataService.fetchAll({ ...params, type: 'DEAL_TASK' });
       return ListResponseMapper.toPagedResult<DealTaskItem>(response);
     },
   });
+
+  const handleViewChange = useCallback((next: TaskBoardView) => {
+    setBoardViewState(next);
+    try {
+      localStorage.setItem(TASK_BOARD_VIEW_STORAGE_KEY, next);
+    } catch {
+      // Non-fatal
+    }
+  }, []);
   const toast = useToast();
   const crud = useDealTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
   const staff = useStaffOptions();
@@ -50,10 +74,22 @@ const DealTaskPage = () => {
 
   return (
     <div className="task-settings-page">
-      <PageHeader title="Deal Task" description="Manage your deal tasks" />
+      <PageHeader
+        title="Deal Task"
+        description="Manage your deal tasks"
+        action={
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            <TaskViewToggle view={boardView} onChange={handleViewChange} />
+          </div>
+        }
+      />
       <SettingsTabs items={taskTabs} />
       <div className="account-content">
-        <div className="table-container">
+        {boardView === 'kanban' ? (
+          <TaskKanbanView taskType="DEAL_TASK" onViewChange={handleViewChange} />
+        ) : (
+          <>
+            <div className="table-container">
           <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={16} /> Add Deal Task
@@ -67,19 +103,22 @@ const DealTaskPage = () => {
                 <TCell variant="th">Description</TCell>
                 <TCell variant="th">Scheduled Date</TCell>
                 <TCell variant="th">Scheduled Time</TCell>
+                <TCell variant="th">Workflow</TCell>
+                <TCell variant="th">Stage</TCell>
                 <TCell variant="th">Assigned To</TCell>
                 <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
+                <TCell variant="th">Repeat</TCell>
                 <TCell variant="th">Deal</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
               {pagination.isLoading && pagination.list.length === 0 ? (
-                <TaskListLoadingRow colSpan={11} />
+                <TaskListLoadingRow colSpan={14} />
               ) : !pagination.isLoading && pagination.list.length === 0 ? (
-                <EmptyState colSpan={11} message={LABEL_NO_DATA} />
+                <EmptyState colSpan={14} message={LABEL_NO_DATA} />
               ) : pagination.list.map((item, idx) => (
                 <DealTaskRow
                   key={item.id}
@@ -101,6 +140,8 @@ const DealTaskPage = () => {
             onPageChange={pagination.setPageNumber}
           />
         </div>
+          </>
+        )}
         <Drawer isOpen={drawer.showDrawer} onClose={drawer.closeDrawer} title={drawer.editingItem ? 'Edit Deal Task' : 'Add Deal Task'}>
           <GenericTaskForm
             validationSchema={drawer.editingItem ? editDealTaskValidationSchema : addDealTaskValidationSchema}
