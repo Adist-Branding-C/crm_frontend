@@ -49,6 +49,11 @@ class FacebookApi {
     return response.data;
   }
 
+  async getForm(pageId: string, formId: string, connectionId: string): Promise<ApiResponse<FacebookFormSummary>> {
+    const response = await axiosInstance.get(FACEBOOK_API_ENDPOINTS.PAGE_FORM_BY_ID(pageId, formId), { params: { connectionId } });
+    return response.data;
+  }
+
   async getMappingOptions(): Promise<ApiResponse<MappingOptions>> {
     const response = await axiosInstance.get(FACEBOOK_API_ENDPOINTS.MAPPING_OPTIONS);
     return response.data;
