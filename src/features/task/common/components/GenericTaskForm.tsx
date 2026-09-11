@@ -11,6 +11,10 @@ import { STATUS_OPTIONS } from '../constants/statusOptions';
 import { getFieldClassName } from '../utils/fieldClassName';
 import type { GenericTaskFormProps } from '../types/genericTaskForm.types';
 import SelectSearch from '../../../../shared/components/SelectSearch';
+import RepeatFieldSelector from './RepeatFieldSelector';
+import { useTaskWorkflowOptions } from '../hooks/useTaskWorkflowOptions';
+import { getRecurrenceLabel } from '../utils/recurrence';
+import type { LabelValuePair } from '../../../../shared/types/common';
 
 const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
   const { values, dirty } = useFormikContext<any>();
@@ -28,6 +32,64 @@ const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDr
       return () => clearTimeout(timeout);
     }
   }, [values, dirty, draftId, onDraftSaved]);
+
+  return null;
+};
+
+interface WorkflowStageSyncProps {
+  isLoading: boolean;
+  defaultWorkflowId: string;
+  workflowOptions: LabelValuePair[];
+  loadStages: (workflowId: string) => void;
+  stageOptions: LabelValuePair[];
+  isLoadingStages: boolean;
+}
+
+/**
+ * Orchestrates the dependent Workflow/Stage selection - applies the default
+ * workflow only while the form's current workflowId is blank or no longer exists
+ * in the workflow list (so an edited task keeps its own workflow), fetches the
+ * selected workflow's stages whenever that workflowId changes (covering both the
+ * initial default selection and manual changes), and keeps stageId pre-selected
+ * to the workflow's first stage once its stages arrive.
+ */
+const WorkflowStageSync = ({
+  isLoading,
+  defaultWorkflowId,
+  workflowOptions,
+  loadStages,
+  stageOptions,
+  isLoadingStages,
+}: WorkflowStageSyncProps) => {
+  const { values, setValues } = useFormikContext<any>();
+
+  useEffect(() => {
+    if (isLoading || defaultWorkflowId === '') return;
+    setValues((prev: any) => {
+      const currentWorkflowId = prev.workflowId ? String(prev.workflowId) : '';
+      const isKnownWorkflow = workflowOptions.some((o) => String(o.value) === currentWorkflowId);
+      if (isKnownWorkflow) return prev;
+      return { ...prev, workflowId: defaultWorkflowId, stageId: '' };
+    });
+  }, [isLoading, defaultWorkflowId, workflowOptions, setValues]);
+
+  useEffect(() => {
+    const workflowId = values.workflowId ? String(values.workflowId) : '';
+    if (!workflowId) return;
+    loadStages(workflowId);
+  }, [values.workflowId, loadStages]);
+
+  useEffect(() => {
+    if (isLoadingStages || stageOptions.length === 0) return;
+    setValues((prev: any) => {
+      const currentStageId = prev.stageId ? String(prev.stageId) : '';
+      const isKnownStage = stageOptions.some((o) => String(o.value) === currentStageId);
+      if (isKnownStage) return prev;
+      const firstStageId = stageOptions[0]?.value;
+      if (firstStageId == null) return prev;
+      return { ...prev, stageId: String(firstStageId) };
+    });
+  }, [isLoadingStages, stageOptions, setValues]);
 
   return null;
 };
@@ -64,6 +126,7 @@ const GenericTaskForm = ({
   const associationEmpty = !resolvedAssociationLoading && resolvedAssociationOptions.length === 0;
   const categoryEmpty = !categoryLoading && (categoryOptions ?? []).length === 0;
   const drawerBodyRef = useRef<HTMLDivElement>(null);
+  const workflowOptions = useTaskWorkflowOptions();
 
   useEffect(() => {
     if (error) {
@@ -86,6 +149,8 @@ const GenericTaskForm = ({
                   { label: 'Title', value: values.title },
                   { label: 'Description', value: values.description },
                   !hideCategory ? { label: 'Category', value: categoryOptions?.find(c => String(c.value) === String(values.categoryId))?.label || '' } : null,
+                  { label: 'Workflow', value: workflowOptions.workflowOptions.find(o => String(o.value) === String(values.workflowId))?.label || '' },
+                  { label: 'Stage', value: workflowOptions.stageOptions.find(o => String(o.value) === String(values.stageId))?.label || '' },
                   { label: associationLabel, value: resolvedAssociationOptions.find(o => String(o.value) === String(values[associationFieldName]))?.label || '' },
                 ].filter(Boolean) as any
               },
@@ -94,6 +159,7 @@ const GenericTaskForm = ({
                 fields: [
                   { label: 'Date', value: values.scheduledDate },
                   { label: 'Time', value: values.scheduledTime },
+                  { label: 'Repeat', value: getRecurrenceLabel(values.repeatType, values.repeatConfig) },
                   { label: 'Assigned To', value: staffOptions.find(s => String(s.value) === String(values.assignedTo))?.label || '' },
                   { label: 'Priority', value: values.priority },
                   { label: 'Status', value: values.status },
@@ -108,6 +174,31 @@ const GenericTaskForm = ({
       >
         {(helpers) => {
           const { values, errors, touched, dirty, submitCount, isSubmitting } = helpers;
+          const {
+            workflowOptions: workflows,
+            isLoading: workflowsLoading,
+            defaultWorkflowId,
+            stageOptions,
+            isLoadingStages,
+            loadStages,
+          } = workflowOptions;
+          const workflowsEmpty = !workflowsLoading && workflows.length === 0;
+
+          const handleWorkflowChange = (e: any) => {
+            const nextWorkflowId = String(e.target.value ?? '');
+            if (!nextWorkflowId) return;
+            helpers.setFieldValue('workflowId', nextWorkflowId);
+            helpers.setFieldTouched('workflowId', true, false);
+            helpers.setFieldValue('stageId', '');
+          };
+
+          const handleStageChange = (e: any) => {
+            const nextStageId = String(e.target.value ?? '');
+            if (!nextStageId) return;
+            helpers.setFieldValue('stageId', nextStageId);
+            helpers.setFieldTouched('stageId', true, false);
+          };
+
           const fieldClass = (name: string) => getFieldClassName(
             name,
             touched as Record<string, boolean | undefined>,
@@ -159,6 +250,53 @@ const GenericTaskForm = ({
 
               {children}
 
+              <div className="form-group">
+                <label>Workflow</label>
+                <SelectSearch
+                  name="workflowId"
+                  value={values.workflowId ? String(values.workflowId) : ''}
+                  options={workflows}
+                  onChange={handleWorkflowChange}
+                  onBlur={() => helpers.setFieldTouched('workflowId', true, false)}
+                  className={fieldClass('workflowId')}
+                  disabled={workflowsLoading || workflowsEmpty}
+                  placeholder={workflowsLoading ? 'Loading...' : 'Select a workflow'}
+                />
+                {workflowsEmpty ? (
+                  <small className="field-error-text">
+                    No workflows available. Please create a workflow in Settings.
+                  </small>
+                ) : (
+                  <FormikError name="workflowId" component="small" className="field-error-text" />
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Stage</label>
+                <SelectSearch
+                  name="stageId"
+                  value={values.stageId ? String(values.stageId) : ''}
+                  options={stageOptions}
+                  onChange={handleStageChange}
+                  onBlur={() => helpers.setFieldTouched('stageId', true, false)}
+                  className={fieldClass('stageId')}
+                  disabled={workflowsLoading || workflowsEmpty || !values.workflowId || isLoadingStages}
+                  placeholder={
+                    workflowsLoading ? 'Loading...'
+                    : isLoadingStages ? 'Loading stages...'
+                    : !values.workflowId ? 'Select a workflow first'
+                    : 'Select a stage'
+                  }
+                />
+                {!values.workflowId && !workflowsLoading ? (
+                  <small className="field-error-text">Select a workflow first</small>
+                ) : values.workflowId && stageOptions.length === 0 && !isLoadingStages ? (
+                  <small className="field-error-text">No stages in this workflow yet.</small>
+                ) : (
+                  <FormikError name="stageId" component="small" className="field-error-text" />
+                )}
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Scheduled Date <span className="text-danger">*</span></label>
@@ -171,6 +309,8 @@ const GenericTaskForm = ({
                   <FormikError name="scheduledTime" component="small" className="field-error-text" />
                 </div>
               </div>
+
+              <RepeatFieldSelector getFieldClass={fieldClass} />
 
               <div className="form-group">
                 <label>Assigned To <span className="text-danger">*</span></label>
@@ -239,6 +379,15 @@ const GenericTaskForm = ({
                 </Field>
                 <FormikError name="status" component="small" className="field-error-text" />
               </div>
+
+              <WorkflowStageSync
+                isLoading={workflowsLoading}
+                defaultWorkflowId={defaultWorkflowId}
+                workflowOptions={workflows}
+                loadStages={loadStages}
+                stageOptions={stageOptions}
+                isLoadingStages={isLoadingStages}
+              />
 
               <AutoSaveForm draftId={draftId} onDraftSaved={onDraftSaved} />
 

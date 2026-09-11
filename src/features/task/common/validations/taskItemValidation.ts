@@ -38,6 +38,36 @@ export const taskItemBaseValidationSchema = yup.object({
   assignedTo: yup.string().required('Assigned to is required'),
   priority: yup.string().required('Priority is required'),
   status: yup.string().required('Status is required'),
+  workflowId: yup.string(),
+  stageId: yup.string(),
+  repeatType: yup
+    .string()
+    .oneOf(['Never', 'Daily', 'Weekly', 'Monthly'])
+    .default('Never'),
+  repeatConfig: yup
+    .object()
+    .when('repeatType', {
+      is: (value: string) => value === 'Daily' || value === 'Never',
+      then: (schema) => schema.notRequired(),
+      otherwise: (schema) =>
+        schema
+          .required('Repeat configuration is required')
+          .test(
+            'has-repeat-config',
+            'Select the day you want the task to repeat on',
+            function (value: Record<string, unknown> | undefined) {
+              if (!value) return false;
+              const repeatType = this.parent.repeatType;
+              if (repeatType === 'Weekly') {
+                return typeof value.dayOfWeek === 'number';
+              }
+              if (repeatType === 'Monthly') {
+                return value.dayOfMonth !== undefined && value.dayOfMonth !== null && value.dayOfMonth !== '';
+              }
+              return true;
+            },
+          ),
+    }),
 });
 
 /**

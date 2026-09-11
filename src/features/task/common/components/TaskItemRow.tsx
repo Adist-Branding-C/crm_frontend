@@ -3,6 +3,8 @@ import { TRow, TCell } from '../../../../shared/components/table';
 import StatusBadge from '../../../../shared/components/StatusBadge';
 import RowActions from './RowActions';
 import { formatTime12hr } from '../../../../shared/utils/dateUtils';
+import WorkflowStageCells from './WorkflowStageCells';
+import TaskRepeatCell from './TaskRepeatCell';
 import type { TaskItemRowShape, TaskItemRowProps } from '../types/taskItemRow.types';
 
 /**
@@ -24,10 +26,12 @@ function TaskItemRow<T extends TaskItemRowShape>({ item, index, dropdownOpen, on
       <TCell className="truncate-cell"><span title={item.description}>{item.description}</span></TCell>
       <TCell>{item.scheduledDate}</TCell>
       <TCell>{formatTime12hr(item.scheduledTime)}</TCell>
+      <WorkflowStageCells workflowName={item.workflowName} stageName={item.stageName} stageColor={item.stageColor} />
       <TCell>{item.assignedTo?.name ?? '-'}</TCell>
       <TCell>{item.assignedBy?.name ?? '-'}</TCell>
       <TCell><StatusBadge value={item.priority} /></TCell>
       <TCell><StatusBadge value={item.status} /></TCell>
+      <TaskRepeatCell repeatType={item.repeatType} repeatConfig={item.repeatConfig} />
       <TCell>{item.leadId?.name ?? '-'}</TCell>
       <TCell>
         <RowActions item={item} dropdownOpen={dropdownOpen} onToggleDropdown={onToggleDropdown} onEdit={onEdit} onDelete={onDelete} />

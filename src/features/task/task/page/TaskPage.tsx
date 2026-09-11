@@ -1,5 +1,5 @@
 import { Plus, FileText, CheckSquare } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
 import { useToast } from '../../../../shared/hooks/useToast';
@@ -30,17 +30,42 @@ import { draftService } from '../../../../shared/services/draftService';
 import { useDrafts } from '../../../../shared/hooks/useDrafts';
 import { getErrorMessage } from '../../../../shared/utils/error';
 import { taskTabs } from '../../common/taskTabs';
-import type { TaskItem, TaskFormDataUpdate } from '../types';
+import TaskViewToggle from '../../kanban/components/TaskViewToggle';
+import TaskKanbanView from '../../kanban/components/TaskKanbanView';
+import { TASK_BOARD_VIEW_STORAGE_KEY } from '../../kanban/constants/taskBoard.constants';
+import type { TaskBoardView } from '../../kanban/types/kanban.types';
+import type { TaskItem, TaskFormDataUpdate, RecurrenceChainItem } from '../types';
+import RecurrenceHistoryList from '../components/RecurrenceHistoryList';
+import { isRecurring, getNextOccurrenceDate } from '../../common/utils/recurrence';
 import type { TaskPreviewData } from '../../common/types/genericTaskForm.types';
 import './TaskPage.css';
 
 type TaskView = 'tasks' | 'drafts';
 
+function readStoredView(): TaskBoardView {
+  try {
+    const stored = localStorage.getItem(TASK_BOARD_VIEW_STORAGE_KEY);
+    return stored === 'table' ? 'table' : 'kanban';
+  } catch {
+    return 'kanban';
+  }
+}
+
 const TaskPage = () => {
+  const [boardView, setBoardViewState] = useState<TaskBoardView>(readStoredView);
   const [activeView, setActiveView] = useState<TaskView>('tasks');
   const [draftId, setDraftId] = useState<string | null>(null);
   const drafts = useDrafts('task');
   const [previewData, setPreviewData] = useState<TaskPreviewData | null>(null);
+
+  const handleViewChange = useCallback((next: TaskBoardView) => {
+    setBoardViewState(next);
+    try {
+      localStorage.setItem(TASK_BOARD_VIEW_STORAGE_KEY, next);
+    } catch {
+      // Non-fatal
+    }
+  }, []);
 
   useEffect(() => {
     if (activeView === 'drafts' && drafts.length === 0) {
@@ -131,6 +156,19 @@ const TaskPage = () => {
     try {
       const res = await taskDataService.update(id, payload);
       if (res.status) {
+        const task = pagination.list.find((t) => t.id === id);
+        if (
+          payload.status &&
+          payload.status.toLowerCase() === 'completed' &&
+          task &&
+          isRecurring(task.repeatType)
+        ) {
+          const nextDate = getNextOccurrenceDate(task.scheduledDate, task.repeatType, task.repeatConfig);
+          const formattedDate = nextDate ? new Date(nextDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'next occurrence';
+          toast.showToastMessage(`Next task '${task.title}' created for ${formattedDate}`, 'success');
+        } else {
+          toast.showToastMessage('Task updated successfully', 'success');
+        }
         pagination.refresh();
         return true;
       }
@@ -140,20 +178,34 @@ const TaskPage = () => {
     }
   };
 
+  const handleHistoryTaskClick = (item: RecurrenceChainItem) => {
+    const task = pagination.list.find((t) => t.id === item.id);
+    if (task) {
+      drawer.openEditDrawer(task);
+    } else {
+      toast.showToastMessage('That task is not available in the current view', 'error');
+    }
+  };
+
   return (
     <div className="task-settings-page">
       <PageHeader 
         title={activeView === 'drafts' ? 'Task Drafts' : 'Task'} 
         description={activeView === 'drafts' ? 'Resume your unfinished tasks' : 'Manage your tasks'} 
         action={
-          drafts.length > 0 && (
-            <button
-              className={`btn btn-secondary ${activeView === 'drafts' ? 'active' : ''}`}
-              onClick={() => setActiveView((v) => (v === 'drafts' ? 'tasks' : 'drafts'))}
-            >
-              {activeView === 'drafts' ? <><CheckSquare size={16} /> Back to Tasks</> : <><FileText size={16} /> Drafts</>}
-            </button>
-          )
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            {activeView === 'tasks' && (
+              <TaskViewToggle view={boardView} onChange={handleViewChange} />
+            )}
+            {drafts.length > 0 && (
+              <button
+                className={`btn btn-secondary ${activeView === 'drafts' ? 'active' : ''}`}
+                onClick={() => setActiveView((v) => (v === 'drafts' ? 'tasks' : 'drafts'))}
+              >
+                {activeView === 'drafts' ? <><CheckSquare size={16} /> Back to Tasks</> : <><FileText size={16} /> Drafts</>}
+              </button>
+            )}
+          </div>
         }
       />
       
@@ -162,7 +214,11 @@ const TaskPage = () => {
       <div className="account-content">
         {activeView === 'drafts' && <DraftsList type="task" onResumeDraft={handleResumeDraft} />}
         
-        {activeView === 'tasks' && (
+        {activeView === 'tasks' && boardView === 'kanban' && (
+          <TaskKanbanView taskType="NORMAL" onViewChange={handleViewChange} onAddTask={drawer.openAddDrawer} addLabel="Add Task" />
+        )}
+
+        {activeView === 'tasks' && boardView === 'table' && (
           <div className="table-container">
             <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
             <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -178,19 +234,22 @@ const TaskPage = () => {
                 <TCell variant="th">Category</TCell>
                 <TCell variant="th">Scheduled Date</TCell>
                 <TCell variant="th">Scheduled Time</TCell>
+                <TCell variant="th">Workflow</TCell>
+                <TCell variant="th">Stage</TCell>
                 <TCell variant="th">Assigned To</TCell>
                 <TCell variant="th">Assigned By</TCell>
                 <TCell variant="th">Priority</TCell>
                 <TCell variant="th">Status</TCell>
+                <TCell variant="th">Repeat</TCell>
                 <TCell variant="th">Lead</TCell>
                 <TCell variant="th">Actions</TCell>
               </TRow>
             </THead>
             <TBody>
               {pagination.isLoading && pagination.list.length === 0 ? (
-                <TaskListLoadingRow colSpan={12} />
+                <TaskListLoadingRow colSpan={15} />
               ) : !pagination.isLoading && pagination.list.length === 0 ? (
-                <EmptyState colSpan={12} message={LABEL_NO_DATA} />
+                <EmptyState colSpan={15} message={LABEL_NO_DATA} />
               ) : pagination.list.map((item, idx) => (
                 <TaskRow
                   key={item.id}
@@ -229,7 +288,7 @@ const TaskPage = () => {
             onSave={handleSavePreview}
           />
         ) : (
-          <Drawer 
+<Drawer 
             isOpen={drawer.showDrawer} 
             onClose={() => { drawer.closeDrawer(); setDraftId(null); }} 
             title={drawer.editingItem ? 'Edit Task' : 'Add Task'}
@@ -251,7 +310,10 @@ const TaskPage = () => {
             leadOptions={leads.leadOptions}
             leadLoading={leads.leadLoading}
           />
-        </Drawer>
+            {drawer.editingItem && isRecurring(drawer.editingItem.repeatType) && (
+              <RecurrenceHistoryList taskId={drawer.editingItem.id} onTaskClick={handleHistoryTaskClick} />
+            )}
+          </Drawer>
         )}
         <AdminDeleteModal
           isOpen={!!deleteConfirm.deletingItem}

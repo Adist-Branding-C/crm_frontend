@@ -3,6 +3,7 @@ import type { Schema } from 'yup';
 import type { FormikHelpers } from 'formik';
 import type { PreviewSection } from '../../../../shared/components/preview/PreviewCanvas';
 import type { CategoryOption, StaffOption, LeadOption } from './options';
+import type { RepeatType } from '../../task/types/interface';
 
 export interface TaskPreviewData {
   sections: PreviewSection[];
@@ -20,6 +21,13 @@ export interface GenericTaskFormValues {
   leadId?: string | number;
   priority: string;
   status: string;
+  workflowId?: string;
+  stageId?: string;
+  repeatType?: RepeatType;
+  repeatConfig?: {
+    dayOfWeek?: number;
+    dayOfMonth?: number | 'last';
+  } | undefined;
 }
 
 export interface GenericTaskFormProps {

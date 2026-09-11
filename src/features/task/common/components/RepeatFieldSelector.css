@@ -1,0 +1,36 @@
+.repeat-field {
+  margin-top: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-md);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+}
+
+.repeat-field label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 0;
+  font-size: 0.8125rem;
+}
+
+.repeat-field select,
+.repeat-field input[type='number'] {
+  min-height: 38px;
+}
+
+.repeat-last-day {
+  margin-top: 0.5rem;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.repeat-last-day input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}

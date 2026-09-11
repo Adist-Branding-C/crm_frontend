@@ -1,0 +1,24 @@
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/modals.css';
+
+.task-settings-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.pipeline-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.pipeline-list-empty {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  padding: var(--space-6);
+  text-align: center;
+}

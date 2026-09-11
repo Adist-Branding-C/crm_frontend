@@ -23,6 +23,10 @@ export class TaskMapper {
       leadId: toIdString(item.leadId),
       priority: item.priority || '',
       status: item.status || '',
+      workflowId: item.workflowId != null ? String(item.workflowId) : '',
+      stageId: item.stageId != null ? String(item.stageId) : '',
+      repeatType: item.repeatType || 'Never',
+      repeatConfig: item.repeatConfig,
     };
   }
 }

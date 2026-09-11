@@ -16,4 +16,6 @@ export const ADD_TASK_INITIAL_VALUES = {
   leadId: '',
   priority: '',
   status: '',
+  repeatType: 'Never' as const,
+  repeatConfig: undefined as { dayOfWeek?: number; dayOfMonth?: number | 'last' } | undefined,
 };
