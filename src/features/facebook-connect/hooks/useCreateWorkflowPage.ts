@@ -4,12 +4,12 @@ import { facebookApi } from '../services/facebook.service';
 import { useFacebookBrowseOptions } from './useFacebookBrowseOptions';
 import { emptyMappingRow, useMappingRows } from './useMappingRows';
 import { useToast } from '../../../shared/hooks/useToast';
-import type { FieldMapping } from '../types';
+import type { FacebookFormSummary, FieldMapping } from '../types';
 
 export const useCreateWorkflowPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const browse = useFacebookBrowseOptions();
+  const browse = useFacebookBrowseOptions(toast);
   const mapping = useMappingRows();
 
   const [name, setName] = useState('');
@@ -20,8 +20,14 @@ export const useCreateWorkflowPage = () => {
   const [statusName, setStatusName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedFormDetails, setSelectedFormDetails] = useState<FacebookFormSummary | null>(null);
+  const [loadingFormDetails, setLoadingFormDetails] = useState(false);
 
-  const selectedForm = browse.forms.find((form) => form.id === formId) ?? null;
+  // Prefer the freshly-fetched form (re-pulled from Facebook the moment this
+  // specific form is selected) and fall back to the cached entry from the
+  // Page's form list while that fetch is in flight, so the Field Mapping
+  // builder never flashes empty just because the request hasn't landed yet.
+  const selectedForm = selectedFormDetails ?? browse.forms.find((form) => form.id === formId) ?? null;
 
   const handleConnectionChange = (value: string) => {
     setConnectionId(value);
@@ -34,13 +40,26 @@ export const useCreateWorkflowPage = () => {
   const handlePageChange = (value: string) => {
     setPageId(value);
     setFormId('');
+    setSelectedFormDetails(null);
     mapping.setRows([emptyMappingRow()]);
     if (value && connectionId) browse.loadForms(value, connectionId);
   };
 
-  const handleFormChange = (value: string) => {
+  const handleFormChange = async (value: string) => {
     setFormId(value);
+    setSelectedFormDetails(null);
     mapping.setRows([emptyMappingRow()]);
+    if (!value || !pageId || !connectionId) return;
+
+    setLoadingFormDetails(true);
+    try {
+      const response = await facebookApi.getForm(pageId, value, connectionId);
+      setSelectedFormDetails(response.data ?? null);
+    } catch (error: any) {
+      toast.showToastMessage(error?.response?.data?.message || 'Failed to load fields for this form', 'error');
+    } finally {
+      setLoadingFormDetails(false);
+    }
   };
 
   const buildFieldMappings = (): FieldMapping[] => {
@@ -115,6 +134,7 @@ export const useCreateWorkflowPage = () => {
     pageId,
     formId,
     selectedForm,
+    loadingFormDetails,
     sourceName,
     setSourceName,
     statusName,

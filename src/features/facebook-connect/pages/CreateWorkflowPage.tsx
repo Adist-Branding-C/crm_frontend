@@ -25,6 +25,7 @@ const CreateWorkflowPage = () => {
     pageId,
     formId,
     selectedForm,
+    loadingFormDetails,
     sourceName,
     setSourceName,
     statusName,
@@ -141,6 +142,7 @@ const CreateWorkflowPage = () => {
 
             <div className="form-group">
               <label>Field Mapping</label>
+              {loadingFormDetails && <p className="hint-text">Loading fields for this form…</p>}
               <FieldMappingBuilder
                 rows={mapping.rows}
                 form={selectedForm}
