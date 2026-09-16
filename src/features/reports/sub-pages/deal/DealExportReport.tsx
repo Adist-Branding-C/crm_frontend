@@ -164,9 +164,6 @@ const DealExportReport = () => {
         </div>
         <div className="filter-row" style={{ alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 100%' }}>
-            <div className="widget-status-text" style={{ marginBottom: '0.75rem' }}>
-              These checkboxes only choose which spreadsheet columns are included — they don't change which deals get exported. To change how many deals match (the "Total Rows" you'll see in Export History), adjust the Search / Date Range / Pipeline / Stage / Type / Agent filters above instead.
-            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
               <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-medium)', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Columns to Include
