@@ -47,6 +47,7 @@ export interface StatusLeadsResponseData {
   status: string;
   count: number;
   items: RawPipelineLead[];
+  pagination: PaginationMeta;
 }
 
 export interface TasksResponseData {
