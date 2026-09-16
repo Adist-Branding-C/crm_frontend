@@ -6,6 +6,7 @@ import type { EscalationRuleFormData, EscalationRuleFormValues } from '../types/
 import { EscalationRulesMapper } from '../mappers/escalationRules.mapper';
 import { escalationRuleValidationSchema } from '../validations';
 import { DURATION_UNIT_OPTIONS } from '../constants';
+import { TaskPriority } from '../../../task/common/constants/taskEnums';
 
 interface EscalationRuleRowProps {
   row: EscalationRuleItem;
@@ -91,7 +92,7 @@ const EscalationRuleRow = ({ row, isSaving, onSave }: EscalationRuleRowProps) =>
                     Assignee
                   </span>
                 </label>
-                {row.priority === 'High' && (
+                {row.priority === TaskPriority.HIGH && (
                   <label className="escalation-rule-row__checkbox">
                     <Field type="checkbox" name="notifyAdmin" />
                     <span>Admin</span>

@@ -3,10 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, ArrowLeft, ChevronUp, ChevronDown, GripVertical, Star } from 'lucide-react';
 import { useTaskWorkflowDetail } from '../hooks/useTaskWorkflowDetail';
 import { useStageFormDrawer } from '../hooks/useStageFormDrawer';
+import { useTaskStageCounts } from '../hooks/useTaskStageCounts';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { taskWorkflowService } from '../services/taskworkflow.service';
 import { ADD_STAGE_INITIAL_VALUES } from '../constants/index';
 import StageFormDrawer from '../components/StageFormDrawer';
+import ReassignTaskStageModal from '../components/ReassignTaskStageModal';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import ToastNotification from '../../components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import Drawer from '../../../../shared/components/Drawer';
@@ -23,7 +26,8 @@ const TaskWorkflowDetailPage = () => {
   const toast = useToast();
   const drawerBodyRef = useRef<HTMLDivElement>(null);
 
-  const stageDrawer = useStageFormDrawer(numericId, refresh);
+  const stageCounts = useTaskStageCounts(numericId);
+  const stageDrawer = useStageFormDrawer(numericId, refresh, stageCounts);
 
   const sortedStages = useMemo(() => {
     if (!workflow) return [];
@@ -173,6 +177,25 @@ const TaskWorkflowDetailPage = () => {
             onCancel={stageDrawer.close}
           />
         </Drawer>
+
+        <ReassignTaskStageModal
+          isOpen={!!stageDrawer.reassignPrompt}
+          stage={stageDrawer.reassignPrompt?.stage ?? null}
+          taskCount={stageDrawer.reassignPrompt?.taskCount ?? 0}
+          otherStages={sortedStages.filter((s) => s.id !== stageDrawer.reassignPrompt?.stage.id)}
+          onConfirm={stageDrawer.confirmReassignAndDelete}
+          onClose={stageDrawer.cancelReassignPrompt}
+        />
+
+        <AdminDeleteModal
+          isOpen={!!stageDrawer.deleteConfirm}
+          itemName={stageDrawer.deleteConfirm?.name}
+          itemType="stage"
+          error={stageDrawer.error}
+          isDeleting={stageDrawer.isDeleting}
+          onConfirm={stageDrawer.confirmDelete}
+          onClose={stageDrawer.cancelDeleteConfirm}
+        />
       </div>
 
       <ToastNotification

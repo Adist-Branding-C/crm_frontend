@@ -4,14 +4,14 @@ import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.ut
 import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { CALL_TASK_API_ENDPOINTS } from '../constants/callTaskApiEndpoints';
 import type { TaskListParams } from '../../common/types/listParams';
+import { RepeatType } from '../../common/constants/taskEnums';
 import type { CallTaskItem, CallTaskFormData } from '../types/index';
 
 /**
  * HTTP client for the Call Task API - communicates with the backend only.
  *
  * Used by:
- * - callTaskDataService singleton, consumed by useCallTaskCrud (create/update/delete)
- *   and CallTaskPage (list fetch).
+ * - useCalendarAddTask (calendar) - creates call tasks from the calendar's add-task flow.
  */
 export class CallTaskDataService {
   async fetchAll(params: TaskListParams): Promise<ApiResponse<CallTaskItem[]>> {
@@ -45,7 +45,7 @@ export class CallTaskDataService {
         payload[key] = Number(payload[key]);
       }
     });
-    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== 'Never' && payload.repeatType !== 'Daily') {
+    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== RepeatType.NEVER && payload.repeatType !== RepeatType.DAILY) {
       const config = payload.repeatConfig;
       if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
         config.dayOfWeek = Number(config.dayOfWeek);

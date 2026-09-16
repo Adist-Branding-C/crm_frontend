@@ -8,7 +8,7 @@ interface EntityRef {
  * category) from an API item whose relational fields arrive as `{ id, name }` objects.
  *
  * Used by:
- * - TaskMapper, CallTaskMapper, CampaignTaskMapper, DealTaskMapper (toFormValues).
+ * - UnifiedTaskMapper.toFormValues.
  *
  * Notes:
  * - Previously each mapper either inlined `String(entity.id)` or, for leadId, wrongly
@@ -24,7 +24,7 @@ export function toIdString(entity: EntityRef | null | undefined): string {
  * update endpoints validate against, or '' if absent.
  *
  * Used by:
- * - TaskMapper, CallTaskMapper, CampaignTaskMapper, DealTaskMapper (toFormValues).
+ * - UnifiedTaskMapper.toFormValues.
  *
  * Notes:
  * - Display-only 12-hour formatting for tables is a separate concern, handled by

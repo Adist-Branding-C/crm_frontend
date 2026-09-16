@@ -4,7 +4,8 @@ import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { TASK_API_ENDPOINTS } from '../constants/taskApiEndpoints';
 import type { ApiResponse } from '../../../../shared/types/common';
 import type { TaskListParams } from '../../common/types/listParams';
-import type { TaskItem, TaskFormData, TaskFormDataUpdate, RecurrenceChainItem } from '../types';
+import { RepeatType } from '../../common/constants/taskEnums';
+import type { TaskItem, TaskFormData, RecurrenceChainItem } from '../types';
 
 /**
  * HTTP client for the Task API - communicates with the backend only.
@@ -46,7 +47,7 @@ export class TaskDataService {
         payload[key] = Number(payload[key]);
       }
     });
-    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== 'Never' && payload.repeatType !== 'Daily') {
+    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== RepeatType.NEVER && payload.repeatType !== RepeatType.DAILY) {
       const config = payload.repeatConfig;
       if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
         config.dayOfWeek = Number(config.dayOfWeek);

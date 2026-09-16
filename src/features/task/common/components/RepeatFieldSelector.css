@@ -1,26 +1,27 @@
 .repeat-field {
-  margin-top: 0.625rem;
-  padding: 0.625rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
   border: 1px solid var(--border-default);
   border-radius: var(--border-radius-md);
   background: color-mix(in srgb, var(--surface-2) 60%, transparent);
 }
 
-.repeat-field label {
+/* Higher specificity than .form-group label (0,1,1) so the vertical rhythm
+   is identical in dev and prod regardless of shared-stylesheet load order:
+   label margin-bottom 0.375rem + flex gap 0.375rem = 0.75rem to the control,
+   matching the 12px measured on Scheduled Date / Assigned To fields. */
+.form-group .repeat-field label {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
-  margin-bottom: 0;
+  margin-bottom: 0.375rem;
   font-size: 0.8125rem;
 }
 
-.repeat-field select,
-.repeat-field input[type='number'] {
-  min-height: 38px;
-}
-
-.repeat-last-day {
-  margin-top: 0.5rem;
+.form-group .repeat-field label.repeat-last-day {
   flex-direction: row !important;
   align-items: center;
   gap: 0.5rem !important;
@@ -28,9 +29,10 @@
   cursor: pointer;
 }
 
-.repeat-last-day input[type='checkbox'] {
+.form-group .repeat-field label.repeat-last-day input[type='checkbox'] {
   width: 16px;
   height: 16px;
+  margin: 0;
   accent-color: var(--accent);
   cursor: pointer;
 }

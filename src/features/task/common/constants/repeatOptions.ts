@@ -1,10 +1,11 @@
 import type { LabelValuePair } from '../../../../shared/types/common';
+import { RepeatType } from './taskEnums';
 
 export const REPEAT_TYPE_OPTIONS: LabelValuePair[] = [
-  { value: 'Never', label: 'Never' },
-  { value: 'Daily', label: 'Daily' },
-  { value: 'Weekly', label: 'Weekly' },
-  { value: 'Monthly', label: 'Monthly' },
+  { value: RepeatType.NEVER, label: 'Never' },
+  { value: RepeatType.DAILY, label: 'Daily' },
+  { value: RepeatType.WEEKLY, label: 'Weekly' },
+  { value: RepeatType.MONTHLY, label: 'Monthly' },
 ];
 
 export const WEEK_DAY_OPTIONS: LabelValuePair[] = [
@@ -20,7 +21,7 @@ export const WEEK_DAY_OPTIONS: LabelValuePair[] = [
 export const MONTHLY_LAST_DAY_VALUE = 'last';
 
 export const REPEAT_TYPE_BADGE_CLASS: Record<string, string> = {
-  Daily: 'badge-recurring-daily',
-  Weekly: 'badge-recurring-weekly',
-  Monthly: 'badge-recurring-monthly',
+  [RepeatType.DAILY]: 'badge-recurring-daily',
+  [RepeatType.WEEKLY]: 'badge-recurring-weekly',
+  [RepeatType.MONTHLY]: 'badge-recurring-monthly',
 };

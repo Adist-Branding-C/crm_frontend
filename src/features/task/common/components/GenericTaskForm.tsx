@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext } from 'formik';
+import type { FormikHelpers } from 'formik';
 import { draftService } from '../../../../shared/services/draftService';
 import type { PreviewSection } from '../../../../shared/components/preview/PreviewCanvas';
 import ErrorMessage from '../../../../shared/components/ErrorMessage';
@@ -8,14 +9,29 @@ import { ScrollToFirstError } from '../../../../shared/components/ScrollToFirstE
 import { scrollContainerToTop } from '../../../../shared/utils/scrollToError.util';
 import { PRIORITY_OPTIONS } from '../constants/priorityOptions';
 import { STATUS_OPTIONS } from '../constants/statusOptions';
+import { TASK_TYPE_CONFIG, TASK_TYPE_OPTIONS } from '../constants/taskTypeConfig';
+import type { TaskTaskTypeKey } from '../types/taskType.types';
 import { getFieldClassName } from '../utils/fieldClassName';
-import type { GenericTaskFormProps } from '../types/genericTaskForm.types';
+import type { GenericTaskFormProps, GenericTaskFormValues } from '../types/genericTaskForm.types';
 import SelectSearch from '../../../../shared/components/SelectSearch';
 import RepeatFieldSelector from './RepeatFieldSelector';
 import { useTaskWorkflowOptions } from '../hooks/useTaskWorkflowOptions';
 import { getRecurrenceLabel } from '../utils/recurrence';
 import type { LabelValuePair } from '../../../../shared/types/common';
 
+const getTaskTypeLabel = (taskType: TaskTaskTypeKey | '' | undefined): string =>
+  taskType ? TASK_TYPE_CONFIG[taskType].label : '';
+
+/**
+ * Draft autosave for the ADD flow only.
+ *
+ * Notes:
+ * - Rendered exclusively when !isEditing: in edit mode a draft is meaningless
+ *   (the task already exists) and writing one would flip the page's draftId,
+ *   which swaps Formik's initialValues to the draft payload and triggers a
+ *   resetForm via enableReinitialize on every debounced save - collapsing dirty
+ *   to false and re-disabling the Preview/Update submit button.
+ */
 const AutoSaveForm = ({ draftId, onDraftSaved }: { draftId?: string | null, onDraftSaved?: (id: string) => void }) => {
   const { values, dirty } = useFormikContext<any>();
   
@@ -118,6 +134,11 @@ const GenericTaskForm = ({
   categoryOptions,
   categoryLoading,
   hideCategory = false,
+  unifiedMode = false,
+  campaignOptions,
+  campaignLoading,
+  dealOptions,
+  dealLoading,
   children,
 }: GenericTaskFormProps) => {
   const staffEmpty = !staffLoading && staffOptions.length === 0;
@@ -127,6 +148,21 @@ const GenericTaskForm = ({
   const categoryEmpty = !categoryLoading && (categoryOptions ?? []).length === 0;
   const drawerBodyRef = useRef<HTMLDivElement>(null);
   const workflowOptions = useTaskWorkflowOptions();
+
+  const associationSetByType: Record<TaskTaskTypeKey, { options: LabelValuePair[]; loading: boolean }> = {
+    GENERAL: { options: categoryOptions ?? [], loading: categoryLoading ?? false },
+    CALL: { options: leadOptions ?? [], loading: leadLoading ?? false },
+    CAMPAIGN: { options: campaignOptions ?? [], loading: campaignLoading ?? false },
+    DEAL: { options: dealOptions ?? [], loading: dealLoading ?? false },
+  };
+
+  const handleTaskTypeChange = (e: any, helpers: any) => {
+    const next = e.target.value as TaskTaskTypeKey | '';
+    helpers.setFieldValue('taskType', next);
+    helpers.setFieldTouched('taskType', true, false);
+    if (!next) return;
+    ['categoryId', 'leadId', 'campaignId', 'dealId'].forEach((field) => helpers.setFieldValue(field, ''));
+  };
 
   useEffect(() => {
     if (error) {
@@ -142,16 +178,25 @@ const GenericTaskForm = ({
         validationSchema={validationSchema}
         onSubmit={async (values, helpers) => {
           if (onPreviewRequest) {
+            const activeType = (values.taskType as TaskTaskTypeKey | '' | undefined);
+            const activeConfig = unifiedMode && activeType ? TASK_TYPE_CONFIG[activeType] : undefined;
+            const previewAssociationField = activeConfig?.associationFieldName ?? associationFieldName;
+            const previewAssociationLabel = activeConfig?.associationLabel ?? associationLabel;
+            const previewAssociationOptions = activeConfig
+              ? associationSetByType[activeType as TaskTaskTypeKey]?.options ?? []
+              : resolvedAssociationOptions;
+
             const sections: PreviewSection[] = [
               {
                 title: 'Task Info',
                 fields: [
+                  unifiedMode ? { label: 'Task Type', value: getTaskTypeLabel(activeType) } : null,
                   { label: 'Title', value: values.title },
                   { label: 'Description', value: values.description },
-                  !hideCategory ? { label: 'Category', value: categoryOptions?.find(c => String(c.value) === String(values.categoryId))?.label || '' } : null,
+                  !hideCategory && !unifiedMode ? { label: 'Category', value: categoryOptions?.find(c => String(c.value) === String(values.categoryId))?.label || '' } : null,
                   { label: 'Workflow', value: workflowOptions.workflowOptions.find(o => String(o.value) === String(values.workflowId))?.label || '' },
                   { label: 'Stage', value: workflowOptions.stageOptions.find(o => String(o.value) === String(values.stageId))?.label || '' },
-                  { label: associationLabel, value: resolvedAssociationOptions.find(o => String(o.value) === String(values[associationFieldName]))?.label || '' },
+                  { label: previewAssociationLabel, value: previewAssociationOptions.find(o => String(o.value) === String(values[previewAssociationField as keyof typeof values]))?.label || '' },
                 ].filter(Boolean) as any
               },
               {
@@ -166,10 +211,10 @@ const GenericTaskForm = ({
                 ]
               }
             ];
-            onPreviewRequest({ sections, payload: values, formValues: values });
+            onPreviewRequest({ sections, payload: values as unknown as Record<string, unknown>, formValues: values as unknown as Record<string, unknown> });
             return;
           }
-          await onSubmit(values, helpers);
+          await onSubmit(values as unknown as Record<string, unknown>, helpers as unknown as FormikHelpers<Record<string, unknown>>);
         }}
       >
         {(helpers) => {
@@ -205,48 +250,36 @@ const GenericTaskForm = ({
             errors as Record<string, string | undefined>,
           );
 
+          const fieldsDisabled = unifiedMode && !values.taskType;
+
           return (
             <Form>
               <ScrollToFirstError errors={errors} submitCount={submitCount} containerRef={drawerBodyRef} />
               {error && <ErrorMessage message={error} />}
 
+              {unifiedMode && (
+                <div className="form-group">
+                  <label>Task Type <span className="text-danger">*</span></label>
+                  <Field as="select" name="taskType" className={fieldClass('taskType')} onChange={(e: any) => handleTaskTypeChange(e, helpers)}>
+                    {TASK_TYPE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </Field>
+                  <FormikError name="taskType" component="small" className="field-error-text" />
+                </div>
+              )}
+
               <div className="form-group">
                 <label>Title <span className="text-danger">*</span></label>
-                <Field type="text" name="title" className={fieldClass('title')} placeholder="Enter task title" />
+                <Field type="text" name="title" className={fieldClass('title')} placeholder="Enter task title" disabled={fieldsDisabled} />
                 <FormikError name="title" component="small" className="field-error-text" />
               </div>
 
               <div className="form-group">
                 <label>Description <span className="text-danger">*</span></label>
-                <Field as="textarea" name="description" className={fieldClass('description')} placeholder="Enter description" rows={3} />
+                <Field as="textarea" name="description" className={fieldClass('description')} placeholder="Enter description" rows={3} disabled={fieldsDisabled} />
                 <FormikError name="description" component="small" className="field-error-text" />
               </div>
-
-              {!hideCategory && categoryOptions && (
-                <div className="form-group">
-                  <label>Category <span className="text-danger">*</span></label>
-                  <SelectSearch
-                    name="categoryId"
-                    value={values.categoryId}
-                    options={categoryOptions}
-                    onChange={(e) => {
-                      helpers.setFieldValue('categoryId', e.target.value);
-                      helpers.setFieldTouched('categoryId', true, false);
-                    }}
-                    onBlur={() => helpers.setFieldTouched('categoryId', true, false)}
-                    className={fieldClass('categoryId')}
-                    disabled={categoryLoading || categoryEmpty}
-                    placeholder={categoryLoading ? 'Loading...' : 'Select a category'}
-                  />
-                  {categoryEmpty ? (
-                    <small className="field-error-text">
-                      No task categories available. Please create a category first.
-                    </small>
-                  ) : (
-                    <FormikError name="categoryId" component="small" className="field-error-text" />
-                  )}
-                </div>
-              )}
 
               {children}
 
@@ -259,7 +292,7 @@ const GenericTaskForm = ({
                   onChange={handleWorkflowChange}
                   onBlur={() => helpers.setFieldTouched('workflowId', true, false)}
                   className={fieldClass('workflowId')}
-                  disabled={workflowsLoading || workflowsEmpty}
+                  disabled={fieldsDisabled || workflowsLoading || workflowsEmpty}
                   placeholder={workflowsLoading ? 'Loading...' : 'Select a workflow'}
                 />
                 {workflowsEmpty ? (
@@ -280,7 +313,7 @@ const GenericTaskForm = ({
                   onChange={handleStageChange}
                   onBlur={() => helpers.setFieldTouched('stageId', true, false)}
                   className={fieldClass('stageId')}
-                  disabled={workflowsLoading || workflowsEmpty || !values.workflowId || isLoadingStages}
+                  disabled={fieldsDisabled || workflowsLoading || workflowsEmpty || !values.workflowId || isLoadingStages}
                   placeholder={
                     workflowsLoading ? 'Loading...'
                     : isLoadingStages ? 'Loading stages...'
@@ -300,17 +333,17 @@ const GenericTaskForm = ({
               <div className="form-row">
                 <div className="form-group">
                   <label>Scheduled Date <span className="text-danger">*</span></label>
-                  <Field type="date" name="scheduledDate" className={fieldClass('scheduledDate')} />
+                  <Field type="date" name="scheduledDate" className={fieldClass('scheduledDate')} disabled={fieldsDisabled} />
                   <FormikError name="scheduledDate" component="small" className="field-error-text" />
                 </div>
                 <div className="form-group">
                   <label>Scheduled Time <span className="text-danger">*</span></label>
-                  <Field type="time" name="scheduledTime" className={fieldClass('scheduledTime')} />
+                  <Field type="time" name="scheduledTime" className={fieldClass('scheduledTime')} disabled={fieldsDisabled} />
                   <FormikError name="scheduledTime" component="small" className="field-error-text" />
                 </div>
               </div>
 
-              <RepeatFieldSelector getFieldClass={fieldClass} />
+              <RepeatFieldSelector getFieldClass={fieldClass} disabled={fieldsDisabled} />
 
               <div className="form-group">
                 <label>Assigned To <span className="text-danger">*</span></label>
@@ -324,7 +357,7 @@ const GenericTaskForm = ({
                   }}
                   onBlur={() => helpers.setFieldTouched('assignedTo', true, false)}
                   className={fieldClass('assignedTo')}
-                  disabled={staffLoading || staffEmpty}
+                  disabled={fieldsDisabled || staffLoading || staffEmpty}
                   placeholder={staffLoading ? 'Loading staff...' : 'Select a staff member'}
                 />
                 {staffEmpty ? (
@@ -336,31 +369,91 @@ const GenericTaskForm = ({
                 )}
               </div>
 
-              <div className="form-group">
-                <label>{associationLabel} <span className="text-danger">*</span></label>
-                <SelectSearch
-                  name={associationFieldName}
-                  value={values[associationFieldName]}
-                  options={resolvedAssociationOptions}
-                  onChange={(e) => {
-                    helpers.setFieldValue(associationFieldName, e.target.value);
-                    helpers.setFieldTouched(associationFieldName, true, false);
-                  }}
-                  onBlur={() => helpers.setFieldTouched(associationFieldName, true, false)}
-                  className={fieldClass(associationFieldName)}
-                  disabled={resolvedAssociationLoading || associationEmpty}
-                  placeholder={resolvedAssociationLoading ? associationLoadingLabel : associationPlaceholder}
-                />
-                {associationEmpty ? (
-                  <small className="field-error-text">{associationEmptyMessage}</small>
-                ) : (
-                  <FormikError name={associationFieldName} component="small" className="field-error-text" />
-                )}
-              </div>
+              {!hideCategory && !unifiedMode && categoryOptions && (
+                <div className="form-group">
+                  <label>Category <span className="text-danger">*</span></label>
+                  <SelectSearch
+                    name="categoryId"
+                    value={values.categoryId ?? ''}
+                    options={categoryOptions}
+                    onChange={(e) => {
+                      helpers.setFieldValue('categoryId', e.target.value);
+                      helpers.setFieldTouched('categoryId', true, false);
+                    }}
+                    onBlur={() => helpers.setFieldTouched('categoryId', true, false)}
+                    className={fieldClass('categoryId')}
+                    disabled={categoryLoading || categoryEmpty}
+                    placeholder={categoryLoading ? 'Loading...' : 'Select a category'}
+                  />
+                  {categoryEmpty ? (
+                    <small className="field-error-text">
+                      No task categories available. Please create a category first.
+                    </small>
+                  ) : (
+                    <FormikError name="categoryId" component="small" className="field-error-text" />
+                  )}
+                </div>
+              )}
+
+              {unifiedMode ? (
+                values.taskType ? (
+                  (() => {
+                    const activeType = values.taskType as TaskTaskTypeKey;
+                    const config = TASK_TYPE_CONFIG[activeType];
+                    const associationSet = associationSetByType[activeType];
+                    const associationEmpty = !associationSet.loading && associationSet.options.length === 0;
+                    return (
+                      <div className="form-group">
+                        <label>{config.associationLabel} <span className="text-danger">*</span></label>
+                        <SelectSearch
+                          name={config.associationFieldName}
+                          value={String(values[config.associationFieldName as keyof GenericTaskFormValues] ?? '')}
+                          options={associationSet.options}
+                          onChange={(e) => {
+                            helpers.setFieldValue(config.associationFieldName, e.target.value);
+                            helpers.setFieldTouched(config.associationFieldName, true, false);
+                          }}
+                          onBlur={() => helpers.setFieldTouched(config.associationFieldName, true, false)}
+                          className={fieldClass(config.associationFieldName)}
+                          disabled={associationSet.loading || associationEmpty}
+                          placeholder={associationSet.loading ? config.associationLoadingLabel : config.associationPlaceholder}
+                        />
+                        {associationEmpty ? (
+                          <small className="field-error-text">{config.associationEmptyMessage}</small>
+                        ) : (
+                          <FormikError name={config.associationFieldName} component="small" className="field-error-text" />
+                        )}
+                      </div>
+                    );
+                  })()
+                ) : null
+              ) : (
+                <div className="form-group">
+                  <label>{associationLabel} <span className="text-danger">*</span></label>
+                  <SelectSearch
+                    name={associationFieldName}
+                    value={String(values[associationFieldName as keyof GenericTaskFormValues] ?? '')}
+                    options={resolvedAssociationOptions}
+                    onChange={(e) => {
+                      helpers.setFieldValue(associationFieldName, e.target.value);
+                      helpers.setFieldTouched(associationFieldName, true, false);
+                    }}
+                    onBlur={() => helpers.setFieldTouched(associationFieldName, true, false)}
+                    className={fieldClass(associationFieldName)}
+                    disabled={resolvedAssociationLoading || associationEmpty}
+                    placeholder={resolvedAssociationLoading ? associationLoadingLabel : associationPlaceholder}
+                  />
+                  {associationEmpty ? (
+                    <small className="field-error-text">{associationEmptyMessage}</small>
+                  ) : (
+                    <FormikError name={associationFieldName} component="small" className="field-error-text" />
+                  )}
+                </div>
+              )}
 
               <div className="form-group">
                 <label>Priority <span className="text-danger">*</span></label>
-                <Field as="select" name="priority" className={fieldClass('priority')}>
+                <Field as="select" name="priority" className={fieldClass('priority')} disabled={fieldsDisabled}>
                   <option value="">Select priority</option>
                   {PRIORITY_OPTIONS.map(o => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -371,7 +464,7 @@ const GenericTaskForm = ({
 
               <div className="form-group">
                 <label>Status <span className="text-danger">*</span></label>
-                <Field as="select" name="status" className={fieldClass('status')}>
+                <Field as="select" name="status" className={fieldClass('status')} disabled={fieldsDisabled}>
                   <option value="">Select status</option>
                   {STATUS_OPTIONS.map(o => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -389,7 +482,9 @@ const GenericTaskForm = ({
                 isLoadingStages={isLoadingStages}
               />
 
-              <AutoSaveForm draftId={draftId} onDraftSaved={onDraftSaved} />
+              {!isEditing && (
+                <AutoSaveForm draftId={draftId ?? null} {...(onDraftSaved ? { onDraftSaved } : {})} />
+              )}
 
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary" disabled={isLoading || isSubmitting || (isEditing && !dirty)}>

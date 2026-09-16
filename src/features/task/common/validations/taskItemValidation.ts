@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { RepeatType } from '../constants/taskEnums';
 
 /**
  * Base validation schema shared by the task-type entities that don't carry a category
@@ -42,12 +43,12 @@ export const taskItemBaseValidationSchema = yup.object({
   stageId: yup.string(),
   repeatType: yup
     .string()
-    .oneOf(['Never', 'Daily', 'Weekly', 'Monthly'])
-    .default('Never'),
+    .oneOf(Object.values(RepeatType))
+    .default(RepeatType.NEVER),
   repeatConfig: yup
     .object()
     .when('repeatType', {
-      is: (value: string) => value === 'Daily' || value === 'Never',
+      is: (value: string) => value === RepeatType.DAILY || value === RepeatType.NEVER,
       then: (schema) => schema.notRequired(),
       otherwise: (schema) =>
         schema
@@ -57,11 +58,11 @@ export const taskItemBaseValidationSchema = yup.object({
             'Select the day you want the task to repeat on',
             function (value: Record<string, unknown> | undefined) {
               if (!value) return false;
-              const repeatType = this.parent.repeatType;
-              if (repeatType === 'Weekly') {
-                return typeof value.dayOfWeek === 'number';
-              }
-              if (repeatType === 'Monthly') {
+const repeatType = this.parent.repeatType;
+if (repeatType === RepeatType.WEEKLY) {
+  return typeof value.dayOfWeek === 'number';
+}
+if (repeatType === RepeatType.MONTHLY) {
                 return value.dayOfMonth !== undefined && value.dayOfMonth !== null && value.dayOfMonth !== '';
               }
               return true;

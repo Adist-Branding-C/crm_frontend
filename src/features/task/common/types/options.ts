@@ -3,21 +3,21 @@ import type { LabelValuePair } from '../../../../shared/types/common';
 export type CategoryOption = LabelValuePair;
 
 export interface StaffOption {
-  value: number;
+  value: string;
   label: string;
 }
 
 export interface LeadOption {
-  value: number;
+  value: string;
   label: string;
 }
 
 export interface DealOption {
-  value: number;
+  value: string;
   label: string;
 }
 
 export interface CampaignOption {
-  value: number;
+  value: string;
   label: string;
 }

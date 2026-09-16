@@ -1,22 +1,18 @@
 import { useDraggable } from '@dnd-kit/core';
-import { Calendar, Phone, Megaphone, Briefcase, ListChecks, Link2 } from 'lucide-react';
+import { Calendar, Link2, RefreshCw } from 'lucide-react';
 import { formatDate } from '../../../../shared/utils/dateUtils';
-import { TASK_TYPE_LABELS } from '../constants/taskBoard.constants';
-import RecurrenceBadge from '../../common/components/RecurrenceBadge';
+import { getRecurrenceLabel } from '../../common/utils/recurrence';
+import { isTaskOverdue } from '../../common/utils/isTaskOverdue';
+import TaskTypeBadge from '../../common/components/TaskTypeBadge';
+import OverdueTag from '../../common/components/OverdueTag';
 import type { TaskKanbanTask } from '../types/kanban.types';
+import { RepeatType } from '../../common/constants/taskEnums';
 import './TaskCard.css';
 
 const PRIORITY_COLOR: Record<string, string> = {
   High: 'var(--danger-text)',
   Medium: 'var(--warning-text)',
   Low: 'var(--text-tertiary)',
-};
-
-const TYPE_ICON: Record<string, typeof Phone> = {
-  NORMAL: ListChecks,
-  CALL_TASK: Phone,
-  CAMPAIGN_TASK: Megaphone,
-  DEAL_TASK: Briefcase,
 };
 
 interface TaskCardProps {
@@ -30,9 +26,10 @@ function TaskCard({ task, stageId }: TaskCardProps) {
     data: { type: 'task', task, stageId },
   });
 
-  const TypeIcon = TYPE_ICON[task.type] ?? ListChecks;
-  const typeLabel = TASK_TYPE_LABELS[task.type] ?? task.type;
   const hasRelatedEntity = !!(task.leadId || task.dealId || task.campaignId);
+  const isRecurring = !!task.repeatType && task.repeatType !== RepeatType.NEVER;
+  const recurrenceLabel = getRecurrenceLabel(task.repeatType, task.repeatConfig);
+  const overdue = isTaskOverdue(task.scheduledDate, task.scheduledTime, task.status);
 
   return (
     <div
@@ -42,17 +39,12 @@ function TaskCard({ task, stageId }: TaskCardProps) {
       {...listeners}
     >
       <div className="task-kanban-card__header">
-        <span className="task-kanban-card__type" title={typeLabel}>
-          <TypeIcon size={12} /> {typeLabel}
-        </span>
-        <span className="task-kanban-card__header-icons">
-          <RecurrenceBadge repeatType={task.repeatType} repeatConfig={task.repeatConfig} />
-          {hasRelatedEntity && (
-            <span className="task-kanban-card__link-icon" title="Has related entity">
-              <Link2 size={12} />
-            </span>
-          )}
-        </span>
+        <TaskTypeBadge type={task.taskType} />
+        {hasRelatedEntity && (
+          <span className="task-kanban-card__link-icon" title="Has related entity">
+            <Link2 size={12} />
+          </span>
+        )}
       </div>
 
       <div className="task-kanban-card__title">{task.title}</div>
@@ -65,12 +57,18 @@ function TaskCard({ task, stageId }: TaskCardProps) {
           {task.priority}
         </span>
       )}
+      {overdue && <OverdueTag />}
 
       <div className="task-kanban-card__footer">
         <div className="task-kanban-card__assignee">
           {task.assignedTo?.name ?? 'Unassigned'}
         </div>
         <div className="task-kanban-card__date">
+          {isRecurring && (
+            <span className="task-kanban-card__repeat" title={recurrenceLabel} aria-label={recurrenceLabel}>
+              <RefreshCw size={14} />
+            </span>
+          )}
           <Calendar size={12} />
           <span>{task.scheduledDate ? formatDate(task.scheduledDate) : 'No date'}</span>
         </div>

@@ -1,4 +1,5 @@
-export type RepeatType = 'Never' | 'Daily' | 'Weekly' | 'Monthly';
+import { RepeatType } from '../../common/constants/taskEnums';
+export { RepeatType } from '../../common/constants/taskEnums';
 
 export interface RepeatConfig {
   dayOfWeek?: number;

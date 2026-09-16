@@ -1,6 +1,6 @@
 import { RefreshCw } from 'lucide-react';
 import { getRecurrenceLabel } from '../utils/recurrence';
-import type { RepeatType, RepeatConfig } from '../../task/types/interface';
+import { RepeatType, type RepeatConfig } from '../../task/types/interface';
 import './RecurrenceBadge.css';
 
 interface RecurrenceBadgeProps {
@@ -10,7 +10,7 @@ interface RecurrenceBadgeProps {
 }
 
 const RecurrenceBadge = ({ repeatType, repeatConfig, showLabel = false }: RecurrenceBadgeProps) => {
-  if (!repeatType || repeatType === 'Never') return null;
+  if (!repeatType || repeatType === RepeatType.NEVER) return null;
 
   const label = getRecurrenceLabel(repeatType, repeatConfig);
   const badgeClass = `recurrence-badge recurrence-badge--${repeatType.toLowerCase()}`;

@@ -1,12 +1,12 @@
 import type { DealTaskFormData } from '../types/index';
+import { RepeatType } from '../../common/constants/taskEnums';
 
 /**
- * Blank form values for the Add Deal Task drawer, and the fallback used by
- * `DealTaskMapper.toFormValues` when there's no editing item yet.
+ * Blank form values for a new Deal Task, used by the calendar's useCalendarAddTask
+ * to seed the add-task form for a chosen date.
  *
  * Used by:
- * - DealTaskPage (Add drawer initial values)
- * - useDealTaskDrawer (via DealTaskMapper.toFormValues)
+ * - useCalendarAddTask (calendar feature).
  */
 export const ADD_DEAL_TASK_INITIAL_VALUES: DealTaskFormData = {
   title: '',
@@ -17,6 +17,6 @@ export const ADD_DEAL_TASK_INITIAL_VALUES: DealTaskFormData = {
   dealId: '',
   priority: '',
   status: '',
-  repeatType: 'Never',
+  repeatType: RepeatType.NEVER,
   repeatConfig: undefined,
 };

@@ -11,6 +11,8 @@ import { useTaskStageCounts } from '../hooks/useTaskStageCounts';
 import { useTaskStageFormDrawer } from '../hooks/useTaskStageFormDrawer';
 import TaskWorkflowCanvas from '../components/TaskWorkflowCanvas';
 import StageFormDrawer from '../components/StageFormDrawer';
+import ReassignTaskStageModal from '../components/ReassignTaskStageModal';
+import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
 import { ADD_STAGE_INITIAL_VALUES } from '../constants/index';
 import type { TaskStageFormData } from '../types/request';
 import type { TaskWorkflowStage } from '../types/interface';
@@ -24,14 +26,14 @@ function TaskWorkflowCanvasPage() {
 
   const { workflow, isLoading, error, refresh } = useTaskWorkflowDetail(numericWorkflowId);
 
-  const stageDrawer = useTaskStageFormDrawer(numericWorkflowId, refresh);
+  const stageCounts = useTaskStageCounts(numericWorkflowId);
+  const stageDrawer = useTaskStageFormDrawer(numericWorkflowId, refresh, stageCounts);
   const { open: openStageDrawer } = stageDrawer.drawer;
   const handleEditStage = useCallback(
     (stage: TaskWorkflowStage) => openStageDrawer(stage),
     [openStageDrawer],
   );
 
-  const stageCounts = useTaskStageCounts(numericWorkflowId);
   const graph = useTaskStageGraph(numericWorkflowId, workflow, handleEditStage, stageCounts);
 
   const editInitialValues: TaskStageFormData = useMemo(() => {
@@ -109,6 +111,25 @@ function TaskWorkflowCanvasPage() {
           onCancel={stageDrawer.drawer.close}
         />
       </Drawer>
+
+      <ReassignTaskStageModal
+        isOpen={!!stageDrawer.reassignPrompt}
+        stage={stageDrawer.reassignPrompt?.stage ?? null}
+        taskCount={stageDrawer.reassignPrompt?.taskCount ?? 0}
+        otherStages={(workflow.stages ?? []).filter((s) => s.id !== stageDrawer.reassignPrompt?.stage.id)}
+        onConfirm={stageDrawer.confirmReassignAndDelete}
+        onClose={stageDrawer.cancelReassignPrompt}
+      />
+
+      <AdminDeleteModal
+        isOpen={!!stageDrawer.deleteConfirm}
+        itemName={stageDrawer.deleteConfirm?.name}
+        itemType="stage"
+        error={stageDrawer.error}
+        isDeleting={stageDrawer.isDeleting}
+        onConfirm={stageDrawer.confirmDelete}
+        onClose={stageDrawer.cancelDeleteConfirm}
+      />
     </PageContainer>
   );
 }

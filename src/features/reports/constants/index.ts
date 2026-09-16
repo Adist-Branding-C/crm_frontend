@@ -6,7 +6,7 @@ import type { DailyActivityRow, GLAPIRow, DeletedLead, DealStageStat, DealAgentS
 export const reportCategories: ReportCategory[] = [
   { id: 'lead', title: 'Lead Reports', path: '/reports/lead', icon: Users },
   // { id: 'deal', title: 'Deal Reports', path: '/reports/deal', icon: DollarSign },
-  // { id: 'task', title: 'Task Reports', path: '/reports/task', icon: ListChecks },
+  { id: 'task', title: 'Task Reports', path: '/reports/task', icon: ListChecks },
   // { id: 'call', title: 'Call Reports', path: '/reports/call', icon: Phone },
   // { id: 'checkin', title: 'Check-in & Check-out', path: '/reports/checkin', icon: ClipboardList },
   // { id: 'attendance', title: 'Attendance Report', path: '/reports/attendance', icon: Clock },
@@ -54,12 +54,6 @@ export const dealReportOptions: ReportOption[] = [
   { id: 'export', title: 'Deal Export', description: 'Export deal data for offline analysis', path: '/reports/deal/export' },
   { id: 'export-history', title: 'Deal Export History', description: 'Track all your past deal data exports', path: '/reports/deal/export-history' },
   { id: 'deleted', title: 'Deleted Deals', description: 'View and restore previously deleted deals', path: '/reports/deal/deleted' },
-];
-
-export const taskReportOptions: ReportOption[] = [
-  { id: 'task-wise', title: 'Task Wise Report', description: 'Comprehensive breakdown of tasks by category and status', path: '/reports/task/task-wise' },
-  { id: 'lead-change', title: 'Lead Change Report', description: 'Track task-related lead changes and updates', path: '/reports/task/lead-change' },
-  { id: 'work', title: 'Task Work Report', description: 'Analyze task completion and work distribution', path: '/reports/task/work' },
 ];
 
 export const callReportOptions: ReportOption[] = [

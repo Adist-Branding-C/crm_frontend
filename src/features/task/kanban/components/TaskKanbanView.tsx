@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, Plus } from 'lucide-react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import EmptyState from '../../../../shared/components/EmptyState';
@@ -6,12 +6,14 @@ import ToastNotification from '../../../../shared/components/ToastNotification';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { useSelectedWorkflow } from '../hooks/useSelectedWorkflow';
 import { useTaskKanban } from '../hooks/useTaskKanban';
+import TaskTypeFilter from '../../common/components/TaskTypeFilter';
 import TaskKanbanBoard from './TaskKanbanBoard';
 import TaskWorkflowPicker from './TaskWorkflowPicker';
 import type { TaskBoardView } from '../types/kanban.types';
 
 interface TaskKanbanViewProps {
-  taskType: string;
+  /** Fixed type for legacy/embedded usage; omitted (or 'ALL') shows every type. */
+  taskType?: string | undefined;
   onViewChange: (view: TaskBoardView) => void;
   onAddTask?: (() => void) | undefined;
   addLabel?: string | undefined;
@@ -24,15 +26,18 @@ function TaskKanbanView({ taskType, onViewChange, onAddTask, addLabel }: TaskKan
     [toast.showToastMessage],
   );
 
+  const [typeFilter, setTypeFilter] = useState<string>(taskType ?? 'ALL');
+  const effectiveTaskType = typeFilter === 'ALL' ? '' : typeFilter;
+
   const { workflows, selectedWorkflowId, setSelectedWorkflowId, isLoading: workflowsLoading } =
     useSelectedWorkflow();
 
-  const kanban = useTaskKanban(selectedWorkflowId, taskType, reportError);
+  const kanban = useTaskKanban(selectedWorkflowId, effectiveTaskType, reportError);
 
   useEffect(() => {
     if (selectedWorkflowId) kanban.fetchKanban(selectedWorkflowId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedWorkflowId, taskType]);
+  }, [selectedWorkflowId, effectiveTaskType]);
 
   const refetch = useCallback(() => {
     if (selectedWorkflowId) kanban.fetchKanban(selectedWorkflowId);
@@ -51,6 +56,7 @@ function TaskKanbanView({ taskType, onViewChange, onAddTask, addLabel }: TaskKan
           selectedWorkflowId={selectedWorkflowId}
           onChange={setSelectedWorkflowId}
         />
+        <TaskTypeFilter value={typeFilter} onChange={setTypeFilter} />
         <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>
           Drag cards between columns to change stage
         </span>

@@ -4,7 +4,7 @@ import type { FieldErrorMap, FieldErrorFallback } from '../../../../shared/types
  * Backend-field-name -> Formik-field-name remapping for task-item submit errors.
  *
  * Used by:
- * - useTaskCrud, useCallTaskCrud, useCampaignTaskCrud, useDealTaskCrud (via useSubmitErrorHandler).
+ * - useTaskCrud and useCalendarAddTask (via useSubmitErrorHandler).
  *
  * Notes:
  * - Empty because the task-item endpoints already return field names matching the
@@ -18,7 +18,7 @@ export const TASK_FIELD_MAP: FieldErrorMap = {};
  * and no field-scoped errors (e.g. a generic validation string with no field key).
  *
  * Used by:
- * - useTaskCrud, useCallTaskCrud, useCampaignTaskCrud, useDealTaskCrud (via useSubmitErrorHandler).
+ * - useTaskCrud and useCalendarAddTask (via useSubmitErrorHandler).
  *
  * Notes:
  * - Order matters; the first matching keyword wins.

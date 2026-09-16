@@ -96,7 +96,8 @@ export function useTaskKanban(
           };
         }),
       );
-    } catch {
+    } catch (err: unknown) {
+      console.error('Failed to load more tasks for kanban stage', err);
       onError?.('Failed to load more tasks');
     } finally {
       setLoadingStageId(null);

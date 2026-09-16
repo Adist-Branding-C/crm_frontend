@@ -1,5 +1,6 @@
 import type { DurationUnit } from '../types/interface';
 import type { LabelValuePair } from '../../../../shared/types/common';
+import { TaskPriority } from '../../../task/common/constants/taskEnums';
 
 /**
  * API endpoints for the task SLA escalation configuration.
@@ -41,4 +42,4 @@ export const DURATION_UNIT_OPTIONS: LabelValuePair[] = DURATION_UNITS.map((unit)
  * Display order for the SLA rows - the backend returns its own ordering, but the
  * page renders fixed High / Medium / Low tiers so the order is pinned here.
  */
-export const ESCALATION_PRIORITIES = ['High', 'Medium', 'Low'] as const;
+export const ESCALATION_PRIORITIES = [TaskPriority.HIGH, TaskPriority.MEDIUM, TaskPriority.LOW] as const;

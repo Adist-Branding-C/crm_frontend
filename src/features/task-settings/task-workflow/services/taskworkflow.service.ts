@@ -130,9 +130,14 @@ export class TaskWorkflowService {
     });
   }
 
-  async deleteStage(workflowId: number, stageId: number): Promise<TaskWorkflowSimpleResponse> {
+  async deleteStage(
+    workflowId: number,
+    stageId: number,
+    reassignToStageId?: number,
+  ): Promise<TaskWorkflowSimpleResponse> {
     const response = await axiosInstance.delete<TaskWorkflowSimpleResponse>(
       TASK_WORKFLOW_API_ENDPOINTS.STAGE(workflowId, stageId),
+      { data: reassignToStageId !== undefined ? { reassignToStageId } : {} },
     );
     return ServiceResponseUtil.successResponse({
       status: response.data.status,

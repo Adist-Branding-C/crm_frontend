@@ -4,14 +4,14 @@ import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.ut
 import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { CAMPAIGN_TASK_API_ENDPOINTS } from '../constants/campaignTaskApiEndpoints';
 import type { TaskListParams } from '../../common/types/listParams';
+import { RepeatType } from '../../common/constants/taskEnums';
 import type { CampaignTaskItem, CampaignTaskFormData } from '../types/index';
 
 /**
  * HTTP client for the Campaign Task API - communicates with the backend only.
  *
  * Used by:
- * - campaignTaskDataService singleton, consumed by useCampaignTaskCrud (create/update/delete)
- *   and CampaignTaskPage (list fetch).
+ * - useCalendarAddTask (calendar) - creates campaign tasks from the calendar's add-task flow.
  */
 export class CampaignTaskDataService {
   async fetchAll(params: TaskListParams): Promise<ApiResponse<CampaignTaskItem[]>> {
@@ -45,7 +45,7 @@ export class CampaignTaskDataService {
         payload[key] = Number(payload[key]);
       }
     });
-    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== 'Never' && payload.repeatType !== 'Daily') {
+    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== RepeatType.NEVER && payload.repeatType !== RepeatType.DAILY) {
       const config = payload.repeatConfig;
       if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
         config.dayOfWeek = Number(config.dayOfWeek);

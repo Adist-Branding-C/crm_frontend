@@ -15,7 +15,7 @@ const TASK_KANBAN_ENDPOINTS = {
 export class TaskKanbanService {
   async getKanban(workflowId: string, taskType?: string): Promise<TaskKanbanStage[]> {
     const params: Record<string, string> = { workflowId };
-    if (taskType) params.type = taskType;
+    if (taskType) params.taskType = taskType;
     const response = await axiosInstance.get<TaskKanbanResponse>(
       TASK_KANBAN_ENDPOINTS.KANBAN,
       { params },
@@ -31,7 +31,7 @@ export class TaskKanbanService {
     taskType?: string,
   ): Promise<{ stageId: string; items: TaskKanbanTask[]; pagination: PaginationMeta }> {
     const params: Record<string, string | number> = { workflowId, pageNumber, limit };
-    if (taskType) params.type = taskType;
+    if (taskType) params.taskType = taskType;
     const response = await axiosInstance.get<TaskKanbanResponse>(
       TASK_KANBAN_ENDPOINTS.KANBAN,
       { params },

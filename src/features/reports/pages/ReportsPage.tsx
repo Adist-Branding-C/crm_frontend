@@ -20,10 +20,14 @@ import LeadConversionReport from '../sub-pages/LeadConversionReport';
 import DealExportReport from '../sub-pages/DealExportReport';
 import DealExportHistoryReport from '../sub-pages/DealExportHistoryReport';
 import DealDeletedReport from '../sub-pages/DealDeletedReport';
-import TaskReportsLanding from '../sub-pages/TaskReportsLanding';
-import TaskWiseReport from '../sub-pages/TaskWiseReport';
-import LeadChangeReport from '../sub-pages/LeadChangeReport';
-import TaskWorkReport from '../sub-pages/TaskWorkReport';
+import TaskReportsLanding from '../task-reports/sub-pages/TaskReportsLanding';
+import TaskSummaryReport from '../task-reports/sub-pages/TaskSummaryReport';
+import TaskActivityReport from '../task-reports/sub-pages/TaskActivityReport';
+import TaskStageHistoryReport from '../task-reports/sub-pages/TaskStageHistoryReport';
+import TaskPipelineDistributionReport from '../task-reports/sub-pages/TaskPipelineDistributionReport';
+import TaskSLABreachReport from '../task-reports/sub-pages/TaskSLABreachReport';
+import TaskRecurringComplianceReport from '../task-reports/sub-pages/TaskRecurringComplianceReport';
+import TaskTeamPerformanceReport from '../task-reports/sub-pages/TaskTeamPerformanceReport';
 import GLDialerCallReport from '../sub-pages/GLDialerCallReport';
 import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
 import CheckinReport from '../sub-pages/CheckinReport';
@@ -44,7 +48,7 @@ const ReportsPage = () => {
         <Routes>
           <Route path="lead/*" element={<LeadReportsRouter />} />
           {/* <Route path="deal/*" element={<DealReportsRouter />} /> */}
-          {/* <Route path="task/*" element={<TaskReportsRouter />} /> */}
+          <Route path="task/*" element={<TaskReportsRouter />} />
           {/* <Route path="call/*" element={<CallReportsRouter />} /> */}
           {/* <Route path="checkin" element={<CheckinReport />} /> */}
           {/* <Route path="attendance" element={<AttendanceReport />} /> */}
@@ -91,9 +95,13 @@ const DealReportsRouter = () => (
 const TaskReportsRouter = () => (
   <Routes>
     <Route path="" element={<TaskReportsLanding />} />
-    <Route path="task-wise" element={<TaskWiseReport />} />
-    <Route path="lead-change" element={<LeadChangeReport />} />
-    <Route path="work" element={<TaskWorkReport />} />
+    <Route path="summary" element={<TaskSummaryReport />} />
+    <Route path="activity" element={<TaskActivityReport />} />
+    <Route path="stage-history" element={<TaskStageHistoryReport />} />
+    <Route path="pipeline-distribution" element={<TaskPipelineDistributionReport />} />
+    <Route path="sla-breach" element={<TaskSLABreachReport />} />
+    <Route path="recurring-compliance" element={<TaskRecurringComplianceReport />} />
+    <Route path="team-performance" element={<TaskTeamPerformanceReport />} />
     <Route path="*" element={<Navigate to="/reports/task" replace />} />
   </Routes>
 );

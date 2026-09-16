@@ -35,7 +35,8 @@ export function useTaskWorkflowOptions() {
     setIsLoading(true);
     try {
       setWorkflows(await taskWorkflowService.getAllWorkflows());
-    } catch {
+    } catch (err: unknown) {
+      console.error('Failed to load task workflows', err);
       setWorkflows([]);
     } finally {
       setIsLoading(false);
@@ -64,10 +65,11 @@ export function useTaskWorkflowOptions() {
           .sort(bySortOrder)
           .map((stage) => ({ value: stage.id, label: stage.name })),
       );
-    } catch {
-      if (activeWorkflowIdRef.current !== id) return;
-      setStageOptions([]);
-    } finally {
+} catch (err: unknown) {
+        console.error('Failed to load stages for workflow', err);
+        if (activeWorkflowIdRef.current !== id) return;
+        setStageOptions([]);
+      } finally {
       if (activeWorkflowIdRef.current === id) setIsLoadingStages(false);
     }
   }, []);

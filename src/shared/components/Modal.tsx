@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -12,7 +13,7 @@ interface ModalProps {
 const Modal = ({ isOpen, onClose, title, children, maxWidth }: ModalProps) => {
   if (!isOpen) return null;
 
-  return (
+  const content = (
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-content"
@@ -29,6 +30,8 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth }: ModalProps) => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(content, document.body) : null;
 };
 
 export default Modal;

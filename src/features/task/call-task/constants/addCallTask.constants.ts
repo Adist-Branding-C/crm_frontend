@@ -1,12 +1,12 @@
 import type { CallTaskFormData } from '../types/index';
+import { RepeatType } from '../../common/constants/taskEnums';
 
 /**
- * Blank form values for the Add Call Task drawer, and the fallback used by
- * `CallTaskMapper.toFormValues` when there's no editing item yet.
+ * Blank form values for a new Call Task, used by the calendar's useCalendarAddTask
+ * to seed the add-task form for a chosen date.
  *
  * Used by:
- * - CallTaskPage (Add drawer initial values)
- * - useCallTaskDrawer (via CallTaskMapper.toFormValues)
+ * - useCalendarAddTask (calendar feature).
  */
 export const ADD_CALL_TASK_INITIAL_VALUES: CallTaskFormData = {
   title: '',
@@ -17,6 +17,6 @@ export const ADD_CALL_TASK_INITIAL_VALUES: CallTaskFormData = {
   leadId: '',
   priority: '',
   status: '',
-  repeatType: 'Never',
+  repeatType: RepeatType.NEVER,
   repeatConfig: undefined,
 };

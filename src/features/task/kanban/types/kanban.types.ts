@@ -1,6 +1,5 @@
 import type { PaginationMeta } from '../../../../shared/types/common';
-
-export type TaskTypeFilter = 'NORMAL' | 'CALL_TASK' | 'CAMPAIGN_TASK' | 'DEAL_TASK';
+import type { RepeatType } from '../../task/types/interface';
 
 /** Task row nested under each stage in the kanban endpoint response. */
 export interface TaskKanbanTask {
@@ -11,12 +10,12 @@ export interface TaskKanbanTask {
   scheduledTime: string;
   priority: string;
   status: string;
-  type: string;
+  taskType: string;
   assignedTo?: { id: number; name: string } | null;
   leadId?: { id: number; name: string } | null;
   dealId?: { id: number; name: string } | null;
   campaignId?: { id: number; name: string } | null;
-  repeatType?: 'Never' | 'Daily' | 'Weekly' | 'Monthly';
+  repeatType?: RepeatType;
   repeatConfig?: {
     dayOfWeek?: number;
     dayOfMonth?: number | 'last';

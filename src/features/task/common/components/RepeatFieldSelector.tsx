@@ -1,6 +1,6 @@
 import { useFormikContext } from 'formik';
 import { REPEAT_TYPE_OPTIONS, WEEK_DAY_OPTIONS, MONTHLY_LAST_DAY_VALUE } from '../constants/repeatOptions';
-import { getFieldClassName } from '../utils/fieldClassName';
+import { RepeatType } from '../constants/taskEnums';
 import './RepeatFieldSelector.css';
 
 function getConfigError(errors: Record<string, unknown>): string | undefined {
@@ -12,19 +12,20 @@ function getConfigError(errors: Record<string, unknown>): string | undefined {
 
 interface RepeatFieldSelectorProps {
   getFieldClass: (name: string) => string;
+  disabled?: boolean;
 }
 
-const RepeatFieldSelector = ({ getFieldClass }: RepeatFieldSelectorProps) => {
+const RepeatFieldSelector = ({ getFieldClass, disabled = false }: RepeatFieldSelectorProps) => {
   const { values, errors, touched, setFieldValue, setFieldTouched } = useFormikContext<any>();
 
-  const repeatType = values.repeatType || 'Never';
+  const repeatType = values.repeatType || RepeatType.NEVER;
   const configError = getConfigError(errors);
 
   const handleRepeatTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value;
     setFieldValue('repeatType', next);
     setFieldTouched('repeatType', true, false);
-    if (next === 'Never' || next === 'Daily') {
+    if (next === RepeatType.NEVER || next === RepeatType.DAILY) {
       setFieldValue('repeatConfig', undefined);
     } else {
       setFieldValue('repeatConfig', {});
@@ -68,6 +69,7 @@ const RepeatFieldSelector = ({ getFieldClass }: RepeatFieldSelectorProps) => {
         onChange={handleRepeatTypeChange}
         onBlur={() => setFieldTouched('repeatType', true, false)}
         className={getFieldClass('repeatType')}
+        disabled={disabled}
       >
         {REPEAT_TYPE_OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -77,7 +79,7 @@ const RepeatFieldSelector = ({ getFieldClass }: RepeatFieldSelectorProps) => {
         <small className="field-error-text">{String(errors.repeatType)}</small>
       )}
 
-      {repeatType === 'Weekly' && (
+      {repeatType === RepeatType.WEEKLY && (
         <div className="repeat-field">
           <label>Repeat on
             <select
@@ -86,6 +88,7 @@ const RepeatFieldSelector = ({ getFieldClass }: RepeatFieldSelectorProps) => {
               onChange={handleDayOfWeekChange}
               onBlur={() => setFieldTouched('repeatConfig', true, false)}
               className={getFieldClass('repeatConfig')}
+              disabled={disabled}
             >
               <option value="">Select a day</option>
               {WEEK_DAY_OPTIONS.map((o) => (
@@ -96,7 +99,7 @@ const RepeatFieldSelector = ({ getFieldClass }: RepeatFieldSelectorProps) => {
         </div>
       )}
 
-      {repeatType === 'Monthly' && (
+      {repeatType === RepeatType.MONTHLY && (
         <div className="repeat-field">
           <label>Repeat on day</label>
           <input
@@ -115,19 +118,21 @@ const RepeatFieldSelector = ({ getFieldClass }: RepeatFieldSelectorProps) => {
             onBlur={() => setFieldTouched('repeatConfig', true, false)}
             className={getFieldClass('repeatConfig')}
             placeholder="1-31"
+            disabled={disabled}
           />
           <label className="repeat-last-day">
             <input
               type="checkbox"
               checked={isLastDayOff}
               onChange={handleLastDayToggle}
+              disabled={disabled}
             />
             Last day of month
           </label>
         </div>
       )}
 
-      {(repeatType === 'Weekly' || repeatType === 'Monthly') && configError && (
+      {(repeatType === RepeatType.WEEKLY || repeatType === RepeatType.MONTHLY) && configError && (
         <small className="field-error-text">{configError}</small>
       )}
     </div>

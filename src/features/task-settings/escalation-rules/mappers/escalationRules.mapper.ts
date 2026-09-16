@@ -1,6 +1,7 @@
 import type { DurationUnit, EscalationPriority, EscalationRuleItem } from '../types/interface';
 import type { EscalationRuleFormData, EscalationRuleFormValues } from '../types/request';
 import { DURATION_UNITS } from '../constants';
+import { TaskPriority } from '../../../task/common/constants/taskEnums';
 
 const MINUTES_PER_UNIT: Record<DurationUnit, number> = {
   minutes: 1,
@@ -54,10 +55,12 @@ export function toBreachMinutes(amount: string | number, unit: DurationUnit): nu
 export class EscalationRulesMapper {
   static toEscalationRuleItem(raw: unknown): EscalationRuleItem {
     const r = (raw ?? {}) as Record<string, unknown>;
-    const priority = String(r.priority ?? 'Low');
+    const priority = String(r.priority ?? TaskPriority.LOW);
     const normalized = priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
     const validPriority: EscalationPriority =
-      normalized === 'High' || normalized === 'Medium' ? normalized : 'Low';
+      normalized === TaskPriority.HIGH || normalized === TaskPriority.MEDIUM
+        ? (normalized as TaskPriority)
+        : TaskPriority.LOW;
     return {
       id: Number(r.id),
       priority: validPriority,
@@ -75,7 +78,7 @@ export class EscalationRulesMapper {
       amount,
       unit,
       notifyAssignee: true,
-      notifyAdmin: item.priority === 'High' && item.notifyAdmin,
+      notifyAdmin: item.priority === TaskPriority.HIGH && item.notifyAdmin,
       notifyInApp: item.notifyInApp,
       notifyEmail: item.notifyEmail,
     };
@@ -85,7 +88,7 @@ export class EscalationRulesMapper {
     return {
       breachMinutes: toBreachMinutes(values.amount, values.unit),
       notifyAssignee: true,
-      notifyAdmin: priority === 'High' ? values.notifyAdmin : false,
+      notifyAdmin: priority === TaskPriority.HIGH ? values.notifyAdmin : false,
       notifyInApp: values.notifyInApp,
       notifyEmail: values.notifyEmail,
     };

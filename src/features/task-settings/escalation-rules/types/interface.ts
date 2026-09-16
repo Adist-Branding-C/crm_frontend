@@ -1,6 +1,8 @@
+import type { TaskPriority } from '../../../task/common/constants/taskEnums';
+
 export type DurationUnit = 'minutes' | 'hours' | 'days';
 
-export type EscalationPriority = 'High' | 'Medium' | 'Low';
+export type EscalationPriority = TaskPriority;
 
 /**
  * A single priority tier of the task SLA escalation configuration - exactly three

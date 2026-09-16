@@ -4,14 +4,14 @@ import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.ut
 import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { DEAL_TASK_API_ENDPOINTS } from '../constants/dealTaskApiEndpoints';
 import type { TaskListParams } from '../../common/types/listParams';
+import { RepeatType } from '../../common/constants/taskEnums';
 import type { DealTaskItem, DealTaskFormData } from '../types/index';
 
 /**
  * HTTP client for the Deal Task API - communicates with the backend only.
  *
  * Used by:
- * - dealTaskDataService singleton, consumed by useDealTaskCrud (create/update/delete)
- *   and DealTaskPage (list fetch).
+ * - useCalendarAddTask (calendar) - creates deal tasks from the calendar's add-task flow.
  */
 export class DealTaskDataService {
   async fetchAll(params: TaskListParams): Promise<ApiResponse<DealTaskItem[]>> {
@@ -45,7 +45,7 @@ export class DealTaskDataService {
         payload[key] = Number(payload[key]);
       }
     });
-    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== 'Never' && payload.repeatType !== 'Daily') {
+    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== RepeatType.NEVER && payload.repeatType !== RepeatType.DAILY) {
       const config = payload.repeatConfig;
       if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
         config.dayOfWeek = Number(config.dayOfWeek);
