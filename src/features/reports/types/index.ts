@@ -52,39 +52,6 @@ export interface DeletedLead {
   [key: string]: string | number;
 }
 
-export interface DealStageStat {
-  stage: string;
-  count: number;
-  amount: number;
-  color: string;
-}
-
-export interface DealAgentStat {
-  id: number;
-  name: string;
-  totalDeals: number;
-  openDeals: number;
-  winDeals: number;
-  closeDeals: number;
-}
-
-export interface LeadConversionDeal {
-  id: number;
-  dealCode: string;
-  dealName: string;
-  leadName: string;
-  mobile: string;
-  dealAmount: number;
-  dealStatus: string;
-  leadSource: string;
-  lostReason: string;
-  startDate: string;
-  endDate: string;
-  staffName: string;
-  createdBy: string;
-  updatedAt: string;
-}
-
 export interface TaskWiseRow {
   id: number;
   agentName: string;

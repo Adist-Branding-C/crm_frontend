@@ -10,9 +10,9 @@ export function useStaffList() {
     setIsLoading(true);
     staffService.getStaff()
       .then((response) => {
-        const data = response?.data ?? response ?? [];
-        const items = Array.isArray(data) ? data : [];
-        setStaff(items.map((s: any) => ({ label: s.name, value: s.id })));
+        const data = response?.data;
+        const items = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
+        setStaff(items.map((s: any) => ({ label: s.name, value: s.id, staffId: s.staff_id })));
       })
       .catch(() => setStaff([]))
       .finally(() => setIsLoading(false));

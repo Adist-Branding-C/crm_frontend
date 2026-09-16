@@ -90,6 +90,7 @@ export interface LeadOption {
 export interface StaffOption {
   label: string;
   value: string | number;
+  staffId?: string;
 }
 
 export interface DealListResponse {
