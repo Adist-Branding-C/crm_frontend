@@ -35,6 +35,7 @@ export interface UseLeadPaginationReturn {
 export interface UseLeadSearchReturn {
   searchQuery: string;
   setSearchQuery: (v: string) => void;
+  syncSearchQuery: (v: string) => void;
   resetSearch: () => void;
 }
 
