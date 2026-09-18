@@ -1,69 +1,52 @@
-import React, { useState } from 'react';
-import { Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useAgingDeals } from '../../../deal-analytics/hooks/useAgingDeals';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { formatAmountWithCurrency } from '../../../../shared/constants/currencies';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
-import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+import { useState } from 'react';
 
-/**
- * Stalled / Aging Deals (issues5.md report #7). All three filters are
- * independently toggleable, per the approved draft - omitted filters are
- * simply not applied.
- *
- * "No activity" is computed from Activities + Remarks + Tasks only - Call
- * Logs are excluded because call_logs has no deal-level column anywhere in
- * this schema (only lead_id); see DealRepository.getAgingDeals' own comment
- * for the full reasoning. Flagged here too since it's a user-visible
- * behavior difference from the ticket's literal "no recent calls" wording.
- */
+
+interface DealFilters {
+  noActivityDays: string;
+  inStageDays: string;
+  closeDateExceeded: boolean;
+  pipelineId: number | undefined;
+  agentId: number | undefined;
+}
+
+const INITIAL_FILTERS: DealFilters = {
+  noActivityDays: '',
+  inStageDays: '',
+  closeDateExceeded: false,
+  pipelineId: undefined,
+  agentId: undefined,
+};
+
+
 const DealAgingReport = () => {
-  // Committed (debounced) values - these actually drive the API call.
-  const [noActivityDays, setNoActivityDays] = useState<string>('');
-  const [inStageDays, setInStageDays] = useState<string>('');
-  const [closeDateExceeded, setCloseDateExceeded] = useState(false);
-  const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
-  const [agentId, setAgentId] = useState<number | undefined>(undefined);
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
   const [page, setPage] = useState(1);
   const { pipelineOptions, staffOptions } = useDealReportFilterOptions();
 
-  // These two are free-typed number inputs, not a select - without
-  // debouncing, every keystroke (e.g. typing "14") fires its own API call.
-  // Matches the same useDebouncedSearch pattern already used for search boxes
-  // elsewhere in this codebase (useDealSearch.ts, DealTaskPage.tsx).
-  const {
-    searchValue: noActivityDaysInput,
-    handleSearchChange: handleNoActivityDaysInputChange,
-    resetSearch: resetNoActivityDaysInput,
-  } = useDebouncedSearch((value) => { setNoActivityDays(value); setPage(1); }, 500);
-
-  const {
-    searchValue: inStageDaysInput,
-    handleSearchChange: handleInStageDaysInputChange,
-    resetSearch: resetInStageDaysInput,
-  } = useDebouncedSearch((value) => { setInStageDays(value); setPage(1); }, 500);
-
   const { data, isLoading, isError, error, refetch } = useAgingDeals({
-    noActivityDays: noActivityDays ? Number(noActivityDays) : undefined,
-    inStageDays: inStageDays ? Number(inStageDays) : undefined,
-    closeDateExceeded: closeDateExceeded || undefined,
-    pipelineId,
-    agentId,
+    noActivityDays: appliedFilters.noActivityDays ? Number(appliedFilters.noActivityDays) : undefined,
+    inStageDays: appliedFilters.inStageDays ? Number(appliedFilters.inStageDays) : undefined,
+    closeDateExceeded: appliedFilters.closeDateExceeded || undefined,
+    pipelineId: appliedFilters.pipelineId,
+    agentId: appliedFilters.agentId,
     pageNumber: page,
     limit: 10,
   });
 
+  const handleApplyFilters = () => {
+    applyFilters();
+    setPage(1);
+  };
+
   const items = data?.items ?? [];
   const pagination = data?.pagination;
-
-  const handleExport = () => {
-    const headers = ['Deal', 'Stage', 'Days in Stage', 'Days Until/Past Close', 'Amount', 'Agent'];
-    const rows = items.map((d) => [d.dealName, d.stageName, d.daysInCurrentStage, d.daysUntilOrPastCloseDate ?? '—', d.amount, d.agentName ?? 'Unassigned']);
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'stalled_aging_deals.csv');
-  };
 
   return (
     <div className="report-content-wrapper with-sidebar">
@@ -77,8 +60,8 @@ const DealAgingReport = () => {
               type="number"
               min={0}
               placeholder="e.g. 14"
-              value={noActivityDaysInput}
-              onChange={(e) => handleNoActivityDaysInputChange(e.target.value)}
+              value={filters.noActivityDays}
+              onChange={(e) => setFilters((f) => ({ ...f, noActivityDays: e.target.value }))}
             />
           </div>
           <div className="filter-group">
@@ -87,8 +70,8 @@ const DealAgingReport = () => {
               type="number"
               min={0}
               placeholder="e.g. 30"
-              value={inStageDaysInput}
-              onChange={(e) => handleInStageDaysInputChange(e.target.value)}
+              value={filters.inStageDays}
+              onChange={(e) => setFilters((f) => ({ ...f, inStageDays: e.target.value }))}
             />
           </div>
           <div className="filter-group">
@@ -96,8 +79,8 @@ const DealAgingReport = () => {
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', minHeight: '38px', fontWeight: 400, textTransform: 'none', letterSpacing: 'normal', fontSize: '0.875rem', color: 'var(--text-main)' }}>
               <input
                 type="checkbox"
-                checked={closeDateExceeded}
-                onChange={(e) => { setCloseDateExceeded(e.target.checked); setPage(1); }}
+                checked={filters.closeDateExceeded}
+                onChange={(e) => setFilters((f) => ({ ...f, closeDateExceeded: e.target.checked }))}
                 style={{ width: 'auto', minHeight: 'auto' }}
               />
               Close date exceeded
@@ -106,8 +89,8 @@ const DealAgingReport = () => {
           <div className="filter-group">
             <label>Pipeline</label>
             <select
-              value={pipelineId ?? ''}
-              onChange={(e) => { setPipelineId(e.target.value ? Number(e.target.value) : undefined); setPage(1); }}
+              value={filters.pipelineId ?? ''}
+              onChange={(e) => setFilters((f) => ({ ...f, pipelineId: e.target.value ? Number(e.target.value) : undefined }))}
             >
               <option value="">All Pipelines</option>
               {pipelineOptions.map((opt) => (
@@ -118,8 +101,8 @@ const DealAgingReport = () => {
           <div className="filter-group">
             <label>Agent</label>
             <select
-              value={agentId ?? ''}
-              onChange={(e) => { setAgentId(e.target.value ? Number(e.target.value) : undefined); setPage(1); }}
+              value={filters.agentId ?? ''}
+              onChange={(e) => setFilters((f) => ({ ...f, agentId: e.target.value ? Number(e.target.value) : undefined }))}
             >
               <option value="">All Agents</option>
               {staffOptions.map((opt) => (
@@ -130,17 +113,11 @@ const DealAgingReport = () => {
           <div className="filter-actions">
             <button
               className="btn btn-secondary"
-              onClick={() => {
-                resetNoActivityDaysInput(); resetInStageDaysInput();
-                setNoActivityDays(''); setInStageDays(''); setCloseDateExceeded(false);
-                setPipelineId(undefined); setAgentId(undefined); setPage(1);
-              }}
+              onClick={() => { resetFilters(); setPage(1); }}
             >
               Clear
             </button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={items.length === 0}>
-              <Download size={16} /> Export
-            </button>
+            <button className="btn btn-primary" onClick={handleApplyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>

@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
-import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
 import { useDeletedDeals } from '../../../deal-analytics/hooks/useDeletedDeals';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { useDealFilterOptions } from '../../../deal/hooks/useDealFilterOptions';
@@ -10,41 +9,51 @@ import { useSourceOptions } from '../../../deal-analytics/hooks/useSourceOptions
 import { mapApiToUI } from '../../../deal/utils/dealMapper';
 import { formatAmountWithCurrency } from '../../../../shared/constants/currencies';
 import DateRangePicker from '../../../../shared/components/filters/DateRangePicker';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+
+interface DealFilters {
+  dateFrom: string;
+  dateTo: string;
+  dateFilterBy: string;
+  type: string;
+  deletedBy: string;
+  agentId: number | undefined;
+  statusId: string;
+  sourceId: string;
+  search: string;
+}
+
+const INITIAL_FILTERS: DealFilters = {
+  dateFrom: '', dateTo: '', dateFilterBy: 'createdAt', type: '', deletedBy: '',
+  agentId: undefined, statusId: '', sourceId: '', search: '',
+};
 
 
 const DealDeletedReport = () => {
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [dateFilterBy, setDateFilterBy] = useState('createdAt');
-  const [type, setType] = useState('');
-  const [deletedBy, setDeletedBy] = useState('');
-  const [agentId, setAgentId] = useState<number | undefined>(undefined);
-  const [statusId, setStatusId] = useState('');
-  const [sourceId, setSourceId] = useState('');
-  const [search, setSearch] = useState('');
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
   const [page, setPage] = useState(1);
   const { staffOptions, deletedByOptions } = useDealReportFilterOptions();
   const { statusOptions } = useDealFilterOptions();
   const { sourceOptions } = useSourceOptions();
 
-  const { searchValue: searchInput, handleSearchChange, resetSearch } = useDebouncedSearch((value) => {
-    setSearch(value);
-    setPage(1);
-  });
-
   const { data, isLoading, isError, error, refetch } = useDeletedDeals({
-    dateFrom: dateFrom || undefined,
-    dateTo: dateTo || undefined,
-    dateFilterBy,
-    type: type || undefined,
-    deletedBy: deletedBy || undefined,
-    agentId,
-    statusId: statusId || undefined,
-    sourceId: sourceId || undefined,
-    search: search || undefined,
+    dateFrom: appliedFilters.dateFrom || undefined,
+    dateTo: appliedFilters.dateTo || undefined,
+    dateFilterBy: appliedFilters.dateFilterBy,
+    type: appliedFilters.type || undefined,
+    deletedBy: appliedFilters.deletedBy || undefined,
+    agentId: appliedFilters.agentId,
+    statusId: appliedFilters.statusId || undefined,
+    sourceId: appliedFilters.sourceId || undefined,
+    search: appliedFilters.search || undefined,
     pageNumber: page,
     limit: 10,
   });
+
+  const handleApplyFilters = () => {
+    applyFilters();
+    setPage(1);
+  };
 
   const items = (data?.items ?? []).map(mapApiToUI);
   const pagination = data?.pagination;
@@ -57,16 +66,16 @@ const DealDeletedReport = () => {
         <div className="filter-row">
           <div className="filter-group">
             <label>Search Deals</label>
-            <input type="text" placeholder="Type a deal name..." value={searchInput} onChange={(e) => handleSearchChange(e.target.value)} />
+            <input type="text" placeholder="Type a deal name..." value={filters.search} onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))} />
           </div>
           <DateRangePicker
             label="Date Range"
-            value={{ start: dateFrom, end: dateTo }}
-            onChange={(range) => { setDateFrom(range.start); setDateTo(range.end); setPage(1); }}
+            value={{ start: filters.dateFrom, end: filters.dateTo }}
+            onChange={(range) => setFilters((f) => ({ ...f, dateFrom: range.start, dateTo: range.end }))}
           />
           <div className="filter-group">
             <label>Filter By Date</label>
-            <select value={dateFilterBy} onChange={(e) => { setDateFilterBy(e.target.value); setPage(1); }}>
+            <select value={filters.dateFilterBy} onChange={(e) => setFilters((f) => ({ ...f, dateFilterBy: e.target.value }))}>
               <option value="createdAt">Created Date</option>
               <option value="updatedAt">Updated Date</option>
               <option value="startDate">Start Date</option>
@@ -77,7 +86,7 @@ const DealDeletedReport = () => {
         <div className="filter-row">
           <div className="filter-group">
             <label>Stage</label>
-            <select value={statusId} onChange={(e) => { setStatusId(e.target.value); setPage(1); }}>
+            <select value={filters.statusId} onChange={(e) => setFilters((f) => ({ ...f, statusId: e.target.value }))}>
               <option value="">All Stages</option>
               {statusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -86,7 +95,7 @@ const DealDeletedReport = () => {
           </div>
           <div className="filter-group">
             <label>Source</label>
-            <select value={sourceId} onChange={(e) => { setSourceId(e.target.value); setPage(1); }}>
+            <select value={filters.sourceId} onChange={(e) => setFilters((f) => ({ ...f, sourceId: e.target.value }))}>
               <option value="">All Sources</option>
               {sourceOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -95,7 +104,7 @@ const DealDeletedReport = () => {
           </div>
           <div className="filter-group">
             <label>Deal Type</label>
-            <select value={type} onChange={(e) => { setType(e.target.value); setPage(1); }}>
+            <select value={filters.type} onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}>
               <option value="">All Types</option>
               <option value="New">New</option>
               <option value="Existing">Existing</option>
@@ -103,7 +112,7 @@ const DealDeletedReport = () => {
           </div>
           <div className="filter-group">
             <label>Agent</label>
-            <select value={agentId ?? ''} onChange={(e) => { setAgentId(e.target.value ? Number(e.target.value) : undefined); setPage(1); }}>
+            <select value={filters.agentId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, agentId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Agents</option>
               {staffOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -112,7 +121,7 @@ const DealDeletedReport = () => {
           </div>
           <div className="filter-group">
             <label>Deleted By</label>
-            <select value={deletedBy} onChange={(e) => { setDeletedBy(e.target.value); setPage(1); }}>
+            <select value={filters.deletedBy} onChange={(e) => setFilters((f) => ({ ...f, deletedBy: e.target.value }))}>
               <option value="">Anyone</option>
               {deletedByOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -122,13 +131,11 @@ const DealDeletedReport = () => {
           <div className="filter-actions">
             <button
               className="btn btn-secondary"
-              onClick={() => {
-                resetSearch(); setSearch(''); setDateFrom(''); setDateTo(''); setDateFilterBy('createdAt'); setType('');
-                setAgentId(undefined); setDeletedBy(''); setStatusId(''); setSourceId(''); setPage(1);
-              }}
+              onClick={() => { resetFilters(); setPage(1); }}
             >
               Clear
             </button>
+            <button className="btn btn-primary" onClick={handleApplyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>

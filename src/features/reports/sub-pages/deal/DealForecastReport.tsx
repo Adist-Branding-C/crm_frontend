@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useForecastByPeriod } from '../../../deal-analytics/hooks/useForecastByPeriod';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { formatAmountWithCurrency } from '../../../../shared/constants/currencies';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
+import { useTablePagination } from '../../../../shared/hooks/useTablePagination';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+import Pagination from '../../../../shared/components/table/Pagination';
 import CustomDateRangeField from '../../../../shared/components/filters/CustomDateRangeField';
 import type { ReportPeriod } from '../../../deal-analytics/types';
 
@@ -18,34 +18,34 @@ const PERIOD_OPTIONS: { value: ReportPeriod; label: string }[] = [
 ];
 
 
+interface DealFilters {
+  period: ReportPeriod;
+  customFrom: string;
+  customTo: string;
+  pipelineId: number | undefined;
+  agentId: number | undefined;
+}
+
+const INITIAL_FILTERS: DealFilters = { period: 'this_month', customFrom: '', customTo: '', pipelineId: undefined, agentId: undefined };
+
 const DealForecastReport = () => {
-  const [period, setPeriod] = useState<ReportPeriod>('this_month');
-  const [customFrom, setCustomFrom] = useState('');
-  const [customTo, setCustomTo] = useState('');
-  const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
-  const [agentId, setAgentId] = useState<number | undefined>(undefined);
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
   const { pipelineOptions, staffOptions } = useDealReportFilterOptions();
 
 
-  const isCustomReady = period !== 'custom' || Boolean(customFrom && customTo);
+  const isCustomReady = appliedFilters.period !== 'custom' || Boolean(appliedFilters.customFrom && appliedFilters.customTo);
   const { data, isLoading, isError, error, refetch } = useForecastByPeriod({
-    period: isCustomReady ? period : 'this_month',
-    from: isCustomReady && period === 'custom' ? customFrom : undefined,
-    to: isCustomReady && period === 'custom' ? customTo : undefined,
-    pipelineId,
-    agentId,
+    period: isCustomReady ? appliedFilters.period : 'this_month',
+    from: isCustomReady && appliedFilters.period === 'custom' ? appliedFilters.customFrom : undefined,
+    to: isCustomReady && appliedFilters.period === 'custom' ? appliedFilters.customTo : undefined,
+    pipelineId: appliedFilters.pipelineId,
+    agentId: appliedFilters.agentId,
   });
 
   const byCurrency = data?.byCurrency ?? [];
   const byPipeline = data?.byPipeline ?? [];
   const unscheduled = data?.unscheduled ?? [];
-
-  const handleExport = () => {
-    const headers = ['Pipeline', 'Currency', 'Open Deals', 'Open Value', 'Weighted Value'];
-    const rows = byPipeline.map((p) => [p.pipelineName, p.currency, p.openCount, p.openAmount, p.weightedAmount]);
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'forecasted_revenue.csv');
-  };
+  const { currentPage, setCurrentPage, totalPages, paginatedData: pagedByPipeline } = useTablePagination(byPipeline);
 
   return (
     <div className="report-content-wrapper with-sidebar">
@@ -55,23 +55,23 @@ const DealForecastReport = () => {
         <div className="filter-row">
           <div className="filter-group">
             <label>Period</label>
-            <select value={period} onChange={(e) => setPeriod(e.target.value as ReportPeriod)}>
+            <select value={filters.period} onChange={(e) => setFilters((f) => ({ ...f, period: e.target.value as ReportPeriod }))}>
               {PERIOD_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
           </div>
-          {period === 'custom' && (
+          {filters.period === 'custom' && (
             <CustomDateRangeField
               label="Custom Range"
-              from={customFrom}
-              to={customTo}
-              onChange={(from, to) => { setCustomFrom(from); setCustomTo(to); }}
+              from={filters.customFrom}
+              to={filters.customTo}
+              onChange={(from, to) => setFilters((f) => ({ ...f, customFrom: from, customTo: to }))}
             />
           )}
           <div className="filter-group">
             <label>Pipeline</label>
-            <select value={pipelineId ?? ''} onChange={(e) => setPipelineId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.pipelineId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, pipelineId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Pipelines</option>
               {pipelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -80,7 +80,7 @@ const DealForecastReport = () => {
           </div>
           <div className="filter-group">
             <label>Agent</label>
-            <select value={agentId ?? ''} onChange={(e) => setAgentId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.agentId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, agentId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Agents</option>
               {staffOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -88,15 +88,8 @@ const DealForecastReport = () => {
             </select>
           </div>
           <div className="filter-actions">
-            <button
-              className="btn btn-secondary"
-              onClick={() => { setPeriod('this_month'); setCustomFrom(''); setCustomTo(''); setPipelineId(undefined); setAgentId(undefined); }}
-            >
-              Clear
-            </button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={byPipeline.length === 0}>
-              <Download size={16} /> Export
-            </button>
+            <button className="btn btn-secondary" onClick={resetFilters}>Clear</button>
+            <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>
@@ -150,7 +143,7 @@ const DealForecastReport = () => {
               </tr>
             </thead>
             <tbody>
-              {byPipeline.map((p) => (
+              {pagedByPipeline.map((p) => (
                 <tr key={`${p.pipelineId}-${p.currency}`}>
                   <td>{p.pipelineName}</td>
                   <td>{p.currency}</td>
@@ -162,6 +155,13 @@ const DealForecastReport = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={byPipeline.length}
+          rowsPerPage={10}
+          onPageChange={setCurrentPage}
+        />
       </ReportStateWrapper>
     </div>
   );

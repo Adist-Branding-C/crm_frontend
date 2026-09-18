@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useWinLossReasons } from '../../../deal-analytics/hooks/useWinLossReasons';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { formatAmountWithCurrency } from '../../../../shared/constants/currencies';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
+import { useTablePagination } from '../../../../shared/hooks/useTablePagination';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+import Pagination from '../../../../shared/components/table/Pagination';
 import type { AnalyticsPeriod } from '../../../deal-analytics/types';
 
 const PERIOD_OPTIONS: { value: AnalyticsPeriod | ''; label: string }[] = [
@@ -16,23 +16,23 @@ const PERIOD_OPTIONS: { value: AnalyticsPeriod | ''; label: string }[] = [
 ];
 
 
+interface DealFilters {
+  period: AnalyticsPeriod | '';
+  pipelineId: number | undefined;
+  agentId: number | undefined;
+}
+
+const INITIAL_FILTERS: DealFilters = { period: '', pipelineId: undefined, agentId: undefined };
+
 const DealWinLossReport = () => {
-  const [period, setPeriod] = useState<AnalyticsPeriod | ''>('');
-  const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
-  const [agentId, setAgentId] = useState<number | undefined>(undefined);
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
   const { pipelineOptions, staffOptions } = useDealReportFilterOptions();
-  const { data, isLoading, isError, error, refetch } = useWinLossReasons({ period: period || undefined, pipelineId, agentId });
+  const { data, isLoading, isError, error, refetch } = useWinLossReasons({ period: appliedFilters.period || undefined, pipelineId: appliedFilters.pipelineId, agentId: appliedFilters.agentId });
 
   const won = data?.won;
   const lost = data?.lost;
   const lostReasons = data?.lostReasons ?? [];
-
-  const handleExport = () => {
-    const headers = ['Lost Reason', 'Count', 'Amount', '% of Lost'];
-    const rows = lostReasons.map((r) => [r.reason, r.count, r.amount, r.percentOfLost]);
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'win_loss_reasons.csv');
-  };
+  const { currentPage, setCurrentPage, totalPages, paginatedData: pagedLostReasons } = useTablePagination(lostReasons);
 
   return (
     <div className="report-content-wrapper with-sidebar">
@@ -42,7 +42,7 @@ const DealWinLossReport = () => {
         <div className="filter-row">
           <div className="filter-group">
             <label>Period</label>
-            <select value={period} onChange={(e) => setPeriod(e.target.value as AnalyticsPeriod | '')}>
+            <select value={filters.period} onChange={(e) => setFilters((f) => ({ ...f, period: e.target.value as AnalyticsPeriod | '' }))}>
               {PERIOD_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -50,7 +50,7 @@ const DealWinLossReport = () => {
           </div>
           <div className="filter-group">
             <label>Pipeline</label>
-            <select value={pipelineId ?? ''} onChange={(e) => setPipelineId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.pipelineId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, pipelineId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Pipelines</option>
               {pipelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -59,7 +59,7 @@ const DealWinLossReport = () => {
           </div>
           <div className="filter-group">
             <label>Agent</label>
-            <select value={agentId ?? ''} onChange={(e) => setAgentId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.agentId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, agentId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Agents</option>
               {staffOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -67,15 +67,8 @@ const DealWinLossReport = () => {
             </select>
           </div>
           <div className="filter-actions">
-            <button
-              className="btn btn-secondary"
-              onClick={() => { setPeriod(''); setPipelineId(undefined); setAgentId(undefined); }}
-            >
-              Clear
-            </button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={lostReasons.length === 0}>
-              <Download size={16} /> Export
-            </button>
+            <button className="btn btn-secondary" onClick={resetFilters}>Clear</button>
+            <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>
@@ -105,7 +98,7 @@ const DealWinLossReport = () => {
               </tr>
             </thead>
             <tbody>
-              {lostReasons.map((r) => (
+              {pagedLostReasons.map((r) => (
                 <tr key={r.reason}>
                   <td>{r.reason === 'UNSPECIFIED' ? 'Unspecified' : r.reason}</td>
                   <td>{r.count}</td>
@@ -116,6 +109,13 @@ const DealWinLossReport = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={lostReasons.length}
+          rowsPerPage={10}
+          onPageChange={setCurrentPage}
+        />
       </ReportStateWrapper>
     </div>
   );

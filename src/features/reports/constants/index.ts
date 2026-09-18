@@ -227,12 +227,3 @@ export const REPT_SORT_OPTIONS = [
   { value: 'dealAmountHigh', label: 'Deal Amount (High-Low)' },
   { value: 'dealAmountLow', label: 'Deal Amount (Low-High)' },
 ];
-
-export const deletedDealData = [
-  { id: 1, dealName: 'TechCorp Deal', deletedBy: 'John Doe', leadName: 'Rahul Sharma', mobile: '9876543210', amount: 50000, status: 'Lost', type: 'Hot Deal', startDate: '2024-01-15', endDate: '2024-02-15', agent: 'John Doe', createdBy: 'Admin', createdAt: '2024-01-10', deletedAt: '2024-01-20', lostReason: 'Not Interested' },
-  { id: 2, dealName: 'Startup Deal', deletedBy: 'Jane Smith', leadName: 'Priya Patel', mobile: '9876543211', amount: 25000, status: 'Lost', type: 'Cold Deal', startDate: '2024-01-14', endDate: '2024-02-14', agent: 'Jane Smith', createdBy: 'Admin', createdAt: '2024-01-09', deletedAt: '2024-01-19', lostReason: 'Price High' },
-  { id: 3, dealName: 'Global Deal', deletedBy: 'Mike Johnson', leadName: 'Amit Kumar', mobile: '9876543212', amount: 75000, status: 'Lost', type: 'Warm Deal', startDate: '2024-01-13', endDate: '2024-02-13', agent: 'Mike Johnson', createdBy: 'Admin', createdAt: '2024-01-08', deletedAt: '2024-01-18', lostReason: 'Budget Issues' },
-  { id: 4, dealName: 'SmallBiz Deal', deletedBy: 'John Doe', leadName: 'Sneha Reddy', mobile: '9876543213', amount: 15000, status: 'Lost', type: 'Cold Deal', startDate: '2024-01-12', endDate: '2024-02-12', agent: 'John Doe', createdBy: 'Admin', createdAt: '2024-01-07', deletedAt: '2024-01-17', lostReason: 'Not Needed' },
-  { id: 5, dealName: 'MegaCorp Deal', deletedBy: 'Jane Smith', leadName: 'Vikram Singh', mobile: '9876543214', amount: 100000, status: 'Lost', type: 'Hot Deal', startDate: '2024-01-11', endDate: '2024-02-11', agent: 'Jane Smith', createdBy: 'Admin', createdAt: '2024-01-06', deletedAt: '2024-01-16', lostReason: 'Competitor' },
-  { id: 6, dealName: 'Enterprise Deal', deletedBy: 'Mike Johnson', leadName: 'Ananya Gupta', mobile: '9876543215', amount: 35000, status: 'Lost', type: 'Warm Deal', startDate: '2024-01-10', endDate: '2024-02-10', agent: 'Mike Johnson', createdBy: 'Admin', createdAt: '2024-01-05', deletedAt: '2024-01-15', lostReason: 'Timeline' },
-];

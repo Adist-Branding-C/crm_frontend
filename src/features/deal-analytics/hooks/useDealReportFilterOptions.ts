@@ -22,6 +22,11 @@ export function useDealReportFilterOptions() {
     [pipelines],
   );
 
+  const defaultPipelineId = useMemo(() => {
+    const defaultPipeline = pipelines.find((p) => p.isDefault);
+    return defaultPipeline ? Number(defaultPipeline.id) : undefined;
+  }, [pipelines]);
+
   const staffOptions = useMemo<DealReportSelectOption[]>(
     () => staff.map((s) => ({ label: s.label, value: Number(s.value) })),
     [staff],
@@ -35,6 +40,7 @@ export function useDealReportFilterOptions() {
 
   return {
     pipelineOptions,
+    defaultPipelineId,
     staffOptions,
     deletedByOptions,
     isLoading: pipelinesLoading || staffLoading,

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useOwnerLeaderboard } from '../../../deal-analytics/hooks/useOwnerLeaderboard';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { formatAmountWithCurrency } from '../../../../shared/constants/currencies';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
+import { useTablePagination } from '../../../../shared/hooks/useTablePagination';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+import Pagination from '../../../../shared/components/table/Pagination';
 import type { AnalyticsPeriod } from '../../../deal-analytics/types';
 
 const PERIOD_OPTIONS: { value: AnalyticsPeriod | ''; label: string }[] = [
@@ -22,19 +22,19 @@ const formatCycle = (seconds: number | null): string => {
 };
 
 
-const DealRepPerformanceReport = () => {
-  const [period, setPeriod] = useState<AnalyticsPeriod | ''>('');
-  const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
-  const { pipelineOptions } = useDealReportFilterOptions();
-  const { data, isLoading, isError, error, refetch } = useOwnerLeaderboard({ period: period || undefined, pipelineId });
-  const rows = data ?? [];
+interface DealFilters {
+  period: AnalyticsPeriod | '';
+  pipelineId: number | undefined;
+}
 
-  const handleExport = () => {
-    const headers = ['Agent', 'Total Deals', 'Won', 'Lost', 'Win Rate', 'Total Value', 'Won Revenue', 'Avg Sales Cycle'];
-    const csvRows = rows.map((r) => [r.agentName, r.totalDeals, r.wonDeals, r.lostDeals, `${r.winRate}%`, r.totalAmount, r.wonAmount, formatCycle(r.avgSalesCycleSeconds)]);
-    const csv = [headers.join(','), ...csvRows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'sales_rep_performance.csv');
-  };
+const INITIAL_FILTERS: DealFilters = { period: '', pipelineId: undefined };
+
+const DealRepPerformanceReport = () => {
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
+  const { pipelineOptions } = useDealReportFilterOptions();
+  const { data, isLoading, isError, error, refetch } = useOwnerLeaderboard({ period: appliedFilters.period || undefined, pipelineId: appliedFilters.pipelineId });
+  const rows = data ?? [];
+  const { currentPage, setCurrentPage, totalPages, paginatedData: pagedRows } = useTablePagination(rows);
 
   return (
     <div className="report-content-wrapper with-sidebar">
@@ -44,7 +44,7 @@ const DealRepPerformanceReport = () => {
         <div className="filter-row">
           <div className="filter-group">
             <label>Period</label>
-            <select value={period} onChange={(e) => setPeriod(e.target.value as AnalyticsPeriod | '')}>
+            <select value={filters.period} onChange={(e) => setFilters((f) => ({ ...f, period: e.target.value as AnalyticsPeriod | '' }))}>
               {PERIOD_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -52,7 +52,7 @@ const DealRepPerformanceReport = () => {
           </div>
           <div className="filter-group">
             <label>Pipeline</label>
-            <select value={pipelineId ?? ''} onChange={(e) => setPipelineId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.pipelineId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, pipelineId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Pipelines</option>
               {pipelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -60,10 +60,8 @@ const DealRepPerformanceReport = () => {
             </select>
           </div>
           <div className="filter-actions">
-            <button className="btn btn-secondary" onClick={() => { setPeriod(''); setPipelineId(undefined); }}>Clear</button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={rows.length === 0}>
-              <Download size={16} /> Export
-            </button>
+            <button className="btn btn-secondary" onClick={resetFilters}>Clear</button>
+            <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>
@@ -84,7 +82,7 @@ const DealRepPerformanceReport = () => {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {pagedRows.map((r) => (
                 <tr key={r.agentId}>
                   <td>{r.agentName}</td>
                   <td>{r.totalDeals}</td>
@@ -99,6 +97,13 @@ const DealRepPerformanceReport = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={rows.length}
+          rowsPerPage={10}
+          onPageChange={setCurrentPage}
+        />
       </ReportStateWrapper>
     </div>
   );

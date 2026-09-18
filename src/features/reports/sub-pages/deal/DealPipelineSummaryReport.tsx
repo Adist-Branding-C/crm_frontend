@@ -1,36 +1,23 @@
 import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useStageFunnel } from '../../../deal-analytics/hooks/useStageFunnel';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { formatAmountWithCurrency } from '../../../../shared/constants/currencies';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
+import { useTablePagination } from '../../../../shared/hooks/useTablePagination';
+import Pagination from '../../../../shared/components/table/Pagination';
 import '../../../dashboard/components/widgets/WidgetStyles.css';
 
 
 const DealPipelineSummaryReport = () => {
   const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
   const { data, isLoading, isError, error, refetch } = useStageFunnel(pipelineId);
-  const { pipelineOptions } = useDealReportFilterOptions();
+  const { pipelineOptions, defaultPipelineId } = useDealReportFilterOptions();
 
   const stages = data?.stages ?? [];
   const totalValue = stages.reduce((sum, s) => sum + Number(s.amount), 0);
   const totalCount = stages.reduce((sum, s) => sum + s.count, 0);
-
-  const handleExport = () => {
-    const headers = ['Stage', 'Outcome', 'Probability %', 'Deal Count', 'Pipeline Value', '% of Total Value'];
-    const rows = stages.map((s) => [
-      s.stageName,
-      s.outcome,
-      s.probability,
-      s.count,
-      s.amount,
-      totalValue > 0 ? ((Number(s.amount) / totalValue) * 100).toFixed(2) : '0',
-    ]);
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'pipeline_summary.csv');
-  };
+  const { currentPage, setCurrentPage, totalPages, paginatedData: pagedStages } = useTablePagination(stages);
 
   return (
     <div className="report-content-wrapper with-sidebar">
@@ -41,10 +28,9 @@ const DealPipelineSummaryReport = () => {
           <div className="filter-group" style={{ maxWidth: '280px' }}>
             <label>Pipeline</label>
             <select
-              value={pipelineId ?? ''}
+              value={pipelineId ?? defaultPipelineId ?? ''}
               onChange={(e) => setPipelineId(e.target.value ? Number(e.target.value) : undefined)}
             >
-              <option value="">Default Pipeline</option>
               {pipelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -52,9 +38,6 @@ const DealPipelineSummaryReport = () => {
           </div>
           <div className="filter-actions">
             <button className="btn btn-secondary" onClick={() => setPipelineId(undefined)}>Clear</button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={stages.length === 0}>
-              <Download size={16} /> Export
-            </button>
           </div>
         </div>
       </div>
@@ -88,7 +71,7 @@ const DealPipelineSummaryReport = () => {
               </tr>
             </thead>
             <tbody>
-              {stages.map((s) => (
+              {pagedStages.map((s) => (
                 <tr key={s.stageId}>
                   <td>{s.stageName}</td>
                   <td>{s.outcome}</td>
@@ -101,6 +84,13 @@ const DealPipelineSummaryReport = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={stages.length}
+          rowsPerPage={10}
+          onPageChange={setCurrentPage}
+        />
       </ReportStateWrapper>
     </div>
   );

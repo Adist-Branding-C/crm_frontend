@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useVelocity } from '../../../deal-analytics/hooks/useVelocity';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { useDealPipelineDetail } from '../../../deal-pipeline-builder/hooks/useDealPipelineDetail';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
+import { useTablePagination } from '../../../../shared/hooks/useTablePagination';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+import Pagination from '../../../../shared/components/table/Pagination';
 import type { AnalyticsPeriod } from '../../../deal-analytics/types';
 
 const PERIOD_OPTIONS: { value: AnalyticsPeriod | ''; label: string }[] = [
@@ -54,29 +54,29 @@ const StageSelect = ({
 };
 
 
+interface DealFilters {
+  period: AnalyticsPeriod | '';
+  pipelineId: number | undefined;
+  agentId: number | undefined;
+  stageId: number | undefined;
+}
+
+const INITIAL_FILTERS: DealFilters = { period: '', pipelineId: undefined, agentId: undefined, stageId: undefined };
+
 const DealVelocityReport = () => {
-  const [period, setPeriod] = useState<AnalyticsPeriod | ''>('');
-  const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
-  const [agentId, setAgentId] = useState<number | undefined>(undefined);
-  const [stageId, setStageId] = useState<number | undefined>(undefined);
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
   const { pipelineOptions, staffOptions } = useDealReportFilterOptions();
   const { data, isLoading, isError, error, refetch } = useVelocity({
-    period: period || undefined,
-    pipelineId,
-    agentId,
-    stageId,
+    period: appliedFilters.period || undefined,
+    pipelineId: appliedFilters.pipelineId,
+    agentId: appliedFilters.agentId,
+    stageId: appliedFilters.stageId,
   });
 
   const stages = data?.stages ?? [];
   const cycleTime = data?.cycleTime ?? [];
   const maxDuration = Math.max(1, ...stages.map((s) => s.avgDurationSeconds));
-
-  const handleExport = () => {
-    const headers = ['Stage', 'Avg. Time in Stage', 'Occupancies'];
-    const rows = stages.map((s) => [s.stageName, formatDuration(s.avgDurationSeconds), s.occupancyCount]);
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'deal_velocity.csv');
-  };
+  const { currentPage, setCurrentPage, totalPages, paginatedData: pagedStages } = useTablePagination(stages);
 
   return (
     <div className="report-content-wrapper with-sidebar">
@@ -86,7 +86,7 @@ const DealVelocityReport = () => {
         <div className="filter-row">
           <div className="filter-group">
             <label>Period</label>
-            <select value={period} onChange={(e) => setPeriod(e.target.value as AnalyticsPeriod | '')}>
+            <select value={filters.period} onChange={(e) => setFilters((f) => ({ ...f, period: e.target.value as AnalyticsPeriod | '' }))}>
               {PERIOD_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -95,11 +95,11 @@ const DealVelocityReport = () => {
           <div className="filter-group">
             <label>Pipeline</label>
             <select
-              value={pipelineId ?? ''}
+              value={filters.pipelineId ?? ''}
               onChange={(e) => {
                 const next = e.target.value ? Number(e.target.value) : undefined;
-                setPipelineId(next);
-                setStageId(undefined); // stage belongs to the previous pipeline - reset
+                // stage belongs to the previous pipeline - reset it alongside
+                setFilters((f) => ({ ...f, pipelineId: next, stageId: undefined }));
               }}
             >
               <option value="">All Pipelines</option>
@@ -108,12 +108,16 @@ const DealVelocityReport = () => {
               ))}
             </select>
           </div>
-          {pipelineId !== undefined && (
-            <StageSelect pipelineId={pipelineId} value={stageId} onChange={setStageId} />
+          {filters.pipelineId !== undefined && (
+            <StageSelect
+              pipelineId={filters.pipelineId}
+              value={filters.stageId}
+              onChange={(stageId) => setFilters((f) => ({ ...f, stageId }))}
+            />
           )}
           <div className="filter-group">
             <label>Agent</label>
-            <select value={agentId ?? ''} onChange={(e) => setAgentId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.agentId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, agentId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Agents</option>
               {staffOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -121,15 +125,10 @@ const DealVelocityReport = () => {
             </select>
           </div>
           <div className="filter-actions">
-            <button
-              className="btn btn-secondary"
-              onClick={() => { setPeriod(''); setPipelineId(undefined); setAgentId(undefined); setStageId(undefined); }}
-            >
+            <button className="btn btn-secondary" onClick={resetFilters}>
               Clear
             </button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={stages.length === 0}>
-              <Download size={16} /> Export
-            </button>
+            <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>
@@ -158,7 +157,7 @@ const DealVelocityReport = () => {
               </tr>
             </thead>
             <tbody>
-              {stages.map((s) => (
+              {pagedStages.map((s) => (
                 <tr key={s.stageId}>
                   <td>{s.stageName}</td>
                   <td>
@@ -182,6 +181,13 @@ const DealVelocityReport = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={stages.length}
+          rowsPerPage={10}
+          onPageChange={setCurrentPage}
+        />
       </ReportStateWrapper>
     </div>
   );

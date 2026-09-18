@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useSizeDistribution } from '../../../deal-analytics/hooks/useSizeDistribution';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { formatAmountWithCurrency, CURRENCY_OPTIONS, DEFAULT_CURRENCY } from '../../../../shared/constants/currencies';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
+import { useTablePagination } from '../../../../shared/hooks/useTablePagination';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+import Pagination from '../../../../shared/components/table/Pagination';
 import type { AnalyticsPeriod } from '../../../deal-analytics/types';
 
 const TIER_LABEL: Record<string, string> = {
@@ -22,30 +22,30 @@ const PERIOD_OPTIONS: { value: AnalyticsPeriod | ''; label: string }[] = [
 ];
 
 
-const DealSizeDistributionReport = () => {
-  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
-  const [period, setPeriod] = useState<AnalyticsPeriod | ''>('');
-  const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
-  const { pipelineOptions } = useDealReportFilterOptions();
-  const { data, isLoading, isError, error, refetch } = useSizeDistribution({ currency, period: period || undefined, pipelineId });
-  const tiers = data?.tiers ?? [];
+interface DealFilters {
+  currency: string;
+  period: AnalyticsPeriod | '';
+  pipelineId: number | undefined;
+}
 
-  const handleExport = () => {
-    const headers = ['Tier', 'Count', '% of Total', 'Total Value', 'Won Revenue', 'Avg Value', 'Win Rate'];
-    const rows = tiers.map((t) => [TIER_LABEL[t.tier] ?? t.tier, t.count, t.percentOfTotal, t.totalAmount, t.wonAmount, t.avgAmount, t.winRate]);
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'deal_size_distribution.csv');
-  };
+const INITIAL_FILTERS: DealFilters = { currency: DEFAULT_CURRENCY, period: '', pipelineId: undefined };
+
+const DealSizeDistributionReport = () => {
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
+  const { pipelineOptions } = useDealReportFilterOptions();
+  const { data, isLoading, isError, error, refetch } = useSizeDistribution({ currency: appliedFilters.currency, period: appliedFilters.period || undefined, pipelineId: appliedFilters.pipelineId });
+  const tiers = data?.tiers ?? [];
+  const { currentPage, setCurrentPage, totalPages, paginatedData: pagedTiers } = useTablePagination(tiers);
 
   return (
     <div className="report-content-wrapper with-sidebar">
-      <PageHeader title="Deal Size & Value Distribution" description={`Distribution of deals by value tier (${data?.currency ?? currency})`} breadcrumb={false} />
+      <PageHeader title="Deal Size & Value Distribution" description={`Distribution of deals by value tier (${data?.currency ?? appliedFilters.currency})`} breadcrumb={false} />
 
       <div className="filters-panel">
         <div className="filter-row">
           <div className="filter-group">
             <label>Currency</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
+            <select value={filters.currency} onChange={(e) => setFilters((f) => ({ ...f, currency: e.target.value }))}>
               {CURRENCY_OPTIONS.map((opt) => (
                 <option key={opt.code} value={opt.code}>{opt.code}</option>
               ))}
@@ -53,7 +53,7 @@ const DealSizeDistributionReport = () => {
           </div>
           <div className="filter-group">
             <label>Period</label>
-            <select value={period} onChange={(e) => setPeriod(e.target.value as AnalyticsPeriod | '')}>
+            <select value={filters.period} onChange={(e) => setFilters((f) => ({ ...f, period: e.target.value as AnalyticsPeriod | '' }))}>
               {PERIOD_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -61,7 +61,7 @@ const DealSizeDistributionReport = () => {
           </div>
           <div className="filter-group">
             <label>Pipeline</label>
-            <select value={pipelineId ?? ''} onChange={(e) => setPipelineId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.pipelineId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, pipelineId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Pipelines</option>
               {pipelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -69,20 +69,13 @@ const DealSizeDistributionReport = () => {
             </select>
           </div>
           <div className="filter-actions">
-            <button
-              className="btn btn-secondary"
-              onClick={() => { setCurrency(DEFAULT_CURRENCY); setPeriod(''); setPipelineId(undefined); }}
-            >
-              Clear
-            </button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={tiers.length === 0}>
-              <Download size={16} /> Export
-            </button>
+            <button className="btn btn-secondary" onClick={resetFilters}>Clear</button>
+            <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>
 
-      <ReportStateWrapper isLoading={isLoading} isError={isError} error={error} onRetry={refetch} isEmpty={!isLoading && !isError && tiers.length === 0} emptyMessage={`No deals in ${currency} for this period`}>
+      <ReportStateWrapper isLoading={isLoading} isError={isError} error={error} onRetry={refetch} isEmpty={!isLoading && !isError && tiers.length === 0} emptyMessage={`No deals in ${appliedFilters.currency} for this period`}>
         <div style={{ display: 'flex', gap: '2rem', margin: '1rem 0' }}>
           {tiers.map((t) => (
             <div key={t.tier}>
@@ -106,7 +99,7 @@ const DealSizeDistributionReport = () => {
               </tr>
             </thead>
             <tbody>
-              {tiers.map((t) => (
+              {pagedTiers.map((t) => (
                 <tr key={t.tier}>
                   <td>{TIER_LABEL[t.tier] ?? t.tier}</td>
                   <td>{t.count}</td>
@@ -120,6 +113,13 @@ const DealSizeDistributionReport = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={tiers.length}
+          rowsPerPage={10}
+          onPageChange={setCurrentPage}
+        />
       </ReportStateWrapper>
     </div>
   );

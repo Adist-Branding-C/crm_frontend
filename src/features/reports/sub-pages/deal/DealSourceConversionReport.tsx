@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
 import ReportStateWrapper from '../../components/ReportStateWrapper';
 import { useSourceConversion } from '../../../deal-analytics/hooks/useSourceConversion';
 import { useDealReportFilterOptions } from '../../../deal-analytics/hooks/useDealReportFilterOptions';
 import { useSourceOptions } from '../../../deal-analytics/hooks/useSourceOptions';
 import { formatAmountWithCurrency } from '../../../../shared/constants/currencies';
-import { triggerBlobDownload } from '../../../../shared/utils/blobDownload.util';
+import { useTablePagination } from '../../../../shared/hooks/useTablePagination';
+import { useFilterState } from '../../../../shared/hooks/useFilterState';
+import Pagination from '../../../../shared/components/table/Pagination';
 import type { AnalyticsPeriod } from '../../../deal-analytics/types';
 
 const PERIOD_OPTIONS: { value: AnalyticsPeriod | ''; label: string }[] = [
@@ -17,26 +17,26 @@ const PERIOD_OPTIONS: { value: AnalyticsPeriod | ''; label: string }[] = [
 ];
 
 
+interface DealFilters {
+  period: AnalyticsPeriod | '';
+  pipelineId: number | undefined;
+  sourceId: string;
+}
+
+const INITIAL_FILTERS: DealFilters = { period: '', pipelineId: undefined, sourceId: '' };
+
 const DealSourceConversionReport = () => {
-  const [period, setPeriod] = useState<AnalyticsPeriod | ''>('');
-  const [pipelineId, setPipelineId] = useState<number | undefined>(undefined);
-  const [sourceId, setSourceId] = useState('');
+  const { filters, setFilters, appliedFilters, applyFilters, resetFilters } = useFilterState<DealFilters>(INITIAL_FILTERS);
   const { pipelineOptions } = useDealReportFilterOptions();
   const { sourceOptions, isLoading: sourceOptionsLoading } = useSourceOptions();
 
   const { data, isLoading, isError, error, refetch } = useSourceConversion({
-    period: period || undefined,
-    pipelineId,
-    sourceIds: sourceId || undefined,
+    period: appliedFilters.period || undefined,
+    pipelineId: appliedFilters.pipelineId,
+    sourceIds: appliedFilters.sourceId || undefined,
   });
   const rows = data ?? [];
-
-  const handleExport = () => {
-    const headers = ['Source', 'Total Deals', 'Won', 'Lost', 'Conversion Rate', 'Total Value', 'Won Revenue', 'Avg Deal Value'];
-    const csvRows = rows.map((r) => [r.sourceName, r.total, r.won, r.lost, `${r.conversionRate}%`, r.totalAmount, r.wonAmount, r.avgDealValue]);
-    const csv = [headers.join(','), ...csvRows.map((r) => r.join(','))].join('\n');
-    triggerBlobDownload(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'conversion_by_source.csv');
-  };
+  const { currentPage, setCurrentPage, totalPages, paginatedData: pagedRows } = useTablePagination(rows);
 
   return (
     <div className="report-content-wrapper with-sidebar">
@@ -46,7 +46,7 @@ const DealSourceConversionReport = () => {
         <div className="filter-row">
           <div className="filter-group">
             <label>Period</label>
-            <select value={period} onChange={(e) => setPeriod(e.target.value as AnalyticsPeriod | '')}>
+            <select value={filters.period} onChange={(e) => setFilters((f) => ({ ...f, period: e.target.value as AnalyticsPeriod | '' }))}>
               {PERIOD_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -54,7 +54,7 @@ const DealSourceConversionReport = () => {
           </div>
           <div className="filter-group">
             <label>Pipeline</label>
-            <select value={pipelineId ?? ''} onChange={(e) => setPipelineId(e.target.value ? Number(e.target.value) : undefined)}>
+            <select value={filters.pipelineId ?? ''} onChange={(e) => setFilters((f) => ({ ...f, pipelineId: e.target.value ? Number(e.target.value) : undefined }))}>
               <option value="">All Pipelines</option>
               {pipelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -63,7 +63,7 @@ const DealSourceConversionReport = () => {
           </div>
           <div className="filter-group">
             <label>Source</label>
-            <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} disabled={sourceOptionsLoading}>
+            <select value={filters.sourceId} onChange={(e) => setFilters((f) => ({ ...f, sourceId: e.target.value }))} disabled={sourceOptionsLoading}>
               <option value="">Select</option>
               {sourceOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -71,15 +71,8 @@ const DealSourceConversionReport = () => {
             </select>
           </div>
           <div className="filter-actions">
-            <button
-              className="btn btn-secondary"
-              onClick={() => { setPeriod(''); setPipelineId(undefined); setSourceId(''); }}
-            >
-              Clear
-            </button>
-            <button className="btn btn-primary" onClick={handleExport} disabled={rows.length === 0}>
-              <Download size={16} /> Export
-            </button>
+            <button className="btn btn-secondary" onClick={resetFilters}>Clear</button>
+            <button className="btn btn-primary" onClick={applyFilters}>Apply Filters</button>
           </div>
         </div>
       </div>
@@ -100,7 +93,7 @@ const DealSourceConversionReport = () => {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {pagedRows.map((r) => (
                 <tr key={r.sourceId ?? 'unknown'}>
                   <td>{r.sourceName}</td>
                   <td>{r.total}</td>
@@ -115,6 +108,13 @@ const DealSourceConversionReport = () => {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={rows.length}
+          rowsPerPage={10}
+          onPageChange={setCurrentPage}
+        />
       </ReportStateWrapper>
     </div>
   );
