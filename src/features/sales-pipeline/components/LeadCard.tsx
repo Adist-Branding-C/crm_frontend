@@ -1,23 +1,32 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { Phone, Calendar } from 'lucide-react';
+import { Phone, Calendar, Loader2 } from 'lucide-react';
 import { formatDate } from '../../../shared/utils/dateUtils';
 import { hashStringToColor } from '../utils/pipelineColor.util';
 import type { LeadCardProps } from '../types';
 
-const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId }) => {
+const LeadCard: React.FC<LeadCardProps> = ({ lead, fromStatusId, onLeadClick, isOpening }) => {
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id: `lead-${lead.id}`,
     data: { type: 'lead', lead, fromStatusId },
   });
 
+  const handleClick = () => {
+    if (isDragging || !onLeadClick) return;
+    onLeadClick(lead);
+  };
+
   return (
     <div
       ref={setNodeRef}
-      className={`deal-card${isDragging ? ' deal-card--dragging' : ''}`}
+      className={`deal-card${isDragging ? ' deal-card--dragging' : ''}${onLeadClick ? ' deal-card--clickable' : ''}`}
       {...attributes}
       {...listeners}
+      onClick={handleClick}
     >
+      {isOpening && (
+        <div className="deal-card__opening"><Loader2 size={14} className="spin" /></div>
+      )}
 <div className="deal-title">{lead.name}</div>
       <div className="deal-value">
         <Phone size={14} />
