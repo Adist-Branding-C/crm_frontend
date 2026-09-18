@@ -281,8 +281,7 @@
   color: #fff;
 }
 
-/* Delete Modal */
-.modal-overlay {
+.workflow-delete-overlay.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -295,7 +294,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.workflow-delete-modal.modal-content {
   background: var(--bg-card);
   border-radius: 8px;
   width: 100%;
@@ -303,7 +302,7 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-.modal-header {
+.workflow-delete-modal .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -311,12 +310,13 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.modal-header h3 {
+.workflow-delete-modal .modal-header h3 {
   margin: 0;
   font-size: 1rem;
+  color: var(--text-main);
 }
 
-.modal-close {
+.workflow-delete-modal .modal-close {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -329,41 +329,43 @@
   color: var(--text-muted);
 }
 
-.modal-close:hover {
+.workflow-delete-modal .modal-close:hover {
   background: var(--border-color);
 }
 
-.modal-body {
+.workflow-delete-modal .modal-body {
   padding: 1.25rem;
 }
 
-.delete-warning {
+.workflow-delete-modal .delete-warning {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: #fef3c7;
+  background: var(--danger-subtle);
   border-radius: 6px;
-  color: #92400e;
+  color: var(--danger-text);
   margin-bottom: 1rem;
 }
 
-.delete-warning p {
+.workflow-delete-modal .delete-warning p {
   margin: 0;
   font-size: 0.875rem;
+  color: var(--danger-text);
 }
 
-.delete-message {
+.workflow-delete-modal .delete-message {
   font-size: 0.875rem;
-  color: var(--text-muted);
+  color: var(--text-main);
   margin-bottom: 1.5rem;
 }
 
-.delete-message strong {
+.workflow-delete-modal .delete-message strong {
   color: var(--text-main);
+  font-weight: 600;
 }
 
-.modal-actions {
+.workflow-delete-modal .modal-actions {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
@@ -499,6 +501,7 @@
     opacity: 0;
     transform: translateY(1rem);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -540,14 +543,14 @@
   background-color: white;
   transition: 0.3s;
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.toggle-switch input:checked + .toggle-slider {
+.toggle-switch input:checked+.toggle-slider {
   background-color: #22c55e;
 }
 
-.toggle-switch input:checked + .toggle-slider:before {
+.toggle-switch input:checked+.toggle-slider:before {
   transform: translateX(22px);
 }
 
@@ -691,7 +694,7 @@
   align-items: flex-start;
 }
 
-.mapping-row--builder > select:first-child {
+.mapping-row--builder>select:first-child {
   flex: 0 0 180px;
 }
 
