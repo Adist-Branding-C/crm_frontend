@@ -8,6 +8,21 @@
 @import '../../../shared/styles/modals.css';
 @import '../../../shared/styles/stat-cards.css';
 @import '../../../shared/styles/forms.css';
+
+/* .enquiries-table's `td:first-child { text-align: center; width: 50px }`
+   rule exists for tables whose first column is a checkbox or a narrow "#"
+   row-number - correct there, but every Deal Report table's first column is
+   a real label (Stage, Source, Agent, Tier...), so that rule was squashing
+   it into a centered 50px box and fighting any column-width the table
+   itself declares. Opt out via `.deal-report-table` on the <table> element.
+   Two classes on the selector so this reliably outweighs the original rule
+   regardless of CSS import order. Export History's table is intentionally
+   NOT given this class - its first column genuinely is a "#" row number. */
+.enquiries-table.deal-report-table td:first-child {
+  text-align: left;
+  width: auto;
+}
+
 .report-tabs {
   display: flex;
   gap: 0.25rem;
