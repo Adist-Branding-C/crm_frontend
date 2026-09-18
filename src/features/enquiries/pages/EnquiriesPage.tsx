@@ -90,7 +90,7 @@ const EnquiriesPage = () => {
     const paramSearch = searchParams.get('search') ?? '';
     if (lastSearchParamRef.current === paramSearch) return;
     lastSearchParamRef.current = paramSearch;
-    leadSearch.setSearchQuery(paramSearch);
+    leadSearch.syncSearchQuery(paramSearch);
     pagination.resetPage();
     crud.fetchLeads(1, rowsPerPageRef.current, paramSearch, activeFiltersRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
