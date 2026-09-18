@@ -1,3 +1,5 @@
+import type { RepeatType, RepeatConfig } from '../../task/types/interface';
+
 export interface CallTaskItem {
   id: number;
   title: string;
@@ -22,4 +24,11 @@ export interface CallTaskItem {
   } | null;
   priority: string;
   status: string;
+  workflowId?: number;
+  stageId?: number;
+  workflowName?: string | null;
+  stageName?: string | null;
+  stageColor?: string | null;
+  repeatType?: RepeatType;
+  repeatConfig?: RepeatConfig;
 }

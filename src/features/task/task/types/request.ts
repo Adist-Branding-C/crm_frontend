@@ -1,3 +1,5 @@
+import type { RepeatType } from './interface';
+
 export interface TaskFormData {
   title: string;
   description: string;
@@ -8,6 +10,13 @@ export interface TaskFormData {
   leadId: string;
   priority: string;
   status: string;
+  workflowId?: string;
+  stageId?: string;
+  repeatType?: RepeatType;
+  repeatConfig?: {
+    dayOfWeek?: number;
+    dayOfMonth?: number | 'last';
+  } | undefined;
 }
 
 export interface TaskFormDataUpdate {
@@ -20,4 +29,9 @@ export interface TaskFormDataUpdate {
   leadId?: string;
   priority?: string;
   status?: string;
+  repeatType?: RepeatType;
+  repeatConfig?: {
+    dayOfWeek?: number;
+    dayOfMonth?: number | 'last';
+  } | undefined;
 }

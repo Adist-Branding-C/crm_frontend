@@ -1,3 +1,11 @@
+import { RepeatType } from '../../common/constants/taskEnums';
+export { RepeatType } from '../../common/constants/taskEnums';
+
+export interface RepeatConfig {
+  dayOfWeek?: number;
+  dayOfMonth?: number | 'last';
+}
+
 export interface TaskItem {
   id: number;
   title: string;
@@ -22,4 +30,11 @@ export interface TaskItem {
   } | null;
   priority: string;
   status: string;
+  workflowId?: number;
+  stageId?: number;
+  workflowName?: string | null;
+  stageName?: string | null;
+  stageColor?: string | null;
+  repeatType?: RepeatType;
+  repeatConfig?: RepeatConfig;
 }

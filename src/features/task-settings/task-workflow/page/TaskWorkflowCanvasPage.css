@@ -1,0 +1,10 @@
+.task-canvas-header-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.task-canvas-instructions {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+}

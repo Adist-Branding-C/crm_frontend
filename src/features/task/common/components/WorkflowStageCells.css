@@ -1,0 +1,19 @@
+/* Workflow + Stage table cells — stage name sits beside its colour dot */
+
+.stage-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.stage-cell__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cell-muted {
+  color: var(--text-disabled);
+}

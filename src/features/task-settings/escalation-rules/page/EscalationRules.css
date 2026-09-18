@@ -1,0 +1,318 @@
+@import '../../../../shared/styles/tables.css';
+@import '../../../../shared/styles/buttons.css';
+@import '../../../../shared/styles/badges.css';
+@import '../../../../shared/styles/pagination.css';
+@import '../../../../shared/styles/forms.css';
+@import '../../../../shared/styles/drawers.css';
+@import '../../../../shared/styles/modals.css';
+@import '../../../../shared/styles/dropdowns.css';
+@import '../../../../shared/styles/sidebar-layout.css';
+
+.task-settings-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.escalation-rules-wrapper {
+  max-width: 1100px;
+}
+
+/*
+ * Five columns, anchored by the header labels: Priority | Notify After |
+ * Recipients | Channels | (Save). Each section gets its own grid cell so
+ * checkboxes, inputs and buttons never overlap.
+ */
+.escalation-rules-head,
+.escalation-rule-row {
+  display: grid;
+  grid-template-columns: 120px minmax(240px, 1.3fr) minmax(180px, 1fr) minmax(180px, 1fr) 120px;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.escalation-rules-head {
+  padding: 0 1.25rem 0.5rem;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.escalation-rule-row {
+  padding: 1.125rem 1.25rem;
+  margin-bottom: 0.875rem;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  background-color: var(--surface-1);
+  box-shadow: var(--shadow-card);
+}
+
+.escalation-rule-row__cell {
+  min-width: 0;
+}
+
+/* ---- Priority ---- */
+.escalation-priority-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: var(--leading-normal);
+  white-space: nowrap;
+}
+
+.escalation-priority-badge--high {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-text);
+}
+
+.escalation-priority-badge--medium {
+  background-color: rgba(251, 191, 36, 0.12);
+  color: var(--warning-text);
+}
+
+.escalation-priority-badge--low {
+  background-color: rgba(107, 114, 128, 0.12);
+  color: var(--text-tertiary);
+}
+
+/* ---- Notify After ---- */
+.escalation-rule-row__label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.escalation-rule-row__duration-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.escalation-rule-row__amount {
+  width: 104px;
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--border-radius-md);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  background: var(--surface-2);
+  outline: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.escalation-rule-row__amount:hover:not(:focus) {
+  border-color: var(--border-strong);
+}
+
+.escalation-rule-row__amount:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.escalation-rule-row__amount.input-error {
+  border-color: var(--danger);
+}
+
+.escalation-rule-row__unit {
+  flex: 1;
+  min-width: 128px;
+}
+
+/* ---- Notify: Recipients / Channels groups ---- */
+
+.escalation-rule-row__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.escalation-rule-row__group-label {
+  margin-bottom: 0.25rem;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.escalation-rule-row__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.escalation-rule-row__checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.escalation-rule-row__lock-icon {
+  color: currentColor;
+}
+
+/* Custom checkbox - the native control is hidden and replaced with a styled
+   box (gray border, brand-red fill + white check when checked) so it renders
+   consistently instead of a 16px accent-tinted native box. */
+.escalation-rule-row__checkbox input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--border-radius-xs);
+  background-color: var(--surface-1);
+  cursor: pointer;
+  position: relative;
+}
+
+.escalation-rule-row__checkbox input[type='checkbox']:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.escalation-rule-row__checkbox input[type='checkbox']:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.escalation-rule-row__checkbox input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 6.5px;
+  top: 4.5px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--text-on-accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.escalation-rule-row__checkbox input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* Assignee is always notified: checked + disabled, rendered as a deliberate
+   locked state (gray box + white check + lock cue + muted label) rather than a
+   faded input. */
+.escalation-rule-row__checkbox--locked {
+  cursor: default;
+  color: var(--text-tertiary);
+}
+
+.escalation-rule-row__checkbox--locked input[type='checkbox'] {
+  background-color: var(--surface-2);
+  border-color: var(--border-strong);
+  cursor: default;
+}
+
+.escalation-rule-row__checkbox--locked input[type='checkbox']:checked {
+  background-color: var(--text-disabled);
+  border-color: var(--text-disabled);
+}
+
+.escalation-rule-row__checkbox input[type='checkbox']:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+/* ---- Actions / Save ---- */
+.escalation-rule-row__actions {
+  text-align: right;
+}
+
+.escalation-rule-row__actions .btn {
+  min-width: 96px;
+  height: 40px;
+}
+
+/* Genuinely disabled look for "no unsaved changes" — replace the shared
+   faded-opacity style with a flat gray surface so it reads as disabled rather
+   than a washed-out primary. pointer-events stay on so the tooltip shows. */
+.escalation-rule-row__save--idle,
+.escalation-rule-row__save--idle:hover {
+  background-color: var(--surface-2);
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* While saving the button stays solid primary (spinner cues progress) but is
+   still non-interactive; only reset the shared washed-out disabled opacity. */
+.escalation-rule-row__actions .btn:disabled,
+.escalation-rule-row__actions .btn[aria-disabled='true'] {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: not-allowed;
+}
+
+/* ---- Loading / empty ---- */
+.escalation-rules-loading,
+.escalation-rules-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: var(--text-tertiary);
+}
+
+.field-error-text {
+  display: block;
+  color: var(--danger-text);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Tablet: reduce gaps and let columns flex tighter before the full mobile stack. */
+@media (max-width: 1024px) {
+  .escalation-rules-head,
+  .escalation-rule-row {
+    grid-template-columns: 100px minmax(180px, 1.1fr) minmax(140px, 1fr) minmax(140px, 1fr) 100px;
+    gap: 0.75rem;
+  }
+
+  .escalation-rule-row {
+    padding: 1rem;
+  }
+}
+
+/* Below the desktop grid's comfortable floor (~900px viewport -> wrapper below
+   856px) the rows stack as one column per field instead of five. */
+@media (max-width: 900px) {
+  .escalation-rules-head {
+    display: none;
+  }
+
+  .escalation-rule-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .escalation-rule-row__actions {
+    text-align: left;
+  }
+}

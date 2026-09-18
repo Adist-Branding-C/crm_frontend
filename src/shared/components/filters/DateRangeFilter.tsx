@@ -19,7 +19,7 @@ interface DateRangeFilterProps {
 const DateRangeFilter = ({ label, idPrefix, value, onChange }: DateRangeFilterProps) => {
   const labelId = `${idPrefix}-label`;
   return (
-    <div className="filter-group">
+    <div className="filter-group date-range-filter-group">
       <label id={labelId}>{label}</label>
       <div className="date-range-input" role="group" aria-labelledby={labelId}>
         <input

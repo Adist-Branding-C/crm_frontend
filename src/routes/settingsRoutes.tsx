@@ -22,6 +22,9 @@ import TaskCategoryPage from '../features/task-settings/task-category/page/TaskC
 import CallStatusPage from '../features/task-settings/call-status/page/CallStatus';
 import CallReasonPage from '../features/task-settings/call-reason/page/CallReason';
 import MeetingOutcomePage from '../features/task-settings/meeting-outcome/pages/MeetingOutcome';
+import TaskWorkflowPage from '../features/task-settings/task-workflow/page/TaskWorkflow';
+import TaskWorkflowCanvasPage from '../features/task-settings/task-workflow/page/TaskWorkflowCanvasPage';
+import EscalationRulesPage from '../features/task-settings/escalation-rules/page/EscalationRulesPage';
 
 export default (
   <>
@@ -44,10 +47,16 @@ export default (
       <Route path="call_reasons" element={<CallReasonPage />} />
       <Route path="meeting_outcome" element={<MeetingOutcomePage />} />
       <Route path="task_categories" element={<TaskCategoryPage />} />
+      <Route path="task_workflows" element={<TaskWorkflowPage />} />
+      <Route path="task_workflows/:workflowId" element={<TaskWorkflowCanvasPage />} />
+      <Route path="escalation_rules" element={<EscalationRulesPage />} />
     </Route>
     <Route path="user/call_status" element={<ErrorBoundary><CallStatusPage /></ErrorBoundary>} />
     <Route path="user/call_reasons" element={<ErrorBoundary><CallReasonPage /></ErrorBoundary>} />
     <Route path="user/meeting_outcome" element={<ErrorBoundary><MeetingOutcomePage /></ErrorBoundary>} />
     <Route path="user/task_categories" element={<ErrorBoundary><TaskCategoryPage /></ErrorBoundary>} />
+    <Route path="user/task_workflows" element={<ErrorBoundary><TaskWorkflowPage /></ErrorBoundary>} />
+    <Route path="user/task_workflows/:workflowId" element={<ErrorBoundary><TaskWorkflowCanvasPage /></ErrorBoundary>} />
+    <Route path="user/escalation_rules" element={<ErrorBoundary><EscalationRulesPage /></ErrorBoundary>} />
   </>
 );

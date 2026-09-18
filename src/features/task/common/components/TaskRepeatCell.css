@@ -1,0 +1,5 @@
+/* Repeat table cell — recurrence badge for recurring tasks, muted dash otherwise */
+
+.cell-muted {
+  color: var(--text-disabled);
+}

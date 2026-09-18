@@ -1,10 +1,11 @@
+import { RepeatType } from '../../common/constants/taskEnums';
+
 /**
- * Blank form values for the Add Task drawer, and the fallback used by
- * `TaskMapper.toFormValues` when there's no editing item yet.
+ * Blank form values for a new Task, used by the calendar's useCalendarAddTask to seed
+ * the add-task form for a chosen date.
  *
  * Used by:
- * - TaskPage (Add drawer initial values)
- * - TaskMapper.toFormValues
+ * - useCalendarAddTask (calendar feature).
  */
 export const ADD_TASK_INITIAL_VALUES = {
   title: '',
@@ -16,4 +17,6 @@ export const ADD_TASK_INITIAL_VALUES = {
   leadId: '',
   priority: '',
   status: '',
+  repeatType: RepeatType.NEVER,
+  repeatConfig: undefined as { dayOfWeek?: number; dayOfMonth?: number | 'last' } | undefined,
 };

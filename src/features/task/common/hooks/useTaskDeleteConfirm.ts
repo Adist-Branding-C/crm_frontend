@@ -6,8 +6,7 @@ import { useDeleteConfirmation } from '../../../../shared/hooks/useDeleteConfirm
  * delete handler with the id extraction every task list's delete flow needs.
  *
  * Used by:
- * - useTaskDeleteConfirm (task), useCallTaskDeleteConfirm, useCampaignTaskDeleteConfirm,
- *   useDealTaskDeleteConfirm - each passes its own entity's delete-by-id handler.
+ * - TaskPage (delete confirm for the unified task table/kanban).
  *
  * Notes:
  * - Previously each of the four sub-modules reimplemented this exact

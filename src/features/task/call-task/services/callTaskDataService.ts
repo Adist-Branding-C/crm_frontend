@@ -4,14 +4,14 @@ import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.ut
 import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { CALL_TASK_API_ENDPOINTS } from '../constants/callTaskApiEndpoints';
 import type { TaskListParams } from '../../common/types/listParams';
+import { RepeatType } from '../../common/constants/taskEnums';
 import type { CallTaskItem, CallTaskFormData } from '../types/index';
 
 /**
  * HTTP client for the Call Task API - communicates with the backend only.
  *
  * Used by:
- * - callTaskDataService singleton, consumed by useCallTaskCrud (create/update/delete)
- *   and CallTaskPage (list fetch).
+ * - useCalendarAddTask (calendar) - creates call tasks from the calendar's add-task flow.
  */
 export class CallTaskDataService {
   async fetchAll(params: TaskListParams): Promise<ApiResponse<CallTaskItem[]>> {
@@ -26,14 +26,36 @@ export class CallTaskDataService {
     });
   }
 
+  async getById(id: number): Promise<ApiResponse<CallTaskItem>> {
+    const response = await axiosInstance.get<ApiResponse<CallTaskItem>>(
+      CALL_TASK_API_ENDPOINTS.GET_BY_ID(id),
+    );
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
   private cleanPayload(data: any): any {
     const payload = { ...data };
-    ['leadId', 'dealId', 'campaignId', 'categoryId'].forEach(key => {
+    ['leadId', 'dealId', 'campaignId', 'categoryId', 'workflowId', 'stageId'].forEach(key => {
       if (payload[key] === '') delete payload[key];
       else if (payload[key] !== undefined && payload[key] !== null && key !== 'leadId') {
         payload[key] = Number(payload[key]);
       }
     });
+    if (payload.repeatConfig && payload.repeatType && payload.repeatType !== RepeatType.NEVER && payload.repeatType !== RepeatType.DAILY) {
+      const config = payload.repeatConfig;
+      if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
+        config.dayOfWeek = Number(config.dayOfWeek);
+      }
+      if (config.dayOfMonth !== undefined && config.dayOfMonth !== null && config.dayOfMonth !== '' && config.dayOfMonth !== 'last') {
+        config.dayOfMonth = Number(config.dayOfMonth);
+      }
+    } else {
+      delete payload.repeatConfig;
+    }
     return payload;
   }
 
