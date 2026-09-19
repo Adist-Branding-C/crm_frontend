@@ -52,6 +52,8 @@ const CHANGE_FIELD_LABELS: Record<string, string> = {
   name: 'Name',
   dealName: 'Deal name',
   phone: 'Phone',
+  phone2: 'Contact Number 2',
+  phone3: 'Contact Number 3',
   email: 'Email',
   agentId: 'Assigned agent',
   purposeId: 'Purpose',

@@ -18,6 +18,10 @@ export interface FollowupLead {
   updatedAt: string;
   nextFollowUp: string;
    countryCode?: string;
+  phone2?: string;
+  countryCode2?: string;
+  phone3?: string;
+  countryCode3?: string;
 }
 
 export interface Filters {
@@ -44,6 +48,10 @@ export interface FollowupLeadApiItem {
   updatedAt: string;
   nextFollowUpDate: string | null;
    countryCode?: string;
+  phone2?: string | null;
+  countryCode2?: string | null;
+  phone3?: string | null;
+  countryCode3?: string | null;
 }
 
 export interface FollowupPaginationMeta {

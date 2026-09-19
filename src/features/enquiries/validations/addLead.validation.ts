@@ -12,6 +12,51 @@ export function getExpectedPhoneDigitLength(countryCode?: string | null): number
   return COUNTRY_PHONE_DIGIT_LENGTH[countryCode.trim()] ?? 10;
 }
 
+type ExtraContactSlot = 2 | 3;
+
+const ADDITIONAL_CONTACT_LABEL = (slot: ExtraContactSlot) => `Contact Number ${slot}`;
+
+function additionalContactPhoneSchema(slot: ExtraContactSlot) {
+  const label = ADDITIONAL_CONTACT_LABEL(slot);
+  const countryKey = `countryCode${slot}`;
+  return yup
+    .string()
+    .trim()
+    .test('additional-contact-phone', function (value) {
+      if (!value) return true;
+      const countryCode = this.parent[countryKey] as string | undefined;
+      if (!countryCode) {
+        return this.createError({ message: `${label} requires a country code` });
+      }
+      const expectedLength = getExpectedPhoneDigitLength(countryCode);
+      if (!new RegExp(`^\\d{${expectedLength}}$`).test(value)) {
+        return this.createError({ message: `${label} must be exactly ${expectedLength} digits for country code ${countryCode}` });
+      }
+      const sameNumber = (phone: unknown, code: unknown, defaultCode: string) =>
+        phone === value && ((code as string) || defaultCode) === countryCode;
+      if (sameNumber(this.parent.phone, this.parent.countryCode, '+91')) {
+        return this.createError({ message: `${label} duplicates the primary number` });
+      }
+      if (slot === 3 && sameNumber(this.parent.phone2, this.parent.countryCode2, '')) {
+        return this.createError({ message: `${label} duplicates Contact Number 2` });
+      }
+      return true;
+    });
+}
+
+function additionalContactCountrySchema(slot: ExtraContactSlot) {
+  const label = ADDITIONAL_CONTACT_LABEL(slot);
+  const phoneKey = `phone${slot}`;
+  return yup.string().test('additional-contact-country', function (value) {
+    if (!value) return true;
+    const phone = this.parent[phoneKey] as string | undefined;
+    if (!phone || !phone.trim()) {
+      return this.createError({ message: `Enter ${label} or clear the country code` });
+    }
+    return true;
+  });
+}
+
 const BASE_VALIDATION_SHAPE: Record<string, yup.Schema> = {
   name: yup
     .string()
@@ -21,7 +66,7 @@ const BASE_VALIDATION_SHAPE: Record<string, yup.Schema> = {
     .string()
     .trim()
     .required('Phone is required')
-    .test('is-valid-phone', function(value) {
+    .test('is-valid-phone', function (value) {
       if (!value) return true;
       const { countryCode } = this.parent;
       const expectedLength = getExpectedPhoneDigitLength(countryCode);
@@ -33,6 +78,10 @@ const BASE_VALIDATION_SHAPE: Record<string, yup.Schema> = {
   countryCode: yup
     .string()
     .required('Country code is required'),
+  phone2: additionalContactPhoneSchema(2),
+  countryCode2: additionalContactCountrySchema(2),
+  phone3: additionalContactPhoneSchema(3),
+  countryCode3: additionalContactCountrySchema(3),
   email: yup
     .string()
     .trim()
@@ -44,7 +93,7 @@ const BASE_VALIDATION_SHAPE: Record<string, yup.Schema> = {
   purposeId: yup.string(),
   typeId: yup.string(),
   statusId: yup.string(),
-  nextFollowUp: yup.string().test('is-future', 'Next follow-up date cannot be in the past', function(value) {
+  nextFollowUp: yup.string().test('is-future', 'Next follow-up date cannot be in the past', function (value) {
     if (!value) return true;
     const today = new Date();
     today.setHours(0, 0, 0, 0);

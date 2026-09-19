@@ -58,7 +58,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
     }
   }, [isOpen, onClose]);
 
-  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError } = useLeadActivities(lead?.id, isOpen);
+  const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError, refresh: refreshActivities } = useLeadActivities(lead?.id, isOpen);
   const {
     remarks,
     isLoading: isLoadingRemarks,
@@ -118,6 +118,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
       if (res.status) {
         showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
         onFieldSaved?.(payload);
+        refreshActivities();
         onLeadUpdated?.();
         return true;
       }
@@ -294,6 +295,20 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
                       <span className="leaddrawer-info-value">{lead.phone || '-'}</span>
                     </div>
                   </div>
+                  {[
+                    { slot: 2, phone: lead.phone2, countryCode: lead.countryCode2 },
+                    { slot: 3, phone: lead.phone3, countryCode: lead.countryCode3 },
+                  ].map(({ slot, phone, countryCode }) =>
+                    phone ? (
+                      <div className="leaddrawer-info-item" key={slot}>
+                        <div className="leaddrawer-info-icon"><Phone size={14} /></div>
+                        <div className="leaddrawer-info-content">
+                          <span className="leaddrawer-info-label">Contact Number {slot}</span>
+                          <span className="leaddrawer-info-value">{countryCode ? `${countryCode} ${phone}` : phone}</span>
+                        </div>
+                      </div>
+                    ) : null,
+                  )}
                   <div className="leaddrawer-info-item">
                     <div className="leaddrawer-info-icon"><MailIcon size={14} /></div>
                     <div className="leaddrawer-info-content">
@@ -419,7 +434,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
                   <div className="leaddrawer-tab-header">
                     <h3 className="leaddrawer-tab-heading">Latest Activity</h3>
                   </div>
-                  {activitiesLoading ? (
+                  {activitiesLoading && apiActivities.length === 0 ? (
                     <div className="leaddrawer-activity-list">
                       <div className="leaddrawer-loading">Loading activities...</div>
                     </div>

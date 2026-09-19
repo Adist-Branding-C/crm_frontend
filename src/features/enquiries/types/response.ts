@@ -22,6 +22,10 @@ export interface LeadApiItem {
   name: string;
   phone: string;
   countryCode: string | null;
+  phone2?: string | null;
+  countryCode2?: string | null;
+  phone3?: string | null;
+  countryCode3?: string | null;
   email: string | null;
   location: string | null;
   address: string | null;

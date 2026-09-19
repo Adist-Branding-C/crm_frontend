@@ -12,6 +12,10 @@ export interface Lead {
   name: string;
   phone: string;
   countryCode: string;
+  phone2: string;
+  countryCode2: string;
+  phone3: string;
+  countryCode3: string;
   email: string;
   location: string;
   address: string;

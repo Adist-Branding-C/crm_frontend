@@ -113,6 +113,10 @@ export interface AddLeadFormValues {
   name: string;
   phone: string;
   countryCode: string;
+  phone2: string;
+  countryCode2: string;
+  phone3: string;
+  countryCode3: string;
   email: string;
   agentId: string;
   purposeId: string;
@@ -158,6 +162,11 @@ export interface LeadDetailDrawerProps {
     leadId?: string;
     name: string;
     phone: string;
+    countryCode?: string | null;
+    phone2?: string | null;
+    countryCode2?: string | null;
+    phone3?: string | null;
+    countryCode3?: string | null;
     email?: string;
     location?: string;
     address?: string;

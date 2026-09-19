@@ -98,6 +98,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onUpload, on
             <p><strong>* Required Fields:</strong></p>
             <p>Name, Mobile Number, Lead Source</p>
             <p>All other fields can be left empty if the information is not available.</p>
+            <p>Optional extra numbers: fill both "Contact 2 Country Code" and "Contact 2 Number" (same for Contact 3), or leave both empty.</p>
           </div>
 
           <div className="format-note">

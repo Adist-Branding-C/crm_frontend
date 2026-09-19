@@ -2,6 +2,10 @@ export interface UpdateLeadPayload {
   name?: string;
   phone?: string;
   countryCode?: string;
+  phone2?: string | null;
+  countryCode2?: string | null;
+  phone3?: string | null;
+  countryCode3?: string | null;
   email?: string;
   agentId?: string;
   purposeId?: string;
@@ -19,6 +23,10 @@ export interface CreateLeadPayload {
   name: string;
   phone: string;
   countryCode: string;
+  phone2?: string | null;
+  countryCode2?: string | null;
+  phone3?: string | null;
+  countryCode3?: string | null;
   email?: string;
   sourceId: string;
   agentId?: string;

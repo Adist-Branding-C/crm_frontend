@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { AxiosError } from 'axios';
 import { activityService } from '../services/activityService';
 import { ERROR_MESSAGES } from '../constants/messages';
@@ -14,12 +14,14 @@ export function useLeadActivities(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const loadedLeadIdRef = useRef<number | undefined>(undefined);
 
   const isActivityTabActive = activeTab === undefined || activeTab === 'activity';
   const shouldFetch = isOpen && !!leadId && isActivityTabActive;
 
   useEffect(() => {
     if (!isOpen || !leadId) {
+      loadedLeadIdRef.current = undefined;
       setActivities([]);
       setError(null);
       return;
@@ -28,6 +30,13 @@ export function useLeadActivities(
     if (!shouldFetch) return;
 
     let cancelled = false;
+
+    // A refetch for the same lead keeps the current list on screen while it loads;
+    // a different lead must never show the previous lead's activities.
+    if (loadedLeadIdRef.current !== leadId) {
+      loadedLeadIdRef.current = leadId;
+      setActivities([]);
+    }
 
     const fetchActivities = async () => {
       setIsLoading(true);
