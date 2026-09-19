@@ -1,21 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { facebookApi } from '../services/facebook.service';
-import { useMappingRows, emptyMappingRow, type MappingRow } from './useMappingRows';
+import { useMappingRows, emptyMappingRow, buildMappingRowsFromWorkflow } from './useMappingRows';
 import { useToast } from '../../../shared/hooks/useToast';
 import type { FacebookFormSummary, FieldMapping, MappingOptions, Workflow } from '../types';
-
-const buildMappingRowsFromWorkflow = (mappings: FieldMapping[]): MappingRow[] => {
-  return mappings
-    .filter((mapping) => mapping.crmFieldCategory === 'core' || mapping.crmFieldCategory === 'additional')
-    .map((mapping) => ({
-      ...emptyMappingRow(),
-      crmFieldCategory: mapping.crmFieldCategory as 'core' | 'additional',
-      crmFieldKey: mapping.crmFieldKey,
-      valueTemplate: mapping.valueTemplate ?? '',
-      isRequired: mapping.isRequired,
-    }));
-};
 
 export const useEditWorkflowPage = () => {
   const { id } = useParams<{ id: string }>();

@@ -92,6 +92,13 @@ export interface UpdateWorkflowPayload {
   fieldMappings?: FieldMapping[];
 }
 
+export interface CloneWorkflowPayload {
+  name?: string | undefined;
+  connectionId: string;
+  facebookPageId: string;
+  facebookFormId: string;
+}
+
 export type FacebookLeadStatus = 'received' | 'processing' | 'processed' | 'failed';
 
 export interface FacebookLeadEvent {
