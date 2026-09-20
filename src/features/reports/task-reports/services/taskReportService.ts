@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
-import axiosInstance, { API_BASE_URL } from '../../../../api/axiosInstance';
-import { AUTH_STORAGE_KEYS } from '../../../auth/constants/auth.constants';
+import axiosInstance from '../../../../api/axiosInstance';
+
 import { QueryMapper } from '../../../../shared/mappers/query.mapper';
 import { ServiceResponseUtil } from '../../../../shared/utils/serviceResponse.util';
 import { extractFilenameFromContentDisposition } from '../../../../shared/utils/blobDownload.util';
@@ -169,48 +169,32 @@ export class TaskReportService {
   // Content-Disposition header with a static fallback. Non-2xx responses are
   // JSON bodies that arrive as blobs, so the backend message (e.g. the export
   // row cap) is parsed from them and re-thrown intact.
+
+
+
   async exportActivityExcel(
-    params: GetTaskActivityParams,
-  ): Promise<{ blob: Blob; filename: string }> {
-    const accessToken = Cookies.get(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
-    const paramObject = QueryMapper.toQuery({ ...params, export: 'true' });
-    const searchParams = new URLSearchParams();
-    (Object.keys(paramObject) as Array<keyof typeof paramObject>).forEach((key) => {
-      const value = paramObject[key];
-      if (value !== undefined && value !== null) searchParams.append(key, String(value));
-    });
+  params: GetTaskActivityParams,
+): Promise<{ blob: Blob; filename: string }> {
+  const paramObject = QueryMapper.toQuery({ ...params, export: 'true' });
 
-    const response = await fetch(
-      `${API_BASE_URL}${TASK_REPORT_API_ENDPOINTS.ACTIVITY}?${searchParams.toString()}`,
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        credentials: 'same-origin',
-      },
-    );
+  const response = await axiosInstance.get(
+    TASK_REPORT_API_ENDPOINTS.ACTIVITY,
+    {
+      params: paramObject,
+      responseType: 'blob',
+    },
+  );
 
-    if (!response.ok) {
-      const errorBlob = await response.blob();
-      let message: string | undefined;
-      if (errorBlob.type.toLowerCase().includes('json')) {
-        try {
-          const text = await errorBlob.text();
-          message = text
-            ? (JSON.parse(text) as { message?: string } | undefined)?.message
-            : undefined;
-        } catch {
-          message = undefined;
-        }
-      }
-      throw new Error(message || `Export failed with status ${response.status}`);
-    }
+  const filename = extractFilenameFromContentDisposition(
+    response.headers['content-disposition'],
+    ACTIVITY_DEFAULT_EXPORT_FILENAME,
+  );
 
-    const blob = await response.blob();
-    const filename = extractFilenameFromContentDisposition(
-      response.headers.get('content-disposition') ?? undefined,
-      ACTIVITY_DEFAULT_EXPORT_FILENAME,
-    );
-    return { blob, filename };
-  }
+  return {
+    blob: response.data,
+    filename,
+  };
+}
 }
 
 export const taskReportService = new TaskReportService();
