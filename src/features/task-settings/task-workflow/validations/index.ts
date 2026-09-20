@@ -24,4 +24,5 @@ export const stageValidationSchema = yup.object({
     .string()
     .matches(/^#[0-9A-Fa-f]{6}$/, 'Color must be a valid hex value')
     .required('Color is required'),
+  isCompletedStage: yup.boolean().default(false),
 });

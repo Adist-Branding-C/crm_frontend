@@ -9,6 +9,7 @@ import {
 } from '@dnd-kit/core';
 import { taskKanbanService } from '../services/taskKanbanService';
 import type { TaskKanbanStage, TaskKanbanTask } from '../types/kanban.types';
+import { getKanbanLoadMoreState } from '../utils/taskKanbanPagination';
 
 function moveTask(
   stages: TaskKanbanStage[],
@@ -39,6 +40,7 @@ export function useTaskKanban(
   workflowId: string | null,
   taskType: string,
   onError?: (message: string) => void,
+  search?: string,
 ) {
   const [stages, setStages] = useState<TaskKanbanStage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +56,7 @@ export function useTaskKanban(
     setIsLoading(true);
     setError('');
     try {
-      const data = await taskKanbanService.getKanban(wfId, taskType);
+      const data = await taskKanbanService.getKanban(wfId, taskType, search);
       setStages(data);
     } catch (err: unknown) {
       const msg = err && typeof err === 'object' && 'message' in err
@@ -68,12 +70,22 @@ export function useTaskKanban(
 
   const loadMore = useCallback(async (stageId: string) => {
     if (!workflowId || loadingStageId) return;
+
     const stage = stages.find((s) => s.stageId === stageId);
     if (!stage) return;
-    const hasMore = stage.items.length < stage.count || stage.pagination.has_next;
-    if (!hasMore || !stage.pagination.page) return;
-    const nextPage = stage.pagination.page + 1;
-    const limit = stage.pagination.limit;
+
+    const { hasMore, remaining, requestedLimit } = getKanbanLoadMoreState({
+      totalCount: Number(stage.count ?? 0),
+      loadedCount: stage.items.length,
+      defaultLimit: stage.pagination.limit || 10,
+      hasNext: stage.pagination.has_next,
+    });
+
+    if (!hasMore) return;
+
+    const nextPage = Number(stage.pagination.page ?? 1) + 1;
+    const limit = requestedLimit || 1;
+
     setLoadingStageId(stageId);
     try {
       const result = await taskKanbanService.loadMoreStage(
@@ -82,17 +94,27 @@ export function useTaskKanban(
         nextPage,
         limit,
         taskType,
+        search,
       );
+
       setStages((prev) =>
         prev.map((s) => {
           if (s.stageId !== result.stageId) return s;
+
           const loadedIds = new Set(s.items.map((t) => t.id));
           const fresh = result.items.filter((t) => !loadedIds.has(t.id));
+          const mergedItems = [...s.items, ...fresh];
+          const nextTotal = Number(result.pagination.total ?? mergedItems.length);
+          const nextRemaining = Math.max(0, nextTotal - mergedItems.length);
+
           return {
             ...s,
-            items: [...s.items, ...fresh],
-            count: result.pagination.total ?? s.count,
-            pagination: result.pagination,
+            items: mergedItems,
+            count: nextTotal,
+            pagination: {
+              ...result.pagination,
+              has_next: Boolean(result.pagination.has_next) && nextRemaining > 0,
+            },
           };
         }),
       );
@@ -102,7 +124,7 @@ export function useTaskKanban(
     } finally {
       setLoadingStageId(null);
     }
-  }, [workflowId, loadingStageId, stages, taskType, onError]);
+  }, [workflowId, loadingStageId, stages, taskType, search, onError]);
 
   const handleDragStart = useCallback((_event: DragStartEvent) => {}, []);
 

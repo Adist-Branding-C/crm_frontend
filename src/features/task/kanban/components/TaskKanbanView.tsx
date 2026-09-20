@@ -12,37 +12,36 @@ import TaskWorkflowPicker from './TaskWorkflowPicker';
 import type { TaskBoardView } from '../types/kanban.types';
 
 interface TaskKanbanViewProps {
-  /** Fixed type for legacy/embedded usage; omitted (or 'ALL') shows every type. */
-  taskType?: string | undefined;
+  /** Shared source-of-truth state from the Tasks page, so table and kanban use the same filters. */
+  taskType: string;
+  searchQuery: string;
+  onTypeChange: (value: string) => void;
   onViewChange: (view: TaskBoardView) => void;
   onAddTask?: (() => void) | undefined;
   addLabel?: string | undefined;
 }
 
-function TaskKanbanView({ taskType, onViewChange, onAddTask, addLabel }: TaskKanbanViewProps) {
+function TaskKanbanView({ taskType, searchQuery, onTypeChange, onViewChange, onAddTask, addLabel }: TaskKanbanViewProps) {
   const toast = useToast();
   const reportError = useCallback(
     (message: string) => toast.showToastMessage(message, 'error'),
     [toast.showToastMessage],
   );
 
-  const [typeFilter, setTypeFilter] = useState<string>(taskType ?? 'ALL');
-  const effectiveTaskType = typeFilter === 'ALL' ? '' : typeFilter;
+  const effectiveTaskType = taskType === 'ALL' ? '' : taskType;
 
   const { workflows, selectedWorkflowId, setSelectedWorkflowId, isLoading: workflowsLoading } =
     useSelectedWorkflow();
 
-  const kanban = useTaskKanban(selectedWorkflowId, effectiveTaskType, reportError);
+  const kanban = useTaskKanban(selectedWorkflowId, effectiveTaskType, reportError, searchQuery);
 
   useEffect(() => {
     if (selectedWorkflowId) kanban.fetchKanban(selectedWorkflowId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedWorkflowId, effectiveTaskType]);
+  }, [selectedWorkflowId, effectiveTaskType, searchQuery, kanban.fetchKanban]);
 
   const refetch = useCallback(() => {
     if (selectedWorkflowId) kanban.fetchKanban(selectedWorkflowId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedWorkflowId]);
+  }, [selectedWorkflowId, kanban.fetchKanban]);
 
   if (workflowsLoading) {
     return <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)' }}>Loading workflows...</div>;
@@ -56,7 +55,7 @@ function TaskKanbanView({ taskType, onViewChange, onAddTask, addLabel }: TaskKan
           selectedWorkflowId={selectedWorkflowId}
           onChange={setSelectedWorkflowId}
         />
-        <TaskTypeFilter value={typeFilter} onChange={setTypeFilter} />
+        <TaskTypeFilter value={taskType} onChange={onTypeChange} />
         <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-tertiary)' }}>
           Drag cards between columns to change stage
         </span>

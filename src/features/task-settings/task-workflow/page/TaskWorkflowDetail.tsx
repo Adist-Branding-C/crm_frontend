@@ -66,10 +66,20 @@ const TaskWorkflowDetailPage = () => {
 
   const stageInitialValues: TaskStageFormData = useMemo(() => {
     if (stageDrawer.editingItem) {
-      return { name: stageDrawer.editingItem.name, color: stageDrawer.editingItem.color };
+      return {
+        name: stageDrawer.editingItem.name,
+        color: stageDrawer.editingItem.color,
+        isCompletedStage: Boolean(stageDrawer.editingItem.isCompletedStage),
+      };
     }
     return ADD_STAGE_INITIAL_VALUES;
   }, [stageDrawer.editingItem]);
+
+  const otherCompletedStageName = useMemo(() => {
+    if (!stageDrawer.editingItem) return null;
+    const currentId = String(stageDrawer.editingItem.id);
+    return (workflow.stages ?? []).find((stage) => stage.id !== currentId && stage.isCompletedStage)?.name ?? null;
+  }, [stageDrawer.editingItem, workflow.stages]);
 
   if (isLoading) {
     return (
@@ -171,6 +181,7 @@ const TaskWorkflowDetailPage = () => {
           <StageFormDrawer
             editingItem={stageDrawer.editingItem}
             initialValues={stageInitialValues}
+            otherCompletedStageName={otherCompletedStageName}
             onSubmit={stageDrawer.handleSubmit}
             onDelete={stageDrawer.requestDelete}
             error={stageDrawer.error}

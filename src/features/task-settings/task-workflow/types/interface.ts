@@ -3,6 +3,7 @@ export interface TaskWorkflowStage {
   name: string;
   color: string;
   sortOrder: number;
+  isCompletedStage?: boolean;
   positionX?: number | null;
   positionY?: number | null;
 }

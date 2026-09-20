@@ -5,6 +5,7 @@ import type { TaskKanbanStage, TaskKanbanResponse, TaskKanbanTask } from '../typ
 import type { TaskWorkflowItem } from '../../../task-settings/task-workflow/types/interface';
 import { TaskWorkflowMapper } from '../../../task-settings/task-workflow/mappers/taskWorkflow.mapper';
 import { TaskKanbanMapper } from '../mappers/taskKanban.mapper';
+import { buildKanbanTaskQuery } from '../../common/utils/taskViewFilters';
 
 const TASK_KANBAN_ENDPOINTS = {
   KANBAN: '/tasks/kanban',
@@ -13,9 +14,8 @@ const TASK_KANBAN_ENDPOINTS = {
 };
 
 export class TaskKanbanService {
-  async getKanban(workflowId: string, taskType?: string): Promise<TaskKanbanStage[]> {
-    const params: Record<string, string> = { workflowId };
-    if (taskType) params.taskType = taskType;
+  async getKanban(workflowId: string, taskType?: string, search?: string): Promise<TaskKanbanStage[]> {
+    const params = buildKanbanTaskQuery({ taskType, search }, workflowId);
     const response = await axiosInstance.get<TaskKanbanResponse>(
       TASK_KANBAN_ENDPOINTS.KANBAN,
       { params },
@@ -29,9 +29,9 @@ export class TaskKanbanService {
     pageNumber: number,
     limit: number,
     taskType?: string,
+    search?: string,
   ): Promise<{ stageId: string; items: TaskKanbanTask[]; pagination: PaginationMeta }> {
-    const params: Record<string, string | number> = { workflowId, pageNumber, limit };
-    if (taskType) params.taskType = taskType;
+    const params = { ...buildKanbanTaskQuery({ taskType, search }, workflowId), pageNumber, limit };
     const response = await axiosInstance.get<TaskKanbanResponse>(
       TASK_KANBAN_ENDPOINTS.KANBAN,
       { params },

@@ -2,6 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { Inbox, Loader2 } from 'lucide-react';
 import TaskCard from './TaskCard';
 import type { TaskKanbanStage } from '../types/kanban.types';
+import { getKanbanLoadMoreState } from '../utils/taskKanbanPagination';
 import './TaskKanbanBoard.css';
 
 interface DroppableTaskColumnProps {
@@ -16,10 +17,17 @@ function DroppableTaskColumn({ stage, loadingStageId, onLoadMore }: DroppableTas
     data: { stageId: stage.stageId },
   });
 
-  const hasMore = stage.items.length < stage.count || stage.pagination.has_next;
+  const loadMoreState = getKanbanLoadMoreState({
+    totalCount: stage.count ?? 0,
+    loadedCount: stage.items.length,
+    defaultLimit: stage.pagination.limit || 10,
+    hasNext: stage.pagination.has_next,
+  });
+
+  const remainingMore = loadMoreState.remaining;
+  const hasMore = loadMoreState.hasMore;
   const isLoadingMore = loadingStageId === stage.stageId;
-  const remainingMore = Math.max(0, stage.count - stage.items.length);
-  const pageSize = stage.pagination.limit || remainingMore;
+  const pageSize = loadMoreState.requestedLimit;
 
   return (
     <div

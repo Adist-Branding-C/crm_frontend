@@ -16,7 +16,12 @@ const RecurrenceBadge = ({ repeatType, repeatConfig, showLabel = false }: Recurr
   const badgeClass = `recurrence-badge recurrence-badge--${repeatType.toLowerCase()}`;
 
   return (
-    <span className={`${badgeClass}${showLabel ? ' recurrence-badge--labeled' : ''}`} data-tooltip={label}>
+    <span
+      className={`${badgeClass}${showLabel ? ' recurrence-badge--labeled' : ''}`}
+      data-tooltip={label}
+      title={label}
+      aria-label={label}
+    >
       <RefreshCw size={12} />
       {showLabel && <span className="recurrence-badge__label">{label.replace('Repeats: ', '')}</span>}
     </span>

@@ -10,13 +10,14 @@ import type { TaskWorkflowStage } from '../types/interface';
 interface StageFormDrawerProps {
   editingItem: TaskWorkflowStage | null;
   initialValues: TaskStageFormData;
+  otherCompletedStageName?: string | null;
   onSubmit: (values: TaskStageFormData, helpers: FormikHelpers<TaskStageFormData>) => Promise<void | boolean>;
   onDelete?: (item: TaskWorkflowStage) => void;
   error: string;
   onCancel: () => void;
 }
 
-function StageFormDrawer({ editingItem, initialValues, onSubmit, onDelete, error, onCancel }: StageFormDrawerProps) {
+function StageFormDrawer({ editingItem, initialValues, otherCompletedStageName, onSubmit, onDelete, error, onCancel }: StageFormDrawerProps) {
   const isEditing = !!editingItem;
 
   return (
@@ -29,6 +30,11 @@ function StageFormDrawer({ editingItem, initialValues, onSubmit, onDelete, error
       {({ errors, touched, dirty, values, setFieldValue, isSubmitting }) => {
         const fieldClass = (name: keyof TaskStageFormData) =>
           `form-control${touched[name] && errors[name] ? ' input-error' : ''}`;
+
+        const completedStageWarning =
+          !!otherCompletedStageName &&
+          values.isCompletedStage &&
+          !(editingItem && editingItem.isCompletedStage);
 
         return (
           <Form>
@@ -52,6 +58,26 @@ function StageFormDrawer({ editingItem, initialValues, onSubmit, onDelete, error
                 <Field type="text" name="color" className={fieldClass('color')} style={{ flex: 1 }} />
               </div>
               <FormikError name="color" component="small" className="field-error-text" />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+              <label
+                htmlFor="isCompletedStage"
+                style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer' }}
+              >
+                <Field
+                  id="isCompletedStage"
+                  type="checkbox"
+                  name="isCompletedStage"
+                  style={{ width: '1.125rem', height: '1.125rem', flex: '0 0 auto', margin: 0 }}
+                />
+                <span style={{ lineHeight: '1', userSelect: 'none' }}>Mark as completed stage</span>
+              </label>
+              {completedStageWarning && (
+                <small className="field-error-text" style={{ display: 'block', marginTop: 'var(--space-2)' }}>
+                  Another stage ('{otherCompletedStageName}') is already marked as completed. Marking this one will unmark that one.
+                </small>
+              )}
             </div>
 
             <div className="form-actions" style={{ justifyContent: 'space-between' }}>

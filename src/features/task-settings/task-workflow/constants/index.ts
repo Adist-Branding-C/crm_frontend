@@ -19,6 +19,7 @@ export const ADD_WORKFLOW_INITIAL_VALUES = {
 export const ADD_STAGE_INITIAL_VALUES: TaskStageFormData = {
   name: '',
   color: '#2563eb',
+  isCompletedStage: false,
 };
 
 export const CANVAS_AUTO_LAYOUT = {

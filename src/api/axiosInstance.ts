@@ -4,11 +4,11 @@ import { AUTH_STORAGE_KEYS, AUTH_ROUTES } from '../features/auth/constants/auth.
 import { AUTH_API_ENDPOINTS } from '../features/auth/constants/authApiEndpoints';
 import { setAuthTokens, clearAuthTokens } from '../features/auth/utils/tokenStorage';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 const MAX_REFRESH_ATTEMPTS = 3;
 
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BASE_URL,
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
@@ -45,7 +45,7 @@ async function refreshAccessToken(refreshToken: string): Promise<string> {
 
   for (let attempt = 1; attempt <= MAX_REFRESH_ATTEMPTS; attempt++) {
     try {
-      const { data } = await axios.post(`${API_BASE_URL}${AUTH_API_ENDPOINTS.REFRESH}`, { refreshToken });
+      const { data } = await axios.post(`${BASE_URL}${AUTH_API_ENDPOINTS.REFRESH}`, { refreshToken });
       const { accessToken, refreshToken: newRefreshToken } = data.data;
       setAuthTokens(accessToken, newRefreshToken);
       return accessToken;

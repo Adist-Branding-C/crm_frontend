@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
+import { buildUnifiedTaskListQuery } from '../../common/utils/taskViewFilters';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
@@ -82,13 +83,10 @@ const TaskPage = () => {
 
   const pagination = useTableData<UnifiedTaskItem>({
     fetchFn: async (params) => {
-      const type = typeFilterRef.current === 'ALL' ? undefined : typeFilterRef.current;
-      const response = await unifiedTaskDataService.getAll({
-        pageNumber: params.pageNumber,
-        limit: params.limit,
-        ...(params.search ? { search: params.search } : {}),
-        ...(type ? { taskType: type } : {}),
-      });
+      const response = await unifiedTaskDataService.getAll(buildUnifiedTaskListQuery({
+        taskType: typeFilterRef.current,
+        search: params.search,
+      }, params.pageNumber, params.limit));
       return ListResponseMapper.toPagedResult<UnifiedTaskItem>(response);
     },
   });
@@ -267,7 +265,14 @@ const TaskPage = () => {
         {activeView === 'drafts' && <DraftsList type="task" onResumeDraft={handleResumeDraft} />}
 
         {activeView === 'tasks' && boardView === 'kanban' && (
-          <TaskKanbanView onViewChange={handleViewChange} onAddTask={() => drawer.openAddDrawer()} addLabel="Add Task" />
+          <TaskKanbanView
+            taskType={typeFilter}
+            searchQuery={searchValue}
+            onTypeChange={handleTypeFilterChange}
+            onViewChange={handleViewChange}
+            onAddTask={() => drawer.openAddDrawer()}
+            addLabel="Add Task"
+          />
         )}
 
         {activeView === 'tasks' && boardView === 'table' && (

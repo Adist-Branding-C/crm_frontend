@@ -46,6 +46,7 @@ export class TaskWorkflowMapper {
       name: String(r.name ?? ''),
       color: String(r.color ?? '#2563eb'),
       sortOrder: Number(r.sortOrder ?? 0),
+      isCompletedStage: Boolean(r.isCompletedStage ?? r.is_completed_stage ?? false),
       positionX: r.positionX != null ? Number(r.positionX) : null,
       positionY: r.positionY != null ? Number(r.positionY) : null,
     };
@@ -55,6 +56,8 @@ export class TaskWorkflowMapper {
     return {
       name: values.name.trim(),
       color: values.color,
+      isCompletedStage: Boolean(values.isCompletedStage),
+      is_completed_stage: Boolean(values.isCompletedStage),
     };
   }
 
@@ -63,6 +66,8 @@ export class TaskWorkflowMapper {
       name: values.name.trim(),
       color: values.color,
       sortOrder,
+      isCompletedStage: Boolean(values.isCompletedStage),
+      is_completed_stage: Boolean(values.isCompletedStage),
     };
   }
 }
