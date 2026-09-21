@@ -1,6 +1,7 @@
 .widget-base {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   height: 300px;
   border-radius: var(--border-radius-lg);
   border: 1px solid var(--border-color);

@@ -1,4 +1,4 @@
-import type { LeadAdditionalField, Remark, ActivityItem } from './interface';
+import type { LeadAdditionalField, LeadContactNumber, Remark, ActivityItem } from './interface';
 
 // The backend serializes these as lookup objects (TypeORM VirtualColumns joining the
 // lead-settings tables), not plain strings — see Leads entity's `type`/`status`/`source`/
@@ -22,10 +22,7 @@ export interface LeadApiItem {
   name: string;
   phone: string;
   countryCode: string | null;
-  phone2?: string | null;
-  countryCode2?: string | null;
-  phone3?: string | null;
-  countryCode3?: string | null;
+  contactNumbers?: LeadContactNumber[];
   email: string | null;
   location: string | null;
   address: string | null;

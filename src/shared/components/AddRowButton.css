@@ -73,3 +73,21 @@
   border-style: solid;
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
+
+.add-row-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-row-btn:disabled:hover {
+  border-color: var(--border-strong);
+  border-style: dashed;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.add-row-btn:disabled:hover .add-row-btn__icon {
+  background: var(--accent-subtle);
+  color: var(--accent-text);
+  transform: none;
+}

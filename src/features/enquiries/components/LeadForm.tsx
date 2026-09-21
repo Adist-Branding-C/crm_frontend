@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Loader2, Save, Trash2 } from 'lucide-react';
-import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext } from 'formik';
+import { Loader2, Save } from 'lucide-react';
+import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext, getIn } from 'formik';
 import { draftService } from '../../../shared/services/draftService';
 import type { PreviewSection } from '../../../shared/components/preview/PreviewCanvas';
 import { staffService } from '../../deal/services/staff.service';
@@ -23,12 +23,18 @@ import type { LabelValuePair } from '../../../shared/types/common';
 import type { AddLeadFormValues } from '../../../shared/types/drawers';
 import SelectSearch from '../../../shared/components/SelectSearch';
 import AddRowButton from '../../../shared/components/AddRowButton';
+import AdditionalContactCard from './AdditionalContactCard';
+import type { ContactNumberDraft } from '../types';
+import {
+  contactsSignature,
+  createContactNumberDraft,
+  describeUse,
+  draftsFromContacts,
+  filledDrafts,
+  formatContact,
+  toContactPayload,
+} from '../utils/contactNumbers';
 
-
-const EXTRA_CONTACT_SLOTS = [
-  { slot: 2, phoneKey: 'phone2', countryKey: 'countryCode2' },
-  { slot: 3, phoneKey: 'phone3', countryKey: 'countryCode3' },
-] as const;
 
 export interface PreviewData {
   sections: PreviewSection[];
@@ -101,7 +107,6 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
   const [submitError, setSubmitError] = useState('');
   const [activePurposeId, setActivePurposeId] = useState('');
 
-  const [openExtraSlots, setOpenExtraSlots] = useState<Record<number, boolean>>({ 2: false, 3: false });
   const isEditing = !!lead;
   const originalValuesRef = useRef<Record<string, unknown> | null>(null);
   const hasLoadedRef = useRef(false);
@@ -191,16 +196,10 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
       countryCode: trimmed.countryCode,
       sourceId: trimmed.sourceId,
     };
-    for (const { phoneKey, countryKey } of EXTRA_CONTACT_SLOTS) {
-      if (trimmed[phoneKey]) {
-        payload[phoneKey] = trimmed[phoneKey];
-        payload[countryKey] = trimmed[countryKey];
-      } else if (isEditing && lead?.[phoneKey]) {
-        // The lead had this number and the user removed it: an explicit null (not a
-        // missing key) is what tells the backend to clear both columns of the pair.
-        payload[phoneKey] = null;
-        payload[countryKey] = null;
-      }
+    const additionalContacts = toContactPayload(trimmed.contactNumbers);
+    const hadAdditionalContacts = (lead?.contactNumbers ?? []).length > 0;
+    if (additionalContacts.length > 0 || (isEditing && hadAdditionalContacts)) {
+      payload.contactNumbers = additionalContacts;
     }
     if (trimmed.email) payload.email = trimmed.email;
     if (trimmed.agentId) payload.agentId = trimmed.agentId;
@@ -226,14 +225,15 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           fields: [
             { label: 'Name', value: trimmed.name },
             { label: 'Phone', value: trimmed.phone ? `${trimmed.countryCode} ${trimmed.phone}` : '' },
-            ...EXTRA_CONTACT_SLOTS.flatMap(({ slot, phoneKey, countryKey }) => {
-              if (trimmed[phoneKey]) {
-                return [{ label: `Contact Number ${slot}`, value: `${trimmed[countryKey]} ${trimmed[phoneKey]}` }];
-              }
-              return isEditing && lead?.[phoneKey]
-                ? [{ label: `Contact Number ${slot}`, value: 'Removed' }]
-                : [];
-            }),
+            ...filledDrafts(trimmed.contactNumbers).map((draft, index) => ({
+              label: `Contact Number ${index + 2}`,
+              value: `${formatContact(draft.countryCode, draft.phone.trim())} (${describeUse(draft.types, draft.remarks.trim())})`,
+            })),
+            ...(isEditing &&
+            (lead?.contactNumbers ?? []).length >
+              filledDrafts(trimmed.contactNumbers).length
+              ? [{ label: 'Removed contact numbers', value: 'Some additional numbers will be removed' }]
+              : []),
             { label: 'Email', value: trimmed.email || '' },
             { label: 'Assigned To', value: staffOptions.find(o => o.value === trimmed.agentId)?.label || '' }
           ]
@@ -289,13 +289,12 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
 
       messages.forEach(m => {
         const lowerM = m.toLowerCase();
-        const extraSlot = EXTRA_CONTACT_SLOTS.find(
-          ({ slot, phoneKey }) =>
-            lowerM.includes(`contact number ${slot}`) || (!!trimmed[phoneKey] && m.includes(trimmed[phoneKey])),
+        const extraIndex = trimmed.contactNumbers.findIndex(
+          (draft, index) => lowerM.includes(`contact number ${index + 2}`) || (!!draft.phone && m.includes(draft.phone)),
         );
-        if (extraSlot) {
-          formikHelpers.setFieldError(extraSlot.phoneKey, m);
-          formikHelpers.setFieldTouched(extraSlot.phoneKey, true, false);
+        if (extraIndex >= 0) {
+          formikHelpers.setFieldError(`contactNumbers[${extraIndex}].phone`, m);
+          formikHelpers.setFieldTouched(`contactNumbers[${extraIndex}].phone`, true, false);
           hasFieldError = true;
         } else if (lowerM.includes('phone') || lowerM.includes('mobile')) {
           formikHelpers.setFieldError('phone', m);
@@ -356,10 +355,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
       name: lead.name || '',
       phone: lead.phone || '',
       countryCode: lead.countryCode || DEFAULT_COUNTRY_CODE,
-      phone2: lead.phone2 || '',
-      countryCode2: lead.phone2 ? lead.countryCode2 || '' : '',
-      phone3: lead.phone3 || '',
-      countryCode3: lead.phone3 ? lead.countryCode3 || '' : '',
+      contactNumbers: draftsFromContacts(lead.contactNumbers),
       email: lead.email || '',
       agentId: findId(staffOptions, lead.assignedTo),
       purposeId: findId(purposeOptions, lead.purpose),
@@ -414,37 +410,26 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           }
         };
 
-        const handleExtraPhoneChange = (phoneKey: 'phone2' | 'phone3', e: React.ChangeEvent<HTMLInputElement>) => {
-          setFieldValue(phoneKey, e.target.value.replace(/\D/g, ''));
+        const updateContact = (id: string, changes: Partial<ContactNumberDraft>) =>
+          setFieldValue(
+            'contactNumbers',
+            values.contactNumbers.map((draft) => (draft.id === id ? { ...draft, ...changes } : draft)),
+          );
+
+        const handleExtraCountryChange = (index: number, draft: ContactNumberDraft, countryCode: string) => {
+          updateContact(draft.id, { countryCode });
+          setFieldTouched(`contactNumbers[${index}].countryCode`, true, false);
+          if (draft.phone) setFieldTouched(`contactNumbers[${index}].phone`, true, false);
         };
 
-        const handleExtraCountryChange = (
-          phoneKey: 'phone2' | 'phone3',
-          countryKey: 'countryCode2' | 'countryCode3',
-          e: React.ChangeEvent<HTMLSelectElement>,
-        ) => {
-          setFieldValue(countryKey, e.target.value);
-          setFieldTouched(countryKey, true, false);
-          if (values[phoneKey]) setFieldTouched(phoneKey, true, false);
+        const handleAddContact = () => {
+          const draft = createContactNumberDraft();
+          setFieldValue('contactNumbers', [...values.contactNumbers, draft]);
+          requestAnimationFrame(() => document.getElementById(`lead-contact-${draft.id}-phone`)?.focus());
         };
 
-        const isExtraSlotVisible = ({ slot, phoneKey, countryKey }: (typeof EXTRA_CONTACT_SLOTS)[number]) =>
-          !!openExtraSlots[slot] || !!values[phoneKey] || !!values[countryKey];
-        const hiddenSlots = EXTRA_CONTACT_SLOTS.filter((s) => !isExtraSlotVisible(s));
-        const nextHiddenSlot = hiddenSlots[0];
-
-        const handleAddExtraSlot = () => {
-          if (!nextHiddenSlot) return;
-          setOpenExtraSlots((prev) => ({ ...prev, [nextHiddenSlot.slot]: true }));
-          requestAnimationFrame(() => document.getElementById(`lead-contact-${nextHiddenSlot.slot}-phone`)?.focus());
-        };
-
-        const handleRemoveExtraSlot = ({ slot, phoneKey, countryKey }: (typeof EXTRA_CONTACT_SLOTS)[number]) => {
-          setFieldValue(phoneKey, '');
-          setFieldValue(countryKey, '');
-          setFieldTouched(phoneKey, false, false);
-          setFieldTouched(countryKey, false, false);
-          setOpenExtraSlots((prev) => ({ ...prev, [slot]: false }));
+        const handleRemoveContact = (id: string) => {
+          setFieldValue('contactNumbers', values.contactNumbers.filter((draft) => draft.id !== id));
         };
 
         const filteredFieldDefs = additionalFieldDefs.filter((f) => {
@@ -458,10 +443,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           if (values.name !== orig.name) return true;
           if (values.phone !== orig.phone) return true;
           if (values.countryCode !== orig.countryCode) return true;
-          for (const { phoneKey, countryKey } of EXTRA_CONTACT_SLOTS) {
-            if (values[phoneKey] !== orig[phoneKey]) return true;
-            if (values[countryKey] !== orig[countryKey]) return true;
-          }
+          if (contactsSignature(values.contactNumbers) !== contactsSignature(orig.contactNumbers as ContactNumberDraft[])) return true;
           if (values.email !== orig.email) return true;
           if (values.agentId !== orig.agentId) return true;
           if (values.purposeId !== orig.purposeId) return true;
@@ -531,65 +513,35 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
                   {errors.countryCode && touched.countryCode && <div className="error-text">{errors.countryCode}</div>}
                   {errors.phone && touched.phone && <div className="error-text">{errors.phone}</div>}
                 </div>
-                {EXTRA_CONTACT_SLOTS.filter(isExtraSlotVisible).map((extra) => {
-                  const { slot, phoneKey, countryKey } = extra;
-                  const phoneError = touched[phoneKey] ? errors[phoneKey] : undefined;
-                  const countryError = touched[countryKey] ? errors[countryKey] : undefined;
-                  return (
-                    <div className="form-group contact-slot-enter" key={phoneKey}>
-                      <label htmlFor={`lead-contact-${slot}-phone`}>Contact Number {slot}</label>
-                      <div className="phone-field-group">
-                        <select
-                          name={countryKey}
-                          aria-label={`Contact number ${slot} country code`}
-                          value={values[countryKey]}
-                          onChange={(e) => handleExtraCountryChange(phoneKey, countryKey, e)}
-                          onBlur={handleBlur}
-                          className={`phone-country-code${countryError ? ' error' : ''}`}
-                        >
-                          <option value="">Country</option>
-                          {COUNTRY_CODES.map(c => (
-                            <option key={`${c.country}-${c.code}`} value={c.code}>{c.code} {c.country}</option>
-                          ))}
-                        </select>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          name={`lead-phone${slot}-field-no-autofill`}
-                          id={`lead-contact-${slot}-phone`}
-                          autoComplete="do-not-autofill-phone"
-                          autoCorrect="off"
-                          autoCapitalize="off"
-                          spellCheck="false"
-                          placeholder="Enter phone number"
-                          value={values[phoneKey]}
-                          onChange={(e) => handleExtraPhoneChange(phoneKey, e)}
-                          onBlur={() => setFieldTouched(phoneKey, true)}
-                          className={phoneError ? 'error' : ''}
-                        />
-                        <button
-                          type="button"
-                          className="contact-slot-remove"
-                          aria-label={`Remove contact number ${slot}`}
-                          title={`Remove contact number ${slot}`}
-                          onClick={() => handleRemoveExtraSlot(extra)}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      {countryError && <div className="error-text">{countryError}</div>}
-                      {phoneError && <div className="error-text">{phoneError}</div>}
-                    </div>
-                  );
-                })}
-                {nextHiddenSlot && (
-                  <AddRowButton
-                    label="Add another number"
-                    hint={`${hiddenSlots.length} more`}
-                    ariaLabel={`Add another number, ${hiddenSlots.length} more allowed`}
-                    onClick={handleAddExtraSlot}
+                {values.contactNumbers.map((draft, index) => (
+                  <AdditionalContactCard
+                    key={draft.id}
+                    slot={index + 2}
+                    domId={draft.id}
+                    countryCode={draft.countryCode}
+                    phone={draft.phone}
+                    types={draft.types}
+                    remarks={draft.remarks}
+                    errors={{
+                      countryCode: getIn(touched, `contactNumbers[${index}].countryCode`) ? getIn(errors, `contactNumbers[${index}].countryCode`) : undefined,
+                      phone: getIn(touched, `contactNumbers[${index}].phone`) ? getIn(errors, `contactNumbers[${index}].phone`) : undefined,
+                      types: getIn(errors, `contactNumbers[${index}].types`),
+                      remarks: getIn(errors, `contactNumbers[${index}].remarks`),
+                    }}
+                    onCountryCodeChange={(e) => handleExtraCountryChange(index, draft, e.target.value)}
+                    onPhoneChange={(e) => updateContact(draft.id, { phone: e.target.value.replace(/\D/g, '') })}
+                    onPhoneBlur={() => setFieldTouched(`contactNumbers[${index}].phone`, true)}
+                    onTypesChange={(types) => updateContact(draft.id, { types })}
+                    onRemarksChange={(remarks) => updateContact(draft.id, { remarks })}
+                    onRemove={() => handleRemoveContact(draft.id)}
                   />
-                )}
+                ))}
+                <AddRowButton
+                  label="Add another number"
+                  hint={values.contactNumbers.length > 0 ? `${values.contactNumbers.length} added` : undefined}
+                  ariaLabel="Add another number"
+                  onClick={handleAddContact}
+                />
                 <div className="form-group">
                   <label>Email</label>
                   <input

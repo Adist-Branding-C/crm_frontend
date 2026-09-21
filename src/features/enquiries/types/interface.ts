@@ -1,9 +1,28 @@
 import type { DateRange } from '../../../shared/types/common';
+import type { ContactType } from '../constants/contactNumbers.constants';
 
 export interface LeadAdditionalField {
   fieldId: string;
   name: string;
   value: string;
+}
+
+export type { ContactType };
+
+export interface LeadContactNumber {
+  id: number;
+  countryCode: string;
+  phone: string;
+  types: ContactType[];
+  remarks: string | null;
+}
+
+export interface ContactNumberDraft {
+  id: string;
+  countryCode: string;
+  phone: string;
+  types: ContactType[];
+  remarks: string;
 }
 
 export interface Lead {
@@ -12,10 +31,7 @@ export interface Lead {
   name: string;
   phone: string;
   countryCode: string;
-  phone2: string;
-  countryCode2: string;
-  phone3: string;
-  countryCode3: string;
+  contactNumbers: LeadContactNumber[];
   email: string;
   location: string;
   address: string;

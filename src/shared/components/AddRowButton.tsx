@@ -5,12 +5,12 @@ export interface AddRowButtonProps {
   label: string;
   hint?: string | undefined;
   ariaLabel?: string | undefined;
+  disabled?: boolean | undefined;
   onClick: () => void;
 }
 
-
-const AddRowButton = ({ label, hint, ariaLabel, onClick }: AddRowButtonProps) => (
-  <button type="button" className="add-row-btn" aria-label={ariaLabel ?? label} onClick={onClick}>
+const AddRowButton = ({ label, hint, ariaLabel, disabled, onClick }: AddRowButtonProps) => (
+  <button type="button" className="add-row-btn" aria-label={ariaLabel ?? label} disabled={disabled} onClick={onClick}>
     <span className="add-row-btn__icon" aria-hidden="true">
       <Plus size={14} strokeWidth={2.5} />
     </span>

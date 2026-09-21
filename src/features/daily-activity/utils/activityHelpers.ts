@@ -26,17 +26,17 @@ export function calculateTimeAgo(createdAt: string): string {
 export function formatTimestamp(isoString: string): string {
   const d = new Date(isoString);
   if (isNaN(d.getTime())) return 'Unknown time';
-  
+
   const month = d.toLocaleString('en-US', { month: 'short' });
   const day = d.getDate();
   const year = d.getFullYear();
-  
+
   let hours = d.getHours();
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const ampm = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12;
   hours = hours ? hours : 12;
-  
+
   return `${month} ${day}, ${year}, ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
 }
 
@@ -44,16 +44,12 @@ export function getBadge(entityType: string): string {
   return entityType.charAt(0).toUpperCase() + entityType.slice(1);
 }
 
-// Mirrors the backend's LEAD_FIELD_LABELS / DEAL_FIELD_LABELS - field names
-// are shared/unambiguous across both entities (e.g. only one of them ever
-// changes at once), so a single map covers the activity feed regardless of
-// which entity the change belongs to.
+
 const CHANGE_FIELD_LABELS: Record<string, string> = {
   name: 'Name',
   dealName: 'Deal name',
   phone: 'Phone',
-  phone2: 'Contact Number 2',
-  phone3: 'Contact Number 3',
+  contactNumbers: 'Contact Numbers',
   email: 'Email',
   agentId: 'Assigned agent',
   purposeId: 'Purpose',
@@ -75,6 +71,20 @@ const CHANGE_FIELD_LABELS: Record<string, string> = {
 
 export function getChangeFieldLabel(fieldName: string): string {
   return CHANGE_FIELD_LABELS[fieldName] ?? fieldName;
+}
+
+const ONE_SIDED_CHANGE_FIELDS = new Set(['contactNumbers']);
+
+const isBlankChangeValue = (value: string | null | undefined): boolean => !value || value.trim() === '' || value === 'None';
+
+export function getChangeSides(change: { fieldName: string; oldValue?: string | null; newValue?: string | null }): {
+  showOld: boolean;
+  showNew: boolean;
+} {
+  if (!ONE_SIDED_CHANGE_FIELDS.has(change.fieldName)) return { showOld: true, showNew: true };
+  const showOld = !isBlankChangeValue(change.oldValue);
+  const showNew = !isBlankChangeValue(change.newValue);
+  return showOld || showNew ? { showOld, showNew } : { showOld: true, showNew: true };
 }
 
 /**

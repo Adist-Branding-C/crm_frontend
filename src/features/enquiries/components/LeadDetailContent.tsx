@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Phone, MessageSquare, Trash2, Plus, Briefcase, User, Mail as MailIcon, Check, Clock, ArrowLeft, Edit2, Calendar, FileText, Loader2 } from 'lucide-react';
+import LeadContactNumbersTab from './LeadContactNumbersTab';
 import AddLeadTaskDrawer from '../../../components/AddLeadTaskDrawer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
 import AddDealDrawer from '../../../shared/components/drawers/AddDealDrawer';
@@ -26,7 +27,9 @@ import type { EditableDetailFieldOption } from '../../../shared/components/drawe
 import type { DealFormData } from '../../../shared/types/drawers';
 import type { LeadDetailDrawerProps } from '../../../shared/types/drawers';
 import type { DealItem } from '../../deal/types';
-import type { Lead, Remark, LeadTaskItem, UpdateLeadPayload } from '../types';
+import { ContactType } from '../constants/contactNumbers.constants';
+import type { Lead, LeadContactNumber, ContactNumberPayload, Remark, LeadTaskItem, UpdateLeadPayload } from '../types';
+import { getErrorMessage } from '../../../shared/utils/error';
 import type { LabelValuePair } from '../../../shared/types/common';
 
 export interface LeadDetailContentProps {
@@ -47,7 +50,7 @@ export interface LeadDetailContentProps {
  * - LeadDetailDrawer (composed inside the shared Drawer shell)
  */
 const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadDetailContentProps) => {
-  const [activeTab, setActiveTab] = useState<'activity' | 'note' | 'task' | 'deal'>('activity');
+  const [activeTab, setActiveTab] = useState<'activity' | 'numbers' | 'note' | 'task' | 'deal'>('activity');
   const [showTaskDrawer, setShowTaskDrawer] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [newRemarkText, setNewRemarkText] = useState('');
@@ -61,7 +64,9 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
   const [showDeleteTaskModal, setShowDeleteTaskModal] = useState(false);
   const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [showAddDealDrawer, setShowAddDealDrawer] = useState(false);
+  const [contactNumbers, setContactNumbers] = useState<LeadContactNumber[]>(lead.contactNumbers ?? []);
   const [showWhatsappTemplatePicker, setShowWhatsappTemplatePicker] = useState(false);
+  const [whatsappTargetPhone, setWhatsappTargetPhone] = useState('');
   const { hasTemplates: hasWhatsappTemplates, isLoading: whatsappTemplatesLoading, hasError: whatsappTemplatesError } = useActiveWhatsappTemplates();
 
   const { activities: apiActivities, isLoading: activitiesLoading, error: activitiesError, refresh: refreshActivities } = useLeadActivities(lead.id, true, activeTab);
@@ -144,6 +149,29 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     }
   };
 
+  const saveContactNumbers = async (contacts: ContactNumberPayload[]): Promise<string | null> => {
+    if (!lead.leadId) return ERROR_MESSAGES.UPDATE_LEAD;
+    try {
+      const res = await leadDataService.updateLead(lead.leadId, { contactNumbers: contacts });
+      if (!res.status) return res.message || ERROR_MESSAGES.UPDATE_LEAD;
+      setContactNumbers(
+        contacts.map((contact, index) => ({
+          id: -(index + 1),
+          countryCode: contact.countryCode,
+          phone: contact.phone,
+          types: contact.types,
+          remarks: contact.remarks ?? null,
+        })),
+      );
+      showToastMessage('Contact numbers updated', 'success');
+      refreshActivities();
+      onLeadUpdated?.();
+      return null;
+    } catch (err: unknown) {
+      return getErrorMessage(err, ERROR_MESSAGES.UPDATE_LEAD);
+    }
+  };
+
   const handleDealSave = async (formData: DealFormData) => {
     const success = await addDeal(formData);
     if (success) {
@@ -155,35 +183,56 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     return success;
   };
 
-  const handlePhoneClick = () => {
-    if (lead.phone) {
-      window.open(`tel:${lead.phone}`);
+  const handlePhoneClick = (phone: string = lead.phone) => {
+    if (phone) {
+      window.open(`tel:${phone}`);
     }
   };
 
-  const handleWhatsAppClick = () => {
-    if (!lead.phone) return;
+  const handleTextClick = (phone: string) => {
+    if (phone) {
+      window.open(`sms:${phone}`);
+    }
+  };
+
+  const handleContactAction = (type: ContactType, dialNumber: string) => {
+    switch (type) {
+      case ContactType.CALL:
+        handlePhoneClick(dialNumber);
+        break;
+      case ContactType.WHATSAPP:
+        handleWhatsAppClick(dialNumber);
+        break;
+      case ContactType.TEXT:
+        handleTextClick(dialNumber);
+        break;
+    }
+  };
+
+  const handleWhatsAppClick = (phone: string = lead.phone) => {
+    if (!phone) return;
     // Fail-open: if templates haven't loaded, failed to load, or the company
     // has none active, fall back to today's plain "open WhatsApp" behavior
     // instead of showing an empty/broken picker.
     if (whatsappTemplatesError || (!whatsappTemplatesLoading && !hasWhatsappTemplates)) {
-      window.open(buildWhatsappUrl(lead.phone), '_blank');
+      window.open(buildWhatsappUrl(phone), '_blank');
       return;
     }
+    setWhatsappTargetPhone(phone);
     setShowWhatsappTemplatePicker(true);
   };
 
   const handleSelectWhatsappTemplate = (template: WhatsappTemplateItem) => {
-    if (!lead.phone) return;
+    if (!whatsappTargetPhone) return;
     const message = substituteTemplateVariables(template.message || template.content || '', {
       name: lead.name,
     });
-    window.open(buildWhatsappUrl(lead.phone, message), '_blank');
+    window.open(buildWhatsappUrl(whatsappTargetPhone, message), '_blank');
   };
 
   const handleSendWhatsappWithoutTemplate = () => {
-    if (!lead.phone) return;
-    window.open(buildWhatsappUrl(lead.phone), '_blank');
+    if (!whatsappTargetPhone) return;
+    window.open(buildWhatsappUrl(whatsappTargetPhone), '_blank');
   };
 
   const handleAddTask = async (formData: any) => {
@@ -306,7 +355,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
 
             <div className="leaddrawer-actions">
               <button className="leaddrawer-action-btn" title="Edit" onClick={() => setShowEditDrawer(true)}><Edit2 size={16} /></button>
-              <button className="leaddrawer-action-btn" title="WhatsApp" onClick={handleWhatsAppClick} disabled={!lead.phone} style={!lead.phone ? { opacity: 0.5, cursor: 'not-allowed' } : {}}><MessageSquare size={16} /></button>
+              <button className="leaddrawer-action-btn" title="WhatsApp" onClick={() => handleWhatsAppClick()} disabled={!lead.phone} style={!lead.phone ? { opacity: 0.5, cursor: 'not-allowed' } : {}}><MessageSquare size={16} /></button>
               {showWhatsappTemplatePicker && (
                 <WhatsappTemplatePickerOverlay
                   onClose={() => setShowWhatsappTemplatePicker(false)}
@@ -314,7 +363,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   onSendWithoutTemplate={handleSendWhatsappWithoutTemplate}
                 />
               )}
-              <button className="leaddrawer-action-btn" title="Phone" onClick={handlePhoneClick} disabled={!lead.phone} style={!lead.phone ? { opacity: 0.5, cursor: 'not-allowed' } : {}}><Phone size={16} /></button>
+              <button className="leaddrawer-action-btn" title="Phone" onClick={() => handlePhoneClick()} disabled={!lead.phone} style={!lead.phone ? { opacity: 0.5, cursor: 'not-allowed' } : {}}><Phone size={16} /></button>
               <button className="leaddrawer-action-btn delete" title="Delete" onClick={() => onDeleteLead?.(lead as Lead)}><Trash2 size={16} /></button>
             </div>
 
@@ -357,20 +406,6 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                     </span>
                   </div>
                 </div>
-                {([
-                  { slot: 2, phone: lead.phone2, countryCode: lead.countryCode2 },
-                  { slot: 3, phone: lead.phone3, countryCode: lead.countryCode3 },
-                ] as const).map(({ slot, phone, countryCode }) =>
-                  phone ? (
-                    <div className="leaddrawer-info-item" key={slot}>
-                      <div className="leaddrawer-info-icon"><Phone size={14} /></div>
-                      <div className="leaddrawer-info-content">
-                        <span className="leaddrawer-info-label">Contact Number {slot}</span>
-                        <span className="leaddrawer-info-value">{countryCode ? `${countryCode} ${phone}` : phone}</span>
-                      </div>
-                    </div>
-                  ) : null,
-                )}
                 <div className="leaddrawer-info-item">
                   <div className="leaddrawer-info-icon"><MailIcon size={14} /></div>
                   <div className="leaddrawer-info-content">
@@ -487,6 +522,9 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
             </button>
             <button className={`leaddrawer-tab ${activeTab === 'deal' ? 'active' : ''}`} onClick={() => setActiveTab('deal')}>
               <Briefcase size={14} /> Deal
+            </button>
+            <button className={`leaddrawer-tab ${activeTab === 'numbers' ? 'active' : ''}`} onClick={() => setActiveTab('numbers')}>
+              <Phone size={14} /> Numbers <span className="leaddrawer-count-pill">{contactNumbers.length + 1}</span>
             </button>
           </div>
 
@@ -690,6 +728,16 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   </div>
                 )}
               </div>
+            )}
+
+            {activeTab === 'numbers' && (
+              <LeadContactNumbersTab
+                phone={lead.phone}
+                countryCode={lead.countryCode}
+                contactNumbers={contactNumbers}
+                onSave={saveContactNumbers}
+                onAction={handleContactAction}
+              />
             )}
           </div>
         </div>

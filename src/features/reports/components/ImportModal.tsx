@@ -98,7 +98,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, onUpload, on
             <p><strong>* Required Fields:</strong></p>
             <p>Name, Mobile Number, Lead Source</p>
             <p>All other fields can be left empty if the information is not available.</p>
-            <p>Optional extra numbers: fill both "Contact 2 Country Code" and "Contact 2 Number" (same for Contact 3), or leave both empty.</p>
+            <p>Optional "Additional Numbers": any number of extra numbers in one cell, each as "+CC number", separated by ; (for example +91 9123456780; +971 501234567).</p>
           </div>
 
           <div className="format-note">

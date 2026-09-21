@@ -3,6 +3,7 @@ import type { DateRange, LabelValuePair } from '../../../shared/types/common';
 import type { Column } from '../../../shared/types/table';
 import type { PaginationProps } from '../../../shared/types/pagination';
 import type { UpdateLeadPayload } from '../../enquiries/types/request';
+import type { LeadContactNumber } from '../../enquiries/types/interface';
 
 export interface FollowupLead {
   id: number;
@@ -18,10 +19,7 @@ export interface FollowupLead {
   updatedAt: string;
   nextFollowUp: string;
    countryCode?: string;
-  phone2?: string;
-  countryCode2?: string;
-  phone3?: string;
-  countryCode3?: string;
+  contactNumbers?: LeadContactNumber[];
 }
 
 export interface Filters {
@@ -48,10 +46,7 @@ export interface FollowupLeadApiItem {
   updatedAt: string;
   nextFollowUpDate: string | null;
    countryCode?: string;
-  phone2?: string | null;
-  countryCode2?: string | null;
-  phone3?: string | null;
-  countryCode3?: string | null;
+  contactNumbers?: LeadContactNumber[];
 }
 
 export interface FollowupPaginationMeta {

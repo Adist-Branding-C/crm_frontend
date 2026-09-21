@@ -1,5 +1,7 @@
 import * as yup from 'yup';
 import type { LeadAdditionalApiItem } from '../../lead-settings/lead-additional/types';
+import { MAX_CONTACT_REMARKS_LENGTH } from '../constants/contactNumbers.constants';
+import type { ContactNumberDraft } from '../types';
 
 export const COUNTRY_PHONE_DIGIT_LENGTH: Record<string, number> = {
   '+91': 10, '+1': 10, '+44': 10, '+971': 9, '+966': 9, '+974': 8, '+965': 8, '+968': 8, '+973': 8, '+20': 10,
@@ -12,49 +14,59 @@ export function getExpectedPhoneDigitLength(countryCode?: string | null): number
   return COUNTRY_PHONE_DIGIT_LENGTH[countryCode.trim()] ?? 10;
 }
 
-type ExtraContactSlot = 2 | 3;
-
-const ADDITIONAL_CONTACT_LABEL = (slot: ExtraContactSlot) => `Contact Number ${slot}`;
-
-function additionalContactPhoneSchema(slot: ExtraContactSlot) {
-  const label = ADDITIONAL_CONTACT_LABEL(slot);
-  const countryKey = `countryCode${slot}`;
-  return yup
-    .string()
-    .trim()
-    .test('additional-contact-phone', function (value) {
-      if (!value) return true;
-      const countryCode = this.parent[countryKey] as string | undefined;
-      if (!countryCode) {
-        return this.createError({ message: `${label} requires a country code` });
-      }
-      const expectedLength = getExpectedPhoneDigitLength(countryCode);
-      if (!new RegExp(`^\\d{${expectedLength}}$`).test(value)) {
-        return this.createError({ message: `${label} must be exactly ${expectedLength} digits for country code ${countryCode}` });
-      }
-      const sameNumber = (phone: unknown, code: unknown, defaultCode: string) =>
-        phone === value && ((code as string) || defaultCode) === countryCode;
-      if (sameNumber(this.parent.phone, this.parent.countryCode, '+91')) {
-        return this.createError({ message: `${label} duplicates the primary number` });
-      }
-      if (slot === 3 && sameNumber(this.parent.phone2, this.parent.countryCode2, '')) {
-        return this.createError({ message: `${label} duplicates Contact Number 2` });
-      }
-      return true;
-    });
+export interface ContactNumberError {
+  index: number;
+  field: 'countryCode' | 'phone' | 'types' | 'remarks';
+  message: string;
 }
 
-function additionalContactCountrySchema(slot: ExtraContactSlot) {
-  const label = ADDITIONAL_CONTACT_LABEL(slot);
-  const phoneKey = `phone${slot}`;
-  return yup.string().test('additional-contact-country', function (value) {
-    if (!value) return true;
-    const phone = this.parent[phoneKey] as string | undefined;
-    if (!phone || !phone.trim()) {
-      return this.createError({ message: `Enter ${label} or clear the country code` });
+const DEFAULT_PRIMARY_COUNTRY_CODE = '+91';
+
+export function collectContactNumberErrors(
+  drafts: ContactNumberDraft[],
+  primary: { phone?: string | undefined; countryCode?: string | undefined },
+): ContactNumberError[] {
+  const errors: ContactNumberError[] = [];
+  const seen = new Map<string, string>();
+  const keyOf = (countryCode: string, phone: string) => `${countryCode}|${phone}`;
+  if (primary.phone) {
+    seen.set(keyOf(primary.countryCode || DEFAULT_PRIMARY_COUNTRY_CODE, primary.phone.trim()), 'the primary number');
+  }
+
+  drafts.forEach((draft, index) => {
+    const label = `Contact Number ${index + 2}`;
+    const phone = (draft.phone ?? '').trim();
+    const countryCode = (draft.countryCode ?? '').trim();
+    const remarks = draft.remarks ?? '';
+    const types = draft.types ?? [];
+    const add = (field: ContactNumberError['field'], message: string) => errors.push({ index, field, message });
+
+    if (remarks.length > MAX_CONTACT_REMARKS_LENGTH) {
+      add('remarks', `Remarks can be at most ${MAX_CONTACT_REMARKS_LENGTH} characters`);
     }
-    return true;
+    if (!phone) {
+      if (countryCode) add('countryCode', `Enter ${label} or clear the country code`);
+      return;
+    }
+    if (!countryCode) {
+      add('phone', `${label} requires a country code`);
+    } else {
+      const expectedLength = getExpectedPhoneDigitLength(countryCode);
+      if (!new RegExp(`^\\d{${expectedLength}}$`).test(phone)) {
+        add('phone', `${label} must be exactly ${expectedLength} digits for country code ${countryCode}`);
+      } else {
+        const key = keyOf(countryCode, phone);
+        const duplicateOf = seen.get(key);
+        if (duplicateOf) {
+          add('phone', `${label} duplicates ${duplicateOf}`);
+        } else {
+          seen.set(key, label);
+        }
+      }
+    }
+    if (types.length === 0) add('types', `Select at least one use for ${label}`);
   });
+  return errors;
 }
 
 const BASE_VALIDATION_SHAPE: Record<string, yup.Schema> = {
@@ -78,10 +90,16 @@ const BASE_VALIDATION_SHAPE: Record<string, yup.Schema> = {
   countryCode: yup
     .string()
     .required('Country code is required'),
-  phone2: additionalContactPhoneSchema(2),
-  countryCode2: additionalContactCountrySchema(2),
-  phone3: additionalContactPhoneSchema(3),
-  countryCode3: additionalContactCountrySchema(3),
+  contactNumbers: yup.array().test('contact-numbers', function (drafts) {
+    const errors = collectContactNumberErrors((drafts ?? []) as ContactNumberDraft[], {
+      phone: this.parent.phone,
+      countryCode: this.parent.countryCode,
+    });
+    if (errors.length === 0) return true;
+    return new yup.ValidationError(
+      errors.map((error) => this.createError({ path: `contactNumbers[${error.index}].${error.field}`, message: error.message })),
+    );
+  }),
   email: yup
     .string()
     .trim()

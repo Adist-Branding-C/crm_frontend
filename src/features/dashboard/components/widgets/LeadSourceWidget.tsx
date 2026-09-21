@@ -1,51 +1,37 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { CHART_PALETTE, CHART_PALETTE_DEFAULT } from '../../../../shared/constants/chartPalette';
-import './WidgetStyles.css';
-import { ListRowsSkeleton } from './WidgetSkeletons';
+import { getColorForIndex } from '../../../../shared/utils/chartUtils';
+import BarListWidget from './BarListWidget';
 import type { LeadSourceCountItem } from '../../types';
 
-
-function colorForIndex(index: number): string {
-  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE_DEFAULT;
-}
-
 interface LeadSourceWidgetProps {
-  items?: LeadSourceCountItem[];
-  isLoading?: boolean;
-  isError?: boolean;
+  items?: LeadSourceCountItem[] | undefined;
+  isLoading?: boolean | undefined;
+  isError?: boolean | undefined;
 }
 
 const LeadSourceWidget = ({ items = [], isLoading, isError }: LeadSourceWidgetProps) => {
-  const coloredItems = useMemo(() => {
-    return items.map((item, index) => ({
-      ...item,
-      color: colorForIndex(index),
-    }));
-  }, [items]);
+  const barItems = useMemo(
+    () =>
+      items.map((item, index) => ({
+        id: item.sourceId,
+        label: item.source,
+        value: item.count,
+        color: getColorForIndex(index, CHART_PALETTE, CHART_PALETTE_DEFAULT),
+      })),
+    [items],
+  );
 
   return (
-    <div className="card widget-base">
-      <h3 className="widget-title">Lead source</h3>
-      {isLoading ? (
-        <ListRowsSkeleton rows={5} />
-      ) : isError ? (
-        <div className="widget-status-text">Failed to load lead source statistics</div>
-      ) : coloredItems.length === 0 ? (
-        <div className="widget-status-text">No leads in this period</div>
-      ) : (
-        <div className="list-container">
-          {coloredItems.map((item) => (
-            <div key={item.sourceId} className="list-item">
-              <div className="list-item-left">
-                <div className="color-box" style={{ backgroundColor: item.color }}></div>
-                <span>{item.source}</span>
-              </div>
-              <span className="list-item-value">{item.count}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <BarListWidget
+      title="Lead source"
+      items={barItems}
+      isLoading={isLoading}
+      isError={isError}
+      errorText="Failed to load lead source statistics"
+      emptyText="No leads in this period"
+      skeletonRows={5}
+    />
   );
 };
 

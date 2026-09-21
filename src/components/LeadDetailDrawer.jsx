@@ -295,20 +295,17 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
                       <span className="leaddrawer-info-value">{lead.phone || '-'}</span>
                     </div>
                   </div>
-                  {[
-                    { slot: 2, phone: lead.phone2, countryCode: lead.countryCode2 },
-                    { slot: 3, phone: lead.phone3, countryCode: lead.countryCode3 },
-                  ].map(({ slot, phone, countryCode }) =>
-                    phone ? (
-                      <div className="leaddrawer-info-item" key={slot}>
-                        <div className="leaddrawer-info-icon"><Phone size={14} /></div>
-                        <div className="leaddrawer-info-content">
-                          <span className="leaddrawer-info-label">Contact Number {slot}</span>
-                          <span className="leaddrawer-info-value">{countryCode ? `${countryCode} ${phone}` : phone}</span>
-                        </div>
+                  {(lead.contactNumbers || []).map((contact, index) => (
+                    <div className="leaddrawer-info-item" key={contact.id}>
+                      <div className="leaddrawer-info-icon"><Phone size={14} /></div>
+                      <div className="leaddrawer-info-content">
+                        <span className="leaddrawer-info-label">Contact Number {index + 2}</span>
+                        <span className="leaddrawer-info-value">
+                          {contact.countryCode ? `${contact.countryCode} ${contact.phone}` : contact.phone}
+                        </span>
                       </div>
-                    ) : null,
-                  )}
+                    </div>
+                  ))}
                   <div className="leaddrawer-info-item">
                     <div className="leaddrawer-info-icon"><MailIcon size={14} /></div>
                     <div className="leaddrawer-info-content">

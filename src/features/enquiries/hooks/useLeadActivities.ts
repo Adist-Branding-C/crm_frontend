@@ -31,8 +31,6 @@ export function useLeadActivities(
 
     let cancelled = false;
 
-    // A refetch for the same lead keeps the current list on screen while it loads;
-    // a different lead must never show the previous lead's activities.
     if (loadedLeadIdRef.current !== leadId) {
       loadedLeadIdRef.current = leadId;
       setActivities([]);
