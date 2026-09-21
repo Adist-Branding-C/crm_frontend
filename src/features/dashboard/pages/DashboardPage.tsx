@@ -88,6 +88,12 @@ const DashboardPage = () => {
               This Month
             </button>
             <button
+              className={`date-btn ${period === 'all' ? 'active' : ''}`}
+              onClick={() => { setPeriod('all'); setShowCustom(false); }}
+            >
+              All Time
+            </button>
+            <button
               className={`date-btn ${showCustom || period === 'custom' ? 'active' : ''}`}
               onClick={() => { setPeriod('custom'); setShowCustom(true); }}
             >
