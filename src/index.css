@@ -130,6 +130,38 @@ body {
 .gap-4 { gap: 1rem; }
 .gap-6 { gap: 1.5rem; }
 
+/* Access Denied (403) screen used by route guards (src/routes/RequireAdmin,
+   RequireSuperAdmin). Rendered when an authenticated user lacks the required
+   permission, in place of a silent redirect so the block is clearly explained. */
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  min-height: 60vh;
+}
+
+.access-denied svg {
+  color: var(--primary);
+}
+
+.access-denied h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.access-denied p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  max-width: 420px;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* Custom Scrollbar for inner areas */
 ::-webkit-scrollbar {
   width: 12px;

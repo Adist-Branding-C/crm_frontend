@@ -20,7 +20,7 @@ class AgentService {
   }
 
 async createAgent(data: Omit<AgentFormData, 'confirmPassword'>): Promise<AgentResponse> {
-    const { fullName, email, phone, countryCode, password, designationId, departmentId, status, isAdmin } = data;
+    const { fullName, email, phone, countryCode, password, designationId, departmentId, roleId, status, isAdmin } = data;
     const payload = {
       fullName,
       email: email.trim(),
@@ -29,6 +29,7 @@ async createAgent(data: Omit<AgentFormData, 'confirmPassword'>): Promise<AgentRe
       password,
       designationId,
       departmentId,
+      roleId,
       status,
       isAdmin,
     };
@@ -46,7 +47,7 @@ async updateAgent(
     staffId: string,
     data: Omit<AgentFormData, 'password' | 'confirmPassword' | 'isAdmin'> & { password?: string },
   ): Promise<AgentResponse> {
-    const { fullName, email, phone, countryCode, password, designationId, departmentId, status } = data;
+    const { fullName, email, phone, countryCode, password, designationId, departmentId, roleId, status } = data;
     const payload = {
       fullName,
       email: email.trim(),
@@ -54,6 +55,7 @@ async updateAgent(
       countryCode,
       designationId,
       departmentId,
+      roleId,
       status,
       ...(password ? { password } : {}),
     };

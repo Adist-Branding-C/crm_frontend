@@ -8,12 +8,13 @@ import { scrollToFirstError } from '../../../../shared/utils/scrollToError.util'
 import type { AddAgentDrawerProps } from '../types/add-agent-drawer.types';
 import { COUNTRY_CODES } from '../../../../shared/constants/countryCodes';
 
-const AddAgentDrawer = ({ visibility, form, status, designation, department }: AddAgentDrawerProps) => {
+const AddAgentDrawer = ({ visibility, form, status, designation, department, role }: AddAgentDrawerProps) => {
   const { isOpen, onClose } = visibility;
   const { validationSchema, initialValues, onSubmit, isEditing } = form;
   const { isLoading, error } = status;
   const { options: designationOptions, onFetch: onFetchDesignations } = designation;
   const { options: departmentOptions, onFetch: onFetchDepartments } = department;
+  const { options: roleOptions, onFetch: onFetchRoles } = role;
   const drawerBodyRef = useRef<HTMLDivElement>(null);
   const prevSubmitCountRef = useRef(0);
 
@@ -21,8 +22,9 @@ const AddAgentDrawer = ({ visibility, form, status, designation, department }: A
     if (isOpen) {
       onFetchDesignations();
       onFetchDepartments();
+      onFetchRoles();
     }
-  }, [isOpen, onFetchDesignations, onFetchDepartments]);
+  }, [isOpen, onFetchDesignations, onFetchDepartments, onFetchRoles]);
 
   useEffect(() => {
     if (error) {
@@ -171,6 +173,17 @@ const AddAgentDrawer = ({ visibility, form, status, designation, department }: A
                   ))}
                 </Field>
                 {showError('departmentId') && errors.departmentId && <small className="field-error-text">{errors.departmentId}</small>}
+              </div>
+
+              <div className="form-group">
+                <label>Role <span className="text-danger">*</span></label>
+                <Field as="select" name="roleId" className={fieldClass('roleId')}>
+                  <option value="">Select role</option>
+                  {roleOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </Field>
+                {showError('roleId') && errors.roleId && <small className="field-error-text">{errors.roleId}</small>}
               </div>
 
               <div className="form-group">

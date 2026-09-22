@@ -20,6 +20,7 @@ export function mapAgentToFormData(item: AgentItem): AgentFormData {
     confirmPassword: '',
     designationId: item.designationId || String(item.designation_id ?? item.designation ?? ''),
     departmentId: item.departmentId || String(item.department_id ?? ''),
+    roleId: item.roleId || String(item.role_id ?? ''),
     status: item.status || '',
     isAdmin: item.isAdmin ?? false,
   };

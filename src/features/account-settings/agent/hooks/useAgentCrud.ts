@@ -32,7 +32,7 @@ export function useAgentCrud({ pagination, showToastMessage }: UseAgentCrudParam
 try {
       const { fullName, email, password, designationId, departmentId, status, isAdmin, countryCode } = values;
       const sanitizedPhone = values.phone.replace(/\D/g, '').slice(0, 10);
-      const requestData = { fullName, email: email.trim(), countryCode, phone: sanitizedPhone, password, designationId, departmentId, status, isAdmin };
+      const requestData = { fullName, email: email.trim(), countryCode, phone: sanitizedPhone, password, designationId, departmentId, roleId: values.roleId, status, isAdmin };
 
       const response = await agentService.createAgent(requestData);
 
@@ -75,6 +75,7 @@ try {
         phone: sanitizedPhone,
         designationId,
         departmentId,
+        roleId: values.roleId,
         status,
         // Blank means "leave the current password as-is" - only send it when
         // the admin actually typed a new one.

@@ -2,12 +2,12 @@ import React from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import AccessDenied from './AccessDenied';
 
-const RequireSuperAdmin = ({ children }: { children: React.ReactNode }) => {
+const RequireAdmin = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
-  if (!user?.isSuperAdmin) {
+  if (!user?.isAdmin && !user?.isSuperAdmin) {
     return <AccessDenied />;
   }
-  return children;
+  return <>{children}</>;
 };
 
-export default RequireSuperAdmin;
+export default RequireAdmin;
