@@ -26,15 +26,15 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({ isOpen, selectedC
   }, [isOpen]);
 
   return (
-    <Modal isOpen={isOpen} onClose={() => { if (!isProcessing) onClose(); }} title="Change Status">
+    <Modal isOpen={isOpen} onClose={() => { if (!isProcessing) onClose(); }} title="Change Stage">
       <div className="modal-body">
         <p style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-          Update status for <strong>{selectedCount}</strong> selected lead(s)
+          Update stage for <strong>{selectedCount}</strong> selected lead(s)
         </p>
         <div className="form-group" style={{ marginBottom: 0 }}>
-          <label>New Status</label>
+          <label>New Stage</label>
           <select value={selectedStatusId} onChange={(e) => setSelectedStatusId(e.target.value)} disabled={statusesLoading || isProcessing}>
-            <option value="">Select status</option>
+            <option value="">Select stage</option>
             {statusesLoading ? (
               <option value="" disabled>Loading...</option>
             ) : (
@@ -45,7 +45,7 @@ const ChangeStatusModal: React.FC<ChangeStatusModalProps> = ({ isOpen, selectedC
       </div>
       <div className="modal-footer">
         <button className="btn btn-primary" onClick={() => onConfirm(selectedStatusId)} disabled={!selectedStatusId || isProcessing}>
-          {isProcessing ? <><Loader2 size={16} className="spin" /> Updating...</> : 'Update Status'}
+          {isProcessing ? <><Loader2 size={16} className="spin" /> Updating...</> : 'Update Stage'}
         </button>
         <button className="btn btn-secondary" onClick={onClose} disabled={isProcessing}>Cancel</button>
       </div>

@@ -102,7 +102,7 @@ const LeadDailyActivityReport = () => {
                 <th>Lead Update</th>
                 <th>Note Added</th>
                 <th>Call log Added</th>
-                <th>Status Updated</th>
+                <th>Stage Updated</th>
                 <th>Purpose Updated</th>
                 <th>Voice Note Added</th>
                 <th>File note Added</th>

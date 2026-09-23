@@ -4,6 +4,7 @@ import { leadTypeService } from '../../lead-settings/lead-types/services';
 import { leadSourceService } from '../../lead-settings/lead-source/services';
 import { leadPurposeService } from '../../lead-settings/lead-purpose/services';
 import { leadStatusService } from '../../lead-settings/lead-status/services';
+import { leadPipelineService } from '../../lead-pipeline-builder/services/leadPipeline.service';
 import { leadAdditionalService } from '../../lead-settings/lead-additional/services/leadAdditionalService';
 import type { LeadAdditionalApiItem } from '../../lead-settings/lead-additional/types';
 import type { LabelValuePair } from '../../../shared/types/common';
@@ -23,6 +24,7 @@ export function useLeadFilterOptions(): UseLeadFilterOptionsReturn {
   const [purposeOptions, setPurposeOptions] = useState<LabelValuePair[]>(cachedPurposeOptions ?? []);
   const [staffOptions, setStaffOptions] = useState<LabelValuePair[]>(cachedStaffOptions ?? []);
   const [statusOptions, setStatusOptions] = useState<LabelValuePair[]>(cachedStatusOptions ?? []);
+  const [pipelineOptions, setPipelineOptions] = useState<LabelValuePair[]>([]);
   const [additionalFields, setAdditionalFields] = useState<AdditionalFieldDef[]>(cachedAdditionalFields ?? []);
   const [isLoading, setIsLoading] = useState(!cachedTypeOptions || !cachedStatusOptions);
   const [error, setError] = useState<string | null>(null);
@@ -89,5 +91,22 @@ export function useLeadFilterOptions(): UseLeadFilterOptionsReturn {
     load();
   }, []);
 
-  return { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, additionalFields, isLoading, error };
+
+  useEffect(() => {
+    let cancelled = false;
+    leadPipelineService
+      .getAllPipelines()
+      .then((pipelines) => {
+        if (cancelled) return;
+        setPipelineOptions(pipelines.map((p) => ({ value: p.id, label: p.name })));
+      })
+      .catch(() => {
+        /* non-fatal - the Pipeline filter just shows no options */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, pipelineOptions, additionalFields, isLoading, error };
 }

@@ -36,7 +36,7 @@ const FollowupFilters: React.FC<FollowupFiltersProps> = ({
       />
       <FilterSelect
         id="followup-filter-status"
-        label="Status"
+        label="Stage"
         value={filters.status}
         options={statusOptions}
         disabled={isLoadingFilterOptions}

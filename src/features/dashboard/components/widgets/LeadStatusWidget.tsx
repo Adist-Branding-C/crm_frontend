@@ -25,11 +25,11 @@ const LeadStatusWidget = ({ items = [], isLoading, isError }: LeadStatusWidgetPr
 
   return (
     <div className="card widget-base">
-      <h3 className="widget-title">Lead status</h3>
+      <h3 className="widget-title">Lead Stage</h3>
       {isLoading ? (
         <ListRowsSkeleton rows={3} />
       ) : isError ? (
-        <div className="widget-status-text">Failed to load lead status statistics</div>
+        <div className="widget-status-text">Failed to load lead stage statistics</div>
       ) : coloredItems.length === 0 ? (
         <div className="widget-status-text">No leads in this period</div>
       ) : (

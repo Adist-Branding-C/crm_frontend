@@ -1,14 +1,57 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EnquiriesFiltersProps } from '../types/component.types';
 import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 import { DATE_FILTER_OPTIONS } from '../../../shared/constants/dateFilterOptions';
 import { useLeadFilterOptions } from '../hooks/useLeadFilterOptions';
 import { getVisibleAdditionalFields } from '../utils/leadFilterFields';
+import { leadPipelineService } from '../../lead-pipeline-builder/services/leadPipeline.service';
 import AdditionalFieldControl from './AdditionalFieldControl';
 import DateRangePicker from '../../../shared/components/filters/DateRangePicker';
+import type { LabelValuePair } from '../../../shared/types/common';
 
 const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterChange, onApplyFilters, onClearFilters }) => {
-  const { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, additionalFields, isLoading } = useLeadFilterOptions();
+  const { typeOptions, sourceOptions, purposeOptions, staffOptions, statusOptions, pipelineOptions, additionalFields, isLoading } = useLeadFilterOptions();
+
+  // when a Pipeline is picked, the Lead Stage dropdown re-scopes to
+  // that pipeline's own stages (fetched via the canvas builder's existing
+  // pipeline-detail endpoint) instead of the flat cross-pipeline list -
+  // otherwise picking a stage here gives no indication which pipeline it
+  // belongs to once a company has more than one.
+  const [pipelineStageOptions, setPipelineStageOptions] = useState<LabelValuePair[] | null>(null);
+  const [isPipelineStagesLoading, setIsPipelineStagesLoading] = useState(false);
+
+  useEffect(() => {
+    if (!filters.pipelineId) {
+      setPipelineStageOptions(null);
+      return;
+    }
+    let cancelled = false;
+    setIsPipelineStagesLoading(true);
+    leadPipelineService
+      .getPipeline(Number(filters.pipelineId))
+      .then((detail) => {
+        if (cancelled) return;
+        setPipelineStageOptions(detail.stages.map((s) => ({ value: s.id, label: s.status })));
+      })
+      .catch(() => {
+        if (!cancelled) setPipelineStageOptions([]);
+      })
+      .finally(() => {
+        if (!cancelled) setIsPipelineStagesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [filters.pipelineId]);
+
+  const effectiveStatusOptions = filters.pipelineId ? pipelineStageOptions ?? [] : statusOptions;
+
+  const handlePipelineChange = (pipelineId: string) => {
+    // The previously selected stage may not exist in the newly picked
+    // pipeline, so clear it rather than silently keeping a stale/invalid
+    // selection.
+    onFilterChange({ ...filters, pipelineId, leadStatus: '' });
+  };
 
   const visibleAdditionalFields = useMemo(
     () => getVisibleAdditionalFields(additionalFields, filters.purposeId),
@@ -81,10 +124,17 @@ const EnquiriesFilters: React.FC<EnquiriesFiltersProps> = ({ filters, onFilterCh
           </select>
         </div>
         <div className="filter-group">
-          <label>Lead Status</label>
-          <select value={filters.leadStatus} onChange={(e) => onFilterChange({ ...filters, leadStatus: e.target.value })} disabled={isLoading}>
+          <label>Pipeline</label>
+          <select value={filters.pipelineId} onChange={(e) => handlePipelineChange(e.target.value)} disabled={isLoading}>
+            <option value="">All pipelines</option>
+            {pipelineOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+        <div className="filter-group">
+          <label>Lead Stage</label>
+          <select value={filters.leadStatus} onChange={(e) => onFilterChange({ ...filters, leadStatus: e.target.value })} disabled={isLoading || isPipelineStagesLoading}>
             <option value="">Select</option>
-            {statusOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            {effectiveStatusOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
         <div className="filter-group">

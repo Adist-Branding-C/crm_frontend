@@ -1,8 +1,8 @@
 /**
- * Lead status CRUD routes.
+ * Lead status read route
  *
  * Used by:
- * - leadStatusService (lead-settings/lead-status page)
+ * - leadStatusService
  */
 export enum LEAD_STATUS_API_ENDPOINTS {
   STATUSES = '/lead-settings/statuses',

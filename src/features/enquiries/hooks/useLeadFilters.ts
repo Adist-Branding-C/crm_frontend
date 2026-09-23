@@ -29,6 +29,7 @@ export function useLeadFilters(
     const params: Record<string, string | number> = {};
     if (filters.typeId) params.typeId = filters.typeId;
     if (filters.leadStatus) params.statusId = filters.leadStatus;
+    if (filters.pipelineId) params.pipelineId = filters.pipelineId;
     if (filters.sourceId) params.sourceId = filters.sourceId;
     if (filters.purposeId) params.purposeId = filters.purposeId;
     if (filters.assignedTo) params.assignedTo = filters.assignedTo;
