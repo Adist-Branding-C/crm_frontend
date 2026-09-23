@@ -28,6 +28,7 @@ export function useStageFormDrawer(
     stage: LeadStageItem;
     leadCount: number;
   } | null>(null);
+  const [stageToDelete, setStageToDelete] = useState<LeadStageItem | null>(null);
 
   const handleSubmit = useCallback(
     async (values: LeadStageFormData, helpers: FormikHelpers<LeadStageFormData>) => {
@@ -43,12 +44,10 @@ export function useStageFormDrawer(
           showToast?.(`Lead Stage ${drawer.item ? 'updated' : 'created'} successfully`, 'success');
           return true;
         }
-        setError(response.message || 'Failed to save stage');
         showToast?.(response.message || 'Failed to save stage', 'error');
         return false;
       } catch (err) {
         const errorMsg = parseApiError(err).message;
-        setError(errorMsg);
         showToast?.(errorMsg, 'error');
         return false;
       } finally {
@@ -59,12 +58,22 @@ export function useStageFormDrawer(
   );
 
   const requestDelete = useCallback(
-    async (stage: LeadStageItem) => {
+    (stage: LeadStageItem) => {
+      setStageToDelete(stage);
+    },
+    [],
+  );
+
+  const confirmDelete = useCallback(
+    async () => {
+      if (!stageToDelete) return;
+      const stage = stageToDelete;
       setError('');
       try {
         const response = await leadPipelineService.deleteStage(pipelineId, stage.id);
         if (response.status) {
           await onChanged();
+          setStageToDelete(null);
           drawer.close();
           showToast?.('Lead Stage deleted successfully', 'success');
         } else {
@@ -73,18 +82,18 @@ export function useStageFormDrawer(
       } catch (err) {
         const axiosErr = err as AxiosError<StageInUseError>;
         if (axiosErr.response?.status === 409) {
+          setStageToDelete(null);
           setReassignPrompt({
             stage,
             leadCount: axiosErr.response.data?.data?.leadCount ?? 0,
           });
         } else {
           const errorMsg = parseApiError(err).message;
-          setError(errorMsg);
           showToast?.(errorMsg, 'error');
         }
       }
     },
-    [drawer, onChanged, pipelineId, showToast],
+    [stageToDelete, drawer, onChanged, pipelineId, showToast],
   );
 
   const confirmReassignAndDelete = useCallback(
@@ -103,12 +112,10 @@ export function useStageFormDrawer(
           drawer.close();
           showToast?.('Lead Stage deleted successfully', 'success');
         } else {
-          setError(response.message || 'Failed to delete stage');
           showToast?.(response.message || 'Failed to delete stage', 'error');
         }
       } catch (err) {
         const errorMsg = parseApiError(err).message;
-        setError(errorMsg);
         showToast?.(errorMsg, 'error');
       }
     },
@@ -120,6 +127,9 @@ export function useStageFormDrawer(
     error,
     handleSubmit,
     requestDelete,
+    stageToDelete,
+    cancelDelete: () => setStageToDelete(null),
+    confirmDelete,
     reassignPrompt,
     cancelReassignPrompt: () => setReassignPrompt(null),
     confirmReassignAndDelete,

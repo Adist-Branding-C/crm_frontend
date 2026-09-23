@@ -11,6 +11,7 @@ import { useStageFormDrawer } from '../hooks/useStageFormDrawer';
 import PipelineCanvas from '../components/PipelineCanvas';
 import StageFormDrawer from '../components/StageFormDrawer';
 import ReassignStageModal from '../components/ReassignStageModal';
+import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import { ADD_STAGE_INITIAL_VALUES } from '../constants/leadPipelineBuilder.constants';
 import type { LeadStageItem } from '../types/interface';
 import type { LeadStageFormData } from '../types/request';
@@ -117,6 +118,14 @@ function LeadPipelineCanvasPage() {
         otherStages={otherStages}
         onConfirm={stageDrawer.confirmReassignAndDelete}
         onClose={stageDrawer.cancelReassignPrompt}
+      />
+
+      <AdminDeleteModal
+        isOpen={!!stageDrawer.stageToDelete}
+        itemName={stageDrawer.stageToDelete?.status ?? ''}
+        itemType="Stage"
+        onConfirm={stageDrawer.confirmDelete}
+        onClose={stageDrawer.cancelDelete}
       />
       
       <ToastNotification
