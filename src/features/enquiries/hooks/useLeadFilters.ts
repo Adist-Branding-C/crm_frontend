@@ -37,6 +37,7 @@ export function useLeadFilters(
       params.dateFrom = filters.dateRange.start;
       params.dateTo = filters.dateRange.end;
     }
+    params.timezoneOffsetMinutes = new Date().getTimezoneOffset();
     if (filters.filterByDate) params.dateFilterBy = DATE_FILTER_BY_API_MAP[filters.filterByDate] ?? filters.filterByDate;
     if (filters.followupAdded) params.followUpAdded = filters.followupAdded;
     const additionalFieldFilters = Object.entries(filters.additionalFields)
