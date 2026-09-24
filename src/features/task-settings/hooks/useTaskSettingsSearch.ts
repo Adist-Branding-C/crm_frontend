@@ -18,7 +18,7 @@ export function useTaskSettingsSearch(
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       onSearchChange(value);
-    }, 2000);
+    }, 1500);
   }, [onSearchChange]);
 
   useEffect(() => {

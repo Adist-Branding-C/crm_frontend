@@ -52,7 +52,7 @@ const CommandPalette = ({ isOpen, onClose, onQuickCreate }: CommandPaletteProps)
   const navigate = useNavigate();
   const { recent, addRecent } = useRecentSearches();
   const [committedQuery, setCommittedQuery] = useState('');
-  const { searchValue: query, handleSearchChange, resetSearch } = useDebouncedSearch(setCommittedQuery, 250);
+  const { searchValue: query, handleSearchChange, resetSearch } = useDebouncedSearch(setCommittedQuery, 1500);
   const { results, isLoading } = useGlobalLeadSearch(committedQuery);
   const [activeIndex, setActiveIndex] = useState(0);
 

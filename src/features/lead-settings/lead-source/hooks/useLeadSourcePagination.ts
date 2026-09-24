@@ -23,7 +23,7 @@ export function useLeadSourcePagination(
     const timer = setTimeout(() => {
       setCurrentPage(1);
       onFetchRef.current(1, rowsPerPageRef.current, searchQuery);
-    }, 400);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 

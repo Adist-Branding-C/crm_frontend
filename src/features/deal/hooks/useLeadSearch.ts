@@ -22,7 +22,7 @@ export function useLeadSearch() {
       } finally {
         setIsLoading(false);
       }
-    }, 400);
+    }, 1500);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [search]);
 
