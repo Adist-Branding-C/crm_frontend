@@ -26,6 +26,11 @@ export const AUTH_STORAGE_KEYS = {
 
 export const MIN_SWIPE_DISTANCE = 50;
 
+export const AUTH_ERROR_MESSAGES = {
+  INVALID_CREDENTIALS: 'Invalid credentials. Please try again.',
+  NETWORK_ERROR: 'Something went wrong. Please try again.',
+}
+
 export const AUTH_CONTENT_SLIDES = [
     {
       icon: Target,
