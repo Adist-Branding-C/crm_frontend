@@ -5,6 +5,8 @@ import {
   ChevronRight,
   CheckCircle,
   XCircle,
+  SkipForward,
+  PlusCircle,
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 
@@ -15,10 +17,11 @@ import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
 import { useImportHistoryDetail } from '../hooks/useImportHistoryDetail';
 import type { ImportEntryStatus } from '../types';
 
-type DetailTab = 'imported' | 'failed';
+type DetailTab = 'imported' | 'skipped' | 'failed' | 'masters';
 
-const TAB_TO_STATUS: Record<DetailTab, ImportEntryStatus> = {
+const TAB_TO_STATUS: Partial<Record<DetailTab, ImportEntryStatus>> = {
   imported: 'success',
+  skipped: 'skipped',
   failed: 'failed',
 };
 
@@ -50,9 +53,11 @@ const ImportHistoryDetail: React.FC = () => {
   useEffect(() => {
     if (!importId) return;
 
+    if (activeTab === 'masters') return;
+
     fetchEntries(
       importId,
-      TAB_TO_STATUS[activeTab],
+      TAB_TO_STATUS[activeTab]!,
       currentPage,
       rowsPerPage,
     );
@@ -71,11 +76,16 @@ const ImportHistoryDetail: React.FC = () => {
       return;
     }
 
+    if (activeTab === 'masters') {
+      fetchDetail(importId);
+      return;
+    }
+
     const timer = setTimeout(() => {
       fetchDetail(importId);
       fetchEntries(
         importId,
-        TAB_TO_STATUS[activeTab],
+        TAB_TO_STATUS[activeTab]!,
         currentPage,
         rowsPerPage,
       );
@@ -108,9 +118,11 @@ const ImportHistoryDetail: React.FC = () => {
     if (!importId) return;
 
     fetchDetail(importId);
+    if (activeTab === 'masters') return;
+
     fetchEntries(
       importId,
-      TAB_TO_STATUS[activeTab],
+      TAB_TO_STATUS[activeTab]!,
       currentPage,
       rowsPerPage,
     );
@@ -126,7 +138,7 @@ const ImportHistoryDetail: React.FC = () => {
         </h1>
       </div>
 
-      <div className="stats-card-row">
+      <div className="stats-card-row stats-card-row--five">
         <div className="stat-card">
           <span className="stat-number">
             {importHistory?.totalRows ?? 0}
@@ -142,12 +154,28 @@ const ImportHistoryDetail: React.FC = () => {
           <span className="stat-label">Imported</span>
         </div>
 
+        <div className="stat-card stat-card-warning">
+          <SkipForward size={24} className="stat-icon" />
+          <span className="stat-number">
+            {importHistory?.skippedCount ?? 0}
+          </span>
+          <span className="stat-label">Skipped</span>
+        </div>
+
         <div className="stat-card stat-card-danger">
           <XCircle size={24} className="stat-icon" />
           <span className="stat-number">
             {importHistory?.failedCount ?? 0}
           </span>
           <span className="stat-label">Failed</span>
+        </div>
+
+        <div className="stat-card">
+          <PlusCircle size={24} className="stat-icon" />
+          <span className="stat-number">
+            {importHistory?.mastersCreatedCount ?? 0}
+          </span>
+          <span className="stat-label">New Masters Created</span>
         </div>
       </div>
 
@@ -163,11 +191,29 @@ const ImportHistoryDetail: React.FC = () => {
 
         <button
           className={`tab-btn ${
+            activeTab === 'skipped' ? 'active' : ''
+          }`}
+          onClick={() => handleTabChange('skipped')}
+        >
+          Skipped ({importHistory?.skippedCount ?? 0})
+        </button>
+
+        <button
+          className={`tab-btn ${
             activeTab === 'failed' ? 'active' : ''
           }`}
           onClick={() => handleTabChange('failed')}
         >
           Failed ({importHistory?.failedCount ?? 0})
+        </button>
+
+        <button
+          className={`tab-btn ${
+            activeTab === 'masters' ? 'active' : ''
+          }`}
+          onClick={() => handleTabChange('masters')}
+        >
+          New Masters ({importHistory?.mastersCreatedCount ?? 0})
         </button>
       </div>
 
@@ -184,144 +230,175 @@ const ImportHistoryDetail: React.FC = () => {
       </div>
 
       <div className="table-container">
-        <table className="enquiries-table">
-          <thead>
-            <tr>
-              {columns.map((col) => (
-                <th key={col.key}>
-                  {col.key === 'checkbox' ? null : col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {isLoading ? (
+        {activeTab === 'masters' ? (
+          <table className="enquiries-table">
+            <thead>
               <tr>
-                <td
-                  colSpan={columns.length}
-                  style={{
-                    textAlign: 'center',
-                    padding: '2rem',
-                  }}
-                >
-                  Loading…
-                </td>
+                <th>#</th>
+                <th>Entity</th>
+                <th>Value</th>
               </tr>
-            ) : entries.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  style={{
-                    textAlign: 'center',
-                    padding: '2rem',
-                  }}
-                >
-                  No records
-                </td>
-              </tr>
-            ) : (
-              entries.map((row, index) => (
-                <tr key={row.id}>
-                  <td></td>
-
-                  <td>{startIndex + index + 1}</td>
-
-                  <td className="lead-name-cell">
-                    {row.name ?? '-'}
-                  </td>
-
-                  <td>{row.phone ?? '-'}</td>
-
-                  <td>{row.source ?? '-'}</td>
-
-                  <td>{row.purpose ?? '-'}</td>
-
-                  <td>{row.assignedTo ?? '-'}</td>
-
-                  <td>{row.errorMessage ?? '-'}</td>
-
-                  <td>
-                    {new Date(row.createdAt).toLocaleString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+            </thead>
+            <tbody>
+              {!importHistory?.createdMasters?.length ? (
+                <tr>
+                  <td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>
+                    No masters created
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                importHistory.createdMasters.map((master, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td style={{ textTransform: 'capitalize' }}>{master.entity}</td>
+                    <td>{master.value}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        ) : (
+          <table className="enquiries-table">
+            <thead>
+              <tr>
+                {columns.map((col) => (
+                  <th key={col.key}>
+                    {col.key === 'checkbox' ? null : col.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    style={{
+                      textAlign: 'center',
+                      padding: '2rem',
+                    }}
+                  >
+                    Loading…
+                  </td>
+                </tr>
+              ) : entries.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    style={{
+                      textAlign: 'center',
+                      padding: '2rem',
+                    }}
+                  >
+                    No records
+                  </td>
+                </tr>
+              ) : (
+                entries.map((row, index) => (
+                  <tr key={row.id}>
+                    <td></td>
+
+                    <td>{startIndex + index + 1}</td>
+
+                    <td className="lead-name-cell">
+                      {row.name ?? '-'}
+                    </td>
+
+                    <td>{row.phone ?? '-'}</td>
+
+                    <td>{row.source ?? '-'}</td>
+
+                    <td>{row.purpose ?? '-'}</td>
+
+                    <td>{row.assignedTo ?? '-'}</td>
+
+                    <td>{row.errorMessage ?? '-'}</td>
+
+                    <td>
+                      {new Date(row.createdAt).toLocaleString('en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      <div className="pagination-container">
-        <div className="pagination-left">
-          <span className="rows-label">Rows per page:</span>
+      {activeTab !== 'masters' && (
+        <div className="pagination-container">
+          <div className="pagination-left">
+            <span className="rows-label">Rows per page:</span>
 
-          <select
-            value={rowsPerPage}
-            onChange={handleRowsPerPageChange}
-            className="rows-select"
-          >
-            {ROWS_OPTIONS_10_25_50.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
+            <select
+              value={rowsPerPage}
+              onChange={handleRowsPerPageChange}
+              className="rows-select"
+            >
+              {ROWS_OPTIONS_10_25_50.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
 
-          <span className="pagination-info">
-            Showing{' '}
-            {total === 0 ? 0 : startIndex + 1}-
-            {Math.min(startIndex + rowsPerPage, total)} of {total}
-          </span>
+            <span className="pagination-info">
+              Showing{' '}
+              {total === 0 ? 0 : startIndex + 1}-
+              {Math.min(startIndex + rowsPerPage, total)} of {total}
+            </span>
+          </div>
+
+          <div className="pagination-right">
+            <button
+              className="pagination-btn"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(1)}
+            >
+              First
+            </button>
+
+            <button
+              className="pagination-btn"
+              disabled={currentPage === 1}
+              onClick={() =>
+                setCurrentPage((prev) => prev - 1)
+              }
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            <span className="page-indicator">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              className="pagination-btn"
+              disabled={currentPage === totalPages}
+              onClick={() =>
+                setCurrentPage((prev) => prev + 1)
+              }
+            >
+              <ChevronRight size={16} />
+            </button>
+
+            <button
+              className="pagination-btn"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(totalPages)}
+            >
+              Last
+            </button>
+          </div>
         </div>
-
-        <div className="pagination-right">
-          <button
-            className="pagination-btn"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(1)}
-          >
-            First
-          </button>
-
-          <button
-            className="pagination-btn"
-            disabled={currentPage === 1}
-            onClick={() =>
-              setCurrentPage((prev) => prev - 1)
-            }
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          <span className="page-indicator">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            className="pagination-btn"
-            disabled={currentPage === totalPages}
-            onClick={() =>
-              setCurrentPage((prev) => prev + 1)
-            }
-          >
-            <ChevronRight size={16} />
-          </button>
-
-          <button
-            className="pagination-btn"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(totalPages)}
-          >
-            Last
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
