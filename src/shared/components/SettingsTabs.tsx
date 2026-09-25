@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Users, Building2, Clock, FileText, MapPinned, Mail, MessageSquare, User, Lock, Briefcase, Plus, Minus } from 'lucide-react';
 import type { TabItem, SettingsTabsProps } from '../types/layout';
-import { useAuth } from '../../features/auth/hooks/useAuth';
 
 const defaultTabs: TabItem[] = [
   { id: 'agent', title: 'Agent', link: '/account', icon: Users },
@@ -21,13 +20,10 @@ const defaultTabs: TabItem[] = [
 const SettingsTabs = ({ items = defaultTabs }: SettingsTabsProps) => {
   const location = useLocation();
   const [limit, setLimit] = useState(8);
-  const { user } = useAuth();
-
-  const visibleItems = user?.isSuperAdmin ? items.filter((item) => item.id !== 'profile') : items;
 
   return (
     <div className="settings-tabs">
-      {visibleItems.slice(0, limit).map((item) => {
+      {items.slice(0, limit).map((item) => {
         const Icon = item.icon;
         return (
           <Link
@@ -41,13 +37,13 @@ const SettingsTabs = ({ items = defaultTabs }: SettingsTabsProps) => {
         );
       })}
 
-      {visibleItems.length > 8 && (
+      {items.length > 8 && (
         <span
-          onClick={() => setLimit(limit > 8 ? 8 : visibleItems.length)}
-          className={`settings-tab ${location.pathname === visibleItems[8]?.link ? 'active' : ''}`}
+          onClick={() => setLimit(limit > 8 ? 8 : items.length)}
+          className={`settings-tab ${location.pathname === items[8]?.link ? 'active' : ''}`}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setLimit(limit > 8 ? 8 : visibleItems.length); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setLimit(limit > 8 ? 8 : items.length); }}
         >
           {limit > 8 ? <Minus size={16} /> : <Plus size={16} />}
           <span style={{ paddingLeft: '10px' }}>{limit > 8 ? 'Reset' : 'More'}</span>

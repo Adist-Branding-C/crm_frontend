@@ -13,7 +13,6 @@ import { useTheme } from '../../hooks/useTheme';
 import type { ThemeMode } from '../../constants/theme';
 import { useCommandPalette } from '../../hooks/useCommandPalette';
 import { useCurrentStaff } from '../../../features/account-settings/agent/hooks/useCurrentStaff';
-import { useCompanySwitch } from '../../../features/companies/hooks/useCompanySwitch';
 import { useNotifications } from '../../../features/notifications/hooks/useNotifications';
 import { NotificationType } from '../../../features/notifications/types';
 import type { NotificationItem } from '../../../features/notifications/types';
@@ -51,9 +50,8 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/.test(navi
 const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { currentStaff, isLoading: isStaffLoading, clearCurrentStaff } = useCurrentStaff();
-  const companySwitch = useCompanySwitch();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { mode: themeMode, setMode: setThemeMode } = useTheme();
   const palette = useCommandPalette();
@@ -64,7 +62,7 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
   const currentUser = {
     name: currentStaff?.name ?? '',
     email: currentStaff?.email ?? '',
-    role: user?.isSuperAdmin ? 'SUPER ADMIN' : currentStaff?.isAdmin ? 'ADMIN' : 'STAFF',
+    role: currentStaff?.isSuperAdmin ? 'SUPER ADMIN' : currentStaff?.isAdmin ? 'ADMIN' : 'STAFF',
     avatar: null as string | null,
     initial: currentStaff?.name ? currentStaff.name.charAt(0).toUpperCase() : '',
   };
@@ -265,12 +263,10 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
               <div className="profile-dropdown-divider" />
 
               <div className="profile-dropdown-links">
-                {!user?.isSuperAdmin && (
-                  <button type="button" className="profile-dropdown-item" onClick={() => { setOpenMenu(null); navigate('/account/profile'); }}>
-                    <UserCircle size={16} />
-                    <span>My Profile</span>
-                  </button>
-                )}
+                <button type="button" className="profile-dropdown-item" onClick={() => { setOpenMenu(null); navigate('/account/profile'); }}>
+                  <UserCircle size={16} />
+                  <span>My Profile</span>
+                </button>
                 <button type="button" className="profile-dropdown-item" onClick={() => { setOpenMenu(null); navigate('/account'); }}>
                   <Settings size={16} />
                   <span>Account Settings</span>
@@ -304,23 +300,6 @@ const TopNav = ({ onOpenDrawer }: TopNavProps) => {
               <div className="profile-dropdown-divider" />
 
               <div className="profile-dropdown-footer">
-                {user?.isSuperAdmin && user?.activeCompanyId && (
-                  <>
-                    <div className="profile-dropdown-item acting-as-item">
-                      <Building size={16} />
-                      <span>Acting as: {user.activeCompanyName}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="profile-dropdown-item"
-                      onClick={companySwitch.switchBackToPlatform}
-                      disabled={companySwitch.isSwitching}
-                    >
-                      <Building size={16} />
-                      <span>Switch back to platform</span>
-                    </button>
-                  </>
-                )}
                 <button type="button" className="profile-dropdown-item logout-item" onClick={handleLogout}>
                   <LogOut size={16} />
                   <span>Logout</span>

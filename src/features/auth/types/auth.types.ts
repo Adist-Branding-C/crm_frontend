@@ -1,8 +1,6 @@
 export interface LoginFormData {
-  companyId: string
   phone: string
   password: string
-  isSuperAdmin: boolean
 }
 
 export interface ForgotPasswordFormData {
@@ -15,11 +13,9 @@ export interface ResetPasswordFormData {
 }
 
 export interface LoginRequest {
-  companyId?: string
   phone: string
   password: string
-  isSuperAdmin: boolean
-  is_limited?: boolean;
+   is_limited?: boolean;
 }
 
 export interface AuthUser {
@@ -30,18 +26,16 @@ export interface AuthUser {
   companyId?: string
   isAdmin?: boolean
   isSuperAdmin?: boolean
-  activeCompanyId?: string
-  activeCompanyName?: string
 }
 
 export interface LoginResponseData {
   id: number
   phone: string
   name: string
-  role?: string
-  staffId?: string
-  companyId?: string
-  isAdmin?: boolean
+  staffId: string
+  companyId: string
+  isAdmin: boolean
+  isSuperAdmin: boolean
   accessToken: string
   refreshToken: string
 }

@@ -1,11 +1,9 @@
 import React from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
-import { Phone, Lock, Building2, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react';
 import { useLoginData } from '../hooks/useLoginData';
 import { useAuth } from '../hooks/useAuth';
-import { useCompanySwitch } from '../../companies/hooks/useCompanySwitch';
-import CompanySelector from '../../companies/components/CompanySelector';
 import ErrorMessage from '../../../shared/components/ErrorMessage';
 import './Login.css';
 import { AUTH_CONTENT_SLIDES, AUTH_ROUTES } from '../constants/auth.constants';
@@ -13,16 +11,10 @@ import { AUTH_CONTENT_SLIDES, AUTH_ROUTES } from '../constants/auth.constants';
 const LoginPage = () => {
   const navigate = useNavigate();
   const loginData = useLoginData();
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const companySwitch = useCompanySwitch();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) return null;
-
-  const needsCompanySelection =
-    loginData.showCompanySelection ||
-    (isAuthenticated && !!user?.isSuperAdmin && !user?.activeCompanyId);
-
-  if (isAuthenticated && !needsCompanySelection) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -61,13 +53,6 @@ const LoginPage = () => {
         </div>
 
         <div className="auth-slide auth-form-panel">
-          {needsCompanySelection ? (
-            <CompanySelector
-              isSwitching={companySwitch.isSwitching}
-              error={companySwitch.error}
-              onSelectCompany={companySwitch.switchToCompany}
-            />
-          ) : (
           <div className="auth-card">
             <div className="auth-header">
               <h1>Sign In</h1>
@@ -79,53 +64,14 @@ const LoginPage = () => {
               validationSchema={loginData.validationSchema}
               onSubmit={loginData.handleSubmit}
             >
-              {({ errors, submitCount, values, setValues, setErrors, validateForm }) => {
+              {({ errors, touched, submitCount }) => {
                 const formError = loginData.error || (submitCount > 0 ? Object.values(errors)[0] : '');
-
-                const handleSuperAdminToggle = (checked: boolean) => {
-                  const nextValues = { ...values, isSuperAdmin: checked, companyId: '' };
-                  setValues(nextValues, false);
-                  setErrors({});
-                  loginData.clearError();
-                  if (submitCount > 0) {
-                    validateForm(nextValues);
-                  }
-                };
-
                 return (
                   <Form className="auth-form">
                     {formError && <ErrorMessage message={formError} />}
 
-                    <div className="form-group switch-field super-admin-toggle">
-                      <label className="toggle-switch">
-                        <input
-                          type="checkbox"
-                          checked={values.isSuperAdmin}
-                          onChange={(e) => handleSuperAdminToggle(e.target.checked)}
-                        />
-                        <span className="toggle-slider" />
-                      </label>
-                      <label>Are you a Super Admin?</label>
-                    </div>
-
-                    {!values.isSuperAdmin && (
-                      <div className="auth-form-group company-id-group" key="companyId">
-                        <label htmlFor="companyId">Company ID <span className="required">*</span></label>
-                        <div className="input-wrapper-with-icon">
-                          <span className="input-icon-left"><Building2 size={18} /></span>
-                          <Field
-                            id="companyId"
-                            name="companyId"
-                            type="text"
-                            placeholder="Enter your Company ID"
-                            className="form-input"
-                          />
-                        </div>
-                      </div>
-                    )}
-
                     <div className="auth-form-group">
-                      <label htmlFor="phone">Phone Number <span className="required">*</span></label>
+                      <label htmlFor="phone">Phone Number</label>
                       <div className="input-wrapper-with-icon">
                         <span className="input-icon-left"><Phone size={18} /></span>
                         <Field
@@ -139,7 +85,7 @@ const LoginPage = () => {
                     </div>
 
                     <div className="auth-form-group">
-                      <label htmlFor="password">Password <span className="required">*</span></label>
+                      <label htmlFor="password">Password</label>
                       <div className="input-wrapper-with-icon">
                         <span className="input-icon-left"><Lock size={18} /></span>
                         <Field
@@ -193,7 +139,6 @@ const LoginPage = () => {
               }}
             </Formik>
           </div>
-          )}
         </div>
       </div>
 
