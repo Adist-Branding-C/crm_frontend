@@ -69,16 +69,21 @@ export const useAuth = () => {
   // gets cached. isAdmin is compared to `undefined`, not truthiness, so a token that explicitly
   // carries `isAdmin: false` (e.g. admin rights were revoked) correctly overrides a stale `true`.
   const claims = getAccessTokenClaims();
+  const isSuperAdmin = claims?.isSuperAdmin !== undefined ? claims.isSuperAdmin : user?.isSuperAdmin;
+  if (user && isSuperAdmin !== undefined) {
+    user = { ...user, isSuperAdmin };
+  }
+  if (user?.isSuperAdmin && claims?.companyId !== undefined) {
+    user = { ...user, activeCompanyId: claims.companyId };
+  }
   if (claims?.staffId && user) {
     const companyId = claims.companyId ?? user.companyId;
     const isAdmin = claims.isAdmin !== undefined ? claims.isAdmin : user.isAdmin;
-    const isSuperAdmin = claims.isSuperAdmin !== undefined ? claims.isSuperAdmin : user.isSuperAdmin;
     user = {
       ...user,
       staffId: claims.staffId,
       ...(companyId !== undefined ? { companyId } : {}),
       ...(isAdmin !== undefined ? { isAdmin } : {}),
-      ...(isSuperAdmin !== undefined ? { isSuperAdmin } : {}),
     };
   }
 

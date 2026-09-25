@@ -12,7 +12,7 @@ const NotificationFields = () => {
   return (
     <div className="automation-config-panel">
       <div className="form-group">
-        <label>Apply to leads in these statuses</label>
+        <label>Apply to leads in these stages</label>
         <MultiSelectChips
           options={statusOptions}
           value={triggerConfig.statusIds ?? []}

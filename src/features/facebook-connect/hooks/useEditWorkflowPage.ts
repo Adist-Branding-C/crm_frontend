@@ -1,9 +1,36 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { facebookApi } from '../services/facebook.service';
-import { useMappingRows, emptyMappingRow, buildMappingRowsFromWorkflow } from './useMappingRows';
-import { useToast } from '../../../shared/hooks/useToast';
-import type { FacebookFormSummary, FieldMapping, MappingOptions, Workflow } from '../types';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { facebookApi } from "../services/facebook.service";
+import {
+  useMappingRows,
+  emptyMappingRow,
+  type MappingRow,
+} from "./useMappingRows";
+import { useToast } from "../../../shared/hooks/useToast";
+import type {
+  FacebookFormSummary,
+  FieldMapping,
+  MappingOptions,
+  Workflow,
+} from "../types";
+
+const buildMappingRowsFromWorkflow = (
+  mappings: FieldMapping[],
+): MappingRow[] => {
+  return mappings
+    .filter(
+      (mapping) =>
+        mapping.crmFieldCategory === "core" ||
+        mapping.crmFieldCategory === "additional",
+    )
+    .map((mapping) => ({
+      ...emptyMappingRow(),
+      crmFieldCategory: mapping.crmFieldCategory as "core" | "additional",
+      crmFieldKey: mapping.crmFieldKey,
+      valueTemplate: mapping.valueTemplate ?? "",
+      isRequired: mapping.isRequired,
+    }));
+};
 
 export const useEditWorkflowPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,15 +39,17 @@ export const useEditWorkflowPage = () => {
   const mapping = useMappingRows();
 
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
-  const [mappingOptions, setMappingOptions] = useState<MappingOptions | null>(null);
+  const [mappingOptions, setMappingOptions] = useState<MappingOptions | null>(
+    null,
+  );
   const [forms, setForms] = useState<FacebookFormSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  const [name, setName] = useState('');
-  const [status, setStatus] = useState<'active' | 'inactive'>('active');
-  const [sourceName, setSourceName] = useState('');
-  const [statusName, setStatusName] = useState('');
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<"active" | "inactive">("active");
+  const [sourceName, setSourceName] = useState("");
+  const [statusName, setStatusName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -29,7 +58,10 @@ export const useEditWorkflowPage = () => {
     (async () => {
       setLoading(true);
       try {
-        const [workflowRes, mappingOptionsRes] = await Promise.all([facebookApi.getWorkflow(id), facebookApi.getMappingOptions()]);
+        const [workflowRes, mappingOptionsRes] = await Promise.all([
+          facebookApi.getWorkflow(id),
+          facebookApi.getMappingOptions(),
+        ]);
         const loaded = workflowRes.data;
         if (!loaded) {
           setNotFound(true);
@@ -41,11 +73,21 @@ export const useEditWorkflowPage = () => {
         setStatus(loaded.status);
         const initialRows = buildMappingRowsFromWorkflow(loaded.fieldMappings);
         mapping.setRows(initialRows.length ? initialRows : [emptyMappingRow()]);
-        setSourceName(loaded.fieldMappings.find((m) => m.crmFieldCategory === 'source')?.crmFieldKey ?? '');
-        setStatusName(loaded.fieldMappings.find((m) => m.crmFieldCategory === 'status')?.crmFieldKey ?? '');
+
+        setSourceName(
+          loaded.fieldMappings.find((m) => m.crmFieldCategory === "source")
+            ?.crmFieldName ?? "",
+        );
+        setStatusName(
+          loaded.fieldMappings.find((m) => m.crmFieldCategory === "status")
+            ?.crmFieldName ?? "",
+        );
 
         if (loaded.facebookPageId && loaded.connectionId) {
-          const formsRes = await facebookApi.listForms(loaded.facebookPageId, loaded.connectionId);
+          const formsRes = await facebookApi.listForms(
+            loaded.facebookPageId,
+            loaded.connectionId,
+          );
           setForms(formsRes.data ?? []);
         }
       } catch {
@@ -57,7 +99,8 @@ export const useEditWorkflowPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const selectedForm = forms.find((form) => form.id === workflow?.facebookFormId) ?? null;
+  const selectedForm =
+    forms.find((form) => form.id === workflow?.facebookFormId) ?? null;
 
   const buildFieldMappings = (): FieldMapping[] => {
     const mappings: FieldMapping[] = [];
@@ -71,19 +114,46 @@ export const useEditWorkflowPage = () => {
         isRequired: row.isRequired,
       });
     }
-    if (sourceName) mappings.push({ facebookField: null, crmFieldCategory: 'source', crmFieldKey: sourceName, isRequired: false });
-    if (statusName) mappings.push({ facebookField: null, crmFieldCategory: 'status', crmFieldKey: statusName, isRequired: false });
+
+    if (sourceName)
+      mappings.push({
+        facebookField: null,
+        crmFieldCategory: "source",
+        crmFieldKey: sourceName,
+        valueTemplate: null,
+        isRequired: false,
+      });
+    if (statusName)
+      mappings.push({
+        facebookField: null,
+        crmFieldCategory: "status",
+        crmFieldKey: statusName,
+        valueTemplate: null,
+        isRequired: false,
+      });
     return mappings;
   };
 
   const validate = (): boolean => {
     const nextErrors: Record<string, string> = {};
-    if (!name.trim()) nextErrors.name = 'Workflow name is required';
-    if (!sourceName) nextErrors.sourceName = 'A default Source is required';
-    const hasNameMapping = mapping.rows.some((row) => row.crmFieldCategory === 'core' && row.crmFieldKey === 'name' && row.valueTemplate.trim());
-    const hasPhoneMapping = mapping.rows.some((row) => row.crmFieldCategory === 'core' && row.crmFieldKey === 'phone' && row.valueTemplate.trim());
-    if (!hasNameMapping) nextErrors.mappings = 'Add a mapping for the "Name" field';
-    else if (!hasPhoneMapping) nextErrors.mappings = 'Add a mapping for the "Phone" field';
+    if (!name.trim()) nextErrors.name = "Workflow name is required";
+    if (!sourceName) nextErrors.sourceName = "A default Source is required";
+    const hasNameMapping = mapping.rows.some(
+      (row) =>
+        row.crmFieldCategory === "core" &&
+        row.crmFieldKey === "name" &&
+        row.valueTemplate.trim(),
+    );
+    const hasPhoneMapping = mapping.rows.some(
+      (row) =>
+        row.crmFieldCategory === "core" &&
+        row.crmFieldKey === "phone" &&
+        row.valueTemplate.trim(),
+    );
+    if (!hasNameMapping)
+      nextErrors.mappings = 'Add a mapping for the "Name" field';
+    else if (!hasPhoneMapping)
+      nextErrors.mappings = 'Add a mapping for the "Phone" field';
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -92,15 +162,22 @@ export const useEditWorkflowPage = () => {
     if (!id || !validate()) return;
     setSubmitting(true);
     try {
-      const response = await facebookApi.updateWorkflow(id, { name: name.trim(), status, fieldMappings: buildFieldMappings() });
+      const response = await facebookApi.updateWorkflow(id, {
+        name: name.trim(),
+        status,
+        fieldMappings: buildFieldMappings(),
+      });
       if (response.data?.subscriptionWarning) {
-        toast.showToastMessage(response.data.subscriptionWarning, 'error');
+        toast.showToastMessage(response.data.subscriptionWarning, "error");
       } else {
-        toast.showToastMessage('Workflow updated', 'success');
+        toast.showToastMessage("Workflow updated", "success");
       }
-      navigate('/facebook/workflows');
+      navigate("/facebook/workflows");
     } catch (error: any) {
-      toast.showToastMessage(error?.response?.data?.message || 'Failed to update this Workflow', 'error');
+      toast.showToastMessage(
+        error?.response?.data?.message || "Failed to update this Workflow",
+        "error",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -110,10 +187,10 @@ export const useEditWorkflowPage = () => {
     if (!id) return;
     try {
       await facebookApi.deleteWorkflow(id);
-      toast.showToastMessage('Workflow deleted', 'success');
-      navigate('/facebook/workflows');
+      toast.showToastMessage("Workflow deleted", "success");
+      navigate("/facebook/workflows");
     } catch {
-      toast.showToastMessage('Failed to delete this Workflow', 'error');
+      toast.showToastMessage("Failed to delete this Workflow", "error");
     }
   };
 

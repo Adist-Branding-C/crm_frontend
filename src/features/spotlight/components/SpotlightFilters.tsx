@@ -123,7 +123,7 @@ const SpotlightFilters: React.FC<SpotlightFiltersProps> = ({
     </div>
     <div className="filter-row">
       <div className="filter-group">
-        <label htmlFor="spotlight-filter-status">Lead Status</label>
+        <label htmlFor="spotlight-filter-status">Lead Stage</label>
         <select
           id="spotlight-filter-status"
           value={filters.statusId}

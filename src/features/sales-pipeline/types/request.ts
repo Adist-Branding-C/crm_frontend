@@ -3,7 +3,11 @@ export interface GetPipelineParams {
   fromDate?: string | undefined;
   toDate?: string | undefined;
   agent?: string | undefined;
-  // Deal-only - scopes the Kanban to one pipeline's stages. Omit to fall
-  // back to the company's default pipeline (Lead/Task ignore this param).
+  // Scopes the Kanban to one pipeline's stages (Deal or Lead - the backend
+  // respects this for both; Task has no pipeline concept). Omit to fall
+  // back to the company's default pipeline. This unified board page
+  // doesn't currently expose a picker for it - PipelineMapper.toQueryParams
+  // never sends it - but the Leads page's own embedded Kanban tab
+  // (EnquiriesPage) does, via its own params, not this mapper.
   pipelineId?: number | undefined;
 }

@@ -64,6 +64,18 @@ class AuthService {
     );
     return response.data;
   }
+
+  async switchCompany(companyId: string | null): Promise<LoginResponse> {
+    const response = await axiosInstance.post<LoginResponse>(
+      AUTH_API_ENDPOINTS.SWITCH_COMPANY,
+      { companyId },
+    );
+    return {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  }
 }
 
 export const authService = new AuthService();

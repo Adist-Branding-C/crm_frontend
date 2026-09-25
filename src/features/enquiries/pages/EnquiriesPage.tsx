@@ -43,6 +43,7 @@ import FollowupPanel from '../../followup-required/components/FollowupPanel';
 import DraftsList from '../components/DraftsList';
 import ViewToggle from '../../deal-board/components/ViewToggle';
 import { useLeadsPipeline } from '../../sales-pipeline/hooks/useLeadsPipeline';
+import { useSalesPipelinePipelineOptions } from '../../sales-pipeline/hooks/useSalesPipelinePipelineOptions';
 import { usePipelineDragDrop } from '../../sales-pipeline/hooks/usePipelineDragDrop';
 import LeadPipelineBoard from '../../sales-pipeline/components/LeadPipelineBoard';
 import { leadService } from '../../deal/services/lead.service';
@@ -85,6 +86,16 @@ const EnquiriesPage = () => {
   const crud = useLeadListData(toast.showToastMessage);
 
   const pipeline = useLeadsPipeline(reportError);
+  // this Kanban tab is always the leads board, so the view is fixed
+  // rather than switchable like the unified Sales Pipeline page's picker.
+  const pipelinePicker = useSalesPipelinePipelineOptions('leads');
+  const kanbanFetchParams = useMemo(
+    () =>
+      pipelinePicker.selectedPipelineId
+        ? { pipelineId: Number(pipelinePicker.selectedPipelineId) }
+        : {},
+    [pipelinePicker.selectedPipelineId],
+  );
   const [, setDealGroups] = useState<PipelineStatusGroup[]>([]);
   const [, setTaskGroups] = useState<TaskStatusGroup[]>([]);
   const dragDrop = usePipelineDragDrop(setDealGroups, pipeline.setLeadGroups, setTaskGroups, reportError);
@@ -101,12 +112,13 @@ const EnquiriesPage = () => {
   }, []);
 
   useEffect(() => {
-    if (listView === 'kanban' && overlay === null) pipeline.fetchLeads({});
-  }, [listView, overlay]);
+    if (listView === 'kanban' && overlay === null) pipeline.fetchLeads(kanbanFetchParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listView, overlay, kanbanFetchParams]);
 
   const refreshKanbanIfActive = useCallback(() => {
-    if (listView === 'kanban') pipeline.fetchLeads({});
-  }, [listView, pipeline.fetchLeads]);
+    if (listView === 'kanban') pipeline.fetchLeads(kanbanFetchParams);
+  }, [listView, pipeline.fetchLeads, kanbanFetchParams]);
 
   const rowsPerPageRef = useRef(10);
   const searchQueryRef = useRef('');
@@ -176,7 +188,7 @@ const EnquiriesPage = () => {
     leadSearch.syncSearchQuery(paramSearch);
     pagination.resetPage();
     crud.fetchLeads(1, rowsPerPageRef.current, paramSearch, activeFiltersRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [searchParams]);
 
   useEffect(() => {
@@ -234,9 +246,22 @@ const EnquiriesPage = () => {
           <>
             <ViewToggle view={listView} onChange={handleListViewChange} />
             {overlay === null && listView === 'kanban' && (
-              <button className="btn btn-primary" onClick={() => addDrawer.open()}>
-                <Plus size={16} /> Add Lead
-              </button>
+              <>
+                {pipelinePicker.pipelineOptions.length > 0 && (
+                  <select
+                    className="btn btn-secondary pipeline-select"
+                    value={pipelinePicker.selectedPipelineId}
+                    onChange={(e) => pipelinePicker.setSelectedPipelineId(e.target.value)}
+                  >
+                    {pipelinePicker.pipelineOptions.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                )}
+                <button className="btn btn-primary" onClick={() => addDrawer.open()}>
+                  <Plus size={16} /> Add Lead
+                </button>
+              </>
             )}
             {drafts.length > 0 && (
               <button
@@ -282,14 +307,14 @@ const EnquiriesPage = () => {
                   type="button"
                   className="btn btn-secondary"
                   style={{ marginTop: '1rem' }}
-                  onClick={() => pipeline.fetchLeads({})}
+                  onClick={() => pipeline.fetchLeads(kanbanFetchParams)}
                 >
                   Retry
                 </button>
               }
             />
           ) : pipeline.leadGroups.length === 0 ? (
-            <PipelineEmptyState message="No lead statuses configured yet - add some in Settings > Lead Statuses" />
+            <PipelineEmptyState message="No lead stages configured yet - add some in Settings > Lead Stage" />
           ) : (
             <LeadPipelineBoard
               filteredLeadGroups={pipeline.leadGroups}

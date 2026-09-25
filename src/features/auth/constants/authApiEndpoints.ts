@@ -4,4 +4,5 @@ export const AUTH_API_ENDPOINTS = {
   RESET_PASSWORD: '/auth/reset-password',
   REFRESH: '/auth/refresh',
   LOGOUT: '/auth/logout',
+  SWITCH_COMPANY: '/auth/switch-company',
 };

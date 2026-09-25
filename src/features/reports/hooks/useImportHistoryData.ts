@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { importHistoryService } from '../services/importHistoryService';
-import type { ImportHistoryApiItem } from '../types';
+import type { ImportHistoryApiItem, ImportMasterDecision } from '../types';
 
 function extractErrorMessage(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'response' in err) {
@@ -58,12 +58,21 @@ export function useImportHistoryData(onShowToast: (message: string, type: 'succe
     fetchImports(page, limit, search);
   }, [fetchImports]);
 
-  const uploadFile = useCallback(async (file: File): Promise<{ success: boolean; error?: string }> => {
+  const uploadFile = useCallback(async (
+    file: File,
+    createMasters: ImportMasterDecision[] = [],
+  ): Promise<{ success: boolean; error?: string; importId?: string }> => {
     try {
-      await importHistoryService.uploadFile(file);
-      onShowToast('File uploaded — import started', 'success');
+      const response = await importHistoryService.uploadFile(file, createMasters);
+      const created = response.data?.mastersCreatedCount ?? 0;
+      onShowToast(
+        created > 0
+          ? `File uploaded — import started, ${created} new ${created === 1 ? 'value' : 'values'} created`
+          : 'File uploaded — import started',
+        'success',
+      );
       refreshCurrentPage();
-      return { success: true };
+      return { success: true, ...(response.data?.importId ? { importId: response.data.importId } : {}) };
     } catch (error) {
       const message = extractErrorMessage(error, 'Failed to upload file');
       onShowToast(message, 'error');

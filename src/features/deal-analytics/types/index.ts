@@ -43,4 +43,4 @@ export interface StageFunnelData {
   stages: StageFunnelStage[];
 }
 
-export type AnalyticsPeriod = 'today' | 'week' | 'month' | 'custom';
+export type AnalyticsPeriod = 'today' | 'week' | 'month' | 'custom' | 'all';

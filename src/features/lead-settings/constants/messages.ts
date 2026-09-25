@@ -9,11 +9,6 @@ export const ERROR_MESSAGES = {
   UPDATE_LEAD_SOURCE: 'Failed to update lead source',
   DELETE_LEAD_SOURCE: 'Failed to delete lead source',
 
-  FETCH_LEAD_STATUSES: 'Failed to fetch lead statuses',
-  CREATE_LEAD_STATUS: 'Failed to create lead status',
-  UPDATE_LEAD_STATUS: 'Failed to update lead status',
-  DELETE_LEAD_STATUS: 'Failed to delete lead status',
-
   FETCH_LEAD_TYPES: 'Failed to fetch lead types',
   CREATE_LEAD_TYPE: 'Failed to create lead type',
   UPDATE_LEAD_TYPE: 'Failed to update lead type',
@@ -32,5 +27,4 @@ export const ERROR_MESSAGES = {
   DUPLICATE_LEAD_SOURCE: 'This lead source already exists.',
   DUPLICATE_LEAD_PURPOSE: 'This lead purpose already exists.',
   DUPLICATE_LEAD_TYPE: 'This lead type already exists.',
-  DUPLICATE_LEAD_STATUS: 'This lead status already exists.',
 } as const;

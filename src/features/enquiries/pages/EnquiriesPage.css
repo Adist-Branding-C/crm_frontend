@@ -12,6 +12,7 @@
 @import '../../../shared/styles/dropdowns.css';
 @import '../../../shared/styles/empty-state.css';
 @import '../../../shared/styles/date-range-picker.css';
+
 .modal-content {
   width: 100%;
   max-width: 450px;
@@ -49,8 +50,20 @@
     opacity: 0;
     transform: translateY(1rem);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+.pipeline-select:focus {
+  outline: none;
+}
+
+.pipeline-select:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+  border-radius: var(--border-radius-xs);
 }

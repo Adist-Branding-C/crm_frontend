@@ -1,0 +1,17 @@
+@import '../../../shared/styles/settings-layout.css';
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/forms.css';
+@import '../../../shared/styles/modals.css';
+
+.lead-pipeline-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.lead-pipeline-list-empty {
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  padding: var(--space-6);
+  text-align: center;
+}

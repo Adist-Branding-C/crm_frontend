@@ -34,6 +34,7 @@ export interface Filters {
   filterByDate: string;
   sourceId: string;
   purposeId: string;
+  pipelineId: string;
   leadStatus: string;
   followupAdded: string;
   assignedTo: string;
