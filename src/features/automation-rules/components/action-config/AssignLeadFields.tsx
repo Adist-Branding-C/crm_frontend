@@ -57,7 +57,7 @@ const AssignLeadFields = ({ index }: { index: number }) => {
           <MultiSelectChips options={sourceOptions} value={config.sourceIds ?? []} onChange={(value) => setFieldValue(`${basePath}.sourceIds`, value)} />
         </div>
         <div className="form-group">
-          <label>Status filter (optional)</label>
+          <label>Stage filter (optional)</label>
           <MultiSelectChips options={statusOptions} value={config.statusIds ?? []} onChange={(value) => setFieldValue(`${basePath}.statusIds`, value)} />
         </div>
         <div className="form-group">

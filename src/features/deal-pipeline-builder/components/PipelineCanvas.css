@@ -1,3 +1,8 @@
+@import '../../../shared/styles/buttons.css';
+@import '../../../shared/styles/forms.css';
+@import '../../../shared/styles/drawers.css';
+@import '../../../shared/styles/modals.css';
+
 /* Retheme React Flow's own CSS variables onto this project's design
  * tokens, scoped to the canvas container so it stays correct across the
  * light/dark toggle without touching @xyflow/react's stylesheet directly. */

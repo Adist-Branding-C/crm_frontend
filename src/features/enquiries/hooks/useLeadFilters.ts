@@ -29,6 +29,7 @@ export function useLeadFilters(
     const params: Record<string, string | number> = {};
     if (filters.typeId) params.typeId = filters.typeId;
     if (filters.leadStatus) params.statusId = filters.leadStatus;
+    if (filters.pipelineId) params.pipelineId = filters.pipelineId;
     if (filters.sourceId) params.sourceId = filters.sourceId;
     if (filters.purposeId) params.purposeId = filters.purposeId;
     if (filters.assignedTo) params.assignedTo = filters.assignedTo;
@@ -37,6 +38,7 @@ export function useLeadFilters(
       params.dateFrom = filters.dateRange.start;
       params.dateTo = filters.dateRange.end;
     }
+    params.timezoneOffsetMinutes = new Date().getTimezoneOffset();
     if (filters.filterByDate) params.dateFilterBy = DATE_FILTER_BY_API_MAP[filters.filterByDate] ?? filters.filterByDate;
     if (filters.followupAdded) params.followUpAdded = filters.followupAdded;
     const additionalFieldFilters = Object.entries(filters.additionalFields)

@@ -58,5 +58,7 @@ export function buildQueryParams(
     if (value) params[key] = value;
   });
 
+  params.timezoneOffsetMinutes = new Date().getTimezoneOffset();
+
   return params;
 }

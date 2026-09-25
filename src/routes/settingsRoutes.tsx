@@ -3,12 +3,13 @@ import { Route } from 'react-router-dom';
 import SettingsPage from '../features/settings/pages/SettingsPage';
 import ErrorBoundary from '../shared/components/ErrorBoundary';
 import LeadPurposePage from '../features/lead-settings/lead-purpose/pages/LeadPurposePage';
-import LeadStatusPage from '../features/lead-settings/lead-status/pages/LeadStatusPage';
 import LeadSourcePage from '../features/lead-settings/lead-source/pages/LeadSourcePage';
 import LeadTypesPage from '../features/lead-settings/lead-types/pages/LeadTypesPage';
 import LeadAdditionalPage from '../features/lead-settings/lead-additional/pages/LeadAdditionalPage';
 import DealPipelineListPage from '../features/deal-pipeline-builder/pages/DealPipelineListPage';
 import DealPipelineCanvasPage from '../features/deal-pipeline-builder/pages/DealPipelineCanvasPage';
+import LeadPipelineListPage from '../features/lead-pipeline-builder/pages/LeadPipelineListPage';
+import LeadPipelineCanvasPage from '../features/lead-pipeline-builder/pages/LeadPipelineCanvasPage';
 // import CustomPipelinePage from '../features/pipeline-settings/pages/CustomPipelinePage';
 // Hidden: Notification Settings page disabled per client request (2026-09-04)
 // import NotificationSettingsPage from '../features/notification-settings/pages/NotificationSettingsPage';
@@ -27,7 +28,8 @@ export default (
   <>
     <Route path="settings" element={<SettingsPage />} />
     <Route path="settings/lead-settings/purpose" element={<ErrorBoundary><LeadPurposePage /></ErrorBoundary>} />
-    <Route path="settings/lead-settings/status" element={<ErrorBoundary><LeadStatusPage /></ErrorBoundary>} />
+    <Route path="settings/lead-pipelines" element={<ErrorBoundary><LeadPipelineListPage /></ErrorBoundary>} />
+    <Route path="settings/lead-pipelines/:pipelineId" element={<ErrorBoundary><LeadPipelineCanvasPage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/source" element={<ErrorBoundary><LeadSourcePage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/types" element={<ErrorBoundary><LeadTypesPage /></ErrorBoundary>} />
     <Route path="settings/lead-settings/additional" element={<ErrorBoundary><LeadAdditionalPage /></ErrorBoundary>} />

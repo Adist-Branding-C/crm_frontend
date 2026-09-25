@@ -17,19 +17,16 @@ export interface TaskCardProps {
 export interface DealCardProps {
   deal: PipelineDeal;
   statusId: number;
-  // Sourced from the deal's column (stage), not the deal itself - a deal
-  // has no probability of its own until the v1.1 per-deal override ships.
   probability?: number | undefined;
-  // Opens the deal detail drawer. Optional - SalesPipelinePage renders the
-  // board without a drawer, DealBoardPage wires it up.
   onDealClick?: ((deal: PipelineDeal) => void) | undefined;
-  // Marks the card that's currently loading its full detail record.
   isOpening?: boolean | undefined;
 }
 
 export interface LeadCardProps {
   lead: Lead;
   fromStatusId: string;
+  onLeadClick?: ((lead: Lead) => void) | undefined;
+  isOpening?: boolean | undefined;
 }
 
 export interface PipelineToolbarProps {
@@ -69,6 +66,8 @@ export interface LeadPipelineBoardProps {
   filteredLeadGroups: LeadStatusGroup[];
   loadingLeadStatusId: string | null;
   loadMoreLeads: (statusId: string) => void;
+  onLeadClick?: ((lead: Lead) => void) | undefined;
+  openingLeadId?: number | null | undefined;
 }
 
 export interface TaskPipelineBoardProps {

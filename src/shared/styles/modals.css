@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1050;
   animation: modal-overlay-in var(--duration-base) var(--ease-standard);
 }
 
@@ -46,7 +46,8 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.modal-header h2 {
+.modal-header h2,
+.modal-header h5 {
   margin: 0;
   font-size: var(--text-lg);
   font-weight: var(--weight-semibold);

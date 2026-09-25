@@ -49,5 +49,5 @@ export const RECENT_ACTIVITIES: Activity[] = [
   { id: 2, type: 'email', title: 'Sent proposal to prospective client', time: '5 hours ago', status: 'completed' },
   { id: 3, type: 'meeting', title: 'Scheduled demo meeting', time: 'Yesterday', status: 'completed' },
   { id: 4, type: 'lead', title: 'Converted new lead to customer', time: 'Yesterday', status: 'completed' },
-  { id: 5, type: 'task', title: 'Updated lead status in CRM', time: '2 days ago', status: 'completed' },
+  { id: 5, type: 'task', title: 'Updated lead stage in CRM', time: '2 days ago', status: 'completed' },
 ];

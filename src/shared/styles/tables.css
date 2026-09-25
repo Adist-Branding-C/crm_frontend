@@ -90,7 +90,11 @@
   color: var(--primary);
   cursor: pointer;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 220px;
+  display: inline-block;
 }
 
 .lead-name-cell:hover {

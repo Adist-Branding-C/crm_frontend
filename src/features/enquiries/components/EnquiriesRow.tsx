@@ -38,7 +38,7 @@ const EDITABLE_FIELD_CONFIG: Partial<Record<string, {
   assignedTo: { payloadKey: 'agentId', type: 'select', optionsKey: 'staffOptions', label: 'Assigned To' },
   purpose: { payloadKey: 'purposeId', type: 'select', optionsKey: 'purposeOptions', label: 'Purpose' },
   type: { payloadKey: 'typeId', type: 'select', optionsKey: 'typeOptions', label: 'Type' },
-  status: { payloadKey: 'statusId', type: 'select', optionsKey: 'statusOptions', label: 'Status' },
+  status: { payloadKey: 'statusId', type: 'select', optionsKey: 'statusOptions', label: 'Stage' },
   source: { payloadKey: 'sourceId', type: 'select', optionsKey: 'sourceOptions', label: 'Source' },
 };
 

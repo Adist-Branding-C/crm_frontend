@@ -114,7 +114,7 @@ const LeadExport: React.FC = () => {
                 </select>
               </div>
               <div className="filter-group">
-                <label>Status</label>
+                <label>Stage</label>
                 <select value={filters.statusId} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, statusId: e.target.value })} disabled={optionsLoading}>
                   <option value="">Select</option>
                   {statusOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}

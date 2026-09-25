@@ -35,6 +35,7 @@ export interface UseLeadPaginationReturn {
 export interface UseLeadSearchReturn {
   searchQuery: string;
   setSearchQuery: (v: string) => void;
+  syncSearchQuery: (v: string) => void;
   resetSearch: () => void;
 }
 
@@ -73,6 +74,7 @@ export interface UseLeadFilterOptionsReturn {
   purposeOptions: LabelValuePair[];
   staffOptions: LabelValuePair[];
   statusOptions: LabelValuePair[];
+  pipelineOptions: LabelValuePair[];
   additionalFields: AdditionalFieldDef[];
   isLoading: boolean;
   error: string | null;

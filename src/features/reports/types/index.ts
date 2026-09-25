@@ -227,7 +227,7 @@ export interface LeadImportHistoryModalProps {
 }
 
 export type ImportHistoryStatus = 'pending' | 'processing' | 'completed' | 'failed';
-export type ImportEntryStatus = 'pending' | 'success' | 'failed';
+export type ImportEntryStatus = 'pending' | 'success' | 'failed' | 'skipped';
 
 export interface ImportHistoryApiItem {
   importId: string;
@@ -238,6 +238,9 @@ export interface ImportHistoryApiItem {
   status: ImportHistoryStatus;
   successCount: number;
   failedCount: number;
+  skippedCount: number;
+  mastersCreatedCount: number;
+  createdMasters: CreatedImportMaster[] | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -276,11 +279,75 @@ export interface ImportEntriesListData {
   pagination: ImportPaginationInfo;
 }
 
+export type ImportMasterEntity = 'source' | 'purpose' | 'type' | 'status';
+
+export interface ImportMasterDecision {
+  entity: ImportMasterEntity;
+  value: string;
+}
+
+export interface CreatedImportMaster extends ImportMasterDecision {
+  id: string;
+}
+
 export interface UploadImportResult {
   importId: string;
   totalRows: number;
   status: ImportHistoryStatus;
+  mastersCreatedCount: number;
+  createdMasters: CreatedImportMaster[];
 }
+
+export type ImportMasterNotCreatableReason = 'NOT_ADMIN' | 'NOT_ALLOWED' | 'TOO_MANY_NEW_VALUES' | 'VALUE_TOO_LONG';
+
+export interface ImportMissingMaster {
+  entity: ImportMasterEntity;
+  columnLabel: string;
+  value: string;
+  rowCount: number;
+  exampleRows: number[];
+  creatable: boolean;
+  notCreatableReason: ImportMasterNotCreatableReason | null;
+}
+
+export interface ImportInactiveMaster {
+  entity: ImportMasterEntity;
+  columnLabel: string;
+  value: string;
+  rowCount: number;
+  exampleRows: number[];
+}
+
+export interface ImportInvalidField {
+  field: string;
+  code: string;
+  message: string;
+  rowCount: number;
+  exampleRows: number[];
+  example: { row: number; value: string | null };
+}
+
+export interface ImportValidationWarning {
+  code: string;
+  message: string;
+  rowCount: number;
+}
+
+export interface ImportValidationReport {
+  totalRows: number;
+  readyRows: number;
+  unfixableRows: number;
+  rowsPendingMasterDecision: number;
+  canCreateMasters: boolean;
+  missingMasters: ImportMissingMaster[];
+  inactiveMasters: ImportInactiveMaster[];
+  invalidFields: ImportInvalidField[];
+  warnings: ImportValidationWarning[];
+  limits: { maxNewMastersPerEntity: number };
+  truncated: boolean;
+}
+
+export type ImportMasterChoice = 'create' | 'skip';
 
 export interface LeadExportFilters {
   dateRange: DateRange;
@@ -331,6 +398,7 @@ export interface CreateLeadExportPayload {
   dateFrom?: string;
   dateTo?: string;
   dateFilterBy?: string;
+  timezoneOffsetMinutes?: number;
   sourceId?: string;
   purposeId?: string;
   statusId?: string;

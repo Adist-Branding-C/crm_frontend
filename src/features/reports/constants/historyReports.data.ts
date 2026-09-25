@@ -13,7 +13,9 @@ export const importHistoryColumns: Column[] = [
   { key: 'fileName', label: 'File Name' },
   { key: 'total', label: 'Total Records' },
   { key: 'invalid', label: 'Failed Records' },
+  { key: 'skipped', label: 'Skipped Records' },
   { key: 'imported', label: 'Imported Records' },
+  { key: 'mastersCreated', label: 'New Masters' },
   { key: 'status', label: 'Status' },
 ];
 

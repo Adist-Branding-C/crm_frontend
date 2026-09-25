@@ -82,7 +82,7 @@ const LeadGLAPIHistoryReport = () => {
               </select>
             </div>
             <div className="filter-group">
-              <label>Status</label>
+              <label>Stage</label>
               <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
                 <option value="">All</option>
                 <option value="Junk Lead _ Form not submitted">Junk Lead _ Form not submitted</option>
@@ -111,7 +111,7 @@ const LeadGLAPIHistoryReport = () => {
               <th>Assigned To</th>
               <th>Purpose</th>
               <th>Source</th>
-              <th>Status</th>
+              <th>Stage</th>
               <th>count</th>
               <th>Date/Time</th>
               <th>Updated At</th>

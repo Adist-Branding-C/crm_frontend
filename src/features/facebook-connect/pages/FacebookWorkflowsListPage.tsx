@@ -116,8 +116,8 @@ const FacebookWorkflowsListPage = () => {
       )}
 
       {deletingWorkflow && (
-        <div className="modal-overlay" onClick={() => setDeletingWorkflow(null)}>
-          <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay workflow-delete-overlay" onClick={() => setDeletingWorkflow(null)}>
+          <div className="modal-content delete-modal workflow-delete-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Delete Workflow?</h3>
               <button className="modal-close" onClick={() => setDeletingWorkflow(null)}>
