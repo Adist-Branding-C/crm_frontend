@@ -1,11 +1,11 @@
 import { Users, DollarSign, ListChecks, Phone, ClipboardList, Clock } from 'lucide-react';
 import type { ReportCategory, ReportOption } from '../types';
 import type { Column } from '../../../shared/types/table';
-import type { DailyActivityRow, GLAPIRow, DeletedLead, DealStageStat, DealAgentStat, LeadConversionDeal, TaskWiseRow, LeadChangeRow, TaskWorkRow, GLDialerCall, GLDialerAgentStat, CallFeedbackEntry, CheckinRow, AttendanceRow } from '../types';
+import type { DailyActivityRow, GLAPIRow, DeletedLead, TaskWiseRow, LeadChangeRow, TaskWorkRow, GLDialerCall, GLDialerAgentStat, CallFeedbackEntry, CheckinRow, AttendanceRow } from '../types';
 
 export const reportCategories: ReportCategory[] = [
   { id: 'lead', title: 'Lead Reports', path: '/reports/lead', icon: Users },
-  // { id: 'deal', title: 'Deal Reports', path: '/reports/deal', icon: DollarSign },
+  { id: 'deal', title: 'Deal Reports', path: '/reports/deal', icon: DollarSign },
   // { id: 'task', title: 'Task Reports', path: '/reports/task', icon: ListChecks },
   // { id: 'call', title: 'Call Reports', path: '/reports/call', icon: Phone },
   // { id: 'checkin', title: 'Check-in & Check-out', path: '/reports/checkin', icon: ClipboardList },
@@ -47,13 +47,24 @@ export const DELETED_LEAD_COLUMNS: Column[] = [
   { key: 'deletedBy', label: 'Deleted By' },
 ];
 
-export const dealReportOptions: ReportOption[] = [
-  { id: 'stage', title: 'Deals by Stage', description: 'Overview of deals segmented by current stage in pipeline', path: '/reports/deal/stage' },
-  { id: 'conversion', title: 'Lead Conversion', description: 'Track conversion rates from lead to deal', path: '/reports/deal/conversion' },
-  { id: 'visit', title: 'Deal Visit', description: 'Record and analyze deal visit activities', path: '/reports/deal/visit' },
-  { id: 'export', title: 'Deal Export', description: 'Export deal data for offline analysis', path: '/reports/deal/export' },
-  { id: 'export-history', title: 'Deal Export History', description: 'Track all your past deal data exports', path: '/reports/deal/export-history' },
-  { id: 'deleted', title: 'Deleted Deals', description: 'View and restore previously deleted deals', path: '/reports/deal/deleted' },
+export type DealReportCategory = 'Pipeline & Forecasting' | 'Conversion & Performance' | 'Risk & Data Integrity' | 'Additional Reports';
+
+export interface DealReportOption extends ReportOption {
+  category: DealReportCategory;
+}
+
+export const dealReportOptions: DealReportOption[] = [
+  { id: 'pipeline-summary', title: 'Deal Stage Distribution / Pipeline Summary', description: 'Deal count and pipeline value across each stage', path: '/reports/deal/pipeline-summary', category: 'Pipeline & Forecasting' },
+  { id: 'forecast', title: 'Forecasted Revenue / Weighted Pipeline Value', description: 'Expected revenue weighted by win probability, by period', path: '/reports/deal/forecast', category: 'Pipeline & Forecasting' },
+  { id: 'velocity', title: 'Deal Velocity & Sales Cycle Duration', description: 'Average time per stage and full sales cycle duration', path: '/reports/deal/velocity', category: 'Pipeline & Forecasting' },
+  { id: 'win-loss', title: 'Win / Loss Analysis & Reasons', description: 'Won vs lost breakdown, with lost-reason analysis', path: '/reports/deal/win-loss', category: 'Conversion & Performance' },
+  { id: 'source-conversion', title: 'Deal Conversion Rate by Source', description: 'Conversion performance by originating lead source', path: '/reports/deal/source-conversion', category: 'Conversion & Performance' },
+  { id: 'rep-performance', title: 'Sales Rep Deal Performance', description: 'Leaderboard comparing sales rep performance', path: '/reports/deal/rep-performance', category: 'Conversion & Performance' },
+  { id: 'aging', title: 'Stalled / Aging Deals', description: 'Deals that may require attention', path: '/reports/deal/aging', category: 'Risk & Data Integrity' },
+  { id: 'size-distribution', title: 'Deal Size & Value Distribution', description: 'Distribution of deals by value tier', path: '/reports/deal/size-distribution', category: 'Risk & Data Integrity' },
+  { id: 'export', title: 'Deal Export', description: 'Export deals with selectable columns and a custom file name', path: '/reports/deal/export', category: 'Additional Reports' },
+  { id: 'export-history', title: 'Deal Export History', description: 'Track all your past deal data exports', path: '/reports/deal/export-history', category: 'Additional Reports' },
+  { id: 'deleted', title: 'Deleted Deals', description: 'Soft-deleted deals (admin only)', path: '/reports/deal/deleted', category: 'Additional Reports' },
 ];
 
 export const taskReportOptions: ReportOption[] = [
@@ -98,34 +109,6 @@ export const deletedLeadsSampleData: DeletedLead[] = [
   { id: 6, name: 'Ananya Gupta', phone: '9876543215', email: 'ananya@email.com', location: 'Mumbai, Maharashtra', assignedTo: 'John Doe', purpose: 'Support', type: 'Warm Lead', status: 'Inactive', source: 'Referral', createdAt: '2024-01-10', updatedAt: '2024-01-15', deletedAt: '2024-01-21', deleteReason: 'Not Interested' },
   { id: 7, name: 'Rajesh Verma', phone: '9876543216', email: 'rajesh@email.com', location: 'Delhi, NCR', assignedTo: 'Mike Johnson', purpose: 'Sales', type: 'Hot Lead', status: 'Active', source: 'Website', createdAt: '2024-01-09', updatedAt: '2024-01-14', deletedAt: '2024-01-20', deleteReason: 'Spam' },
   { id: 8, name: 'Kavitha Nair', phone: '9876543217', email: 'kavitha@email.com', location: 'Kolkata, West Bengal', assignedTo: 'Jane Smith', purpose: 'Demo', type: 'Cold Lead', status: 'Pending', source: 'Social Media', createdAt: '2024-01-08', updatedAt: '2024-01-13', deletedAt: '2024-01-19', deleteReason: 'Invalid Number' },
-];
-
-export const dealStageData: DealStageStat[] = [
-  { stage: 'Open', count: 45, amount: 125000, color: 'var(--info)' },
-  { stage: 'Close', count: 28, amount: 85000, color: 'var(--warning)' },
-  { stage: 'Win', count: 18, amount: 62000, color: 'var(--success)' },
-];
-
-export const dealAgentData: DealAgentStat[] = [
-  { id: 1, name: 'John Doe', totalDeals: 45, openDeals: 12, winDeals: 8, closeDeals: 25 },
-  { id: 2, name: 'Jane Smith', totalDeals: 38, openDeals: 10, winDeals: 6, closeDeals: 22 },
-  { id: 3, name: 'Mike Johnson', totalDeals: 32, openDeals: 8, winDeals: 5, closeDeals: 19 },
-  { id: 4, name: 'Sarah Williams', totalDeals: 28, openDeals: 7, winDeals: 4, closeDeals: 17 },
-  { id: 5, name: 'David Brown', totalDeals: 25, openDeals: 6, winDeals: 3, closeDeals: 16 },
-  { id: 6, name: 'Emily Davis', totalDeals: 22, openDeals: 5, winDeals: 2, closeDeals: 15 },
-  { id: 7, name: 'Chris Wilson', totalDeals: 18, openDeals: 4, winDeals: 2, closeDeals: 12 },
-  { id: 8, name: 'Amanda Taylor', totalDeals: 15, openDeals: 3, winDeals: 1, closeDeals: 11 },
-];
-
-export const dealConversionData: LeadConversionDeal[] = [
-  { id: 1, dealCode: 'DL001', dealName: 'TechCorp Deal', leadName: 'Rahul Sharma', mobile: '9876543210', dealAmount: 50000, dealStatus: 'Open', leadSource: 'Website', lostReason: '', startDate: '2024-01-15', endDate: '2024-02-15', staffName: 'John Doe', createdBy: 'Admin', updatedAt: '2024-01-20' },
-  { id: 2, dealCode: 'DL002', dealName: 'Startup Deal', leadName: 'Priya Patel', mobile: '9876543211', dealAmount: 25000, dealStatus: 'Win', leadSource: 'Referral', lostReason: '', startDate: '2024-01-14', endDate: '2024-02-14', staffName: 'Jane Smith', createdBy: 'Admin', updatedAt: '2024-01-19' },
-  { id: 3, dealCode: 'DL003', dealName: 'Global Deal', leadName: 'Amit Kumar', mobile: '9876543212', dealAmount: 75000, dealStatus: 'Lost', leadSource: 'Social Media', lostReason: 'Not Interested', startDate: '2024-01-13', endDate: '2024-02-13', staffName: 'John Doe', createdBy: 'Admin', updatedAt: '2024-01-18' },
-  { id: 4, dealCode: 'DL004', dealName: 'SmallBiz Deal', leadName: 'Sneha Reddy', mobile: '9876543213', dealAmount: 15000, dealStatus: 'Open', leadSource: 'Website', lostReason: '', startDate: '2024-01-12', endDate: '2024-02-12', staffName: 'Mike Johnson', createdBy: 'Admin', updatedAt: '2024-01-17' },
-  { id: 5, dealCode: 'DL005', dealName: 'MegaCorp Deal', leadName: 'Vikram Singh', mobile: '9876543214', dealAmount: 100000, dealStatus: 'Win', leadSource: 'Email Campaign', lostReason: '', startDate: '2024-01-11', endDate: '2024-02-11', staffName: 'Jane Smith', createdBy: 'Admin', updatedAt: '2024-01-16' },
-  { id: 6, dealCode: 'DL006', dealName: 'Enterprise Deal', leadName: 'Ananya Gupta', mobile: '9876543215', dealAmount: 35000, dealStatus: 'Lost', leadSource: 'Referral', lostReason: 'Price High', startDate: '2024-01-10', endDate: '2024-02-10', staffName: 'John Doe', createdBy: 'Admin', updatedAt: '2024-01-15' },
-  { id: 7, dealCode: 'DL007', dealName: 'Corporate Deal', leadName: 'Rajesh Verma', mobile: '9876543216', dealAmount: 45000, dealStatus: 'Open', leadSource: 'Website', lostReason: '', startDate: '2024-01-09', endDate: '2024-02-09', staffName: 'Mike Johnson', createdBy: 'Admin', updatedAt: '2024-01-14' },
-  { id: 8, dealCode: 'DL008', dealName: 'Business Deal', leadName: 'Kavitha Nair', mobile: '9876543217', dealAmount: 28000, dealStatus: 'Win', leadSource: 'Social Media', lostReason: '', startDate: '2024-01-08', endDate: '2024-02-08', staffName: 'Jane Smith', createdBy: 'Admin', updatedAt: '2024-01-13' },
 ];
 
 export const taskWiseData: TaskWiseRow[] = [
@@ -243,13 +226,4 @@ export const REPT_SORT_OPTIONS = [
   { value: 'updatedDate', label: 'Updated Date' },
   { value: 'dealAmountHigh', label: 'Deal Amount (High-Low)' },
   { value: 'dealAmountLow', label: 'Deal Amount (Low-High)' },
-];
-
-export const deletedDealData = [
-  { id: 1, dealName: 'TechCorp Deal', deletedBy: 'John Doe', leadName: 'Rahul Sharma', mobile: '9876543210', amount: 50000, status: 'Lost', type: 'Hot Deal', startDate: '2024-01-15', endDate: '2024-02-15', agent: 'John Doe', createdBy: 'Admin', createdAt: '2024-01-10', deletedAt: '2024-01-20', lostReason: 'Not Interested' },
-  { id: 2, dealName: 'Startup Deal', deletedBy: 'Jane Smith', leadName: 'Priya Patel', mobile: '9876543211', amount: 25000, status: 'Lost', type: 'Cold Deal', startDate: '2024-01-14', endDate: '2024-02-14', agent: 'Jane Smith', createdBy: 'Admin', createdAt: '2024-01-09', deletedAt: '2024-01-19', lostReason: 'Price High' },
-  { id: 3, dealName: 'Global Deal', deletedBy: 'Mike Johnson', leadName: 'Amit Kumar', mobile: '9876543212', amount: 75000, status: 'Lost', type: 'Warm Deal', startDate: '2024-01-13', endDate: '2024-02-13', agent: 'Mike Johnson', createdBy: 'Admin', createdAt: '2024-01-08', deletedAt: '2024-01-18', lostReason: 'Budget Issues' },
-  { id: 4, dealName: 'SmallBiz Deal', deletedBy: 'John Doe', leadName: 'Sneha Reddy', mobile: '9876543213', amount: 15000, status: 'Lost', type: 'Cold Deal', startDate: '2024-01-12', endDate: '2024-02-12', agent: 'John Doe', createdBy: 'Admin', createdAt: '2024-01-07', deletedAt: '2024-01-17', lostReason: 'Not Needed' },
-  { id: 5, dealName: 'MegaCorp Deal', deletedBy: 'Jane Smith', leadName: 'Vikram Singh', mobile: '9876543214', amount: 100000, status: 'Lost', type: 'Hot Deal', startDate: '2024-01-11', endDate: '2024-02-11', agent: 'Jane Smith', createdBy: 'Admin', createdAt: '2024-01-06', deletedAt: '2024-01-16', lostReason: 'Competitor' },
-  { id: 6, dealName: 'Enterprise Deal', deletedBy: 'Mike Johnson', leadName: 'Ananya Gupta', mobile: '9876543215', amount: 35000, status: 'Lost', type: 'Warm Deal', startDate: '2024-01-10', endDate: '2024-02-10', agent: 'Mike Johnson', createdBy: 'Admin', createdAt: '2024-01-05', deletedAt: '2024-01-15', lostReason: 'Timeline' },
 ];

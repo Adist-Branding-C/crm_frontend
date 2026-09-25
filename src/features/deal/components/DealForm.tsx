@@ -73,6 +73,7 @@ const DealForm = ({
   const {
     leads, staff, statuses, pipelines,
     isLoadingLeads, isLoadingStaff, isLoadingStatuses, isLoadingPipelines,
+    staffError,
   } = useDealFormOptions();
   const { dealAdditionalFieldDefs } = useDealAdditionalFieldDefs();
   const isEditing = !!editingItem;
@@ -479,7 +480,9 @@ const DealForm = ({
                   onBlur={() => setFieldTouched('agentId', true)}
                   className={touched.agentId && errors.agentId ? 'input-error' : ''}
                 />
-                {staffEmpty ? (
+                {staffError ? (
+                  <small className="field-error-text">{staffError}</small>
+                ) : staffEmpty ? (
                   <small className="field-error-text">
                     No agents/staff found. Please add a staff member first.
                   </small>

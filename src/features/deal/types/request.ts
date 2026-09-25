@@ -18,9 +18,16 @@ export interface GetDealsParams {
 /**
  * Params for the dedicated Deal export endpoint — the same filter/search/sort
  * fields as `GetDealsParams` minus `pageNumber`/`limit`, since export always
- * returns the full filtered dataset rather than a single page.
+ * returns the full filtered dataset rather than a single page. `fileName`/
+ * `columns` are both optional - omitted, the endpoint's
+ * pre-existing behavior (every column, an auto-generated file name) is
+ * unchanged.
  */
-export type GetDealsExportParams = Omit<GetDealsParams, 'pageNumber' | 'limit'>;
+export type GetDealsExportParams = Omit<GetDealsParams, 'pageNumber' | 'limit'> & {
+  fileName?: string;
+  columns?: string;
+  type?: string;
+};
 
 export interface CreateDealPayload {
   dealName: string;
