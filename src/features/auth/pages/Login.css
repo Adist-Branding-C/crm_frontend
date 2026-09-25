@@ -184,20 +184,19 @@
 .auth-form-panel {
   flex: 1;
   display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 2rem;
   background: var(--surface-1);
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .auth-card {
   width: 100%;
   max-width: 400px;
-  margin: auto;
 }
 
 .auth-header {
-  margin-bottom: var(--space-6);
+  margin-bottom: 2.5rem;
 }
 
 .auth-header h1 {
@@ -216,7 +215,7 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: 1.5rem;
 }
 
 .auth-error {
@@ -238,96 +237,6 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-secondary);
-}
-
-.auth-form-group label .required {
-  color: #dc2626;
-  margin-left: 2px;
-}
-
-/* Super Admin toggle — matches the shared switch component styling */
-.super-admin-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  margin: 0.25rem 0 0;
-}
-
-.super-admin-toggle .toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 26px;
-  flex-shrink: 0;
-}
-
-.super-admin-toggle .toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.super-admin-toggle .toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--surface-3);
-  border: 1px solid var(--border-strong);
-  border-radius: 26px;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.super-admin-toggle .toggle-slider::before {
-  position: absolute;
-  content: '';
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: #ffffff;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s;
-}
-
-.super-admin-toggle .toggle-switch input:checked + .toggle-slider {
-  background-color: var(--success);
-  border-color: var(--success);
-}
-
-.super-admin-toggle .toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(22px);
-}
-
-.super-admin-toggle .toggle-switch input:focus-visible + .toggle-slider {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.super-admin-toggle .toggle-switch + label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-/* Smooth entry for the Company ID field when toggled back on */
-.company-id-group {
-  animation: company-id-in 0.25s ease;
-}
-
-@keyframes company-id-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .input-wrapper-with-icon {
@@ -438,7 +347,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: var(--space-2);
+  margin-top: 0.5rem;
 }
 
 .auth-btn:hover {

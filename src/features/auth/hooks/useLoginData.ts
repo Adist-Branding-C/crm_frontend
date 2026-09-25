@@ -1,18 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { FormikHelpers } from 'formik';
-import { AUTH_CONTENT_SLIDES, AUTH_ERROR_MESSAGES, AUTH_ROUTES, AUTH_STORAGE_KEYS, MIN_SWIPE_DISTANCE } from '../constants/auth.constants';
+import { AUTH_CONTENT_SLIDES, AUTH_ROUTES, AUTH_STORAGE_KEYS, MIN_SWIPE_DISTANCE } from '../constants/auth.constants';
 import { authService } from '../services/AuthService';
-import type { LoginFormData, LoginRequest } from '../types/auth.types';
+import type { LoginFormData } from '../types/auth.types';
 import { loginValidationSchema } from '../validations/login.schema';
 import { setAuthTokens } from '../utils/tokenStorage';
 import { agentService } from '../../account-settings/agent/services/agent.service';
 
-const loginInitialValues: LoginFormData = { companyId: '', phone: '', password: '', isSuperAdmin: false };
+const loginInitialValues: LoginFormData = { phone: '', password: '' };
 
 export function useLoginData() {
   const navigate = useNavigate();
-  const [showCompanySelection, setShowCompanySelection] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +24,6 @@ export function useLoginData() {
 
   const currentContent = AUTH_CONTENT_SLIDES[contentSlide] ?? AUTH_CONTENT_SLIDES[0];
 
-  const clearError = useCallback(() => setError(''), []);
-
   const handleSubmit = useCallback(async (
     values: LoginFormData,
     { setSubmitting }: FormikHelpers<LoginFormData>,
@@ -35,27 +32,10 @@ export function useLoginData() {
     setIsLoading(true);
 
     try {
-      const payload: LoginRequest = values.isSuperAdmin
-        ? { phone: values.phone, password: values.password, isSuperAdmin: true }
-        : { companyId: values.companyId.trim(), phone: values.phone, password: values.password, isSuperAdmin: false };
-      const response = await authService.login(payload);
+      const response = await authService.login(values);
 
       if (response.status && response.data) {
         setAuthTokens(response.data.accessToken, response.data.refreshToken, rememberMe);
-
-        let isSuperAdmin = response.data.role === 'super_admin';
-        try {
-          const staffResponse = await agentService.getMe();
-          if (staffResponse.status && staffResponse.data) {
-            localStorage.setItem(AUTH_STORAGE_KEYS.STAFF_PROFILE, JSON.stringify(staffResponse.data));
-            if (staffResponse.data.isSuperAdmin !== undefined) {
-              isSuperAdmin = staffResponse.data.isSuperAdmin;
-            }
-          }
-        } catch {
-          // Best-effort; useCurrentStaff retries this fetch on next mount if this failed.
-        }
-
         localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify({
           id: response.data.id,
           name: response.data.name,
@@ -63,21 +43,30 @@ export function useLoginData() {
           staffId: response.data.staffId,
           companyId: response.data.companyId,
           isAdmin: response.data.isAdmin,
-          isSuperAdmin,
         }));
 
-        if (isSuperAdmin) {
-          setShowCompanySelection(true);
-          return;
+        try {
+          const staffResponse = await agentService.getMe();
+          if (staffResponse.status && staffResponse.data) {
+            localStorage.setItem(AUTH_STORAGE_KEYS.STAFF_PROFILE, JSON.stringify(staffResponse.data));
+          }
+        } catch {
+          // Best-effort; useCurrentStaff retries this fetch on next mount if this failed.
         }
 
         navigate(AUTH_ROUTES.DASHBOARD);
       } else {
-        setError(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
+        setError(response.message || 'Login failed');
       }
     } catch (err: unknown) {
-      const isApiError = err && typeof err === 'object' && 'response' in err;
-      setError(isApiError ? AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS : AUTH_ERROR_MESSAGES.NETWORK_ERROR);
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Invalid credentials');
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('Network error. Please try again.');
+      }
     } finally {
       setIsLoading(false);
       setSubmitting(false);
@@ -124,10 +113,9 @@ export function useLoginData() {
   }, []);
 
   return {
-    showCompanySelection,
     showPassword, setShowPassword,
     rememberMe, setRememberMe,
-    isLoading, error, clearError,
+    isLoading, error,
     currentSlide, contentSlide, setContentSlide,
     touchStart, touchEnd, sliderRef,
     handleSubmit, onTouchStart, onTouchMove, onTouchEnd, goToSlide,
