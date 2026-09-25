@@ -14,7 +14,7 @@ import { SpotlightRequestMapper } from '../mappers/spotlightRequest.mapper';
 import type { SpotlightLead, SpotlightFilters } from '../types';
 import type { SortDirection } from '../../../shared/constants/enums/sortDirection';
 
-const SEARCH_DEBOUNCE_MS = 1500;
+const SEARCH_DEBOUNCE_MS = 500;
 
 export function useSpotlightData() {
   const [selectedLead, setSelectedLead] = useState<SpotlightLead | null>(null);

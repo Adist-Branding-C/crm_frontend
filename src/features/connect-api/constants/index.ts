@@ -4,7 +4,7 @@ export const apiParameters: ApiParameter[] = [
   { parameter: 'name', type: 'String', required: 'Yes', description: "Lead's full name." },
   { parameter: 'phone', type: 'String', required: 'Yes', description: "Lead's phone number." },
   { parameter: 'email', type: 'String', required: 'Yes', description: "Lead's email address." },
-  { parameter: 'status', type: 'String', required: 'Yes', description: 'Name of an existing Lead Status configured in your account (case-insensitive).' },
+  { parameter: 'status', type: 'String', required: 'Yes', description: 'Name of an existing Lead Stage configured in your account (case-insensitive).' },
   { parameter: 'source', type: 'String', required: 'Yes', description: 'Name of an existing Lead Source configured in your account (case-insensitive).' },
   { parameter: 'purpose', type: 'String', required: 'Yes', description: 'Name of an existing Lead Purpose configured in your account (case-insensitive).' },
   { parameter: 'type', type: 'String', required: 'Yes', description: 'Name of an existing Lead Type configured in your account (case-insensitive).' },

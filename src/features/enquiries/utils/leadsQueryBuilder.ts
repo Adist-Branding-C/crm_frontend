@@ -1,7 +1,7 @@
 import type { Filters } from '../types';
 import type { SortConfig } from '../../../shared/types/sort';
 
-export const DEBOUNCE_MS = 1500;
+export const DEBOUNCE_MS = 400;
 export const DEFAULT_ROWS_PER_PAGE = 5;
 
 const SORT_BY_MAP: Record<string, string | undefined> = {
@@ -57,6 +57,8 @@ export function buildQueryParams(
   mappings.forEach(([key, value]) => {
     if (value) params[key] = value;
   });
+
+  params.timezoneOffsetMinutes = new Date().getTimezoneOffset();
 
   return params;
 }

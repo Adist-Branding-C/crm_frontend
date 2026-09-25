@@ -215,7 +215,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           fields: [
             { label: 'Purpose', value: purposeOptions.find(o => o.value === trimmed.purposeId)?.label || '' },
             { label: 'Type', value: typeOptions.find(o => o.value === trimmed.typeId)?.label || '' },
-            { label: 'Status', value: statusOptions.find(o => o.value === trimmed.statusId)?.label || '' },
+            { label: 'Stage', value: statusOptions.find(o => o.value === trimmed.statusId)?.label || '' },
             { label: 'Source', value: sourceOptions.find(o => o.value === trimmed.sourceId)?.label || '' },
             { label: 'Next Follow Up', value: trimmed.nextFollowUp || '' }
           ]
@@ -514,7 +514,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
                   <FormikError name="typeId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">
-                  <label>Status</label>
+                  <label>Stage</label>
                   <SelectSearch
                     name="statusId"
                     value={values.statusId}
