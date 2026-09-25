@@ -7,7 +7,7 @@ import type { SelectOption } from '../types';
 // backend either rejects or can't resolve.
 
 export const VALUE_CHANGE_FIELD_OPTIONS: SelectOption[] = [
-  { value: 'statusId', label: 'Status' },
+  { value: 'statusId', label: 'Stage' },
   { value: 'purposeId', label: 'Purpose' },
   { value: 'typeId', label: 'Type' },
   { value: 'sourceId', label: 'Source' },

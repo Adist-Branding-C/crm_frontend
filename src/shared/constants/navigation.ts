@@ -1,5 +1,5 @@
-import { Settings, Tag, Layers, Activity, Target, User, DollarSign, ListChecks, Megaphone, Bell, Calendar, CreditCard, Info, PhoneCall, FileText, Phone, Search } from 'lucide-react';
-import type { TabItem, NotificationIconInfo } from '../types/layout';
+import { User, DollarSign, ListChecks, Megaphone, Bell, Calendar, CreditCard, Info, PhoneCall, FileText, Phone, Search } from 'lucide-react';
+import type { NotificationIconInfo } from '../types/layout';
 
 export const addOptions = [
   { id: 'lead', name: 'Lead', icon: User },
@@ -56,12 +56,4 @@ export const searchResults = [
   { id: 6, category: 'campaign', name: 'Summer Sale 2026', phone: 'Campaign-001', description: 'Active Campaign' },
   { id: 7, category: 'enquiry', name: 'John Doe', phone: '9876543212', description: 'Enquiry - Demo' },
   { id: 8, category: 'call', name: 'Call Log - Priya', phone: 'Call-001', description: 'Incoming Call' },
-];
-
-export const leadTabs: TabItem[] = [
-  // { id: 'lead', title: 'Lead', link: '/settings', icon: Settings },
-  { id: 'types', title: 'Type', link: '/settings/lead-settings/types', icon: Tag },
-  { id: 'source', title: 'Lead Source', link: '/settings/lead-settings/source', icon: Layers },
-  { id: 'status', title: 'Lead Status', link: '/settings/lead-settings/status', icon: Activity },
-  { id: 'purpose', title: 'Lead Purpose', link: '/settings/lead-settings/purpose', icon: Target },
 ];

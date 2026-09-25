@@ -24,11 +24,11 @@ const LeadStatusWidget = ({ items = [], isLoading, isError }: LeadStatusWidgetPr
 
   return (
     <BarListWidget
-      title="Lead status"
+      title="Lead Stage"
       items={barItems}
       isLoading={isLoading}
       isError={isError}
-      errorText="Failed to load lead status statistics"
+      errorText="Failed to load lead stage statistics"
       emptyText="No leads in this period"
       skeletonRows={5}
     />

@@ -75,7 +75,7 @@ const CallFeedbackReport = () => {
             <div className="feedback-stat-card pending"><span className="feedback-stat-value">5</span><span className="feedback-stat-label">Overdue</span></div>
           </div>
           <div className="feedback-card">
-            <h3 className="feedback-card-title">Lead Status</h3>
+            <h3 className="feedback-card-title">Lead Stage</h3>
             <div className="lead-status-table-container">
               <table className="status-summary-table">
                 <tbody>
@@ -90,7 +90,7 @@ const CallFeedbackReport = () => {
             </div>
           </div>
           <div className="feedback-card">
-            <h3 className="feedback-card-title">Lead Status Donut</h3>
+            <h3 className="feedback-card-title">Lead Stage Donut</h3>
             <div className="feedback-chart-container">
               <div className="donut-chart-lg">
                 <div className="donut-chart" style={{ background: `conic-gradient(${gradientStops.join(', ')})` }}>

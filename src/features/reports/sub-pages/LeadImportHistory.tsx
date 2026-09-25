@@ -118,6 +118,7 @@ const LeadImportHistory: React.FC = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onUpload={uploadFile}
+        onImported={handleView}
         onDownloadSample={downloadSample}
       />
 
@@ -224,9 +225,13 @@ const LeadImportHistory: React.FC = () => {
 
                     <td>{row.failedCount}</td>
 
+                    <td>{row.skippedCount}</td>
+
                     <td>
                       <strong>{row.successCount}</strong>
                     </td>
+
+                    <td>{row.mastersCreatedCount}</td>
 
                     <td>
                       <span

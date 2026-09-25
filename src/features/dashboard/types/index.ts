@@ -27,7 +27,7 @@ export interface KpiCardProps {
   isLoading?: boolean;
 }
 
-export type DashboardPeriod = 'today' | 'week' | 'month' | 'custom';
+export type DashboardPeriod = 'today' | 'week' | 'month' | 'custom' | 'all';
 
 export interface GetWonDealsParams {
   period: DashboardPeriod;

@@ -436,7 +436,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   onSave={(v) => saveLeadField({ purposeId: v as string })}
                 />
                 <EditableDetailField
-                  label="Status"
+                  label="Stage"
                   displayValue={lead.status || ''}
                   editValue={findOptionValueByLabel(statusOptions, lead.status)}
                   type="select"

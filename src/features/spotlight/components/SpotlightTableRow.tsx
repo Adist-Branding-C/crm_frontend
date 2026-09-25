@@ -18,7 +18,7 @@ const EDITABLE_FIELD_CONFIG: Record<EditableField, {
   assignedTo: { payloadKey: 'agentId', optionsKey: 'agents', label: 'Assigned To' },
   purpose: { payloadKey: 'purposeId', optionsKey: 'purposes', label: 'Purpose' },
   type: { payloadKey: 'typeId', optionsKey: 'leadTypes', label: 'Type' },
-  status: { payloadKey: 'statusId', optionsKey: 'statuses', label: 'Status' },
+  status: { payloadKey: 'statusId', optionsKey: 'statuses', label: 'Stage' },
   source: { payloadKey: 'sourceId', optionsKey: 'sources', label: 'Source' },
 };
 
@@ -107,7 +107,7 @@ const SpotlightTableRow = memo(
             setEditingField({ field: 'status', rect: e.currentTarget.getBoundingClientRect() });
           }}
           style={{ cursor: 'pointer', display: 'inline-block' }}
-          title="Click to edit Status"
+          title="Click to edit Stage"
         >
           {row.status?.status ? (
             <span className={`badge badge-${row.status.status.toLowerCase()}`}>

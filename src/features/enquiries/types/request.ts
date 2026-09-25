@@ -58,6 +58,7 @@ export interface GetLeadsParams {
   dateFrom?: string;
   dateTo?: string;
   dateFilterBy?: string;
+  timezoneOffsetMinutes?: number;
   followUpAdded?: string;
   additionalFieldFilters?: string;
 }
