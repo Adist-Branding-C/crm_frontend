@@ -7,6 +7,7 @@ export const FACEBOOK_API_ENDPOINTS = {
   MAPPING_OPTIONS: '/facebook/mapping-options',
   WORKFLOWS: '/facebook/workflows',
   WORKFLOW_BY_ID: (id: string) => `/facebook/workflows/${id}`,
+  WORKFLOW_CLONE: (id: string) => `/facebook/workflows/${id}/clone`,
   LEADS: '/facebook/leads',
   LEAD_BY_ID: (id: string) => `/facebook/leads/${id}`,
 };
