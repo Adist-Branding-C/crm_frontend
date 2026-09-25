@@ -23,7 +23,7 @@ export function useLeadAdditionalPagination(
     const timer = setTimeout(() => {
       setCurrentPage(1);
       onFetchRef.current(1, rowsPerPageRef.current, searchQuery);
-    }, 1500);
+    }, 400);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
