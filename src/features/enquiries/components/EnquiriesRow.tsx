@@ -142,7 +142,7 @@ const EnquiriesRow: React.FC<EnquiriesRowProps> = ({ lead, columns, isSelected, 
         if (col.key === 'name') {
           return (
             <TCell key={col.key} className="lead-name-cell" onClick={() => onViewLead(lead)} style={{ cursor: 'pointer' }}>
-              {lead.name}
+              <span className="lead-name-text" title={lead.name}>{lead.name}</span>
             </TCell>
           );
         }
