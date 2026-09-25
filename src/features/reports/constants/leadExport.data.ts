@@ -21,4 +21,5 @@ export const STANDARD_EXPORT_FIELDS: FieldOption[] = [
   { key: 'nextFollowUpDate', label: 'Next Follow Up' },
   { key: 'createdAt', label: 'Created At' },
   { key: 'updatedAt', label: 'Updated At' },
+  { key: 'additionalNumbers', label: 'Additional Numbers' },
 ];

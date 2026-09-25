@@ -99,7 +99,7 @@ export interface AddDealDrawerProps {
   draftId?: string;
 }
 
-import type { Lead } from '../../features/enquiries/types';
+import type { ContactNumberDraft, Lead, LeadContactNumber } from '../../features/enquiries/types';
 
 export interface AddLeadDrawerProps {
   isOpen: boolean;
@@ -113,6 +113,7 @@ export interface AddLeadFormValues {
   name: string;
   phone: string;
   countryCode: string;
+  contactNumbers: ContactNumberDraft[];
   email: string;
   agentId: string;
   purposeId: string;
@@ -158,6 +159,8 @@ export interface LeadDetailDrawerProps {
     leadId?: string;
     name: string;
     phone: string;
+    countryCode?: string | null;
+    contactNumbers?: LeadContactNumber[];
     email?: string;
     location?: string;
     address?: string;
