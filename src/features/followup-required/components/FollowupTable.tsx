@@ -70,7 +70,7 @@ const renderCell = (
         <FollowupEditableCell
           leadId={row.leadId}
           value={row.status}
-          label="Status"
+          label="Stage"
           payloadKey="statusId"
           options={fieldOptions.statusOptions}
           onFieldSave={onFieldSave}

@@ -49,7 +49,7 @@ export function useLeadStatusStatistics(period: DashboardPeriod, from?: string, 
         );
       } catch (error) {
         if (!cancelled) {
-          console.error('useLeadStatusStatistics: failed to load lead status statistics', error);
+          console.error('useLeadStatusStatistics: failed to load lead stage statistics', error);
           setIsError(true);
         }
       } finally {

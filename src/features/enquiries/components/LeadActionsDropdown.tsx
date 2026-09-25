@@ -33,7 +33,7 @@ const LeadActionsDropdown = ({ selectedCount, bulkActions }: LeadActionsDropdown
       <div className="dropdown-header">Actions {selectedCount > 0 && `(${selectedCount} selected)`}</div>
 
       <button className="dropdown-item" onClick={() => { bulkActions.onChangeStatus(); dropdown.close(); }}>
-        <RotateCcw size={16} /> <span>Change Status</span>
+        <RotateCcw size={16} /> <span>Change Stage</span>
       </button>
       <button className="dropdown-item" onClick={() => { bulkActions.onAssignStaff(); dropdown.close(); }}>
         <Users size={16} /> <span>Assign Staff</span>
