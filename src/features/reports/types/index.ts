@@ -431,6 +431,7 @@ export interface CreateLeadExportPayload {
   dateFrom?: string;
   dateTo?: string;
   dateFilterBy?: string;
+  timezoneOffsetMinutes?: number;
   sourceId?: string;
   purposeId?: string;
   statusId?: string;
