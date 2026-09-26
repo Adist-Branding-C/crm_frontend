@@ -32,9 +32,7 @@ interface UseTaskCrudParams<TFormData, TItem> {
  * success, Formik field-error mapping (via useSubmitErrorHandler) on failure.
  *
  * Used by:
- * - useTaskCrud (task), useCallTaskCrud, useCampaignTaskCrud, useDealTaskCrud - each
- *   passes its own data service and toast copy, then renames the returned handlers
- *   to its own handleAddX/handleUpdateX/handleDeleteX to keep its public API stable.
+ * - TaskPage (create/update/delete for the unified task flow).
  *
  * Notes:
  * - Previously each of the four sub-modules reimplemented this exact try/catch/finally

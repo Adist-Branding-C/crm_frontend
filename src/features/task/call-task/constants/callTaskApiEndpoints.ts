@@ -7,6 +7,7 @@
 export const CALL_TASK_API_ENDPOINTS = {
   GET_ALL: '/tasks',
   CREATE: '/tasks/call',
+  GET_BY_ID: (id: number) => `/tasks/${id}`,
   UPDATE: (id: number) => `/tasks/${id}`,
   DELETE: (id: number) => `/tasks/${id}`,
 };

@@ -35,6 +35,11 @@
   color: var(--warning-text);
 }
 
+.badge-warning {
+  background-color: var(--warning-subtle);
+  color: var(--warning-text);
+}
+
 .badge-danger,
 .badge-overdue,
 .badge-lost {

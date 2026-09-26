@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { ACTION_CONFIRM, ACTION_CANCEL } from '../../constants/actionLabels';
 import { LABEL_CONFIRM_DELETE } from '../../constants/labels';
@@ -8,7 +9,7 @@ import ValidationAlert from '../ValidationAlert';
 const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, itemName, itemType, error, onConfirm, onClose, isDeleting }) => {
   if (!isOpen) return null;
 
-  return (
+  const content = (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
@@ -36,6 +37,8 @@ const AdminDeleteModal: React.FC<AdminDeleteModalProps> = React.memo(({ isOpen, 
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(content, document.body) : null;
 });
 
 AdminDeleteModal.displayName = 'AdminDeleteModal';

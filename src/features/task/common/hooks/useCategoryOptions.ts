@@ -7,9 +7,9 @@ export function useCategoryOptions() {
   const fetchCategories = useCallback(async (): Promise<CategoryOption[]> => {
     const catRes = await taskService.getTaskCategories();
     if (catRes.status && catRes.data) {
-      return catRes.data.map((c: { id: number; taskCategory?: string; category?: string }) => ({
+      return catRes.data.map((c) => ({
         value: String(c.id),
-        label: c.taskCategory ?? c.category ?? '',
+        label: c.taskCategory,
       }));
     }
     return [];

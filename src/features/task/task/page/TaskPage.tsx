@@ -1,46 +1,79 @@
 import { Plus, FileText, CheckSquare } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FormikHelpers } from 'formik';
 import { useTableData } from '../../../../shared/hooks/useTableData';
 import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
+import { buildUnifiedTaskListQuery } from '../../common/utils/taskViewFilters';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
-import { useTaskCrud } from '../hooks/useTaskCrud';
-import { useTaskDrawer } from '../hooks/useTaskDrawer';
-import { useTaskDeleteConfirm } from '../hooks/useTaskDeleteConfirm';
-import { useTaskFormSubmit } from '../hooks/useTaskFormSubmit';
+import { useTaskCrud } from '../../common/hooks/useTaskCrud';
+import { useTaskFormSubmit } from '../../common/hooks/useTaskFormSubmit';
+import { useTaskDeleteConfirm } from '../../common/hooks/useTaskDeleteConfirm';
+import { useUnifiedTaskDrawer } from '../../common/hooks/useUnifiedTaskDrawer';
 import { useStaffOptions } from '../../common/hooks/useStaffOptions';
 import { useCategoryOptions } from '../../common/hooks/useCategoryOptions';
 import { useLeadOptions } from '../../common/hooks/useLeadOptions';
-import { taskDataService } from '../services/taskDataService';
-import { addTaskValidationSchema, editTaskValidationSchema } from '../validations/task.validation';
+import { useCampaignOptions } from '../../common/hooks/useCampaignOptions';
+import { useDealOptions } from '../../common/hooks/useDealOptions';
+import { unifiedTaskDataService } from '../../common/services/unifiedTaskDataService';
+import { UnifiedTaskMapper } from '../../common/mapper/unifiedTaskMapper';
+import { isRecurring, getNextOccurrenceDate } from '../../common/utils/recurrence';
+import { isTaskTypeKey } from '../../common/utils/unifiedTask.helpers';
+import type { TaskTypeFilterKey } from '../../common/types/taskType.types';
+import type { UnifiedTaskItem, UnifiedTaskPayload, UnifiedTaskFormValues } from '../../common/types/unifiedTask.types';
+import type { TaskPreviewData } from '../../common/types/genericTaskForm.types';
+import type { RepeatType } from '../../task/types/interface';
+import type { RecurrenceChainItem } from '../types';
 import { LABEL_NO_DATA } from '../../../../shared/constants/labels';
 import { Table, THead, TBody, TRow, TCell, EmptyState, TableNav, Pagination } from '../../../../shared/components/table';
-import Drawer from '../../../../shared/components/Drawer';
 import AdminDeleteModal from '../../../../shared/components/crud/AdminDeleteModal';
-import GenericTaskForm from '../../common/components/GenericTaskForm';
 import TaskListLoadingRow from '../../common/components/TaskListLoadingRow';
-import TaskRow from '../components/TaskRow';
+import UnifiedTaskRow from '../../common/components/UnifiedTaskRow';
+import type { UnifiedRowFieldOptions } from '../../common/components/UnifiedTaskRow';
+import TaskFormDrawer from '../../common/components/TaskFormDrawer';
+import TaskTypeFilter from '../../common/components/TaskTypeFilter';
 import ToastNotification from '../../../../shared/components/ToastNotification';
 import PageHeader from '../../../../shared/components/layout/PageHeader';
-import SettingsTabs from '../../../../shared/components/SettingsTabs';
 import DraftsList from '../../../enquiries/components/DraftsList';
-import PreviewCanvas, { PreviewSection } from '../../../../shared/components/preview/PreviewCanvas';
+import PreviewCanvas from '../../../../shared/components/preview/PreviewCanvas';
 import { draftService } from '../../../../shared/services/draftService';
 import { useDrafts } from '../../../../shared/hooks/useDrafts';
 import { getErrorMessage } from '../../../../shared/utils/error';
-import { taskTabs } from '../../common/taskTabs';
-import type { TaskItem, TaskFormDataUpdate } from '../types';
-import type { TaskPreviewData } from '../../common/types/genericTaskForm.types';
+import TaskViewToggle from '../../kanban/components/TaskViewToggle';
+import TaskKanbanView from '../../kanban/components/TaskKanbanView';
+import { TASK_BOARD_VIEW_STORAGE_KEY } from '../../kanban/constants/taskBoard.constants';
+import type { TaskBoardView } from '../../kanban/types/kanban.types';
 import './TaskPage.css';
 
 type TaskView = 'tasks' | 'drafts';
 
+function readStoredView(): TaskBoardView {
+  try {
+    const stored = localStorage.getItem(TASK_BOARD_VIEW_STORAGE_KEY);
+    return stored === 'table' ? 'table' : 'kanban';
+  } catch {
+    return 'kanban';
+  }
+}
+
 const TaskPage = () => {
+  const [boardView, setBoardViewState] = useState<TaskBoardView>(readStoredView);
   const [activeView, setActiveView] = useState<TaskView>('tasks');
   const [draftId, setDraftId] = useState<string | null>(null);
   const drafts = useDrafts('task');
   const [previewData, setPreviewData] = useState<TaskPreviewData | null>(null);
+  const [typeFilter, setTypeFilter] = useState<TaskTypeFilterKey>('ALL');
+  const typeFilterRef = useRef<TaskTypeFilterKey>('ALL');
+
+  const handleViewChange = useCallback((next: TaskBoardView) => {
+    setBoardViewState(next);
+    try {
+      localStorage.setItem(TASK_BOARD_VIEW_STORAGE_KEY, next);
+    } catch {
+      // Non-fatal
+    }
+  }, []);
 
   useEffect(() => {
     if (activeView === 'drafts' && drafts.length === 0) {
@@ -48,27 +81,60 @@ const TaskPage = () => {
     }
   }, [activeView, drafts.length]);
 
-  const pagination = useTableData<TaskItem>({
+  const pagination = useTableData<UnifiedTaskItem>({
     fetchFn: async (params) => {
-      const response = await taskDataService.getAll({ ...params, type: 'NORMAL' });
-      return ListResponseMapper.toPagedResult<TaskItem>(response);
+      const response = await unifiedTaskDataService.getAll(buildUnifiedTaskListQuery({
+        taskType: typeFilterRef.current,
+        search: params.search,
+      }, params.pageNumber, params.limit));
+      return ListResponseMapper.toPagedResult<UnifiedTaskItem>(response);
     },
   });
+
   const toast = useToast();
-  const crud = useTaskCrud({ pagination, showToastMessage: toast.showToastMessage });
+  const crud = useTaskCrud<UnifiedTaskFormValues, UnifiedTaskItem>({
+    pagination,
+    showToastMessage: toast.showToastMessage,
+    dataService: unifiedTaskDataService,
+    messages: {
+      added: 'Task created successfully',
+      updated: 'Task updated successfully',
+      deleted: 'Task deleted successfully',
+      addFailed: 'Failed to add task',
+      updateFailed: 'Failed to update task',
+      deleteFailed: 'Failed to delete task',
+    },
+  });
   const staff = useStaffOptions();
   const categories = useCategoryOptions();
   const leads = useLeadOptions();
-  const drawer = useTaskDrawer({ loadStaff: staff.loadStaff, loadCategories: categories.loadCategories, loadLeads: leads.loadLeads });
+  const campaigns = useCampaignOptions();
+  const deals = useDealOptions();
+  const drawer = useUnifiedTaskDrawer({
+    loadStaff: staff.loadStaff,
+    loadCategories: categories.loadCategories,
+    loadLeads: leads.loadLeads,
+    loadCampaigns: campaigns.loadCampaigns,
+    loadDeals: deals.loadDeals,
+  });
   const dropdown = useDropdownMenu<number>();
-  const deleteConfirm = useTaskDeleteConfirm({ handleDeleteTask: crud.handleDeleteTask });
-  const formSubmit = useTaskFormSubmit({
+  const deleteConfirm = useTaskDeleteConfirm<UnifiedTaskItem>(crud.handleDelete);
+  const formSubmit = useTaskFormSubmit<UnifiedTaskItem, UnifiedTaskFormValues>({
     editingItem: drawer.editingItem,
     closeDrawer: drawer.closeDrawer,
-    handleAddTask: crud.handleAddTask,
-    handleUpdateTask: crud.handleUpdateTask,
+    mapItemToFormData: UnifiedTaskMapper.toFormValues,
+    handleAdd: crud.handleAdd,
+    handleUpdate: crud.handleUpdate,
   });
   const { searchValue, handleSearchChange } = useDebouncedSearch(pagination.handleSearchChange);
+
+  const handleTypeFilterChange = useCallback((value: string) => {
+    const next: TaskTypeFilterKey = value === 'ALL' ? 'ALL' : isTaskTypeKey(value) ? value : 'ALL';
+    typeFilterRef.current = next;
+    setTypeFilter(next);
+    pagination.setPageNumber(1);
+    pagination.refresh(1);
+  }, [pagination]);
 
   const handleResumeDraft = (id: string) => {
     setDraftId(id);
@@ -80,24 +146,25 @@ const TaskPage = () => {
   };
 
   const taskInitialValues = useMemo(() => {
-    if (draftId) {
+    if (!drawer.editingItem && draftId) {
       return draftService.getDrafts('task').find(d => d.id === draftId)?.payload || drawer.drawerInitialValues;
     }
     return drawer.drawerInitialValues;
-  }, [draftId, drawer.drawerInitialValues]);
+  }, [drawer.editingItem, draftId, drawer.drawerInitialValues]);
 
   const handleSavePreview = async () => {
     if (!previewData) return;
     try {
       const isEditing = !!drawer.editingItem;
-      const helpers = { setSubmitting: () => {} } as unknown as import('formik').FormikHelpers<Record<string, unknown>>;
+      const helpers = { setSubmitting: () => {} } as unknown as FormikHelpers<UnifiedTaskFormValues>;
+      const values = previewData.payload as unknown as UnifiedTaskFormValues;
       let success = false;
       if (isEditing) {
-        success = await formSubmit.handleEditSubmit(previewData.payload as Record<string, unknown>, helpers);
+        success = await formSubmit.handleEditSubmit(values, helpers);
       } else {
-        success = await formSubmit.handleSubmit(previewData.payload as Record<string, unknown>, helpers);
+        success = await formSubmit.handleSubmit(values, helpers);
       }
-      
+
       if (!success) return;
 
       if (draftId) {
@@ -115,110 +182,160 @@ const TaskPage = () => {
     staff.loadStaff();
     categories.loadCategories();
     leads.loadLeads();
+    campaigns.loadCampaigns();
+    deals.loadDeals();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fieldOptions = useMemo(
-    () => ({
-      staffOptions: staff.staffOptions.map((o) => ({ value: String(o.value), label: o.label })),
-      categoryOptions: categories.categoryOptions.map((o) => ({ value: String(o.value), label: o.label })),
-      leadOptions: leads.leadOptions.map((o) => ({ value: String(o.value), label: o.label })),
-    }),
-    [staff.staffOptions, categories.categoryOptions, leads.leadOptions],
-  );
+  const fieldOptions = useMemo<UnifiedRowFieldOptions>(() => ({
+    staffOptions: staff.staffOptions.map((o) => ({ value: String(o.value), label: o.label })),
+    associations: {
+      categoryId: { options: categories.categoryOptions.map((o) => ({ value: String(o.value), label: o.label })), loading: categories.categoryLoading },
+      leadId: { options: leads.leadOptions.map((o) => ({ value: String(o.value), label: o.label })), loading: leads.leadLoading },
+      campaignId: { options: campaigns.campaignOptions.map((o) => ({ value: String(o.value), label: o.label })), loading: campaigns.campaignLoading },
+      dealId: { options: deals.dealOptions.map((o) => ({ value: String(o.value), label: o.label })), loading: deals.dealLoading },
+    },
+  }), [
+    staff.staffOptions, staff.staffLoading,
+    categories.categoryOptions, categories.categoryLoading,
+    leads.leadOptions, leads.leadLoading,
+    campaigns.campaignOptions, campaigns.campaignLoading,
+    deals.dealOptions, deals.dealLoading,
+  ]);
 
-  const handleFieldSave = async (id: number, payload: TaskFormDataUpdate) => {
+  const handleFieldSave = useCallback(async (id: number, payload: Partial<UnifiedTaskPayload>): Promise<boolean> => {
     try {
-      const res = await taskDataService.update(id, payload);
+      const res = await unifiedTaskDataService.updateFields(id, payload);
       if (res.status) {
+        const task = pagination.list.find((t) => t.id === id);
+        if (
+          payload.status &&
+          payload.status.toLowerCase() === 'completed' &&
+          task &&
+          isRecurring(task.repeatType)
+        ) {
+          const nextDate = getNextOccurrenceDate(task.scheduledDate, task.repeatType as RepeatType | undefined, task.repeatConfig);
+          const formattedDate = nextDate ? new Date(nextDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'next occurrence';
+          toast.showToastMessage(`Next task '${task.title}' created for ${formattedDate}`, 'success');
+        } else {
+          toast.showToastMessage('Task updated successfully', 'success');
+        }
         pagination.refresh();
         return true;
       }
       return false;
-    } catch {
+    } catch (err: unknown) {
+      console.error('Failed to update task fields', err);
       return false;
+    }
+  }, [pagination, toast]);
+
+  const handleHistoryTaskClick = (item: RecurrenceChainItem) => {
+    const task = pagination.list.find((t) => t.id === item.id);
+    if (task) {
+      drawer.openEditDrawer(task);
+    } else {
+      toast.showToastMessage('That task is not available in the current view', 'error');
     }
   };
 
   return (
     <div className="task-settings-page">
-      <PageHeader 
-        title={activeView === 'drafts' ? 'Task Drafts' : 'Task'} 
-        description={activeView === 'drafts' ? 'Resume your unfinished tasks' : 'Manage your tasks'} 
+      <PageHeader
+        title={activeView === 'drafts' ? 'Task Drafts' : 'Task'}
+        description={activeView === 'drafts' ? 'Resume your unfinished tasks' : 'Manage your tasks'}
         action={
-          drafts.length > 0 && (
-            <button
-              className={`btn btn-secondary ${activeView === 'drafts' ? 'active' : ''}`}
-              onClick={() => setActiveView((v) => (v === 'drafts' ? 'tasks' : 'drafts'))}
-            >
-              {activeView === 'drafts' ? <><CheckSquare size={16} /> Back to Tasks</> : <><FileText size={16} /> Drafts</>}
-            </button>
-          )
+          <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center' }}>
+            {activeView === 'tasks' && (
+              <TaskViewToggle view={boardView} onChange={handleViewChange} />
+            )}
+            {drafts.length > 0 && (
+              <button
+                className={`btn btn-secondary ${activeView === 'drafts' ? 'active' : ''}`}
+                onClick={() => setActiveView((v) => (v === 'drafts' ? 'tasks' : 'drafts'))}
+              >
+                {activeView === 'drafts' ? <><CheckSquare size={16} /> Back to Tasks</> : <><FileText size={16} /> Drafts</>}
+              </button>
+            )}
+          </div>
         }
       />
-      
-      {activeView === 'tasks' && <SettingsTabs items={taskTabs} />}
-      
+
       <div className="account-content">
         {activeView === 'drafts' && <DraftsList type="task" onResumeDraft={handleResumeDraft} />}
-        
-        {activeView === 'tasks' && (
+
+        {activeView === 'tasks' && boardView === 'kanban' && (
+          <TaskKanbanView
+            taskType={typeFilter}
+            searchQuery={searchValue}
+            onTypeChange={handleTypeFilterChange}
+            onViewChange={handleViewChange}
+            onAddTask={() => drawer.openAddDrawer()}
+            addLabel="Add Task"
+          />
+        )}
+
+        {activeView === 'tasks' && boardView === 'table' && (
           <div className="table-container">
             <TableNav searchQuery={searchValue} onSearchChange={handleSearchChange} rowsPerPage={pagination.limit} onRowsPerPageChange={pagination.handleRowsPerPageChange}>
-            <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Plus size={16} /> Add Task
-            </button>
-          </TableNav>
-          <Table wrapperClassName="table-scroll" className="data-table">
-            <THead>
-              <TRow>
-                <TCell variant="th">Sl No</TCell>
-                <TCell variant="th">Title</TCell>
-                <TCell variant="th">Description</TCell>
-                <TCell variant="th">Category</TCell>
-                <TCell variant="th">Scheduled Date</TCell>
-                <TCell variant="th">Scheduled Time</TCell>
-                <TCell variant="th">Assigned To</TCell>
-                <TCell variant="th">Assigned By</TCell>
-                <TCell variant="th">Priority</TCell>
-                <TCell variant="th">Status</TCell>
-                <TCell variant="th">Lead</TCell>
-                <TCell variant="th">Actions</TCell>
-              </TRow>
-            </THead>
-            <TBody>
-              {pagination.isLoading && pagination.list.length === 0 ? (
-                <TaskListLoadingRow colSpan={12} />
-              ) : !pagination.isLoading && pagination.list.length === 0 ? (
-                <EmptyState colSpan={12} message={LABEL_NO_DATA} />
-              ) : pagination.list.map((item, idx) => (
-                <TaskRow
-                  key={item.id}
-                  item={item}
-                  index={pagination.startIndex + idx + 1}
-                  dropdownOpen={dropdown.dropdownOpen}
-                  onToggleDropdown={dropdown.toggleDropdown}
-                  onEdit={drawer.openEditDrawer}
-                  onDelete={deleteConfirm.handleDeleteClick}
-                  fieldOptions={fieldOptions}
-                  onFieldSave={handleFieldSave}
-                />
-              ))}
-            </TBody>
-          </Table>
-          <Pagination
-            currentPage={pagination.pageNumber}
-            totalPages={pagination.totalPages}
-            totalItems={pagination.totalCount}
-            rowsPerPage={pagination.limit}
-            onPageChange={pagination.setPageNumber}
-          />
-        </div>
+              <TaskTypeFilter value={typeFilter} onChange={handleTypeFilterChange} />
+              <button className="btn btn-primary" onClick={drawer.openAddDrawer} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Plus size={16} /> Add Task
+              </button>
+            </TableNav>
+            <Table wrapperClassName="table-scroll" className="data-table">
+              <THead>
+                <TRow>
+                  <TCell variant="th">Sl No</TCell>
+                  <TCell variant="th">Type</TCell>
+                  <TCell variant="th">Title</TCell>
+                  <TCell variant="th">Description</TCell>
+                  <TCell variant="th">Related</TCell>
+                  <TCell variant="th">Scheduled Date</TCell>
+                  <TCell variant="th">Scheduled Time</TCell>
+                  <TCell variant="th">Workflow</TCell>
+                  <TCell variant="th">Stage</TCell>
+                  <TCell variant="th">Assigned To</TCell>
+                  <TCell variant="th">Assigned By</TCell>
+                  <TCell variant="th">Priority</TCell>
+                  <TCell variant="th">Status</TCell>
+                  <TCell variant="th">Repeat</TCell>
+                  <TCell variant="th">Actions</TCell>
+                </TRow>
+              </THead>
+              <TBody>
+                {pagination.isLoading && pagination.list.length === 0 ? (
+                  <TaskListLoadingRow colSpan={15} />
+                ) : !pagination.isLoading && pagination.list.length === 0 ? (
+                  <EmptyState colSpan={15} message={LABEL_NO_DATA} />
+                ) : pagination.list.map((item, idx) => (
+                  <UnifiedTaskRow
+                    key={item.id}
+                    item={item}
+                    index={pagination.startIndex + idx + 1}
+                    dropdownOpen={dropdown.dropdownOpen}
+                    onToggleDropdown={dropdown.toggleDropdown}
+                    onEdit={drawer.openEditDrawer}
+                    onDelete={deleteConfirm.handleDeleteClick}
+                    fieldOptions={fieldOptions}
+                    onFieldSave={handleFieldSave}
+                  />
+                ))}
+              </TBody>
+            </Table>
+            <Pagination
+              currentPage={pagination.pageNumber}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.totalCount}
+              rowsPerPage={pagination.limit}
+              onPageChange={pagination.setPageNumber}
+            />
+          </div>
         )}
-        
+
         {previewData ? (
           <PreviewCanvas
-            isOpen={true}
+            isOpen
             title={drawer.editingItem ? 'Preview Task Edit' : 'Preview Task'}
             subtitle="Review the details before saving"
             sections={previewData.sections}
@@ -229,29 +346,30 @@ const TaskPage = () => {
             onSave={handleSavePreview}
           />
         ) : (
-          <Drawer 
-            isOpen={drawer.showDrawer} 
-            onClose={() => { drawer.closeDrawer(); setDraftId(null); }} 
-            title={drawer.editingItem ? 'Edit Task' : 'Add Task'}
-          >
-            <GenericTaskForm
-            validationSchema={drawer.editingItem ? editTaskValidationSchema : addTaskValidationSchema}
+          <TaskFormDrawer
+            isOpen={drawer.showDrawer}
+            onClose={() => { drawer.closeDrawer(); setDraftId(null); }}
+            isEditing={Boolean(drawer.editingItem)}
             initialValues={taskInitialValues}
             onSubmit={drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit}
+            isLoading={pagination.isLoading}
+            error={pagination.error}
             draftId={draftId}
             onDraftSaved={setDraftId}
             onPreviewRequest={(data) => setPreviewData(data)}
-            isLoading={pagination.isLoading}
-            error={pagination.error}
-            isEditing={!!drawer.editingItem}
-            categoryOptions={categories.categoryOptions}
-            categoryLoading={categories.categoryLoading}
+            editingItem={drawer.editingItem}
+            onHistoryItemClick={handleHistoryTaskClick}
             staffOptions={staff.staffOptions}
             staffLoading={staff.staffLoading}
+            categoryOptions={categories.categoryOptions}
+            categoryLoading={categories.categoryLoading}
             leadOptions={leads.leadOptions}
             leadLoading={leads.leadLoading}
+            campaignOptions={campaigns.campaignOptions}
+            campaignLoading={campaigns.campaignLoading}
+            dealOptions={deals.dealOptions}
+            dealLoading={deals.dealLoading}
           />
-        </Drawer>
         )}
         <AdminDeleteModal
           isOpen={!!deleteConfirm.deletingItem}

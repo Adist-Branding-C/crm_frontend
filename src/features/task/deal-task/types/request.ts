@@ -1,3 +1,5 @@
+import type { RepeatType, RepeatConfig } from '../../task/types/interface';
+
 export interface DealTaskFormData {
   title: string;
   description: string;
@@ -7,4 +9,8 @@ export interface DealTaskFormData {
   dealId: string;
   priority: string;
   status: string;
+  workflowId?: string;
+  stageId?: string;
+  repeatType?: RepeatType;
+  repeatConfig?: RepeatConfig | undefined;
 }

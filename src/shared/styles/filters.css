@@ -77,6 +77,30 @@
   font-size: 0.875rem;
 }
 
+/* DateRangeFilter spans roughly two sibling filter-group columns so its two
+   date inputs and the "to" label keep their own space instead of overflowing
+   into the next column. When the row is too narrow the group wraps onto its
+   own row; on very small screens the inputs stack vertically. */
+.date-range-filter-group {
+  flex: 2 1 320px;
+  min-width: 280px;
+}
+
+.date-range-filter-group .date-range-input input {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .date-range-filter-group .date-range-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-range-filter-group .date-range-input span {
+    text-align: center;
+  }
+}
+
 .filter-actions {
   display: flex;
   gap: 0.75rem;

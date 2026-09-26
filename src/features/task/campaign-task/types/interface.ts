@@ -1,3 +1,5 @@
+import type { RepeatType, RepeatConfig } from '../../task/types/interface';
+
 export interface CampaignTaskItem {
   id: number;
   title: string;
@@ -26,4 +28,11 @@ export interface CampaignTaskItem {
   } | null;
   priority: string;
   status: string;
+  workflowId?: number;
+  stageId?: number;
+  workflowName?: string | null;
+  stageName?: string | null;
+  stageColor?: string | null;
+  repeatType?: RepeatType;
+  repeatConfig?: RepeatConfig;
 }

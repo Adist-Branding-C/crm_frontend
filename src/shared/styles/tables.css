@@ -409,6 +409,10 @@
   color: var(--danger-text) !important;
 }
 
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
 /* Skeleton loading animation */
 @keyframes skeleton-pulse {
   0% { opacity: 0.4; }

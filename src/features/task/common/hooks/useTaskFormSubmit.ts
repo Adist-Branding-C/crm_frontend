@@ -15,8 +15,7 @@ interface UseTaskFormSubmitParams<TItem extends { id: number }, TFormData> {
  * original item (compared via the entity's own mapper).
  *
  * Used by:
- * - useTaskFormSubmit (task), useCallTaskFormSubmit, useCampaignTaskFormSubmit,
- *   useDealTaskFormSubmit - each passes its own mapper and add/update handlers.
+ * - TaskPage (add/edit submit for the unified task form).
  *
  * Notes:
  * - Previously each of the four sub-modules reimplemented this exact

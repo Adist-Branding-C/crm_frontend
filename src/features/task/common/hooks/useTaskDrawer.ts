@@ -12,9 +12,8 @@ interface UseTaskDrawerParams<TItem, TFormData> {
  * its form's dropdowns need - every loader runs on both add-open and edit-open.
  *
  * Used by:
- * - useTaskDrawer (task), useCallTaskDrawer, useCampaignTaskDrawer, useDealTaskDrawer -
- *   each passes its own mapper, blank-form shape, and loader list (Task additionally
- *   loads categories; the other three only load staff and leads).
+ * - useUnifiedTaskDrawer - passes the unified mapper, blank-form shape, and the
+ *   lookup loaders for the unified TaskPage form fields.
  *
  * Notes:
  * - Previously each of the four sub-modules reimplemented this exact

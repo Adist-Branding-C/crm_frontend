@@ -1,12 +1,12 @@
 import type { CampaignTaskFormData } from '../types/index';
+import { RepeatType } from '../../common/constants/taskEnums';
 
 /**
- * Blank form values for the Add Campaign Task drawer, and the fallback used by
- * `CampaignTaskMapper.toFormValues` when there's no editing item yet.
+ * Blank form values for a new Campaign Task, used by the calendar's useCalendarAddTask
+ * to seed the add-task form for a chosen date.
  *
  * Used by:
- * - CampaignTaskPage (Add drawer initial values)
- * - useCampaignTaskDrawer (via CampaignTaskMapper.toFormValues)
+ * - useCalendarAddTask (calendar feature).
  */
 export const ADD_CAMPAIGN_TASK_INITIAL_VALUES: CampaignTaskFormData = {
   title: '',
@@ -17,4 +17,6 @@ export const ADD_CAMPAIGN_TASK_INITIAL_VALUES: CampaignTaskFormData = {
   campaignId: '',
   priority: '',
   status: '',
+  repeatType: RepeatType.NEVER,
+  repeatConfig: undefined,
 };

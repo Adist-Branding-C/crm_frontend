@@ -596,6 +596,13 @@
   color: var(--primary);
 }
 
+.report-coming-soon {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+
 .status-badge.present {
   background: rgba(16, 185, 129, 0.1);
   color: var(--success);
