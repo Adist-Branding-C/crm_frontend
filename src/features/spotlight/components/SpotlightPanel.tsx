@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import LeadDetailDrawer from '../../../shared/components/drawers/LeadDetailDrawer';
 import { useSpotlightData } from '../hooks/useSpotlightData';
+import { useLeadAssigneeChange } from '../../enquiries/hooks/useLeadAssigneeChange';
+import ReassignLeadTasksModal from '../../enquiries/components/ReassignLeadTasksModal';
+import type { UpdateLeadPayload } from '../../enquiries/types/request';
 import { COLUMNS } from '../constants';
 import SpotlightToolbar from './SpotlightToolbar';
 import SpotlightFilters from './SpotlightFilters';
@@ -11,6 +14,17 @@ import './SpotlightPanel.css';
 
 const SpotlightPanel = () => {
   const spotlightData = useSpotlightData();
+  const assigneeChange = useLeadAssigneeChange();
+  const { resolvePayload } = assigneeChange;
+  const { onFieldSave, paginatedData, filterOptions } = spotlightData;
+
+  const handleFieldSave = useCallback(async (leadId: string, payload: UpdateLeadPayload) => {
+    const finalPayload = await resolvePayload(leadId, payload, {
+      fromName: paginatedData.find((row) => row.leadId === leadId)?.assignedStaff?.name,
+      toName: filterOptions.agents.find((option) => option.value === payload.agentId)?.label,
+    });
+    return finalPayload ? onFieldSave(leadId, finalPayload) : false;
+  }, [resolvePayload, onFieldSave, paginatedData, filterOptions]);
 
   return (
     <>
@@ -72,7 +86,7 @@ const SpotlightPanel = () => {
         onViewLead={spotlightData.handleViewLead}
         loading={spotlightData.loading}
         fieldOptions={spotlightData.filterOptions}
-        onFieldSave={spotlightData.onFieldSave}
+        onFieldSave={handleFieldSave}
       />
 
       <SpotlightPagination
@@ -91,7 +105,7 @@ const SpotlightPanel = () => {
           spotlightData.selectedLead
             ? {
                 ...spotlightData.selectedLead,
-                leadId: String(spotlightData.selectedLead.id),
+                leadId: spotlightData.selectedLead.leadId,
                 type: spotlightData.selectedLead.type?.type || '',
                 status: spotlightData.selectedLead.status?.status || '',
                 source: spotlightData.selectedLead.source?.source || '',
@@ -104,6 +118,7 @@ const SpotlightPanel = () => {
         onClose={spotlightData.closeLeadDetail}
         onLeadUpdated={spotlightData.refetch}
       />
+      <ReassignLeadTasksModal {...assigneeChange.modalProps} />
     </>
   );
 };

@@ -8,11 +8,15 @@ import { draftService } from '../../services/draftService';
 import { useToast } from '../../hooks/useToast';
 import ToastNotification from '../ToastNotification';
 import { getErrorMessage } from '../../../shared/utils/error';
+import { useLeadAssigneeChange } from '../../../features/enquiries/hooks/useLeadAssigneeChange';
+import ReassignLeadTasksModal from '../../../features/enquiries/components/ReassignLeadTasksModal';
+import { SUCCESS_MESSAGES } from '../../../features/enquiries/constants/messages';
 import './AddLeadDrawer.css';
 
 const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId }: AddLeadDrawerProps) => {
   const isEditing = !!lead;
   const { showToast, toastType, toastMessage, showToastMessage, setShowToast } = useToast();
+  const assigneeChange = useLeadAssigneeChange();
 
   // State for toggling between form and preview
   const [view, setView] = useState<'form' | 'preview'>('form');
@@ -60,9 +64,20 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
     if (!previewData) return;
 
     setIsSaving(true);
+    let reassignedTaskCount: number | undefined;
     try {
       if (isEditing && lead) {
-        await leadDataService.updateLead(lead.leadId, previewData.payload);
+        const assignedToField = previewData.sections
+          .flatMap((section) => section.fields)
+          .find((field) => field.label === 'Assigned To')?.value;
+        const toName = typeof assignedToField === 'string' ? assignedToField : undefined;
+        const payload = await assigneeChange.resolvePayload(lead.leadId, previewData.payload, {
+          fromName: lead.assignedTo,
+          toName,
+        });
+        if (!payload) return;
+        const res = await leadDataService.updateLead(lead.leadId, payload);
+        reassignedTaskCount = res.data?.reassignedTaskCount;
       } else {
         await leadDataService.createLead(previewData.payload);
       }
@@ -74,7 +89,12 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
 
       onSaved?.(isEditing ? 'updated' : 'created');
       handleClose();
-      showToastMessage(`Lead successfully ${isEditing ? 'updated' : 'created'}.`, 'success');
+      showToastMessage(
+        reassignedTaskCount
+          ? SUCCESS_MESSAGES.LEAD_UPDATED_WITH_TASKS(reassignedTaskCount)
+          : `Lead successfully ${isEditing ? 'updated' : 'created'}.`,
+        'success',
+      );
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err, 'Failed to save lead');
       showToastMessage(errorMessage, 'error');
@@ -98,6 +118,7 @@ const AddLeadDrawer = ({ isOpen, onClose, onSaved, lead, draftId: initialDraftId
           onSave={handleSave}
         />
         <ToastNotification isVisible={showToast} type={toastType} message={toastMessage} onDismiss={() => setShowToast(false)} />
+        <ReassignLeadTasksModal {...assigneeChange.modalProps} />
       </>
     );
   }

@@ -24,6 +24,9 @@ import { UnifiedTaskMapper } from '../../task/common/mapper/unifiedTaskMapper';
 import type { UnifiedTaskFormValues, UnifiedTaskItem } from '../../task/common/types/unifiedTask.types';
 import { useLeadFormOptions } from '../hooks/useLeadFormOptions';
 import { useLeadDeals } from '../hooks/useLeadDeals';
+import { useLeadAssigneeChange } from '../hooks/useLeadAssigneeChange';
+import type { AssigneeChangeNames } from '../hooks/useLeadAssigneeChange';
+import ReassignLeadTasksModal from './ReassignLeadTasksModal';
 import { leadDataService } from '../services/leadDataService';
 import { toLeadTaskFormData } from '../utils/leadMapper';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../../../shared/utils/dateUtils';
@@ -93,6 +96,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     tasks,
     isLoading: isLoadingTasks,
     error: tasksError,
+    fetchTasks,
     addTask,
     updateTask,
     deleteTask,
@@ -131,6 +135,12 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     addDeal,
   } = useLeadDeals(lead.leadId, true);
 
+  const assigneeChange = useLeadAssigneeChange();
+
+  const refreshTasksIfVisible = () => {
+    if (activeTab === 'task') fetchTasks();
+  };
+
   const toSelectOptions = (options: LabelValuePair[]): EditableDetailFieldOption[] =>
     options.map((o) => ({ value: o.value, label: o.label }));
 
@@ -145,13 +155,17 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     setShowToast(true);
   };
 
-  const saveLeadField = async (payload: UpdateLeadPayload): Promise<boolean> => {
+  const saveLeadField = async (payload: UpdateLeadPayload, names?: AssigneeChangeNames): Promise<boolean> => {
     if (!lead.leadId) return false;
+    const finalPayload = await assigneeChange.resolvePayload(lead.leadId, payload, names);
+    if (!finalPayload) return false;
     try {
-      const res = await leadDataService.updateLead(lead.leadId, payload);
+      const res = await leadDataService.updateLead(lead.leadId, finalPayload);
       if (res.status) {
-        showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
+        const reassignedTaskCount = res.data?.reassignedTaskCount;
+        showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED_WITH_TASKS(reassignedTaskCount), 'success');
         refreshActivities();
+        if (reassignedTaskCount) refreshTasksIfVisible();
         onLeadUpdated?.();
         return true;
       }
@@ -316,6 +330,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     setShowEditDrawer(false);
     showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
     refreshActivities();
+    refreshTasksIfVisible();
     onLeadUpdated?.();
   };
 
@@ -480,7 +495,10 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
                   editValue={findOptionValueByLabel(agentOptions, lead.assignedTo)}
                   type="select"
                   options={toSelectOptions(agentOptions)}
-                  onSave={(v) => saveLeadField({ agentId: v as string })}
+                  onSave={(v) => saveLeadField(
+                    { agentId: v as string },
+                    { fromName: lead.assignedTo, toName: agentOptions.find((o) => o.value === v)?.label },
+                  )}
                 />
                 <EditableDetailField
                   label="Type"
@@ -812,6 +830,7 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
         deal={{ lead: lead?.name, leadId: lead?.leadId ?? '' } as DealFormData}
         onSave={handleDealSave}
       />
+      <ReassignLeadTasksModal {...assigneeChange.modalProps} />
     </>
   );
 };

@@ -67,6 +67,8 @@ const CHANGE_FIELD_LABELS: Record<string, string> = {
   startDate: 'Start date',
   endDate: 'End date',
   leadId: 'Lead',
+  assignedTo: 'Assigned to',
+  tasksAssignedTo: 'Open tasks assigned to',
 };
 
 export function getChangeFieldLabel(fieldName: string): string {

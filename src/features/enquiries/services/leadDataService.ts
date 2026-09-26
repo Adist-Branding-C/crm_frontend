@@ -1,9 +1,9 @@
 import axiosInstance from '../../../api/axiosInstance';
 import { ServiceResponseUtil } from '../../../shared/utils/serviceResponse.util';
 import { QueryMapper } from '../../../shared/mappers/query.mapper';
-import { LEAD_API_ENDPOINTS } from '../constants/leadApiEndpoints';
+import { LEAD_API_ENDPOINTS, leadReassignableTasksCountEndpoint } from '../constants/leadApiEndpoints';
 import type { ApiResponse } from '../../../shared/types/common';
-import type { LeadListData, CreateLeadData, LeadSearchData } from '../types/response';
+import type { LeadListData, CreateLeadData, LeadSearchData, UpdateLeadData, ReassignableTaskCountData } from '../types/response';
 import type { CreateLeadPayload, UpdateLeadPayload, GetLeadsParams } from '../types/request';
 
 /**
@@ -44,8 +44,17 @@ class LeadDataService {
     });
   }
 
-  async updateLead(leadId: string, payload: UpdateLeadPayload): Promise<ApiResponse<null>> {
-    const response = await axiosInstance.patch<ApiResponse<null>>(`${LEAD_API_ENDPOINTS.LEADS}/${leadId}`, payload);
+  async updateLead(leadId: string, payload: UpdateLeadPayload): Promise<ApiResponse<UpdateLeadData>> {
+    const response = await axiosInstance.patch<ApiResponse<UpdateLeadData>>(`${LEAD_API_ENDPOINTS.LEADS}/${leadId}`, payload);
+    return ServiceResponseUtil.successResponse({
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+  }
+
+  async getReassignableTaskCount(leadId: string): Promise<ApiResponse<ReassignableTaskCountData>> {
+    const response = await axiosInstance.get<ApiResponse<ReassignableTaskCountData>>(leadReassignableTasksCountEndpoint(leadId));
     return ServiceResponseUtil.successResponse({
       status: response.data.status,
       message: response.data.message,

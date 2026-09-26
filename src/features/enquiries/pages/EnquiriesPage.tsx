@@ -51,6 +51,9 @@ import type { Lead as PipelineLead, PipelineStatusGroup, TaskStatusGroup } from 
 import type { Lead } from '../../../features/enquiries/types';
 import type { LeadApiItem } from '../types/response';
 import type { UpdateLeadPayload } from '../types/request';
+import { useLeadAssigneeChange } from '../hooks/useLeadAssigneeChange';
+import ReassignLeadTasksModal from '../components/ReassignLeadTasksModal';
+import { SUCCESS_MESSAGES } from '../constants/messages';
 import '../../sales-pipeline/pages/SalesPipelinePage.css';
 import './EnquiriesPage.css';
 
@@ -214,10 +217,21 @@ const EnquiriesPage = () => {
 
   const fieldOptions = useLeadFilterOptions();
 
+  const assigneeChange = useLeadAssigneeChange();
+
   const handleFieldSave = async (leadId: string, payload: UpdateLeadPayload) => {
+    const finalPayload = await assigneeChange.resolvePayload(leadId, payload, {
+      fromName: crud.leads.find((row) => row.leadId === leadId)?.assignedTo,
+      toName: fieldOptions.staffOptions.find((option) => option.value === payload.agentId)?.label,
+    });
+    if (!finalPayload) return false;
     try {
-      const res = await leadDataService.updateLead(leadId, payload);
+      const res = await leadDataService.updateLead(leadId, finalPayload);
       if (res.status) {
+        const reassignedTaskCount = res.data?.reassignedTaskCount;
+        if (reassignedTaskCount) {
+          toast.showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED_WITH_TASKS(reassignedTaskCount), 'success');
+        }
         crud.refreshCurrentPage();
         return true;
       }
@@ -507,6 +521,7 @@ const EnquiriesPage = () => {
         draftId={(addDrawer.item as { draftId?: string })?.draftId}
       />
       <LeadDetailDrawer lead={detailDrawer.item} isOpen={detailDrawer.isOpen} onClose={detailDrawer.close} onLeadUpdated={handleLeadDetailUpdated} onDeleteLead={rowActions.handleDeleteFromDrawer} />
+      <ReassignLeadTasksModal {...assigneeChange.modalProps} />
       <AdminDeleteModal isOpen={!!deleteConfirm.deletingItem} itemName={deleteConfirm.deletingItem?.name} itemType="lead"
         onConfirm={deleteConfirm.handleConfirmDelete} onClose={deleteConfirm.closeDeleteModal} />
       <Toast message={toast.toastMessage} type={toast.toastType} isVisible={toast.showToast} onClose={() => toast.setShowToast(false)} />
