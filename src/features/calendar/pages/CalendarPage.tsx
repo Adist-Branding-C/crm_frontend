@@ -6,20 +6,20 @@ import ToastNotification from '../../../shared/components/ToastNotification';
 import AdminDeleteModal from '../../../shared/components/crud/AdminDeleteModal';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useCalendarData } from '../hooks/useCalendarData';
-import { useCalendarAddTask } from '../hooks/useCalendarAddTask';
+import { useCalendarTaskFormDrawer } from '../hooks/useCalendarTaskFormDrawer';
 import { toLocalDateString } from '../../../shared/utils/dateUtils';
 import CalendarControls from '../components/CalendarControls';
 import MonthView from '../components/MonthView';
 import DayView from '../components/DayView';
 import WeekView from '../components/WeekView';
 import DayDrawer from '../components/DayDrawer';
-import AddCalendarTaskDrawer from '../components/AddCalendarTaskDrawer';
+import TaskFormDrawer from '../../task/common/components/TaskFormDrawer';
 import './CalendarPage.css';
 
 const CalendarPage = () => {
   const toast = useToast();
   const d = useCalendarData(toast.showToastMessage);
-  const addTask = useCalendarAddTask(d.refetch, toast.showToastMessage);
+  const addTask = useCalendarTaskFormDrawer(d.refetch, toast.showToastMessage);
 
   const openAddTask = () => {
     const date = d.selectedDate ?? d.currentDate;
@@ -101,7 +101,27 @@ const CalendarPage = () => {
         onDeleteTask={d.handleDeleteTask}
       />
 
-      <AddCalendarTaskDrawer addTask={addTask} />
+      <TaskFormDrawer
+        isOpen={addTask.isOpen}
+        onClose={addTask.close}
+        isEditing={false}
+        initialValues={addTask.initialValues}
+        onSubmit={addTask.handleSubmit}
+        isLoading={addTask.isSaving}
+        error={addTask.error}
+        draftId={addTask.draftId}
+        onDraftSaved={addTask.onDraftSaved}
+        staffOptions={addTask.staffOptions}
+        staffLoading={addTask.staffLoading}
+        categoryOptions={addTask.categoryOptions}
+        categoryLoading={addTask.categoryLoading}
+        leadOptions={addTask.leadOptions}
+        leadLoading={addTask.leadLoading}
+        campaignOptions={addTask.campaignOptions}
+        campaignLoading={addTask.campaignLoading}
+        dealOptions={addTask.dealOptions}
+        dealLoading={addTask.dealLoading}
+      />
 
       <AdminDeleteModal
         isOpen={!!d.deletingTask}
