@@ -13,7 +13,7 @@ export function useLeadSearch(
     onFetch(1, rowsPerPageRef.current, value, activeFiltersRef.current);
   }, [onFetch, activeFiltersRef, rowsPerPageRef, resetPage]);
 
-  const { searchValue, handleSearchChange, resetSearch, syncSearchValue } = useDebouncedSearch(handleCommittedSearch, 2000);
+  const { searchValue, handleSearchChange, resetSearch, syncSearchValue } = useDebouncedSearch(handleCommittedSearch, 1500);
 
   return {
     searchQuery: searchValue,

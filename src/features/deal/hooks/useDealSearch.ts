@@ -13,7 +13,7 @@ export function useDealSearch(
     onFetch(1, rowsPerPageRef.current, value, activeFiltersRef.current);
   }, [onFetch, activeFiltersRef, rowsPerPageRef, resetPage]);
 
-  const { searchValue, handleSearchChange, resetSearch } = useDebouncedSearch(handleCommittedSearch, 2000);
+  const { searchValue, handleSearchChange, resetSearch } = useDebouncedSearch(handleCommittedSearch, 1500);
 
   return {
     searchQuery: searchValue,
