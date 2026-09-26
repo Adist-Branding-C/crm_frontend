@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, Phone, MessageSquare, Trash2, Plus, Briefcase, User, Mail as MailIcon, Check, Clock, ArrowLeft, Edit2, Calendar, FileText, Loader2 } from 'lucide-react';
 import LeadContactNumbersTab from './LeadContactNumbersTab';
-import AddLeadTaskDrawer from '../../../components/AddLeadTaskDrawer';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
 import AddDealDrawer from '../../../shared/components/drawers/AddDealDrawer';
 import WhatsappTemplatePickerOverlay from '../../../shared/components/WhatsappTemplatePickerOverlay';
@@ -16,9 +15,14 @@ import { useLeadTasks } from '../hooks/useLeadTasks';
 import ActivityTimelineCard from '../../daily-activity/components/ActivityTimelineCard';
 import { ActivityMapper } from '../../daily-activity/mappers/activity.mapper';
 import { useLeadTaskDropdowns } from '../hooks/useLeadTaskDropdowns';
+import TaskFormDrawer from '../../task/common/components/TaskFormDrawer';
+import { UNIFIED_EMPTY_VALUES } from '../../task/common/constants/unifiedTaskInitialValues';
+import { UnifiedTaskMapper } from '../../task/common/mapper/unifiedTaskMapper';
+import type { UnifiedTaskFormValues, UnifiedTaskItem } from '../../task/common/types/unifiedTask.types';
 import { useLeadFormOptions } from '../hooks/useLeadFormOptions';
 import { useLeadDeals } from '../hooks/useLeadDeals';
 import { leadDataService } from '../services/leadDataService';
+import { toLeadTaskFormData } from '../utils/leadMapper';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../../../shared/utils/dateUtils';
 import { badgeClass } from '../../../shared/utils/badgeUtils';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/messages';
@@ -92,12 +96,8 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
   } = useLeadTasks(lead.id, true, activeTab);
 
   const {
-    categoryOptions,
     staffOptions,
-    isLoadingCategories,
     isLoadingStaff,
-    categoriesError,
-    staffError,
   } = useLeadTaskDropdowns(showTaskDrawer);
 
   const {
@@ -235,27 +235,44 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     window.open(buildWhatsappUrl(whatsappTargetPhone), '_blank');
   };
 
-  const handleAddTask = async (formData: any) => {
-    const success = await addTask(formData);
+  const handleAddTask = async (formData: UnifiedTaskFormValues) => {
+    const success = await addTask(toLeadTaskFormData(formData));
     if (success) {
       showToastMessage(SUCCESS_MESSAGES.TASK_CREATED, 'success');
+      setShowTaskDrawer(false);
     } else {
       showToastMessage(ERROR_MESSAGES.ADD_TASK, 'error');
     }
     return success;
   };
 
-  const handleEditTask = async (formData: any) => {
+  const handleEditTask = async (formData: UnifiedTaskFormValues) => {
     if (!editTask) return false;
-    const success = await updateTask(editTask.id, formData);
+    const success = await updateTask(editTask.id, toLeadTaskFormData(formData));
     if (success) {
       setEditTask(null);
+      setShowTaskDrawer(false);
       showToastMessage(SUCCESS_MESSAGES.TASK_UPDATED, 'success');
     } else {
       showToastMessage(ERROR_MESSAGES.UPDATE_TASK, 'error');
     }
     return success;
   };
+
+  const taskInitialValues = useMemo<UnifiedTaskFormValues>(() => {
+    const baseValues: UnifiedTaskFormValues = {
+      ...UNIFIED_EMPTY_VALUES,
+      taskType: 'CALL',
+      leadId: String(lead.id),
+    };
+    if (!editTask) return baseValues;
+    return {
+      ...baseValues,
+      ...UnifiedTaskMapper.toFormValues(editTask as unknown as UnifiedTaskItem),
+      taskType: 'CALL',
+      leadId: String(lead.id),
+    };
+  }, [editTask, lead.id]);
 
   const handleDeleteTaskClick = (task: LeadTaskItem) => {
     setDeleteTaskTarget(task);
@@ -744,19 +761,17 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
       </div>
 
       <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
-      <AddLeadTaskDrawer
+      <TaskFormDrawer
         isOpen={showTaskDrawer}
         onClose={() => { setShowTaskDrawer(false); setEditTask(null); }}
+        isEditing={Boolean(editTask)}
+        initialValues={taskInitialValues}
         onSubmit={editTask ? handleEditTask : handleAddTask}
-        task={editTask}
         isLoading={isLoadingTasks}
         error={tasksError}
-        categoryOptions={categoryOptions}
         staffOptions={staffOptions}
-        isLoadingCategories={isLoadingCategories}
-        isLoadingStaff={isLoadingStaff}
-        categoriesError={categoriesError}
-        staffError={staffError}
+        staffLoading={isLoadingStaff}
+        leadOptions={[{ value: String(lead.id), label: lead.name }]}
       />
       <AddLeadDrawer
         isOpen={showEditDrawer}

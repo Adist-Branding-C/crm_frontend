@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Phone, MessageSquare, Trash2, Plus, Mail, Mail as MailIcon, Send, Check, Clock, ArrowLeft, Edit2, Calendar, User, FileText, AlertTriangle, Loader2 } from 'lucide-react';
 import './LeadDetailDrawer.css';
-import AddLeadTaskDrawer from './AddLeadTaskDrawer';
 import AddLeadDrawer from '../shared/components/drawers/AddLeadDrawer';
 import { useLeadActivities } from '../features/enquiries/hooks/useLeadActivities';
 import Toast from '../shared/components/Toast';
@@ -9,8 +8,12 @@ import AdminDeleteModal from '../shared/components/crud/AdminDeleteModal';
 import { useLeadRemarks } from '../features/enquiries/hooks/useLeadRemarks';
 import { useLeadTasks } from '../features/enquiries/hooks/useLeadTasks';
 import { useLeadTaskDropdowns } from '../features/enquiries/hooks/useLeadTaskDropdowns';
+import TaskFormDrawer from '../features/task/common/components/TaskFormDrawer';
+import { UNIFIED_EMPTY_VALUES } from '../features/task/common/constants/unifiedTaskInitialValues';
+import { UnifiedTaskMapper } from '../features/task/common/mapper/unifiedTaskMapper';
 import { useLeadFormOptions } from '../features/enquiries/hooks/useLeadFormOptions';
 import { leadDataService } from '../features/enquiries/services/leadDataService';
+import { toLeadTaskFormData } from '../features/enquiries/utils/leadMapper';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../features/enquiries/constants/messages';
 import EditableDetailField from '../shared/components/drawers/EditableDetailField';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -79,12 +82,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
   } = useLeadTasks(lead?.id, isOpen, activeTab);
 
   const {
-    categoryOptions,
     staffOptions,
-    isLoadingCategories,
     isLoadingStaff,
-    categoriesError,
-    staffError,
   } = useLeadTaskDropdowns(showTaskDrawer);
 
   const {
@@ -131,8 +130,9 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
   };
 
   const handleAddTask = async (formData) => {
-    const success = await addTask(formData);
+    const success = await addTask(toLeadTaskFormData(formData));
     if (success) {
+      setShowTaskDrawer(false);
       showToastMessage('Task created successfully', 'success');
     } else {
       showToastMessage('Failed to create task', 'error');
@@ -142,15 +142,31 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
 
   const handleEditTask = async (formData) => {
     if (!editTask) return false;
-    const success = await updateTask(editTask.id, formData);
+    const success = await updateTask(editTask.id, toLeadTaskFormData(formData));
     if (success) {
       setEditTask(null);
+      setShowTaskDrawer(false);
       showToastMessage('Task updated successfully', 'success');
     } else {
       showToastMessage('Failed to update task', 'error');
     }
     return success;
   };
+
+  const taskInitialValues = (() => {
+    const baseValues = {
+      ...UNIFIED_EMPTY_VALUES,
+      taskType: 'CALL',
+      leadId: lead?.id ? String(lead.id) : '',
+    };
+    if (!editTask) return baseValues;
+    return {
+      ...baseValues,
+      ...UnifiedTaskMapper.toFormValues(editTask),
+      taskType: 'CALL',
+      leadId: lead?.id ? String(lead.id) : '',
+    };
+  })();
 
   const handleDeleteTaskClick = (task) => {
     setDeleteTaskTarget(task);
@@ -671,19 +687,17 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
         </div>
       )}
       <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
-      <AddLeadTaskDrawer
+      <TaskFormDrawer
         isOpen={showTaskDrawer}
         onClose={() => { setShowTaskDrawer(false); setEditTask(null); }}
+        isEditing={Boolean(editTask)}
+        initialValues={taskInitialValues}
         onSubmit={editTask ? handleEditTask : handleAddTask}
-        task={editTask}
         isLoading={isLoadingTasks}
         error={tasksError}
-        categoryOptions={categoryOptions}
         staffOptions={staffOptions}
-        isLoadingCategories={isLoadingCategories}
-        isLoadingStaff={isLoadingStaff}
-        categoriesError={categoriesError}
-        staffError={staffError}
+        staffLoading={isLoadingStaff}
+        leadOptions={[{ value: lead?.id ? String(lead.id) : '', label: lead?.name }]}
       />
       <AddLeadDrawer
         isOpen={showEditDrawer}

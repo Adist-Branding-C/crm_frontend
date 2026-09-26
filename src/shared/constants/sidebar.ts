@@ -35,7 +35,8 @@ export const sidebarNavGroups: SidebarNavGroup[] = [
       { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
       { icon: MessageCircle, label: 'Leads', path: '/leads' },
       { icon: DollarSign, label: 'Deals', path: '/user/deals' },
-      { icon: Kanban, label: 'Sales Pipeline', path: '/sales-pipeline' },
+      // Hidden temporarily - Sales Pipeline module (not deleted)
+      // { icon: Kanban, label: 'Sales Pipeline', path: '/sales-pipeline' },
       { icon: ListChecks, label: 'Tasks', path: '/user/tasks' },
       { icon: Calendar, label: 'Calendar', path: '/calendar' },
       { icon: Activity, label: 'Daily Activity', path: '/daily-activity' },
