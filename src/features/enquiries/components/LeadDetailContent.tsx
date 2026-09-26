@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { X, Phone, MessageSquare, Trash2, Plus, Briefcase, User, Mail as MailIcon, Check, Clock, ArrowLeft, Edit2, Calendar, FileText, Loader2 } from 'lucide-react';
 import LeadContactNumbersTab from './LeadContactNumbersTab';
 import AddLeadDrawer from '../../../shared/components/drawers/AddLeadDrawer';
@@ -15,6 +15,9 @@ import { useLeadTasks } from '../hooks/useLeadTasks';
 import ActivityTimelineCard from '../../daily-activity/components/ActivityTimelineCard';
 import { ActivityMapper } from '../../daily-activity/mappers/activity.mapper';
 import { useLeadTaskDropdowns } from '../hooks/useLeadTaskDropdowns';
+import { useDealOptions } from '../../task/common/hooks/useDealOptions';
+import { useCategoryOptions } from '../../task/common/hooks/useCategoryOptions';
+import { useCampaignOptions } from '../../task/common/hooks/useCampaignOptions';
 import TaskFormDrawer from '../../task/common/components/TaskFormDrawer';
 import { UNIFIED_EMPTY_VALUES } from '../../task/common/constants/unifiedTaskInitialValues';
 import { UnifiedTaskMapper } from '../../task/common/mapper/unifiedTaskMapper';
@@ -99,6 +102,17 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
     staffOptions,
     isLoadingStaff,
   } = useLeadTaskDropdowns(showTaskDrawer);
+
+  const { dealOptions, dealLoading, loadDeals } = useDealOptions();
+  const { categoryOptions, categoryLoading, loadCategories } = useCategoryOptions();
+  const { campaignOptions, campaignLoading, loadCampaigns } = useCampaignOptions();
+
+  useEffect(() => {
+    if (!showTaskDrawer) return;
+    loadDeals();
+    loadCategories();
+    loadCampaigns();
+  }, [showTaskDrawer, loadDeals, loadCategories, loadCampaigns]);
 
   const {
     staffOptions: agentOptions,
@@ -772,6 +786,12 @@ const LeadDetailContent = ({ lead, onClose, onLeadUpdated, onDeleteLead }: LeadD
         staffOptions={staffOptions}
         staffLoading={isLoadingStaff}
         leadOptions={[{ value: String(lead.id), label: lead.name }]}
+        dealOptions={dealOptions}
+        dealLoading={dealLoading}
+        categoryOptions={categoryOptions}
+        categoryLoading={categoryLoading}
+        campaignOptions={campaignOptions}
+        campaignLoading={campaignLoading}
       />
       <AddLeadDrawer
         isOpen={showEditDrawer}

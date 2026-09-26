@@ -11,6 +11,9 @@ import { useLeadTaskDropdowns } from '../features/enquiries/hooks/useLeadTaskDro
 import TaskFormDrawer from '../features/task/common/components/TaskFormDrawer';
 import { UNIFIED_EMPTY_VALUES } from '../features/task/common/constants/unifiedTaskInitialValues';
 import { UnifiedTaskMapper } from '../features/task/common/mapper/unifiedTaskMapper';
+import { useDealOptions } from '../features/task/common/hooks/useDealOptions';
+import { useCategoryOptions } from '../features/task/common/hooks/useCategoryOptions';
+import { useCampaignOptions } from '../features/task/common/hooks/useCampaignOptions';
 import { useLeadFormOptions } from '../features/enquiries/hooks/useLeadFormOptions';
 import { leadDataService } from '../features/enquiries/services/leadDataService';
 import { toLeadTaskFormData } from '../features/enquiries/utils/leadMapper';
@@ -85,6 +88,17 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
     staffOptions,
     isLoadingStaff,
   } = useLeadTaskDropdowns(showTaskDrawer);
+
+  const { dealOptions, dealLoading, loadDeals } = useDealOptions();
+  const { categoryOptions, categoryLoading, loadCategories } = useCategoryOptions();
+  const { campaignOptions, campaignLoading, loadCampaigns } = useCampaignOptions();
+
+  useEffect(() => {
+    if (!showTaskDrawer) return;
+    loadDeals();
+    loadCategories();
+    loadCampaigns();
+  }, [showTaskDrawer, loadDeals, loadCategories, loadCampaigns]);
 
   const {
     staffOptions: agentOptions,
@@ -698,6 +712,12 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
         staffOptions={staffOptions}
         staffLoading={isLoadingStaff}
         leadOptions={[{ value: lead?.id ? String(lead.id) : '', label: lead?.name }]}
+        dealOptions={dealOptions}
+        dealLoading={dealLoading}
+        categoryOptions={categoryOptions}
+        categoryLoading={categoryLoading}
+        campaignOptions={campaignOptions}
+        campaignLoading={campaignLoading}
       />
       <AddLeadDrawer
         isOpen={showEditDrawer}
