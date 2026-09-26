@@ -540,7 +540,6 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
                     onClose={() => { setShowDeleteRemarkModal(false); setRemarkToDelete(null); }}
                     isDeleting={isDeletingRemark}
                   />
-                  <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
                 </div>
               )}
 
@@ -671,6 +670,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
           </div>
         </div>
       )}
+      <Toast message={toastMessage} type={toastType} isVisible={showToast} onClose={() => setShowToast(false)} />
       <AddLeadTaskDrawer
         isOpen={showTaskDrawer}
         onClose={() => { setShowTaskDrawer(false); setEditTask(null); }}
