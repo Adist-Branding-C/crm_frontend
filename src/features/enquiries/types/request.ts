@@ -23,6 +23,7 @@ export interface UpdateLeadPayload {
   location?: string;
   address?: string;
   additionalFields?: Array<{ fieldId: string; value: string }>;
+  reassignOpenTasks?: boolean;
 }
 
 export interface CreateLeadPayload {

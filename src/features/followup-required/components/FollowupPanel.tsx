@@ -17,6 +17,8 @@ import FollowupStatCards from './FollowupStatCards';
 import FollowupTable from './FollowupTable';
 import FollowupPagination from './FollowupPagination';
 import type { FollowupBucket } from '../types';
+import { useLeadAssigneeChange } from '../../enquiries/hooks/useLeadAssigneeChange';
+import ReassignLeadTasksModal from '../../enquiries/components/ReassignLeadTasksModal';
 
 /**
  * Self-contained follow-up list: stat cards, search/filter/sort toolbar,
@@ -69,7 +71,6 @@ const FollowupPanel = ({ initialFilters }: FollowupPanelProps = {}) => {
     searchValue: searchQuery,
     handleSearchChange: setSearchQuery,
   } = useDebouncedSearch(handleCommittedSearch);
-
 
   useEffect(() => {
     fetchFollowupLeads(
@@ -175,6 +176,20 @@ const FollowupPanel = ({ initialFilters }: FollowupPanelProps = {}) => {
     [typeOptions, sourceOptions, staffOptions, statusOptions, purposeOptions],
   );
 
+  const assigneeChange = useLeadAssigneeChange();
+  const { resolvePayload } = assigneeChange;
+
+  const handleFieldSaveWithTaskPrompt = useCallback(
+    async (leadId: string, payload: UpdateLeadPayload) => {
+      const finalPayload = await resolvePayload(leadId, payload, {
+        fromName: data.find((row) => row.leadId === leadId)?.assignedTo,
+        toName: staffOptions.find((option) => option.value === payload.agentId)?.label,
+      });
+      return finalPayload ? handleFieldSave(leadId, finalPayload) : false;
+    },
+    [resolvePayload, handleFieldSave, data, staffOptions],
+  );
+
   return (
     <>
       <FollowupStatCards
@@ -224,7 +239,7 @@ const FollowupPanel = ({ initialFilters }: FollowupPanelProps = {}) => {
         onRetry={refresh}
         onViewLead={drawerState.handleViewLead}
         fieldOptions={fieldOptions}
-        onFieldSave={handleFieldSave}
+        onFieldSave={handleFieldSaveWithTaskPrompt}
       />
 
       <FollowupPagination
@@ -244,6 +259,7 @@ const FollowupPanel = ({ initialFilters }: FollowupPanelProps = {}) => {
         onLeadUpdated={refreshAll}
         onFieldSaved={drawerState.updateSelectedLead}
       />
+      <ReassignLeadTasksModal {...assigneeChange.modalProps} />
     </>
   );
 };

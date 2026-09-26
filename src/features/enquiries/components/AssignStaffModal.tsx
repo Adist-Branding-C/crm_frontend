@@ -4,15 +4,18 @@ import { staffService } from '../../deal/services/staff.service';
 import Modal from '../../../shared/components/Modal';
 import type { AssignStaffModalProps } from '../types/modal.types';
 import type { LabelValuePair } from '../../../shared/types/common';
+import { REASSIGN_TASKS_PROMPT } from '../constants/messages';
 
 const AssignStaffModal: React.FC<AssignStaffModalProps> = ({ isOpen, selectedCount, isProcessing, onConfirm, onClose }) => {
   const [staffOptions, setStaffOptions] = useState<LabelValuePair[]>([]);
   const [staffLoading, setStaffLoading] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState('');
+  const [reassignOpenTasks, setReassignOpenTasks] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setSelectedStaffId('');
+      setReassignOpenTasks(false);
       return;
     }
     setStaffLoading(true);
@@ -46,9 +49,24 @@ const AssignStaffModal: React.FC<AssignStaffModalProps> = ({ isOpen, selectedCou
             )}
           </select>
         </div>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '1rem', fontSize: '0.875rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={reassignOpenTasks}
+            onChange={(e) => setReassignOpenTasks(e.target.checked)}
+            disabled={isProcessing}
+            style={{ marginTop: '0.2rem' }}
+          />
+          <span>
+            {REASSIGN_TASKS_PROMPT.BULK_CHECKBOX}
+            <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
+              {REASSIGN_TASKS_PROMPT.SCOPE_NOTE}
+            </span>
+          </span>
+        </label>
       </div>
       <div className="modal-footer">
-        <button className="btn btn-primary" onClick={() => onConfirm(selectedStaffId)} disabled={!selectedStaffId || isProcessing}>
+        <button className="btn btn-primary" onClick={() => onConfirm(selectedStaffId, reassignOpenTasks)} disabled={!selectedStaffId || isProcessing}>
           {isProcessing ? <><Loader2 size={16} className="spin" /> Assigning...</> : 'Assign Staff'}
         </button>
         <button className="btn btn-secondary" onClick={onClose} disabled={isProcessing}>Cancel</button>

@@ -20,6 +20,8 @@ import { toLeadTaskFormData } from '../features/enquiries/utils/leadMapper';
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../features/enquiries/constants/messages';
 import EditableDetailField from '../shared/components/drawers/EditableDetailField';
 import { useAuth } from '../features/auth/hooks/useAuth';
+import { useLeadAssigneeChange } from '../features/enquiries/hooks/useLeadAssigneeChange';
+import ReassignLeadTasksModal from '../features/enquiries/components/ReassignLeadTasksModal';
 import { formatDateTime, formatRelativeDate, formatFollowUpDate } from '../shared/utils/dateUtils';
 
 const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }) => {
@@ -79,6 +81,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
     tasks,
     isLoading: isLoadingTasks,
     error: tasksError,
+    fetchTasks,
     addTask,
     updateTask,
     deleteTask,
@@ -109,6 +112,8 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
     additionalFieldDefs,
   } = useLeadFormOptions(isOpen);
 
+  const assigneeChange = useLeadAssigneeChange();
+
   if (!isVisible || !lead) return null;
 
   const showToastMessage = (message, type) => {
@@ -124,14 +129,18 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
     return options.find((o) => o.label === label)?.value ?? '';
   };
 
-  const saveLeadField = async (payload) => {
+  const saveLeadField = async (payload, names) => {
     if (!lead?.leadId) return false;
+    const finalPayload = await assigneeChange.resolvePayload(lead.leadId, payload, names);
+    if (!finalPayload) return false;
     try {
-      const res = await leadDataService.updateLead(lead.leadId, payload);
+      const res = await leadDataService.updateLead(lead.leadId, finalPayload);
       if (res.status) {
-        showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED, 'success');
+        const reassignedTaskCount = res.data?.reassignedTaskCount;
+        showToastMessage(SUCCESS_MESSAGES.LEAD_UPDATED_WITH_TASKS(reassignedTaskCount), 'success');
         onFieldSaved?.(payload);
         refreshActivities();
+        if (reassignedTaskCount && activeTab === 'task') fetchTasks();
         onLeadUpdated?.();
         return true;
       }
@@ -379,7 +388,10 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
                     editValue={findOptionValueByLabel(agentOptions, lead.assignedTo)}
                     type="select"
                     options={toSelectOptions(agentOptions)}
-                    onSave={(v) => saveLeadField({ agentId: v })}
+                    onSave={(v) => saveLeadField(
+                      { agentId: v },
+                      { fromName: lead.assignedTo, toName: agentOptions.find((o) => o.value === v)?.label },
+                    )}
                   />
                   <EditableDetailField
                     label="Type"
@@ -732,6 +744,7 @@ const LeadDetailDrawer = ({ lead, isOpen, onClose, onLeadUpdated, onFieldSaved }
         onClose={() => { setShowDeleteTaskModal(false); setDeleteTaskTarget(null); }}
         isDeleting={isDeletingTask}
       />
+      <ReassignLeadTasksModal {...assigneeChange.modalProps} />
     </div>
   );
 };

@@ -8,6 +8,8 @@
 export const SUCCESS_MESSAGES = {
   LEAD_CREATED: 'Lead created successfully',
   LEAD_UPDATED: 'Lead updated successfully',
+  LEAD_UPDATED_WITH_TASKS: (taskCount: number | undefined) =>
+    taskCount ? `Lead updated successfully. ${taskCount} open task(s) reassigned.` : 'Lead updated successfully',
   LEAD_DELETED: 'Lead deleted successfully',
   REMARK_ADDED: 'Remark added successfully.',
   REMARK_UPDATED: 'Remark updated successfully.',
@@ -18,6 +20,8 @@ export const SUCCESS_MESSAGES = {
   DEAL_CREATED: 'Deal created successfully',
   STATUS_UPDATED: (count: number) => `Status updated for ${count} lead(s)`,
   STAFF_ASSIGNED: (count: number) => `Staff assigned to ${count} lead(s)`,
+  STAFF_ASSIGNED_WITH_TASKS: (count: number, taskCount: number) =>
+    `Staff assigned to ${count} lead(s). ${taskCount} open task(s) reassigned.`,
   LEADS_DELETED: (count: number) => `${count} lead(s) deleted successfully`,
   LEAD_RESTORED: 'Lead restored successfully',
   LEADS_RESTORED: (count: number) => `${count} lead(s) restored successfully`,
@@ -61,4 +65,20 @@ export const ERROR_MESSAGES = {
   RESTORE_LEAD: 'Failed to restore lead',
   PARTIAL_RESTORE: (successCount: number, failCount: number) => `${successCount} restored, ${failCount} failed`,
   ASSIGN_CAMPAIGN_FAILED: 'Failed to assign leads to campaign. Please try again.',
+} as const;
+
+export const REASSIGN_TASKS_PROMPT = {
+  TITLE: 'Reassign open tasks?',
+  WITH_COUNT: (taskCount: number, fromName: string, toName: string) =>
+    `This lead has ${taskCount} open task(s) assigned to ${fromName}. Move them to ${toName} as well?`,
+  WITHOUT_COUNT: (fromName: string, toName: string) =>
+    `Move this lead's open tasks assigned to ${fromName} to ${toName} as well?`,
+  SCOPE_NOTE: 'Completed tasks and tasks assigned to other people are not changed.',
+  FALLBACK_FROM: 'the current assignee',
+  FALLBACK_TO: 'the new assignee',
+  CONFIRM_WITH_TASKS: 'Reassign lead & tasks',
+  CONFIRM_LEAD_ONLY: 'Reassign lead only',
+  CANCEL: 'Cancel',
+  CLOSE: 'Close',
+  BULK_CHECKBOX: "Also reassign each lead's open tasks from its current assignee",
 } as const;

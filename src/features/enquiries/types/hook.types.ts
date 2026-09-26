@@ -93,7 +93,7 @@ export interface UseLeadBulkActionsReturn {
   handleChangeStatusClick: () => void;
   handleConfirmChangeStatus: (statusId: string) => Promise<void>;
   handleAssignStaffClick: () => void;
-  handleConfirmAssignStaff: (agentId: string) => Promise<void>;
+  handleConfirmAssignStaff: (agentId: string, reassignOpenTasks: boolean) => Promise<void>;
   handleAssignCampaignClick: () => void;
   handleConfirmAssignCampaign: (campaignId: string) => Promise<void>;
   handleDeleteSelectedClick: () => void;

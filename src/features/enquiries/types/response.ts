@@ -53,7 +53,6 @@ export interface LeadListData {
   pagination: PaginationInfo;
 }
 
-
 export interface LeadSearchApiItem {
   id: string;
   name: string;
@@ -68,6 +67,16 @@ export interface LeadSearchData {
 
 export interface CreateLeadData {
   leadId: string;
+}
+
+export interface UpdateLeadData {
+  leadId: string;
+  reassignedTaskCount?: number;
+}
+
+export interface ReassignableTaskCountData {
+  openTaskCount: number;
+  currentAgentId: string;
 }
 
 export interface RemarkPaginationInfo {

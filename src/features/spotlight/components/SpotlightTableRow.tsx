@@ -135,7 +135,7 @@ const SpotlightTableRow = memo(
               ? row.status?.id 
               : undefined
           }
-          onSave={(value) => onFieldSave(String(row.id), { [editableConfig.payloadKey]: value })}
+          onSave={(value) => onFieldSave(row.leadId, { [editableConfig.payloadKey]: value })}
           onClose={() => setEditingField(null)}
         />
       )}

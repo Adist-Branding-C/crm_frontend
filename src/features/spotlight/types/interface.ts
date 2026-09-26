@@ -2,6 +2,7 @@ import type { DateRange, LabelValuePair } from '../../../shared/types/common';
 
 export interface SpotlightLead {
   id: number;
+  leadId: string;
   name: string;
   phone: string;
   email: string;

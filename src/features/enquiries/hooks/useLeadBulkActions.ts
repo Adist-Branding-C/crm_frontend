@@ -53,13 +53,16 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
     setShowAssignStaffModal(true);
   }, [selectedIds, onShowToast]);
 
-  const handleConfirmAssignStaff = useCallback(async (agentId: string) => {
+  const handleConfirmAssignStaff = useCallback(async (agentId: string, reassignOpenTasks: boolean) => {
     setIsProcessingSelected(true);
     let successCount = 0;
     let failCount = 0;
+    let reassignedTaskCount = 0;
+    const payload: UpdateLeadPayload = reassignOpenTasks ? { agentId, reassignOpenTasks: true } : { agentId };
     for (const id of selectedIds) {
       try {
-        await leadDataService.updateLead(id, { agentId } as UpdateLeadPayload);
+        const res = await leadDataService.updateLead(id, payload);
+        reassignedTaskCount += res.data?.reassignedTaskCount ?? 0;
         successCount++;
       } catch {
         failCount++;
@@ -69,7 +72,12 @@ export function useLeadBulkActions(options: UseLeadBulkActionsOptions): UseLeadB
     onClearSelection([]);
     setIsProcessingSelected(false);
     if (failCount === 0) {
-      onShowToast(SUCCESS_MESSAGES.STAFF_ASSIGNED(successCount), 'success');
+      onShowToast(
+        reassignedTaskCount > 0
+          ? SUCCESS_MESSAGES.STAFF_ASSIGNED_WITH_TASKS(successCount, reassignedTaskCount)
+          : SUCCESS_MESSAGES.STAFF_ASSIGNED(successCount),
+        'success',
+      );
     } else {
       onShowToast(ERROR_MESSAGES.PARTIAL_ASSIGN(successCount, failCount), 'error');
     }
