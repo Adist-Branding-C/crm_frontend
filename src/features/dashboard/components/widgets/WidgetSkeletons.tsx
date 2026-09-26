@@ -1,10 +1,7 @@
 import React from 'react';
 import { Skeleton } from '../../../../shared/components/Skeleton';
 
-// Mirrors .list-item / .list-item-left / .color-box / .list-item-value so the
-// skeleton rows land in the exact spot the real rows render into - no layout
-// shift once data arrives. Used by any widget rendering a color-box list
-// (LeadStatusWidget, LeadSourceWidget, DealByStageWidget, ActivitiesStatisticsWidget columns).
+
 export const ListRowsSkeleton = ({ rows = 4 }: { rows?: number }) => (
   <div className="list-container">
     {Array.from({ length: rows }).map((_, index) => (
@@ -19,8 +16,7 @@ export const ListRowsSkeleton = ({ rows = 4 }: { rows?: number }) => (
   </div>
 );
 
-// Mirrors the label+value header / horizontal bar pattern shared by
-// LeadPurposeWidget's purpose-item and TasksWidget's task-stat-item.
+
 export const BarRowsSkeleton = ({ rows = 3 }: { rows?: number }) => (
   <div className="list-container">
     {Array.from({ length: rows }).map((_, index) => (
@@ -35,10 +31,17 @@ export const BarRowsSkeleton = ({ rows = 3 }: { rows?: number }) => (
   </div>
 );
 
-// Generic placeholder for chart-shaped widgets (bar/pie) - matches the
-// chart area's typical footprint without reproducing the exact chart.
+
 export const ChartSkeleton = ({ height = 170 }: { height?: number }) => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height }}>
     <Skeleton width="55%" height="70%" borderRadius="8px" />
+  </div>
+);
+
+export const BarListSkeleton = ({ rows = 5 }: { rows?: number }) => (
+  <div className="bar-list-skeleton">
+    {Array.from({ length: rows }).map((_, index) => (
+      <Skeleton key={index} width="100%" height={32} borderRadius="var(--border-radius-md)" />
+    ))}
   </div>
 );

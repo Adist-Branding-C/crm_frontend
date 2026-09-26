@@ -32,21 +32,58 @@ const CellEditPopover = ({ anchorRect, label, type, options = [], initialValue, 
   const [search, setSearch] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const [popoverStyle, setPopoverStyle] = useState<React.CSSProperties>({
+    top: -9999,
+    left: -9999,
+    opacity: 0,
+    width: POPOVER_WIDTH,
+    visibility: 'hidden',
+  });
 
   const filteredOptions = useMemo(() => {
     if (!search) return options;
-    return options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()));
+    return options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()));
   }, [options, search]);
 
-  const position = (() => {
+  useEffect(() => {
+    if (!popoverRef.current) return;
+
     const margin = 8;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+
+    const rect = popoverRef.current.getBoundingClientRect();
+
     let left = anchorRect.left;
     left = Math.max(margin, Math.min(left, viewportWidth - POPOVER_WIDTH - margin));
-    const top = Math.min(anchorRect.bottom + 4, viewportHeight - margin - 120);
-    return { top, left };
-  })();
+
+    const spaceBelow = viewportHeight - anchorRect.bottom;
+    const spaceAbove = anchorRect.top;
+
+    let top: number | undefined;
+    let bottom: number | undefined;
+
+    if (spaceBelow >= rect.height + margin) {
+      top = anchorRect.bottom + 4;
+    } else if (spaceAbove >= rect.height + margin) {
+      bottom = viewportHeight - anchorRect.top + 4;
+    } else {
+      if (spaceBelow > spaceAbove) {
+        top = Math.max(margin, Math.min(anchorRect.bottom + 4, viewportHeight - rect.height - margin));
+      } else {
+        top = Math.max(margin, Math.min(anchorRect.top - rect.height - 4, viewportHeight - rect.height - margin));
+      }
+    }
+
+    setPopoverStyle({
+      ...(top !== undefined ? { top } : {}),
+      ...(bottom !== undefined ? { bottom } : {}),
+      left,
+      opacity: 1,
+      visibility: 'visible',
+      width: POPOVER_WIDTH,
+    });
+  }, [anchorRect]);
 
   const handleSave = useCallback(async () => {
     if (!value) return;
@@ -74,7 +111,7 @@ const CellEditPopover = ({ anchorRect, label, type, options = [], initialValue, 
   }, [onClose]);
 
   return ReactDOM.createPortal(
-    <div ref={popoverRef} className="cell-edit-popover" style={{ top: position.top, left: position.left, width: POPOVER_WIDTH }}>
+    <div ref={popoverRef} className="cell-edit-popover" style={popoverStyle}>
       <div className="cell-edit-popover-label">{label}</div>
       {type === 'select' ? (
         <div className="cell-edit-popover-select">

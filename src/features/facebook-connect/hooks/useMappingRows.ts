@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { FieldMapping } from '../types';
 
 export interface MappingRow {
   localId: string;
@@ -17,6 +18,19 @@ export const emptyMappingRow = (): MappingRow => ({
   valueTemplate: '',
   isRequired: false,
 });
+
+// Used by Edit Workflow to load an existing Workflow's mappings into the builder.
+export const buildMappingRowsFromWorkflow = (mappings: FieldMapping[]): MappingRow[] => {
+  return mappings
+    .filter((mapping) => mapping.crmFieldCategory === 'core' || mapping.crmFieldCategory === 'additional')
+    .map((mapping) => ({
+      ...emptyMappingRow(),
+      crmFieldCategory: mapping.crmFieldCategory as 'core' | 'additional',
+      crmFieldKey: mapping.crmFieldKey,
+      valueTemplate: mapping.valueTemplate ?? '',
+      isRequired: mapping.isRequired,
+    }));
+};
 
 // Shared row-array state for the field mapping builder, used by both Create
 // and Edit Workflow (identical add/update/remove logic either way).

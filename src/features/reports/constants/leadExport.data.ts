@@ -14,11 +14,12 @@ export const STANDARD_EXPORT_FIELDS: FieldOption[] = [
   { key: 'location', label: 'Location' },
   { key: 'address', label: 'Address' },
   { key: 'type', label: 'Type' },
-  { key: 'status', label: 'Status' },
+  { key: 'status', label: 'Stage' },
   { key: 'source', label: 'Source' },
   { key: 'purpose', label: 'Purpose' },
   { key: 'agentId', label: 'Assigned To' },
   { key: 'nextFollowUpDate', label: 'Next Follow Up' },
   { key: 'createdAt', label: 'Created At' },
   { key: 'updatedAt', label: 'Updated At' },
+  { key: 'additionalNumbers', label: 'Additional Numbers' },
 ];

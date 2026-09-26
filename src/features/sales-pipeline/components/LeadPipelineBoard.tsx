@@ -8,6 +8,8 @@ const LeadPipelineBoard: React.FC<LeadPipelineBoardProps> = ({
   filteredLeadGroups,
   loadingLeadStatusId,
   loadMoreLeads,
+  onLeadClick,
+  openingLeadId,
 }) => {
   return (
     <div className="pipeline-board">
@@ -35,6 +37,8 @@ const LeadPipelineBoard: React.FC<LeadPipelineBoardProps> = ({
                   key={lead.id}
                   lead={lead}
                   fromStatusId={group.statusId}
+                  onLeadClick={onLeadClick}
+                  isOpening={openingLeadId === lead.id}
                 />
               ))
             )}

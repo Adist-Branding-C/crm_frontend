@@ -9,7 +9,7 @@ const DATE_FILTER_BY_API_MAP: Record<string, string> = {
 };
 
 export function buildLeadExportPayload(filters: LeadExportFilters, selectedFields: string[]): CreateLeadExportPayload {
-  const payload: CreateLeadExportPayload = { columns: selectedFields };
+  const payload: CreateLeadExportPayload = { columns: selectedFields, timezoneOffsetMinutes: new Date().getTimezoneOffset() };
 
   if (filters.sourceId) payload.sourceId = filters.sourceId;
   if (filters.purposeId) payload.purposeId = filters.purposeId;

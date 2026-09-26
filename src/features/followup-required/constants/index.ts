@@ -14,7 +14,7 @@ export const COLUMNS = [
   { key: 'assignedTo', label: 'Assigned To', sortable: false },
   { key: 'purpose', label: 'Purpose', sortable: false },
   { key: 'type', label: 'Type', sortable: false },
-  { key: 'status', label: 'Status', sortable: false },
+  { key: 'status', label: 'Stage', sortable: false },
   { key: 'source', label: 'Source', sortable: false },
   { key: 'createdAt', label: 'Created At', sortable: true },
   { key: 'updatedAt', label: 'Updated At', sortable: false },

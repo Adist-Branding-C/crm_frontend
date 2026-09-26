@@ -165,7 +165,7 @@ const LeadStatusWise: React.FC = () => {
               </select>
             </div>
             <div className="filter-group">
-              <label>Status</label>
+              <label>Stage</label>
                 <select value={filters.status} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilters({ ...filters, status: e.target.value })}>
                   <option value="">Select</option>
                   {LEAD_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}

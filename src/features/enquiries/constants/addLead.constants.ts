@@ -12,6 +12,7 @@ export const BASE_INITIAL_VALUES: AddLeadFormValues = {
   name: '',
   phone: '',
   countryCode: DEFAULT_COUNTRY_CODE,
+  contactNumbers: [],
   email: '',
   agentId: '',
   purposeId: '',

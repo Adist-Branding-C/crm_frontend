@@ -2,6 +2,7 @@ import axiosInstance from '../../../api/axiosInstance';
 import type { ApiResponse } from '../../../shared/types/common';
 import { FACEBOOK_API_ENDPOINTS } from '../constants/facebookApiEndpoints';
 import type {
+  CloneWorkflowPayload,
   CreateWorkflowPayload,
   FacebookConnection,
   FacebookFormSummary,
@@ -49,6 +50,11 @@ class FacebookApi {
     return response.data;
   }
 
+  async getForm(pageId: string, formId: string, connectionId: string): Promise<ApiResponse<FacebookFormSummary>> {
+    const response = await axiosInstance.get(FACEBOOK_API_ENDPOINTS.PAGE_FORM_BY_ID(pageId, formId), { params: { connectionId } });
+    return response.data;
+  }
+
   async getMappingOptions(): Promise<ApiResponse<MappingOptions>> {
     const response = await axiosInstance.get(FACEBOOK_API_ENDPOINTS.MAPPING_OPTIONS);
     return response.data;
@@ -74,6 +80,14 @@ class FacebookApi {
     payload: UpdateWorkflowPayload,
   ): Promise<ApiResponse<{ workflowId: string; status: string; subscriptionWarning?: string }>> {
     const response = await axiosInstance.patch(FACEBOOK_API_ENDPOINTS.WORKFLOW_BY_ID(id), payload);
+    return response.data;
+  }
+
+  async cloneWorkflow(
+    id: string,
+    payload: CloneWorkflowPayload,
+  ): Promise<ApiResponse<{ workflowId: string; status: string; subscriptionWarning?: string }>> {
+    const response = await axiosInstance.post(FACEBOOK_API_ENDPOINTS.WORKFLOW_CLONE(id), payload);
     return response.data;
   }
 

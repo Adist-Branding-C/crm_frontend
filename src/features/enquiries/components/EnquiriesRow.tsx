@@ -38,7 +38,7 @@ const EDITABLE_FIELD_CONFIG: Partial<Record<string, {
   assignedTo: { payloadKey: 'agentId', type: 'select', optionsKey: 'staffOptions', label: 'Assigned To' },
   purpose: { payloadKey: 'purposeId', type: 'select', optionsKey: 'purposeOptions', label: 'Purpose' },
   type: { payloadKey: 'typeId', type: 'select', optionsKey: 'typeOptions', label: 'Type' },
-  status: { payloadKey: 'statusId', type: 'select', optionsKey: 'statusOptions', label: 'Status' },
+  status: { payloadKey: 'statusId', type: 'select', optionsKey: 'statusOptions', label: 'Stage' },
   source: { payloadKey: 'sourceId', type: 'select', optionsKey: 'sourceOptions', label: 'Source' },
 };
 
@@ -142,7 +142,7 @@ const EnquiriesRow: React.FC<EnquiriesRowProps> = ({ lead, columns, isSelected, 
         if (col.key === 'name') {
           return (
             <TCell key={col.key} className="lead-name-cell" onClick={() => onViewLead(lead)} style={{ cursor: 'pointer' }}>
-              {lead.name}
+              <span className="lead-name-text" title={lead.name}>{lead.name}</span>
             </TCell>
           );
         }

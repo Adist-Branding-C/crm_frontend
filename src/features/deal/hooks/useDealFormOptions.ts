@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { dealFormOptionsService } from '../services/dealFormOptions.service';
 import { dealPipelineService } from '../../deal-pipeline-builder/services/dealPipeline.service';
+import { getErrorMessage } from '../../../shared/utils/error';
 import type { LabelValuePair } from '../../../shared/types/common';
 import type { DealPipelineItem } from '../../deal-pipeline-builder/types/interface';
 
@@ -35,6 +36,7 @@ interface UseDealFormOptionsReturn {
   isLoadingStaff: boolean;
   isLoadingStatuses: boolean;
   isLoadingPipelines: boolean;
+  staffError: string;
 }
 
 interface DealFormOptionsData {
@@ -42,9 +44,10 @@ interface DealFormOptionsData {
   staff: DealStaffOption[];
   statuses: DealStageOption[];
   pipelines: DealPipelineItem[];
+  staffError: string;
 }
 
-const EMPTY_OPTIONS: DealFormOptionsData = { leads: [], staff: [], statuses: [], pipelines: [] };
+const EMPTY_OPTIONS: DealFormOptionsData = { leads: [], staff: [], statuses: [], pipelines: [], staffError: '' };
 
 // Module-scoped cache: shared across every DealForm/drawer mount for the lifetime of
 // the page, so leads/staff/statuses/pipelines are fetched only once instead of on every
@@ -90,6 +93,9 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
       return items.map((s: { id?: string | number; staff_id?: string; name?: string; fullName?: string; staffName?: string }) => ({ label: s.name || s.fullName || s.staffName || 'Unknown', value: String(s.staff_id ?? s.id ?? ''), rawId: s.id ?? null }));
     })()
     : [];
+  const staffError = staffResult.status === 'rejected'
+    ? getErrorMessage(staffResult.reason, 'Failed to load staff')
+    : '';
 
   const statuses = statusesResult.status === 'fulfilled'
     ? (() => {
@@ -106,7 +112,7 @@ async function fetchDealFormOptions(): Promise<DealFormOptionsData> {
 
   const pipelines = pipelinesResult.status === 'fulfilled' ? pipelinesResult.value : [];
 
-  return { leads, staff, statuses, pipelines };
+  return { leads, staff, statuses, pipelines, staffError };
 }
 
 export function useDealFormOptions(): UseDealFormOptionsReturn {
@@ -148,5 +154,6 @@ export function useDealFormOptions(): UseDealFormOptionsReturn {
     isLoadingStaff: isLoading,
     isLoadingStatuses: isLoading,
     isLoadingPipelines: isLoading,
+    staffError: data.staffError,
   };
 }

@@ -27,7 +27,7 @@ const LeadChangeReport = () => {
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
 
   const handleExport = () => {
-    const headers = ['SL Num', 'Lead Name', 'Mobile Number', 'Lead Source', 'Lead Status', 'Note Added By', 'Notes'];
+    const headers = ['SL Num', 'Lead Name', 'Mobile Number', 'Lead Source', 'Lead Stage', 'Note Added By', 'Notes'];
     const csvContent = [headers.join(','), ...filteredData.map(d => `${d.slNum},${d.leadName},${d.mobile},${d.leadSource},${d.leadStatus},${d.noteAddedBy},${d.notes}`)].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     triggerBlobDownload(blob, 'lead_change_report.csv');
@@ -45,7 +45,7 @@ const LeadChangeReport = () => {
       </div>
       <div className="table-container">
         <table className="enquiries-table">
-          <thead><tr><th>SL Num</th><th>Lead Name</th><th>Mobile Number</th><th>Lead Source</th><th>Lead Status</th><th>Note Added By</th><th>Notes</th></tr></thead>
+          <thead><tr><th>SL Num</th><th>Lead Name</th><th>Mobile Number</th><th>Lead Source</th><th>Lead Stage</th><th>Note Added By</th><th>Notes</th></tr></thead>
           <tbody>
             {paginatedData.map(row => (
               <tr key={row.id}>

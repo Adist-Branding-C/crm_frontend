@@ -1,7 +1,17 @@
+import type { ContactType } from './interface';
+
+export interface ContactNumberPayload {
+  countryCode: string;
+  phone: string;
+  types: ContactType[];
+  remarks?: string | null;
+}
+
 export interface UpdateLeadPayload {
   name?: string;
   phone?: string;
   countryCode?: string;
+  contactNumbers?: ContactNumberPayload[];
   email?: string;
   agentId?: string;
   purposeId?: string;
@@ -19,6 +29,7 @@ export interface CreateLeadPayload {
   name: string;
   phone: string;
   countryCode: string;
+  contactNumbers?: ContactNumberPayload[];
   email?: string;
   sourceId: string;
   agentId?: string;
@@ -47,6 +58,7 @@ export interface GetLeadsParams {
   dateFrom?: string;
   dateTo?: string;
   dateFilterBy?: string;
+  timezoneOffsetMinutes?: number;
   followUpAdded?: string;
   additionalFieldFilters?: string;
 }

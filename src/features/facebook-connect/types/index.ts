@@ -48,14 +48,15 @@ export interface MappingOptions {
 
 export type FacebookFieldCategory = 'core' | 'additional' | 'status' | 'source' | 'purpose' | 'type' | 'agent';
 
+
+
+
 export interface FieldMapping {
-  // Only used by the fixed-value categories (status/source/purpose/type/agent).
   facebookField: string | null;
-  crmFieldCategory: FacebookFieldCategory;
+  crmFieldCategory: string;
   crmFieldKey: string;
-  // core/additional only: free text that may contain $<facebookQuestionKey>
-  // tokens, substituted with that question's real answer per lead.
-  valueTemplate?: string | null;
+  crmFieldName?: string | null; // resolved display name for fixed-value categories (source/status/...)
+  valueTemplate: string | null;
   isRequired: boolean;
 }
 
@@ -90,6 +91,13 @@ export interface UpdateWorkflowPayload {
   name?: string;
   status?: WorkflowStatus;
   fieldMappings?: FieldMapping[];
+}
+
+export interface CloneWorkflowPayload {
+  name?: string | undefined;
+  connectionId: string;
+  facebookPageId: string;
+  facebookFormId: string;
 }
 
 export type FacebookLeadStatus = 'received' | 'processing' | 'processed' | 'failed';

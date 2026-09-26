@@ -1,7 +1,16 @@
 import { Plus, Trash2 } from 'lucide-react';
 import MentionTemplateInput from './MentionTemplateInput';
-import type { FacebookFormSummary, MappingOptions } from '../types';
+import type { FacebookFormQuestion, FacebookFormSummary, MappingOptions } from '../types';
 import type { MappingRow } from '../hooks/useMappingRows';
+
+// Facebook attaches these to every lead alongside its form answers - not
+// part of the form's own questions, so they're added here rather than
+// coming back from the Graph API's `questions` field.
+const AD_METADATA_QUESTIONS: FacebookFormQuestion[] = [
+  { key: 'ad_name', label: 'Ad Name' },
+  { key: 'adset_name', label: 'Ad Set Name' },
+  { key: 'campaign_name', label: 'Campaign Name' },
+];
 
 interface FieldMappingBuilderProps {
   rows: MappingRow[];
@@ -17,6 +26,7 @@ interface FieldMappingBuilderProps {
 // delete and add button per row.
 const FieldMappingBuilder = ({ rows, form, mappingOptions, onAddRow, onUpdateRow, onRemoveRow }: FieldMappingBuilderProps) => {
   const usedTargets = new Set(rows.map((row) => `${row.crmFieldCategory}:${row.crmFieldKey}`));
+  const formQuestions = form ? [...form.questions, ...AD_METADATA_QUESTIONS] : [];
 
   return (
     <div className="mapping-rows">
@@ -58,7 +68,7 @@ const FieldMappingBuilder = ({ rows, form, mappingOptions, onAddRow, onUpdateRow
 
           <MentionTemplateInput
             value={row.valueTemplate}
-            formQuestions={form?.questions ?? []}
+            formQuestions={formQuestions}
             onChange={(valueTemplate) => onUpdateRow(row.localId, { valueTemplate })}
           />
 

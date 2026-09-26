@@ -1,19 +1,10 @@
 import { memo } from 'react';
 import { Phone, User, DollarSign, CheckSquare, MessageSquare, Megaphone, ListChecks, ArrowRight } from 'lucide-react';
-import { getChangeFieldLabel } from '../utils/activityHelpers';
+import { getChangeFieldLabel, getChangeSides } from '../utils/activityHelpers';
 import type { ActivityTimelineCardProps } from '../types';
 import './ActivityTimelineCard.css';
 
-/**
- * Maps an activity's entityType to a context-appropriate Lucide icon.
- *
- * Used by:
- * - ActivityTimelineCard (entity-type icon shown next to the activity type text).
- *
- * Notes:
- * - Falls back to the User icon for unrecognized/legacy entity types, so a
- *   deal win or task update never renders a misleading phone icon.
- */
+
 const ENTITY_TYPE_ICONS: Record<string, typeof Phone> = {
   lead: User,
   deal: DollarSign,
@@ -65,14 +56,17 @@ const ActivityTimelineCard = memo(({ activity }: ActivityTimelineCardProps) => {
 
             {activity.changes.length > 0 && (
               <div className="timeline-changes">
-                {activity.changes.map((change, index) => (
-                  <div className="timeline-change-row" key={`${change.fieldName}-${index}`}>
-                    <span className="change-field-label">{getChangeFieldLabel(change.fieldName)}</span>
-                    <span className="change-old-value">{change.oldValue || 'None'}</span>
-                    <ArrowRight size={12} className="change-arrow" />
-                    <span className="change-new-value">{change.newValue || 'None'}</span>
-                  </div>
-                ))}
+                {activity.changes.map((change, index) => {
+                  const { showOld, showNew } = getChangeSides(change);
+                  return (
+                    <div className="timeline-change-row" key={`${change.fieldName}-${index}`}>
+                      <span className="change-field-label">{getChangeFieldLabel(change.fieldName)}</span>
+                      {showOld && <span className="change-old-value">{change.oldValue || 'None'}</span>}
+                      {showOld && showNew && <ArrowRight size={12} className="change-arrow" />}
+                      {showNew && <span className="change-new-value">{change.newValue || 'None'}</span>}
+                    </div>
+                  );
+                })}
               </div>
             )}
 

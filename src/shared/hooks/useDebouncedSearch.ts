@@ -27,9 +27,14 @@ export function useDebouncedSearch(onSearchChange: (value: string) => void, dela
     setSearchValue('');
   }, []);
 
+  const syncSearchValue = useCallback((value: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearchValue(value);
+  }, []);
+
   useEffect(() => () => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
   }, []);
 
-  return { searchValue, handleSearchChange, resetSearch };
+  return { searchValue, handleSearchChange, resetSearch, syncSearchValue };
 }

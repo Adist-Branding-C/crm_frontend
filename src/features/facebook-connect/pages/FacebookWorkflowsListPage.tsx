@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Edit2, Trash2, X, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Edit2, Copy, Trash2, X, AlertTriangle } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import ToastNotification from '../../../shared/components/ToastNotification';
 import { useFacebookWorkflows } from '../hooks/useFacebookWorkflows';
+import { useCloneWorkflowModal } from '../hooks/useCloneWorkflowModal';
+import CloneWorkflowModal from '../components/CloneWorkflowModal';
 import type { Workflow } from '../types';
 import '../../../pages/FacebookWorkflows.css';
 
 const FacebookWorkflowsListPage = () => {
   const navigate = useNavigate();
-  const { workflows, loading, searchQuery, setSearchQuery, statusFilter, setStatusFilter, toggleStatus, remove, toast } = useFacebookWorkflows();
+  const { workflows, loading, searchQuery, setSearchQuery, statusFilter, setStatusFilter, toggleStatus, remove, toast, reload } =
+    useFacebookWorkflows();
   const [deletingWorkflow, setDeletingWorkflow] = useState<Workflow | null>(null);
+  const cloneModal = useCloneWorkflowModal(reload);
 
   const confirmDelete = async () => {
     if (!deletingWorkflow) return;
@@ -103,6 +107,9 @@ const FacebookWorkflowsListPage = () => {
                       <button className="action-menu-btn" onClick={() => navigate(`/facebook/workflows/${workflow.id}/edit`)} title="Edit">
                         <Edit2 size={14} />
                       </button>
+                      <button className="action-menu-btn" onClick={() => cloneModal.open(workflow)} title="Clone">
+                        <Copy size={14} />
+                      </button>
                       <button className="action-menu-btn" onClick={() => setDeletingWorkflow(workflow)} title="Delete">
                         <Trash2 size={14} />
                       </button>
@@ -116,8 +123,8 @@ const FacebookWorkflowsListPage = () => {
       )}
 
       {deletingWorkflow && (
-        <div className="modal-overlay" onClick={() => setDeletingWorkflow(null)}>
-          <div className="modal-content delete-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay workflow-delete-overlay" onClick={() => setDeletingWorkflow(null)}>
+          <div className="modal-content delete-modal workflow-delete-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Delete Workflow?</h3>
               <button className="modal-close" onClick={() => setDeletingWorkflow(null)}>
@@ -138,6 +145,8 @@ const FacebookWorkflowsListPage = () => {
           </div>
         </div>
       )}
+
+      <CloneWorkflowModal {...cloneModal} />
 
       <ToastNotification isVisible={toast.showToast} type={toast.toastType} message={toast.toastMessage} onDismiss={() => toast.setShowToast(false)} />
     </div>

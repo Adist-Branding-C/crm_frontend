@@ -90,11 +90,23 @@
   color: var(--primary);
   cursor: pointer;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .lead-name-cell:hover {
   text-decoration: underline;
+}
+
+.lead-name-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  width: 200px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .lead-cell-empty {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Loader2, Save } from 'lucide-react';
-import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext } from 'formik';
+import { Formik, Form, Field, ErrorMessage as FormikError, useFormikContext, getIn } from 'formik';
 import { draftService } from '../../../shared/services/draftService';
 import type { PreviewSection } from '../../../shared/components/preview/PreviewCanvas';
 import { staffService } from '../../deal/services/staff.service';
@@ -22,6 +22,19 @@ import DynamicAdditionalFields from '../../../shared/components/drawers/DynamicA
 import type { LabelValuePair } from '../../../shared/types/common';
 import type { AddLeadFormValues } from '../../../shared/types/drawers';
 import SelectSearch from '../../../shared/components/SelectSearch';
+import AddRowButton from '../../../shared/components/AddRowButton';
+import AdditionalContactCard from './AdditionalContactCard';
+import type { ContactNumberDraft } from '../types';
+import {
+  contactsSignature,
+  createContactNumberDraft,
+  describeUse,
+  draftsFromContacts,
+  filledDrafts,
+  formatContact,
+  toContactPayload,
+} from '../utils/contactNumbers';
+
 
 export interface PreviewData {
   sections: PreviewSection[];
@@ -93,6 +106,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [activePurposeId, setActivePurposeId] = useState('');
+
   const isEditing = !!lead;
   const originalValuesRef = useRef<Record<string, unknown> | null>(null);
   const hasLoadedRef = useRef(false);
@@ -182,6 +196,11 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
       countryCode: trimmed.countryCode,
       sourceId: trimmed.sourceId,
     };
+    const additionalContacts = toContactPayload(trimmed.contactNumbers);
+    const hadAdditionalContacts = (lead?.contactNumbers ?? []).length > 0;
+    if (additionalContacts.length > 0 || (isEditing && hadAdditionalContacts)) {
+      payload.contactNumbers = additionalContacts;
+    }
     if (trimmed.email) payload.email = trimmed.email;
     if (trimmed.agentId) payload.agentId = trimmed.agentId;
     if (trimmed.purposeId) payload.purposeId = trimmed.purposeId;
@@ -206,6 +225,15 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           fields: [
             { label: 'Name', value: trimmed.name },
             { label: 'Phone', value: trimmed.phone ? `${trimmed.countryCode} ${trimmed.phone}` : '' },
+            ...filledDrafts(trimmed.contactNumbers).map((draft, index) => ({
+              label: `Contact Number ${index + 2}`,
+              value: `${formatContact(draft.countryCode, draft.phone.trim())} (${describeUse(draft.types, draft.remarks.trim())})`,
+            })),
+            ...(isEditing &&
+            (lead?.contactNumbers ?? []).length >
+              filledDrafts(trimmed.contactNumbers).length
+              ? [{ label: 'Removed contact numbers', value: 'Some additional numbers will be removed' }]
+              : []),
             { label: 'Email', value: trimmed.email || '' },
             { label: 'Assigned To', value: staffOptions.find(o => o.value === trimmed.agentId)?.label || '' }
           ]
@@ -215,7 +243,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           fields: [
             { label: 'Purpose', value: purposeOptions.find(o => o.value === trimmed.purposeId)?.label || '' },
             { label: 'Type', value: typeOptions.find(o => o.value === trimmed.typeId)?.label || '' },
-            { label: 'Status', value: statusOptions.find(o => o.value === trimmed.statusId)?.label || '' },
+            { label: 'Stage', value: statusOptions.find(o => o.value === trimmed.statusId)?.label || '' },
             { label: 'Source', value: sourceOptions.find(o => o.value === trimmed.sourceId)?.label || '' },
             { label: 'Next Follow Up', value: trimmed.nextFollowUp || '' }
           ]
@@ -261,7 +289,14 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
 
       messages.forEach(m => {
         const lowerM = m.toLowerCase();
-        if (lowerM.includes('phone') || lowerM.includes('mobile')) {
+        const extraIndex = trimmed.contactNumbers.findIndex(
+          (draft, index) => lowerM.includes(`contact number ${index + 2}`) || (!!draft.phone && m.includes(draft.phone)),
+        );
+        if (extraIndex >= 0) {
+          formikHelpers.setFieldError(`contactNumbers[${extraIndex}].phone`, m);
+          formikHelpers.setFieldTouched(`contactNumbers[${extraIndex}].phone`, true, false);
+          hasFieldError = true;
+        } else if (lowerM.includes('phone') || lowerM.includes('mobile')) {
           formikHelpers.setFieldError('phone', m);
           formikHelpers.setFieldTouched('phone', true, false);
           hasFieldError = true;
@@ -320,6 +355,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
       name: lead.name || '',
       phone: lead.phone || '',
       countryCode: lead.countryCode || DEFAULT_COUNTRY_CODE,
+      contactNumbers: draftsFromContacts(lead.contactNumbers),
       email: lead.email || '',
       agentId: findId(staffOptions, lead.assignedTo),
       purposeId: findId(purposeOptions, lead.purpose),
@@ -374,6 +410,28 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           }
         };
 
+        const updateContact = (id: string, changes: Partial<ContactNumberDraft>) =>
+          setFieldValue(
+            'contactNumbers',
+            values.contactNumbers.map((draft) => (draft.id === id ? { ...draft, ...changes } : draft)),
+          );
+
+        const handleExtraCountryChange = (index: number, draft: ContactNumberDraft, countryCode: string) => {
+          updateContact(draft.id, { countryCode });
+          setFieldTouched(`contactNumbers[${index}].countryCode`, true, false);
+          if (draft.phone) setFieldTouched(`contactNumbers[${index}].phone`, true, false);
+        };
+
+        const handleAddContact = () => {
+          const draft = createContactNumberDraft();
+          setFieldValue('contactNumbers', [...values.contactNumbers, draft]);
+          requestAnimationFrame(() => document.getElementById(`lead-contact-${draft.id}-phone`)?.focus());
+        };
+
+        const handleRemoveContact = (id: string) => {
+          setFieldValue('contactNumbers', values.contactNumbers.filter((draft) => draft.id !== id));
+        };
+
         const filteredFieldDefs = additionalFieldDefs.filter((f) => {
           if (!f.connectWithLeadPurpose || !f.purposeId) return true;
           return f.purposeId === activePurposeId;
@@ -385,6 +443,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
           if (values.name !== orig.name) return true;
           if (values.phone !== orig.phone) return true;
           if (values.countryCode !== orig.countryCode) return true;
+          if (contactsSignature(values.contactNumbers) !== contactsSignature(orig.contactNumbers as ContactNumberDraft[])) return true;
           if (values.email !== orig.email) return true;
           if (values.agentId !== orig.agentId) return true;
           if (values.purposeId !== orig.purposeId) return true;
@@ -454,6 +513,35 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
                   {errors.countryCode && touched.countryCode && <div className="error-text">{errors.countryCode}</div>}
                   {errors.phone && touched.phone && <div className="error-text">{errors.phone}</div>}
                 </div>
+                {values.contactNumbers.map((draft, index) => (
+                  <AdditionalContactCard
+                    key={draft.id}
+                    slot={index + 2}
+                    domId={draft.id}
+                    countryCode={draft.countryCode}
+                    phone={draft.phone}
+                    types={draft.types}
+                    remarks={draft.remarks}
+                    errors={{
+                      countryCode: getIn(touched, `contactNumbers[${index}].countryCode`) ? getIn(errors, `contactNumbers[${index}].countryCode`) : undefined,
+                      phone: getIn(touched, `contactNumbers[${index}].phone`) ? getIn(errors, `contactNumbers[${index}].phone`) : undefined,
+                      types: getIn(errors, `contactNumbers[${index}].types`),
+                      remarks: getIn(errors, `contactNumbers[${index}].remarks`),
+                    }}
+                    onCountryCodeChange={(e) => handleExtraCountryChange(index, draft, e.target.value)}
+                    onPhoneChange={(e) => updateContact(draft.id, { phone: e.target.value.replace(/\D/g, '') })}
+                    onPhoneBlur={() => setFieldTouched(`contactNumbers[${index}].phone`, true)}
+                    onTypesChange={(types) => updateContact(draft.id, { types })}
+                    onRemarksChange={(remarks) => updateContact(draft.id, { remarks })}
+                    onRemove={() => handleRemoveContact(draft.id)}
+                  />
+                ))}
+                <AddRowButton
+                  label="Add another number"
+                  hint={values.contactNumbers.length > 0 ? `${values.contactNumbers.length} added` : undefined}
+                  ariaLabel="Add another number"
+                  onClick={handleAddContact}
+                />
                 <div className="form-group">
                   <label>Email</label>
                   <input
@@ -514,7 +602,7 @@ const LeadForm = ({ lead, draftId, initialDraftValues, onDraftSaved, onSaved, on
                   <FormikError name="typeId" component="div" className="error-text" />
                 </div>
                 <div className="form-group">
-                  <label>Status</label>
+                  <label>Stage</label>
                   <SelectSearch
                     name="statusId"
                     value={values.statusId}

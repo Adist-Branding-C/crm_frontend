@@ -15,11 +15,12 @@ import LeadExportHistory from '../sub-pages/LeadExportHistory';
 import LeadImportHistory from '../sub-pages/LeadImportHistory';
 import ImportHistoryDetail from '../sub-pages/ImportHistoryDetail';
 import DealReportsLanding from '../sub-pages/DealReportsLanding';
-import DealStageReport from '../sub-pages/DealStageReport';
-import LeadConversionReport from '../sub-pages/LeadConversionReport';
+import DealLastReport from '../sub-pages/DealLastReport';
+import DealConversionReport from '../sub-pages/LeadConversionReport';
 import DealExportReport from '../sub-pages/DealExportReport';
 import DealExportHistoryReport from '../sub-pages/DealExportHistoryReport';
-import DealDeletedReport from '../sub-pages/DealDeletedReport';
+import DealDeletedReport from '../sub-pages/DeletedReport';
+
 import TaskReportsLanding from '../task-reports/sub-pages/TaskReportsLanding';
 import TaskSummaryReport from '../task-reports/sub-pages/TaskSummaryReport';
 import TaskActivityReport from '../task-reports/sub-pages/TaskActivityReport';
@@ -28,27 +29,41 @@ import TaskPipelineDistributionReport from '../task-reports/sub-pages/TaskPipeli
 import TaskSLABreachReport from '../task-reports/sub-pages/TaskSLABreachReport';
 import TaskRecurringComplianceReport from '../task-reports/sub-pages/TaskRecurringComplianceReport';
 import TaskTeamPerformanceReport from '../task-reports/sub-pages/TaskTeamPerformanceReport';
+
+import DealPipelineSummaryReport from '../sub-pages/deal/DealPipelineSummaryReport';
+import DealForecastReport from '../sub-pages/deal/DealForecastReport';
+import DealVelocityReport from '../sub-pages/deal/DealVelocityReport';
+import DealWinLossReport from '../sub-pages/deal/DealWinLossReport';
+import DealSourceConversionReport from '../sub-pages/deal/DealSourceConversionReport';
+import DealRepPerformanceReport from '../sub-pages/deal/DealRepPerformanceReport';
+import DealAgingReport from '../sub-pages/deal/DealAgingReport';
+import DealSizeDistributionReport from '../sub-pages/deal/DealSizeDistributionReport';
+
+import GLDialerCallReport from '../sub-pages/GLDialerCallReport';
+import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
+import CheckinReport from '../sub-pages/CheckinReport';
 import GLDialerCallReport from '../sub-pages/GLDialerCallReport';
 import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
 import CheckinReport from '../sub-pages/CheckinReport';
 import AttendanceReport from '../sub-pages/AttendanceReport';
 import AttendanceProfile from '../sub-pages/AttendanceProfile';
-import { callReportOptions } from '../constants';
+import { callReportOptions, reportCategories } from '../constants';
 import './ReportsPage.css';
 
 const ReportsPage = () => {
   const { pathname } = useLocation();
   const isTopLevel = /^\/reports\/(lead|deal|task|call|checkin|attendance)$/.test(pathname);
+  const currentCategory = reportCategories.find((c) => pathname.startsWith(c.path));
 
   return (
     <div className="account-page">
       <div className="account-content" style={{ width: '100%', maxWidth: '100%' }}>
-        {isTopLevel && <PageHeader title="Reports" breadcrumb={false} />}
+        {isTopLevel && <PageHeader title={currentCategory?.title ?? 'Reports'} breadcrumb={false} />}
 
         <Routes>
           <Route path="lead/*" element={<LeadReportsRouter />} />
-          {/* <Route path="deal/*" element={<DealReportsRouter />} /> */}
-          <Route path="task/*" element={<TaskReportsRouter />} />
+<Route path="deal/*" element={<DealReportsRouter />} />
+<Route path="task/*" element={<TaskReportsRouter />} />
           {/* <Route path="call/*" element={<CallReportsRouter />} /> */}
           {/* <Route path="checkin" element={<CheckinReport />} /> */}
           {/* <Route path="attendance" element={<AttendanceReport />} /> */}
@@ -82,9 +97,14 @@ const LeadReportsRouter = () => (
 const DealReportsRouter = () => (
   <Routes>
     <Route path="" element={<DealReportsLanding />} />
-    <Route path="stage" element={<DealStageReport />} />
-    <Route path="conversion" element={<LeadConversionReport />} />
-    <Route path="visit" element={<div className="report-content-wrapper with-sidebar"></div>} />
+    <Route path="pipeline-summary" element={<DealPipelineSummaryReport />} />
+    <Route path="forecast" element={<DealForecastReport />} />
+    <Route path="velocity" element={<DealVelocityReport />} />
+    <Route path="win-loss" element={<DealWinLossReport />} />
+    <Route path="source-conversion" element={<DealSourceConversionReport />} />
+    <Route path="rep-performance" element={<DealRepPerformanceReport />} />
+    <Route path="aging" element={<DealAgingReport />} />
+    <Route path="size-distribution" element={<DealSizeDistributionReport />} />
     <Route path="export" element={<DealExportReport />} />
     <Route path="export-history" element={<DealExportHistoryReport />} />
     <Route path="deleted" element={<DealDeletedReport />} />

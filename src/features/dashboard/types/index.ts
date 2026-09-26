@@ -27,7 +27,7 @@ export interface KpiCardProps {
   isLoading?: boolean;
 }
 
-export type DashboardPeriod = 'today' | 'week' | 'month' | 'custom';
+export type DashboardPeriod = 'today' | 'week' | 'month' | 'custom' | 'all';
 
 export interface GetWonDealsParams {
   period: DashboardPeriod;
@@ -331,3 +331,21 @@ export interface PipelineAmountItem {
 }
 
 export type PipelineAmountResponseData = PipelineAmountItem[];
+
+
+export interface BarListItem {
+  id: string;
+  label: string;
+  value: number;
+  color: string;
+}
+
+export interface BarListWidgetProps {
+  title: string;
+  items: BarListItem[];
+  isLoading?: boolean | undefined;
+  isError?: boolean | undefined;
+  errorText: string;
+  emptyText: string;
+  skeletonRows?: number | undefined;
+}

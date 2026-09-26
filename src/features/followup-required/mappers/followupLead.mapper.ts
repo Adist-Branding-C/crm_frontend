@@ -9,6 +9,7 @@ export function mapApiItemToFollowupLead(
     name: item.name,
     countryCode: item.countryCode ?? '',
     phone: item.phone,
+    contactNumbers: item.contactNumbers ?? [],
     assignedTo: item.agent ?? '',
     purpose: item.purpose ?? '',
     type: item.type ?? '',
