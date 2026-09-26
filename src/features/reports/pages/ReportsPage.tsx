@@ -15,11 +15,7 @@ import LeadExportHistory from '../sub-pages/LeadExportHistory';
 import LeadImportHistory from '../sub-pages/LeadImportHistory';
 import ImportHistoryDetail from '../sub-pages/ImportHistoryDetail';
 import DealReportsLanding from '../sub-pages/DealReportsLanding';
-import DealLastReport from '../sub-pages/DealLastReport';
-import DealConversionReport from '../sub-pages/LeadConversionReport';
-import DealExportReport from '../sub-pages/DealExportReport';
-import DealExportHistoryReport from '../sub-pages/DealExportHistoryReport';
-import DealDeletedReport from '../sub-pages/DeletedReport';
+
 
 import TaskReportsLanding from '../task-reports/sub-pages/TaskReportsLanding';
 import TaskSummaryReport from '../task-reports/sub-pages/TaskSummaryReport';
@@ -42,13 +38,19 @@ import DealSizeDistributionReport from '../sub-pages/deal/DealSizeDistributionRe
 import GLDialerCallReport from '../sub-pages/GLDialerCallReport';
 import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
 import CheckinReport from '../sub-pages/CheckinReport';
-import GLDialerCallReport from '../sub-pages/GLDialerCallReport';
-import CallFeedbackReport from '../sub-pages/CallFeedbackReport';
-import CheckinReport from '../sub-pages/CheckinReport';
 import AttendanceReport from '../sub-pages/AttendanceReport';
 import AttendanceProfile from '../sub-pages/AttendanceProfile';
 import { callReportOptions, reportCategories } from '../constants';
 import './ReportsPage.css';
+import DealExportReport from '../sub-pages/deal/DealExportReport';
+import DealExportHistoryReport from '../sub-pages/deal/DealExportHistoryReport';
+import DealDeletedReport from '../sub-pages/deal/DealDeletedReport';
+
+
+
+
+
+
 
 const ReportsPage = () => {
   const { pathname } = useLocation();
