@@ -90,6 +90,7 @@ export function toTaskUpdatePayload(data: LeadTaskFormValues): TaskFormDataUpdat
 }
 
 export function toTaskCreatePayload(data: LeadTaskFormValues, leadId: number): TaskFormData & { taskType?: string; dealId?: string; campaignId?: string } {
+  const excludeLeadId = data.taskType === 'DEAL' || data.taskType === 'CAMPAIGN';
   return {
     title: data.title,
     description: data.description,
@@ -97,7 +98,7 @@ export function toTaskCreatePayload(data: LeadTaskFormValues, leadId: number): T
     scheduledDate: data.scheduledDate,
     scheduledTime: data.scheduledTime,
     assignedTo: String(data.assignedTo),
-    leadId: String(leadId),
+    ...(excludeLeadId ? {} : { leadId: String(leadId) }),
     priority: data.priority,
     status: data.status,
     ...(data.taskType ? { taskType: data.taskType } : {}),
