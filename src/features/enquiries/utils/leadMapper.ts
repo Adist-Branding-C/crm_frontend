@@ -38,6 +38,8 @@ export interface LeadTaskFormValues extends LeadTaskFormData {
   taskType?: string;
   workflowId?: string | number;
   stageId?: string | number;
+  dealId?: string | number | undefined;
+  campaignId?: string | number | undefined;
   repeatType?: RepeatType;
   repeatConfig?: { dayOfWeek?: number; dayOfMonth?: number | 'last' } | undefined;
 }
@@ -60,12 +62,14 @@ export function toLeadTaskFormData(values: UnifiedTaskFormValues): LeadTaskFormV
     taskType: values.taskType,
     workflowId: values.workflowId,
     stageId: values.stageId,
+    dealId: values.dealId,
+    campaignId: values.campaignId,
     repeatType: values.repeatType,
     repeatConfig: values.repeatConfig,
   };
 }
 
-export function toTaskUpdatePayload(data: LeadTaskFormValues): TaskFormDataUpdate & { taskType?: string } {
+export function toTaskUpdatePayload(data: LeadTaskFormValues): TaskFormDataUpdate & { taskType?: string; dealId?: string; campaignId?: string } {
   return {
     title: data.title,
     description: data.description,
@@ -78,12 +82,14 @@ export function toTaskUpdatePayload(data: LeadTaskFormValues): TaskFormDataUpdat
     ...(data.taskType ? { taskType: data.taskType } : {}),
     ...(data.workflowId != null ? { workflowId: String(data.workflowId) } : {}),
     ...(data.stageId != null ? { stageId: String(data.stageId) } : {}),
+    ...(data.dealId != null ? { dealId: String(data.dealId) } : {}),
+    ...(data.campaignId != null ? { campaignId: String(data.campaignId) } : {}),
     ...(data.repeatType ? { repeatType: data.repeatType } : {}),
     ...(data.repeatConfig ? { repeatConfig: data.repeatConfig } : {}),
   };
 }
 
-export function toTaskCreatePayload(data: LeadTaskFormValues, leadId: number): TaskFormData & { taskType?: string } {
+export function toTaskCreatePayload(data: LeadTaskFormValues, leadId: number): TaskFormData & { taskType?: string; dealId?: string; campaignId?: string } {
   return {
     title: data.title,
     description: data.description,
@@ -97,6 +103,8 @@ export function toTaskCreatePayload(data: LeadTaskFormValues, leadId: number): T
     ...(data.taskType ? { taskType: data.taskType } : {}),
     ...(data.workflowId != null ? { workflowId: String(data.workflowId) } : {}),
     ...(data.stageId != null ? { stageId: String(data.stageId) } : {}),
+    ...(data.dealId != null ? { dealId: String(data.dealId) } : {}),
+    ...(data.campaignId != null ? { campaignId: String(data.campaignId) } : {}),
     ...(data.repeatType ? { repeatType: data.repeatType } : {}),
     ...(data.repeatConfig ? { repeatConfig: data.repeatConfig } : {}),
   };
