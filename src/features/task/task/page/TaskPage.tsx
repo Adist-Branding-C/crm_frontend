@@ -1,13 +1,12 @@
 import { Plus, FileText, CheckSquare } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormikHelpers } from 'formik';
-import { useTableData } from '../../../../shared/hooks/useTableData';
-import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
-import { buildUnifiedTaskListQuery } from '../../common/utils/taskViewFilters';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { useDropdownMenu } from '../../../../shared/hooks/useDropdownMenu';
 import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
 import { useTaskCrud } from '../../common/hooks/useTaskCrud';
+import { useTaskList } from '../../common/hooks/useTaskList';
+import { useTaskMutationService } from '../../common/hooks/useTaskMutationService';
 import { useTaskFormSubmit } from '../../common/hooks/useTaskFormSubmit';
 import { useTaskDeleteConfirm } from '../../common/hooks/useTaskDeleteConfirm';
 import { useUnifiedTaskDrawer } from '../../common/hooks/useUnifiedTaskDrawer';
@@ -16,7 +15,7 @@ import { useCategoryOptions } from '../../common/hooks/useCategoryOptions';
 import { useLeadOptions } from '../../common/hooks/useLeadOptions';
 import { useCampaignOptions } from '../../common/hooks/useCampaignOptions';
 import { useDealOptions } from '../../common/hooks/useDealOptions';
-import { unifiedTaskDataService } from '../../common/services/unifiedTaskDataService';
+import { useUpdateTaskFieldsMutation } from '../../common/services/taskApi';
 import { UnifiedTaskMapper } from '../../common/mapper/unifiedTaskMapper';
 import { isRecurring, getNextOccurrenceDate } from '../../common/utils/recurrence';
 import { isTaskTypeKey } from '../../common/utils/unifiedTask.helpers';
@@ -64,7 +63,6 @@ const TaskPage = () => {
   const drafts = useDrafts('task');
   const [previewData, setPreviewData] = useState<TaskPreviewData | null>(null);
   const [typeFilter, setTypeFilter] = useState<TaskTypeFilterKey>('ALL');
-  const typeFilterRef = useRef<TaskTypeFilterKey>('ALL');
 
   const handleViewChange = useCallback((next: TaskBoardView) => {
     setBoardViewState(next);
@@ -81,21 +79,20 @@ const TaskPage = () => {
     }
   }, [activeView, drafts.length]);
 
-  const pagination = useTableData<UnifiedTaskItem>({
-    fetchFn: async (params) => {
-      const response = await unifiedTaskDataService.getAll(buildUnifiedTaskListQuery({
-        taskType: typeFilterRef.current,
-        search: params.search,
-      }, params.pageNumber, params.limit));
-      return ListResponseMapper.toPagedResult<UnifiedTaskItem>(response);
-    },
+  const pagination = useTaskList({
+    taskType: typeFilter,
+    skip: activeView !== 'tasks' || boardView !== 'table',
   });
 
   const toast = useToast();
-  const crud = useTaskCrud<UnifiedTaskFormValues, UnifiedTaskItem>({
-    pagination,
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const taskMutations = useTaskMutationService();
+  const [updateTaskFields] = useUpdateTaskFieldsMutation();
+  const crud = useTaskCrud<UnifiedTaskFormValues>({
+    pagination: { setError: setSaveError, setIsLoading: setIsSaving },
     showToastMessage: toast.showToastMessage,
-    dataService: unifiedTaskDataService,
+    dataService: taskMutations,
     messages: {
       added: 'Task created successfully',
       updated: 'Task updated successfully',
@@ -130,11 +127,9 @@ const TaskPage = () => {
 
   const handleTypeFilterChange = useCallback((value: string) => {
     const next: TaskTypeFilterKey = value === 'ALL' ? 'ALL' : isTaskTypeKey(value) ? value : 'ALL';
-    typeFilterRef.current = next;
     setTypeFilter(next);
     pagination.setPageNumber(1);
-    pagination.refresh(1);
-  }, [pagination]);
+  }, [pagination.setPageNumber]);
 
   const handleResumeDraft = (id: string) => {
     setDraftId(id);
@@ -205,7 +200,7 @@ const TaskPage = () => {
 
   const handleFieldSave = useCallback(async (id: number, payload: Partial<UnifiedTaskPayload>): Promise<boolean> => {
     try {
-      const res = await unifiedTaskDataService.updateFields(id, payload);
+      const res = await updateTaskFields({ id, payload }).unwrap();
       if (res.status) {
         const task = pagination.list.find((t) => t.id === id);
         if (
@@ -220,7 +215,6 @@ const TaskPage = () => {
         } else {
           toast.showToastMessage('Task updated successfully', 'success');
         }
-        pagination.refresh();
         return true;
       }
       return false;
@@ -228,7 +222,7 @@ const TaskPage = () => {
       console.error('Failed to update task fields', err);
       return false;
     }
-  }, [pagination, toast]);
+  }, [updateTaskFields, pagination.list, toast]);
 
   const handleHistoryTaskClick = (item: RecurrenceChainItem) => {
     const task = pagination.list.find((t) => t.id === item.id);
@@ -267,7 +261,7 @@ const TaskPage = () => {
         {activeView === 'tasks' && boardView === 'kanban' && (
           <TaskKanbanView
             taskType={typeFilter}
-            searchQuery={searchValue}
+            searchQuery={pagination.search}
             onTypeChange={handleTypeFilterChange}
             onViewChange={handleViewChange}
             onAddTask={() => drawer.openAddDrawer()}
@@ -306,6 +300,8 @@ const TaskPage = () => {
               <TBody>
                 {pagination.isLoading && pagination.list.length === 0 ? (
                   <TaskListLoadingRow colSpan={15} />
+                ) : pagination.error && pagination.list.length === 0 ? (
+                  <EmptyState colSpan={15} message={pagination.error} />
                 ) : !pagination.isLoading && pagination.list.length === 0 ? (
                   <EmptyState colSpan={15} message={LABEL_NO_DATA} />
                 ) : pagination.list.map((item, idx) => (
@@ -340,9 +336,9 @@ const TaskPage = () => {
             subtitle="Review the details before saving"
             sections={previewData.sections}
             isSaving={false}
-            error={pagination.error}
-            onClose={() => { setPreviewData(null); pagination.setError(''); }}
-            onEdit={() => { setPreviewData(null); pagination.setError(''); }}
+            error={saveError}
+            onClose={() => { setPreviewData(null); setSaveError(''); }}
+            onEdit={() => { setPreviewData(null); setSaveError(''); }}
             onSave={handleSavePreview}
           />
         ) : (
@@ -352,8 +348,8 @@ const TaskPage = () => {
             isEditing={Boolean(drawer.editingItem)}
             initialValues={taskInitialValues}
             onSubmit={drawer.editingItem ? formSubmit.handleEditSubmit : formSubmit.handleSubmit}
-            isLoading={pagination.isLoading}
-            error={pagination.error}
+            isLoading={isSaving}
+            error={saveError}
             draftId={draftId}
             onDraftSaved={setDraftId}
             onPreviewRequest={(data) => setPreviewData(data)}

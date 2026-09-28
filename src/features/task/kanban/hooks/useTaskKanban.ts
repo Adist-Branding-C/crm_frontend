@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { skipToken } from '@reduxjs/toolkit/query';
 import {
   useSensor,
   useSensors,
@@ -7,7 +8,15 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { taskKanbanService } from '../services/taskKanbanService';
+import { useAppDispatch } from '../../../../store/hooks';
+import { getErrorMessage } from '../../../../shared/utils/error';
+import {
+  taskApi,
+  useGetTaskKanbanQuery,
+  useLazyGetTaskKanbanPageQuery,
+  useMoveTaskStageMutation,
+  type TaskKanbanArgs,
+} from '../../common/services/taskApi';
 import type { TaskKanbanStage, TaskKanbanTask } from '../types/kanban.types';
 import { getKanbanLoadMoreState } from '../utils/taskKanbanPagination';
 
@@ -36,45 +45,51 @@ function moveTask(
   });
 }
 
+/**
+ * Kanban board data, per-column "load more", and drag-to-move.
+ *
+ * Used by:
+ * - TaskKanbanView
+ *
+ * Notes:
+ * - The board comes from the Redux cache (taskApi.getTaskKanban). It refetches by
+ *   itself when the workflow/type/search changes, and after any task is
+ *   created/updated/deleted.
+ * - "Load more" and drag both change the cached board directly with
+ *   `taskApi.util.updateQueryData`, so the screen updates instantly.
+ */
 export function useTaskKanban(
   workflowId: string | null,
   taskType: string,
   onError?: (message: string) => void,
   search?: string,
 ) {
-  const [stages, setStages] = useState<TaskKanbanStage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const dispatch = useAppDispatch();
   const [loadingStageId, setLoadingStageId] = useState<string | null>(null);
+  const [fetchKanbanPage] = useLazyGetTaskKanbanPageQuery();
+  const [moveTaskStage] = useMoveTaskStageMutation();
+
+  // The same args are used to read the board and to update it in the cache.
+  const boardArgs: TaskKanbanArgs | null = workflowId ? { workflowId, taskType, search } : null;
+
+  const { data, isFetching, error, refetch } = useGetTaskKanbanQuery(
+    boardArgs ?? skipToken,
+    { refetchOnMountOrArgChange: true },
+  );
+  const stages = data ?? [];
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor),
   );
 
-  const fetchKanban = useCallback(async (wfId: string) => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const data = await taskKanbanService.getKanban(wfId, taskType, search);
-      setStages(data);
-    } catch (err: unknown) {
-      const msg = err && typeof err === 'object' && 'message' in err
-        ? (err as { message: string }).message
-        : 'Failed to load kanban board';
-      setError(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [taskType]);
-
   const loadMore = useCallback(async (stageId: string) => {
-    if (!workflowId || loadingStageId) return;
+    if (!boardArgs || loadingStageId) return;
 
     const stage = stages.find((s) => s.stageId === stageId);
     if (!stage) return;
 
-    const { hasMore, remaining, requestedLimit } = getKanbanLoadMoreState({
+    const { hasMore, requestedLimit } = getKanbanLoadMoreState({
       totalCount: Number(stage.count ?? 0),
       loadedCount: stage.items.length,
       defaultLimit: stage.pagination.limit || 10,
@@ -88,52 +103,43 @@ export function useTaskKanban(
 
     setLoadingStageId(stageId);
     try {
-      const result = await taskKanbanService.loadMoreStage(
-        workflowId,
-        stageId,
-        nextPage,
-        limit,
-        taskType,
-        search,
-      );
+      // 1. Fetch the next page, then pick out this column.
+      const pageStages = await fetchKanbanPage({ ...boardArgs, pageNumber: nextPage, limit }).unwrap();
+      const page = pageStages.find((s) => s.stageId === stageId);
+      if (!page) throw new Error('Stage not found');
 
-      setStages((prev) =>
-        prev.map((s) => {
-          if (s.stageId !== result.stageId) return s;
+      // 2. Append the new cards to the cached board (skipping any already shown).
+      dispatch(taskApi.util.updateQueryData('getTaskKanban', boardArgs, (cachedStages) =>
+        cachedStages.map((s) => {
+          if (s.stageId !== stageId) return s;
 
           const loadedIds = new Set(s.items.map((t) => t.id));
-          const fresh = result.items.filter((t) => !loadedIds.has(t.id));
-          const mergedItems = [...s.items, ...fresh];
-          const nextTotal = Number(result.pagination.total ?? mergedItems.length);
-          const nextRemaining = Math.max(0, nextTotal - mergedItems.length);
+          const mergedItems = [...s.items, ...page.items.filter((t) => !loadedIds.has(t.id))];
+          const total = Number(page.pagination.total ?? mergedItems.length);
 
           return {
             ...s,
             items: mergedItems,
-            count: nextTotal,
-            pagination: {
-              ...result.pagination,
-              has_next: Boolean(result.pagination.has_next) && nextRemaining > 0,
-            },
+            count: total,
+            pagination: { ...page.pagination, has_next: Boolean(page.pagination.has_next) && total > mergedItems.length },
           };
-        }),
-      );
+        })));
     } catch (err: unknown) {
       console.error('Failed to load more tasks for kanban stage', err);
       onError?.('Failed to load more tasks');
     } finally {
       setLoadingStageId(null);
     }
-  }, [workflowId, loadingStageId, stages, taskType, search, onError]);
+  }, [boardArgs, loadingStageId, stages, fetchKanbanPage, dispatch, onError]);
 
   const handleDragStart = useCallback((_event: DragStartEvent) => {}, []);
 
   const handleDragCancel = useCallback(() => {}, []);
 
   const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
+    async (event: DragEndEvent) => {
       const { active, over } = event;
-      if (!over) return;
+      if (!over || !boardArgs) return;
 
       const task = active.data.current?.task as TaskKanbanTask | undefined;
       const fromStageId = active.data.current?.stageId as string | undefined;
@@ -141,28 +147,29 @@ export function useTaskKanban(
 
       if (!task || !fromStageId || !toStageId || fromStageId === toStageId) return;
 
-      // Optimistic move
-      setStages((prev) => moveTask(prev, task, fromStageId, toStageId));
+      // 1. Move the card on screen right away.
+      const moved = dispatch(taskApi.util.updateQueryData('getTaskKanban', boardArgs, (cachedStages) =>
+        moveTask(cachedStages, task, fromStageId, toStageId)));
 
-      // Persist
-      taskKanbanService.moveTask(task.id, toStageId).catch(() => {
-        // Rollback
-        setStages((prev) => moveTask(prev, { ...task, status: toStageId }, toStageId, fromStageId));
+      // 2. Save it. 3. If saving fails, put the card back.
+      try {
+        await moveTaskStage({ taskId: task.id, stageId: toStageId }).unwrap();
+      } catch {
+        moved.undo();
         onError?.('Failed to move task. Please try again.');
-      });
+      }
     },
-    [onError],
+    [boardArgs, dispatch, moveTaskStage, onError],
   );
 
   return {
     stages,
-    isLoading,
-    error,
+    isLoading: isFetching,
+    error: error ? getErrorMessage(error, 'Failed to load kanban board') : '',
     loadingStageId,
     sensors,
-    fetchKanban,
+    refetch,
     loadMore,
-    setStages,
     handleDragStart,
     handleDragEnd,
     handleDragCancel,

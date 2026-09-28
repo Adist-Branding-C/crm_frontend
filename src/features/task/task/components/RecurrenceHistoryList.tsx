@@ -1,7 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
 import { Loader2, History, ExternalLink } from 'lucide-react';
-import { taskDataService } from '../services/taskDataService';
-import { ListResponseMapper } from '../../../../shared/mappers/list-response.mapper';
+import { useGetRecurrenceChainQuery } from '../../common/services/taskApi';
 import { getErrorMessage } from '../../../../shared/utils/error';
 import { formatDate } from '../../../../shared/utils/dateUtils';
 import type { RecurrenceChainItem } from '../types';
@@ -13,31 +11,10 @@ interface RecurrenceHistoryListProps {
 }
 
 const RecurrenceHistoryList = ({ taskId, onTaskClick }: RecurrenceHistoryListProps) => {
-  const [items, setItems] = useState<RecurrenceChainItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const loadHistory = useCallback(async () => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const response = await taskDataService.getRecurrenceChain(taskId);
-      if (response.status) {
-        const result = ListResponseMapper.toPagedResult<RecurrenceChainItem>(response);
-        setItems(result.items);
-      } else {
-        setItems([]);
-      }
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to load recurrence history'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [taskId]);
-
-  useEffect(() => {
-    loadHistory();
-  }, [loadHistory]);
+  const { currentData, isFetching, error: queryError } = useGetRecurrenceChainQuery(taskId, { refetchOnMountOrArgChange: true });
+  const items = currentData ?? [];
+  const isLoading = isFetching && !currentData;
+  const error = queryError ? getErrorMessage(queryError, 'Failed to load recurrence history') : '';
 
   return (
     <div className="recurrence-history">

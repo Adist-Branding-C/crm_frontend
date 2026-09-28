@@ -1,4 +1,4 @@
-import type { UnifiedTaskFormValues, UnifiedTaskItem } from '../types/unifiedTask.types';
+import type { UnifiedTaskFormValues, UnifiedTaskItem, UnifiedTaskPayload } from '../types/unifiedTask.types';
 import { RepeatType } from '../../task/types/interface';
 import { UNIFIED_EMPTY_VALUES } from '../constants/unifiedTaskInitialValues';
 import { toHHmm, toIdString } from '../utils/taskFieldTransforms';
@@ -40,5 +40,50 @@ export class UnifiedTaskMapper {
       repeatType: (item.repeatType as RepeatType | undefined) ?? RepeatType.NEVER,
       repeatConfig: item.repeatConfig ?? undefined,
     };
+  }
+
+  /**
+   * Builds the POST /tasks and PATCH /tasks/:id request body from the form values.
+   *
+   * Notes:
+   * - Formerly UnifiedTaskDataService.cleanPayload (logic unchanged), moved here when task
+   *   requests moved to RTK Query (taskApi).
+   * - Strips empty association ids so only the active task type's field reaches the backend,
+   *   numbers every id except leadId, and drops repeatConfig unless the repeat type needs one
+   *   (weekly/monthly).
+   */
+  static toRequestPayload(data: UnifiedTaskPayload): Record<string, unknown> {
+    const payload: Record<string, unknown> = { ...data };
+
+    ['leadId', 'dealId', 'campaignId', 'categoryId', 'workflowId', 'stageId'].forEach((key) => {
+      const value = payload[key];
+      if (value === '') {
+        delete payload[key];
+      } else if (value !== undefined && value !== null && key !== 'leadId') {
+        payload[key] = Number(value);
+      }
+    });
+
+    const repeatType = data.repeatType;
+    const repeatConfig = data.repeatConfig;
+    if (repeatConfig && repeatType && repeatType !== RepeatType.NEVER && repeatType !== RepeatType.DAILY) {
+      const config: Record<string, unknown> = { ...repeatConfig };
+      if (config.dayOfWeek !== undefined && config.dayOfWeek !== null && config.dayOfWeek !== '') {
+        config.dayOfWeek = Number(config.dayOfWeek);
+      }
+      if (
+        config.dayOfMonth !== undefined &&
+        config.dayOfMonth !== null &&
+        config.dayOfMonth !== '' &&
+        config.dayOfMonth !== 'last'
+      ) {
+        config.dayOfMonth = Number(config.dayOfMonth);
+      }
+      payload.repeatConfig = config;
+    } else {
+      delete payload.repeatConfig;
+    }
+
+    return payload;
   }
 }

@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useTaskDrawer as useTaskDrawerCore } from './useTaskDrawer';
 import { UNIFIED_EMPTY_VALUES } from '../constants/unifiedTaskInitialValues';
 import { UnifiedTaskMapper } from '../mapper/unifiedTaskMapper';
-import { unifiedTaskDataService } from '../services/unifiedTaskDataService';
+import { useLazyGetTaskByIdQuery } from '../services/taskApi';
 import type { UnifiedTaskFormValues, UnifiedTaskItem } from '../types/unifiedTask.types';
 
 export interface UseUnifiedTaskDrawerParams {
@@ -35,6 +35,7 @@ export function useUnifiedTaskDrawer({
   loadCampaigns,
   loadDeals,
 }: UseUnifiedTaskDrawerParams) {
+  const [fetchTaskDetail] = useLazyGetTaskByIdQuery();
   const loaders = useMemo(
     () => [loadStaff, loadCategories, loadLeads, loadCampaigns, loadDeals],
     [loadStaff, loadCategories, loadLeads, loadCampaigns, loadDeals],
@@ -48,16 +49,16 @@ export function useUnifiedTaskDrawer({
 
   const openEditDrawer = useCallback(async (item: UnifiedTaskItem) => {
     try {
-      const detail = await unifiedTaskDataService.getById(item.id);
-      if (detail.status && detail.data) {
-        drawer.openEditDrawer(detail.data);
+      const detail = await fetchTaskDetail(item.id).unwrap();
+      if (detail) {
+        drawer.openEditDrawer(detail);
         return;
       }
     } catch (err: unknown) {
       console.error('[UnifiedTaskDrawer] Failed to fetch task detail; falling back to row item', err);
     }
     drawer.openEditDrawer(item);
-  }, [drawer.openEditDrawer]);
+  }, [fetchTaskDetail, drawer.openEditDrawer]);
 
   return { ...drawer, openEditDrawer };
 }

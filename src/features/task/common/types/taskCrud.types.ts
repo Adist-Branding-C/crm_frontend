@@ -9,5 +9,4 @@
 export interface TaskCrudPagination {
   setError: (msg: string) => void;
   setIsLoading: (loading: boolean) => void;
-  refresh: () => void;
 }

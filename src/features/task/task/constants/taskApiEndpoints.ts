@@ -3,6 +3,7 @@
  *
  * Used by:
  * - TaskDataService (task/task/services/taskDataService.ts)
+ * - taskApi (task/common/services/taskApi.ts)
  *
  * Notes:
  * - Task creates against the same base path as the list endpoint (unlike Call/Campaign/Deal
@@ -16,4 +17,6 @@ export const TASK_API_ENDPOINTS = {
   UPDATE: (id: number) => `/tasks/${id}`,
   DELETE: (id: number) => `/tasks/${id}`,
   RECURRENCE_CHAIN: (id: number) => `/tasks/${id}/recurrence-chain`,
+  KANBAN: '/tasks/kanban',
+  MOVE_STAGE: (id: number) => `/tasks/${id}/stage`,
 };

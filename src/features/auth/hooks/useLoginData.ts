@@ -7,6 +7,7 @@ import type { LoginFormData } from '../types/auth.types';
 import { loginValidationSchema } from '../validations/login.schema';
 import { setAuthTokens } from '../utils/tokenStorage';
 import { agentService } from '../../account-settings/agent/services/agent.service';
+import { clearAllApiData } from '../../../store/store';
 
 const loginInitialValues: LoginFormData = { phone: '', password: '' };
 
@@ -36,6 +37,7 @@ export function useLoginData() {
 
       if (response.status && response.data) {
         setAuthTokens(response.data.accessToken, response.data.refreshToken, rememberMe);
+        clearAllApiData();
         localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify({
           id: response.data.id,
           name: response.data.name,
