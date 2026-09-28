@@ -8,9 +8,9 @@ import type { ApiResponse } from '../types/common';
  *
  * Notes:
  * - List endpoints have been observed returning the array under `data.items`, as a
- *   bare array in `data` directly, and the total count under `totalItems`, `total`,
- *   or `totalRecords` depending on the endpoint. This tolerates all of those instead
- *   of every feature reimplementing the same defensive parsing.
+ *   bare array in `data` directly, and the total count under `pagination.total`,
+ *   `totalItems`, `total`, or `totalRecords` depending on the endpoint. This tolerates
+ *   all of those instead of every feature reimplementing the same defensive parsing.
  */
 export class ListResponseMapper {
   static toPagedResult<T>(response: ApiResponse<T[]>): { items: T[]; total: number } {
@@ -23,7 +23,11 @@ export class ListResponseMapper {
         ? (response.data as T[])
         : [];
     const items = Array.isArray(rawItems) ? rawItems : [];
-    const total = typeof data.totalItems === 'number' ? data.totalItems
+    const pagination = data.pagination && typeof data.pagination === 'object'
+      ? (data.pagination as Record<string, unknown>)
+      : {};
+    const total = typeof pagination.total === 'number' ? pagination.total
+      : typeof data.totalItems === 'number' ? data.totalItems
       : typeof data.total === 'number' ? data.total
       : typeof data.totalRecords === 'number' ? data.totalRecords
       : items.length;

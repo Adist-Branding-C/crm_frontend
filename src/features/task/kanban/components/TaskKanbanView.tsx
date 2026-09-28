@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { AlertTriangle, Plus } from 'lucide-react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import EmptyState from '../../../../shared/components/EmptyState';
@@ -35,14 +35,6 @@ function TaskKanbanView({ taskType, searchQuery, onTypeChange, onViewChange, onA
 
   const kanban = useTaskKanban(selectedWorkflowId, effectiveTaskType, reportError, searchQuery);
 
-  useEffect(() => {
-    if (selectedWorkflowId) kanban.fetchKanban(selectedWorkflowId);
-  }, [selectedWorkflowId, effectiveTaskType, searchQuery, kanban.fetchKanban]);
-
-  const refetch = useCallback(() => {
-    if (selectedWorkflowId) kanban.fetchKanban(selectedWorkflowId);
-  }, [selectedWorkflowId, kanban.fetchKanban]);
-
   if (workflowsLoading) {
     return <div style={{ padding: 'var(--space-4)', color: 'var(--text-tertiary)' }}>Loading workflows...</div>;
   }
@@ -72,7 +64,7 @@ function TaskKanbanView({ taskType, searchQuery, onTypeChange, onViewChange, onA
       </div>
 
       {kanban.error && <EmptyState message={kanban.error} icon={<AlertTriangle size={48} />} action={
-        <button type="button" className="btn btn-secondary" style={{ marginTop: '1rem' }} onClick={refetch}>Retry</button>
+        <button type="button" className="btn btn-secondary" style={{ marginTop: '1rem' }} onClick={kanban.refetch}>Retry</button>
       } />}
 
       {!kanban.error && kanban.isLoading && kanban.stages.length === 0 && (

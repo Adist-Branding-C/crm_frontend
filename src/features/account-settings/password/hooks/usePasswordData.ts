@@ -7,6 +7,7 @@ import { INITIAL_PASSWORD_FORM } from '../constants';
 import { getPasswordStrength } from '../../../../shared/validations/password.validation';
 import { AUTH_ROUTES } from '../../../auth/constants/auth.constants';
 import { clearAuthTokens } from '../../../auth/utils/tokenStorage';
+import { clearAllApiData } from '../../../../store/store';
 
 const POST_PASSWORD_CHANGE_LOGOUT_DELAY_MS = 2000;
 
@@ -53,6 +54,7 @@ export const usePasswordData = () => {
         logoutTimeoutRef.current = setTimeout(() => {
           clearAuthTokens();
           navigate(AUTH_ROUTES.LOGIN);
+          clearAllApiData();
         }, POST_PASSWORD_CHANGE_LOGOUT_DELAY_MS);
         return true;
       } else {

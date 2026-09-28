@@ -1,6 +1,6 @@
 export interface TaskViewFilters {
-  taskType?: string;
-  search?: string;
+  taskType?: string | undefined;
+  search?: string | undefined;
 }
 
 export function normalizeTaskType(taskType?: string): string | undefined {

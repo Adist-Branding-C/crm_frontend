@@ -5,6 +5,7 @@ import { AUTH_STORAGE_KEYS, AUTH_ROUTES } from '../constants/auth.constants';
 import type { AuthUser } from '../types/auth.types';
 import { authService } from '../services/AuthService';
 import { setAuthTokens, clearAuthTokens, getAccessTokenClaims } from '../utils/tokenStorage';
+import { clearAllApiData } from '../../../store/store';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ export const useAuth = () => {
       clearAuthTokens();
       setIsAuthenticated(false);
       navigate(AUTH_ROUTES.LOGIN);
+      clearAllApiData();
     }
   }, [navigate]);
 

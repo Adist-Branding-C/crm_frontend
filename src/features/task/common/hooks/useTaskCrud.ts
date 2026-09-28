@@ -5,10 +5,10 @@ import { TASK_FIELD_MAP, TASK_FIELD_ERROR_FALLBACKS } from '../constants/fieldEr
 import type { ApiResponse } from '../../../../shared/types/common';
 import type { TaskCrudPagination } from '../types/taskCrud.types';
 
-export interface TaskCrudDataService<TFormData, TItem> {
-  create: (data: TFormData) => Promise<ApiResponse<TItem>>;
-  update: (id: number, data: TFormData) => Promise<ApiResponse<TItem>>;
-  delete: (id: number) => Promise<ApiResponse<null>>;
+export interface TaskCrudDataService<TFormData> {
+  create: (data: TFormData) => Promise<ApiResponse<unknown>>;
+  update: (id: number, data: TFormData) => Promise<ApiResponse<unknown>>;
+  delete: (id: number) => Promise<ApiResponse<unknown>>;
 }
 
 export interface TaskCrudMessages {
@@ -20,10 +20,10 @@ export interface TaskCrudMessages {
   deleteFailed: string;
 }
 
-interface UseTaskCrudParams<TFormData, TItem> {
+interface UseTaskCrudParams<TFormData> {
   pagination: TaskCrudPagination;
   showToastMessage: (msg: string, type: 'success' | 'error') => void;
-  dataService: TaskCrudDataService<TFormData, TItem>;
+  dataService: TaskCrudDataService<TFormData>;
   messages: TaskCrudMessages;
 }
 
@@ -38,7 +38,7 @@ interface UseTaskCrudParams<TFormData, TItem> {
  * - Previously each of the four sub-modules reimplemented this exact try/catch/finally
  *   flow with only the data service and message strings differing.
  */
-export function useTaskCrud<TFormData, TItem>({ pagination, showToastMessage, dataService, messages }: UseTaskCrudParams<TFormData, TItem>) {
+export function useTaskCrud<TFormData>({ pagination, showToastMessage, dataService, messages }: UseTaskCrudParams<TFormData>) {
   const submitError = useSubmitErrorHandler({
     fieldMap: TASK_FIELD_MAP,
     fieldFallbacks: TASK_FIELD_ERROR_FALLBACKS,
@@ -56,7 +56,6 @@ export function useTaskCrud<TFormData, TItem>({ pagination, showToastMessage, da
       const response = await dataService.create(values);
 
       if (response.status) {
-        pagination.refresh();
         showToastMessage(messages.added, 'success');
         return true;
       }
@@ -84,7 +83,6 @@ export function useTaskCrud<TFormData, TItem>({ pagination, showToastMessage, da
       const response = await dataService.update(id, values);
 
       if (response.status) {
-        pagination.refresh();
         showToastMessage(messages.updated, 'success');
         return true;
       }
@@ -105,7 +103,6 @@ export function useTaskCrud<TFormData, TItem>({ pagination, showToastMessage, da
       const response = await dataService.delete(id);
 
       if (response.status) {
-        pagination.refresh();
         showToastMessage(messages.deleted, 'success');
         return true;
       }
