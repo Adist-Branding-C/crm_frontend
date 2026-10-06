@@ -1,5 +1,5 @@
 import { Download, Plus, Search } from 'lucide-react';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../constants/pagination';
 
 interface TableToolbarProps {
   searchQuery: string;
@@ -16,7 +16,7 @@ const TableToolbar = ({ searchQuery, onSearchChange, rowsPerPage, onRowsPerPageC
     <div className="entries-select">
       <label>Show
         <select value={rowsPerPage} onChange={(e) => onRowsPerPageChange(Number(e.target.value))}>
-          {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+          {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
         entries
       </label>

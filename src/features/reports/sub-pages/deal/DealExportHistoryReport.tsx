@@ -9,7 +9,7 @@ import { getErrorMessage } from '../../../../shared/utils/error';
 import { useToast } from '../../../../shared/hooks/useToast';
 import { useDebouncedSearch } from '../../../../shared/hooks/useDebouncedSearch';
 import Toast from '../../../../shared/components/Toast';
-import { ROWS_OPTIONS_10_25_50 } from '../../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../../shared/constants/pagination';
 
 const STATUS_BADGE_CLASSES: Record<string, string> = {
   success: 'badge-active',
@@ -142,7 +142,7 @@ const DealExportHistoryReport = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="rows-select">
-            {ROWS_OPTIONS_10_25_50.map((n) => <option key={n} value={n}>{n}</option>)}
+            {ROWS_OPTIONS_EXTENDED.map((n) => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {total === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + rowsPerPage, total)} of {total}</span>
         </div>

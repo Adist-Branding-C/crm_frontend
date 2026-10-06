@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { MoreHorizontal, Edit2, Search, X, Bell } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { menuItems } from '../constants';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
 import { useNotificationSettingsData } from '../hooks/useNotificationSettingsData';
 import './NotificationSettingsPage.css';
@@ -115,7 +115,7 @@ const NotificationSettingsPage = () => {
               <div className="entries-select">
                 <label>Show
                   <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                    {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+                    {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                   entries
                 </label>

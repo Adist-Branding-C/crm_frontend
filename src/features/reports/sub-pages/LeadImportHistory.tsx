@@ -15,7 +15,7 @@ import Toast from '../../../shared/components/Toast';
 import { useToast } from '../../../shared/hooks/useToast';
 import { useImportHistoryData } from '../hooks/useImportHistoryData';
 import { importHistoryColumns as columns } from '../constants/historyReports.data';
-import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import type { ImportHistoryApiItem } from '../types';
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
@@ -262,7 +262,7 @@ const LeadImportHistory: React.FC = () => {
             onChange={handleRowsPerPageChange}
             className="rows-select"
           >
-            {ROWS_OPTIONS_10_25_50.map((n) => (
+            {ROWS_OPTIONS_EXTENDED.map((n) => (
               <option key={n} value={n}>
                 {n}
               </option>

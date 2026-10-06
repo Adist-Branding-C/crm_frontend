@@ -1,7 +1,7 @@
 import React from 'react';
 import { Eye, AlertCircle } from 'lucide-react';
 import type { LeadsTableProps } from '../types';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { tint } from '../../../shared/utils/color';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -31,7 +31,7 @@ const LeadsTable: React.FC<LeadsTableProps> = ({ data, onViewDetails, rowsPerPag
       <div className="table-controls-left">
         <span className="show-entries">Show entries</span>
         <select value={rowsPerPage} onChange={onRowsPerPageChange}>
-          {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+          {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
       </div>
     </div>

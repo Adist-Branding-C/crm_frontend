@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, Plus } from 'lucide-react';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../constants/pagination';
 import type { AdminToolbarProps } from '../../types/crud';
 import { LABEL_SHOW } from '../../constants/labels';
 
@@ -10,7 +10,7 @@ const AdminToolbar: React.FC<AdminToolbarProps> = React.memo(({ searchQuery, onS
       <label>
         {LABEL_SHOW}
         <select value={rowsPerPage} onChange={(e) => onRowsPerPageChange && onRowsPerPageChange(e)}>
-          {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+          {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
         </select>
         entries
       </label>

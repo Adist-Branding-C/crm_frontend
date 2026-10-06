@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { checkinData } from '../constants';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 
 const CheckinReport = () => {
@@ -40,7 +40,7 @@ const CheckinReport = () => {
             <div className="filter-group">
               <label>Show</label>
               <select className="filter-select" value={rowsPerPage} onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}>
-                {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+                {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
               </select>
               <label>entries</label>
             </div>

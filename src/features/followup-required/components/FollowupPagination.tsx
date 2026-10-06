@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { LABEL_ROWS_PER_PAGE } from '../../../shared/constants/labels';
 import type { FollowupPaginationProps } from '../types';
 
@@ -22,7 +22,7 @@ const FollowupPagination: React.FC<FollowupPaginationProps> = React.memo(
           onChange={onRowsPerPageChange}
           className="rows-select"
         >
-          {ROWS_OPTIONS_10_25_50_100.map((n) => (
+          {ROWS_OPTIONS_EXTENDED.map((n) => (
             <option key={n} value={n}>
               {n}
             </option>

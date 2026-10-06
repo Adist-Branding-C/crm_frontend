@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Search } from 'lucide-react';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../constants/pagination';
 import { LABEL_SHOW, LABEL_ENTRIES } from '../../constants/labels';
 import { ACTION_SEARCH } from '../../constants/actionLabels';
 
@@ -26,7 +26,7 @@ const TableNav = ({
       <label>
         {LABEL_SHOW}
         <select value={rowsPerPage} onChange={(e) => onRowsPerPageChange(Number(e.target.value))}>
-          {ROWS_OPTIONS_10_25_50_100.map(n => (
+          {ROWS_OPTIONS_EXTENDED.map(n => (
             <option key={n} value={n}>{n}</option>
           ))}
         </select>
