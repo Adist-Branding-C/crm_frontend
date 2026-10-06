@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import './ReportsSubPages.css';
 
 import { importDetailColumns as columns } from '../constants/historyReports.data';
-import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { useImportHistoryDetail } from '../hooks/useImportHistoryDetail';
 import type { ImportEntryStatus } from '../types';
 
@@ -342,7 +342,7 @@ const ImportHistoryDetail: React.FC = () => {
               onChange={handleRowsPerPageChange}
               className="rows-select"
             >
-              {ROWS_OPTIONS_10_25_50.map((n) => (
+              {ROWS_OPTIONS_EXTENDED.map((n) => (
                 <option key={n} value={n}>
                   {n}
                 </option>

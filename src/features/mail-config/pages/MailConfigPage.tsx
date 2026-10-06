@@ -3,7 +3,7 @@ import { Formik, Form, Field } from 'formik';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import SettingsTabs from '../../../shared/components/SettingsTabs';
 import DrawerShell from '../../../shared/components/crud/DrawerShell';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { ACTION_SEARCH } from '../../../shared/constants/actionLabels';
 import { MAIL_DRIVER_OPTIONS, ENCRYPTION_OPTIONS } from '../constants';
 import { mailConfigValidationSchema } from '../validations/mailConfig.validation';
@@ -58,7 +58,7 @@ const MailConfigPage = () => {
               <div className="entries-select">
                 <label>Show
                   <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                    {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+                    {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                   entries
                 </label>

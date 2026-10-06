@@ -12,7 +12,7 @@ import { useLeadExportHistory } from '../hooks/useLeadExportHistory';
 import { leadExportService } from '../services/leadExportService';
 import { extractFilenameFromContentDisposition, triggerBlobDownload } from '../../../shared/utils/blobDownload.util';
 import { getErrorMessage } from '../../../shared/utils/error';
-import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { ACTION_VIEW, ACTION_DELETE } from '../../../shared/constants/actionLabels';
 
 const HISTORY_COLUMNS = [
@@ -202,7 +202,7 @@ const LeadExportHistory: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            {ROWS_OPTIONS_10_25_50.map((n) => <option key={n} value={n}>{n}</option>)}
+            {ROWS_OPTIONS_EXTENDED.map((n) => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {total === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + rowsPerPage, total)} of {total}</span>
         </div>

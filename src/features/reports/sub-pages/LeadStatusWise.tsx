@@ -9,7 +9,7 @@ import {
   statusWiseData as statusData, statusWiseStatsCards as statsCards,
   statusWiseColumns as columns
 } from '../constants/matrixReports.data';
-import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { ACTION_FILTER, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 import { LEAD_STATUS_OPTIONS } from '../../../shared/constants/leadStatuses';
 import { REPT_LEAD_TYPE_OPTIONS, REPT_PURPOSE_OPTIONS, REPT_SOURCE_OPTIONS } from '../constants';
@@ -271,7 +271,7 @@ const LeadStatusWise: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
+            {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

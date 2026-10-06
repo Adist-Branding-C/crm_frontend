@@ -9,7 +9,7 @@ import {
   sourceWiseAgentOptions as agentOptions, sourceWiseSourceOptions as sourceOptions,
   sourceWiseColumns as lswColumns
 } from '../constants/matrixReports.data';
-import { ROWS_OPTIONS_10_25_50 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import { ACTION_SUBMIT, ACTION_CLEAR } from '../../../shared/constants/actionLabels';
 import type { Column } from '../../../shared/types/table';
 import type { LeadSourceWiseFilters } from '../types';
@@ -267,7 +267,7 @@ const LeadSourceWise: React.FC = () => {
         <div className="pagination-left">
           <span className="rows-label">Rows per page:</span>
           <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="rows-select">
-            {ROWS_OPTIONS_10_25_50.map(n => <option key={n} value={n}>{n}</option>)}
+            {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
           <span className="pagination-info">Showing {startIndex + 1}-{Math.min(startIndex + rowsPerPage, filteredData.length)} of {filteredData.length}</span>
         </div>

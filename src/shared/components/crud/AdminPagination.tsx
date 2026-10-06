@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ROWS_OPTIONS_10_25_50_100 } from '../../constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../constants/pagination';
 import { LABEL_SHOW, LABEL_ENTRIES, LABEL_FIRST, LABEL_LAST, LABEL_PREVIOUS, LABEL_NEXT, LABEL_PAGE, LABEL_OF, LABEL_SHOWING, LABEL_TO } from '../../constants/labels';
 import type { AdminPaginationProps } from '../../types/crud';
 
@@ -18,7 +18,7 @@ const AdminPagination: React.FC<AdminPaginationProps> = React.memo(({
           <label>
             {LABEL_SHOW}
             <select value={rowsPerPage} onChange={onRowsPerPageChange}>
-              {ROWS_OPTIONS_10_25_50_100.map(n => <option key={n} value={n}>{n}</option>)}
+              {ROWS_OPTIONS_EXTENDED.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
             {LABEL_ENTRIES}
           </label>

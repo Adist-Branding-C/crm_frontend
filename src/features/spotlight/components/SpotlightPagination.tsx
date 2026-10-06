@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { SpotlightPaginationProps } from '../types';
-import { ROWS_OPTIONS_5_10_25_50 } from '../../../shared/constants/pagination';
+import { ROWS_OPTIONS_EXTENDED } from '../../../shared/constants/pagination';
 import {
   LABEL_ROWS_PER_PAGE,
   LABEL_SHOWING,
@@ -29,7 +29,7 @@ const SpotlightPagination: React.FC<SpotlightPaginationProps> = React.memo(
           onChange={onRowsPerPageChange}
           className="rows-select"
         >
-          {ROWS_OPTIONS_5_10_25_50.map((n) => (
+          {ROWS_OPTIONS_EXTENDED.map((n) => (
             <option key={n} value={n}>
               {n}
             </option>
