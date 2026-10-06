@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavLink, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { NavLink, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
+import { ChevronRight, MessageCircle, DollarSign, ListChecks } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import LeadReportsLanding from '../sub-pages/LeadReportsLanding';
 import LeadDailyActivityReport from '../sub-pages/LeadDailyActivityReport';
@@ -15,7 +15,6 @@ import LeadExportHistory from '../sub-pages/LeadExportHistory';
 import LeadImportHistory from '../sub-pages/LeadImportHistory';
 import ImportHistoryDetail from '../sub-pages/ImportHistoryDetail';
 import DealReportsLanding from '../sub-pages/DealReportsLanding';
-
 
 import TaskReportsLanding from '../task-reports/sub-pages/TaskReportsLanding';
 import TaskSummaryReport from '../task-reports/sub-pages/TaskSummaryReport';
@@ -42,15 +41,38 @@ import AttendanceReport from '../sub-pages/AttendanceReport';
 import AttendanceProfile from '../sub-pages/AttendanceProfile';
 import { callReportOptions, reportCategories } from '../constants';
 import './ReportsPage.css';
+import '../../../pages/Settings.css'; // Make sure the settings grid CSS is available
 import DealExportReport from '../sub-pages/deal/DealExportReport';
 import DealExportHistoryReport from '../sub-pages/deal/DealExportHistoryReport';
 import DealDeletedReport from '../sub-pages/deal/DealDeletedReport';
 
+const ReportsRootLanding = () => {
+  const reportCards = [
+    { id: 'lead', title: 'Lead Reports', description: 'View and analyze all lead-related reports and metrics', link: '/reports/lead', icon: <MessageCircle size={24} /> },
+    { id: 'deal', title: 'Deal Reports', description: 'Analyze deal pipelines, conversions, and win/loss ratios', link: '/reports/deal', icon: <DollarSign size={24} /> },
+    { id: 'task', title: 'Task Reports', description: 'Monitor task completion, team performance, and SLA compliance', link: '/reports/task', icon: <ListChecks size={24} /> },
+  ];
 
-
-
-
-
+  return (
+    <div className="settings-page" style={{ padding: 0 }}>
+      <PageHeader title="Reports" description="Select a report category to view detailed metrics" breadcrumb={false} />
+      <div className="settings-grid">
+        {reportCards.map((item) => (
+          <Link key={item.id} to={item.link} className="settings-card">
+            <div className="settings-icon">
+              {item.icon}
+            </div>
+            <h6>{item.title}</h6>
+            <p>{item.description}</p>
+            <div className="settings-link">
+              <p>View {item.title.toLowerCase()}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const ReportsPage = () => {
   const { pathname } = useLocation();
@@ -63,15 +85,15 @@ const ReportsPage = () => {
         {isTopLevel && <PageHeader title={currentCategory?.title ?? 'Reports'} breadcrumb={false} />}
 
         <Routes>
+          <Route path="" element={<ReportsRootLanding />} />
           <Route path="lead/*" element={<LeadReportsRouter />} />
-<Route path="deal/*" element={<DealReportsRouter />} />
-<Route path="task/*" element={<TaskReportsRouter />} />
+          <Route path="deal/*" element={<DealReportsRouter />} />
+          <Route path="task/*" element={<TaskReportsRouter />} />
           {/* <Route path="call/*" element={<CallReportsRouter />} /> */}
           {/* <Route path="checkin" element={<CheckinReport />} /> */}
           {/* <Route path="attendance" element={<AttendanceReport />} /> */}
           {/* <Route path="attendance/profile/:staffId" element={<AttendanceProfile />} /> */}
-          <Route path="" element={<Navigate to="/reports/lead" replace />} />
-          <Route path="*" element={<Navigate to="/reports/lead" replace />} />
+          <Route path="*" element={<Navigate to="/reports" replace />} />
         </Routes>
       </div>
     </div>
