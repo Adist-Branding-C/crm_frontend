@@ -4,7 +4,7 @@ import { useFormikContext } from 'formik';
 import { Plus } from 'lucide-react';
 import type { RuleBuilderFormValues } from '../hooks/useRuleBuilder';
 import type { ActionType } from '../types';
-import { ACTION_TYPES, ACTION_TYPE_META, DEFAULT_ACTION_CONFIG } from '../constants';
+import { ACTION_TYPES, ACTION_TYPE_META, DEFAULT_ACTION_CONFIG, isNotificationAllowed, isTaskTrigger, isWebhookOnlyTrigger } from '../constants';
 import { generateActionId } from '../context/AutomationDataContext';
 import ActionCard from './ActionCard';
 
@@ -13,6 +13,13 @@ const ActionsSection = () => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [showPicker, setShowPicker] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const isWebhookOnly = isWebhookOnlyTrigger(values.triggerType);
+  const notificationAllowed = isNotificationAllowed(values.triggerType);
+  const selectableActions: ActionType[] = isWebhookOnly
+    ? ['WEBHOOK']
+    : ACTION_TYPES.filter((actionType) => actionType !== 'NOTIFICATION' || notificationAllowed);
+  const restrictedFamily = isTaskTrigger(values.triggerType) ? 'Task' : 'Deal';
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((prev) => {
@@ -23,6 +30,7 @@ const ActionsSection = () => {
   };
 
   const handleAddAction = (actionType: ActionType) => {
+    if (isWebhookOnly && actionType !== 'WEBHOOK') return;
     const id = generateActionId();
     const newAction = {
       id,
@@ -86,7 +94,7 @@ const ActionsSection = () => {
 
       {showPicker ? (
         <div className="automation-add-action-picker">
-          {ACTION_TYPES.map((actionType) => (
+          {selectableActions.map((actionType) => (
             <button type="button" key={actionType} className="automation-add-action-option" onClick={() => handleAddAction(actionType)}>
               {ACTION_TYPE_META[actionType].label}
             </button>
@@ -97,6 +105,8 @@ const ActionsSection = () => {
           <Plus size={16} /> Add Action
         </button>
       )}
+
+      {isWebhookOnly && <p className="automation-action-hint">{restrictedFamily} rules support webhook actions only</p>}
     </div>
   );
 };

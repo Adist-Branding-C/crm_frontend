@@ -1,13 +1,31 @@
-export type TriggerType = 'NEW_ENQUIRY' | 'VALUE_CHANGE' | 'REASSIGN' | 'NOTIFICATION';
+export type TriggerType =
+  | 'NEW_ENQUIRY'
+  | 'VALUE_CHANGE'
+  | 'REASSIGN'
+  | 'NOTIFICATION'
+  | 'DEAL_CREATED'
+  | 'DEAL_UPDATED'
+  | 'DEAL_STAGE_CHANGED'
+  | 'TASK_CREATED'
+  | 'TASK_UPDATED'
+  | 'TASK_STAGE_CHANGED';
 
-export type ActionType = 'WEBHOOK' | 'ADD_TASK' | 'ASSIGN_LEAD' | 'ADD_TO_CAMPAIGN';
+export type AggregateType = 'lead' | 'deal' | 'task' | 'rule';
+
+export type ActionType = 'WEBHOOK' | 'ADD_TASK' | 'ASSIGN_LEAD' | 'ADD_TO_CAMPAIGN' | 'NOTIFICATION';
 
 export type AssignToType = 'STAFF' | 'DEPARTMENT';
+
+export type NotificationRecipient = 'LEAD_OWNER' | 'SPECIFIC_USER';
 
 // Matches crm_backend's TaskPriority enum exactly (Title-case values, not upper-case) —
 // a mismatch here fails silently until the backend rejects the value at execution time
 // with "invalid input value for enum tasks_priority_enum".
 export type TaskPriority = 'Low' | 'Medium' | 'High';
+
+// Matches crm_backend's UnifiedTaskType enum — the discriminator a task create requires
+// ("taskType is required (GENERAL | CALL | CAMPAIGN | DEAL)").
+export type TaskType = 'GENERAL' | 'CALL' | 'CAMPAIGN' | 'DEAL';
 
 export type TaskAssigneeType = 'LEAD_OWNER' | 'STAFF';
 
@@ -38,6 +56,7 @@ export interface WebhookActionConfig extends ActionFilters {
 }
 
 export interface AddTaskActionConfig {
+  taskType: TaskType;
   taskName: string;
   description?: string;
   priority: TaskPriority;
@@ -56,11 +75,21 @@ export interface AddToCampaignActionConfig extends ActionFilters {
   campaignId: string;
 }
 
+// In-app notification action (lead triggers only). title/message may contain the
+// placeholders {{lead.name}}, {{lead.status}} and {{lead.phone}}, rendered at execution time.
+export interface NotificationActionConfig {
+  recipient: NotificationRecipient;
+  userId?: string;
+  title: string;
+  message: string;
+}
+
 export type ActionConfig =
   | WebhookActionConfig
   | AddTaskActionConfig
   | AssignLeadActionConfig
-  | AddToCampaignActionConfig;
+  | AddToCampaignActionConfig
+  | NotificationActionConfig;
 
 export interface RuleAction {
   id: string;
@@ -96,7 +125,16 @@ export interface WebhookHistoryEntry {
   errorMessage?: string;
   createdAt: string;
   webhookUrl?: string;
-  leadId?: string;
+  // A webhook attempt belongs to a lead, deal or task; older responses may omit the
+  // deal/task fields entirely, so every aggregate field is optional and nullable.
+  leadId?: string | null;
+  dealId?: string | null;
+  taskId?: string | null;
+  leadName?: string;
+  dealName?: string;
+  taskName?: string;
+  aggregateType?: AggregateType;
+  aggregateId?: string;
 }
 
 export interface ExecutionLog {
@@ -104,8 +142,17 @@ export interface ExecutionLog {
   automationRuleId: string;
   actionId: string;
   actionType: ActionType;
-  leadId: string;
-  leadName: string;
+  // Rule-level cron sweep rows (REASSIGN/NOTIFICATION) have no action: actionId 0 and
+  // aggregateType 'rule'. Flagged so the UI shows a sweep label instead of a fake action.
+  isSweep?: boolean;
+  leadId?: string | null;
+  leadName?: string;
+  dealId?: string | null;
+  dealName?: string;
+  taskId?: string | null;
+  taskName?: string;
+  aggregateType?: AggregateType;
+  aggregateId?: string;
   status: ExecutionStatus;
   retryCount: number;
   resultMessage?: string;

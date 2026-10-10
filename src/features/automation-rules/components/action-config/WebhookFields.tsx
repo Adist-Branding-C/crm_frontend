@@ -2,6 +2,7 @@ import { getIn, useFormikContext } from 'formik';
 import type { RuleBuilderFormValues } from '../../hooks/useRuleBuilder';
 import type { WebhookActionConfig } from '../../types';
 import { useAutomationData } from '../../context/AutomationDataContext';
+import { isWebhookOnlyTrigger } from '../../constants';
 import MultiSelectChips from '../MultiSelectChips';
 
 const WebhookFields = ({ index }: { index: number }) => {
@@ -10,6 +11,7 @@ const WebhookFields = ({ index }: { index: number }) => {
   const config = values.actions[index]?.actionConfig as WebhookActionConfig;
   const basePath = `actions.${index}.actionConfig`;
   const urlError = getIn(errors, `${basePath}.url`);
+  const hideLeadOnlyFilters = isWebhookOnlyTrigger(values.triggerType);
 
   return (
     <>
@@ -24,16 +26,18 @@ const WebhookFields = ({ index }: { index: number }) => {
         />
         {urlError && <small className="automation-field-error">{urlError}</small>}
       </div>
-      <div className="automation-field-row">
-        <div className="form-group">
-          <label>Source filter (optional)</label>
-          <MultiSelectChips options={sourceOptions} value={config.sourceIds ?? []} onChange={(value) => setFieldValue(`${basePath}.sourceIds`, value)} />
+      {!hideLeadOnlyFilters && (
+        <div className="automation-field-row">
+          <div className="form-group">
+            <label>Source filter (optional)</label>
+            <MultiSelectChips options={sourceOptions} value={config.sourceIds ?? []} onChange={(value) => setFieldValue(`${basePath}.sourceIds`, value)} />
+          </div>
+          <div className="form-group">
+            <label>Purpose filter (optional)</label>
+            <MultiSelectChips options={purposeOptions} value={config.purposeIds ?? []} onChange={(value) => setFieldValue(`${basePath}.purposeIds`, value)} />
+          </div>
         </div>
-        <div className="form-group">
-          <label>Purpose filter (optional)</label>
-          <MultiSelectChips options={purposeOptions} value={config.purposeIds ?? []} onChange={(value) => setFieldValue(`${basePath}.purposeIds`, value)} />
-        </div>
-      </div>
+      )}
     </>
   );
 };

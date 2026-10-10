@@ -1,6 +1,7 @@
 import { getIn, useFormikContext } from 'formik';
 import type { RuleBuilderFormValues } from '../../hooks/useRuleBuilder';
 import type { AddTaskActionConfig } from '../../types';
+import { TASK_TYPE_OPTIONS } from '../../constants';
 import { useAutomationData } from '../../context/AutomationDataContext';
 
 const AddTaskFields = ({ index }: { index: number }) => {
@@ -12,6 +13,15 @@ const AddTaskFields = ({ index }: { index: number }) => {
   return (
     <>
       <div className="automation-field-row">
+        <div className="form-group">
+          <label>Task Type</label>
+          <select className="form-control" value={config.taskType ?? 'GENERAL'} onChange={(e) => setFieldValue(`${basePath}.taskType`, e.target.value)}>
+            {TASK_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          {getIn(errors, `${basePath}.taskType`) && <small className="automation-field-error">{getIn(errors, `${basePath}.taskType`)}</small>}
+        </div>
         <div className="form-group">
           <label>Task Name</label>
           <input className="form-control" value={config.taskName} onChange={(e) => setFieldValue(`${basePath}.taskName`, e.target.value)} />
