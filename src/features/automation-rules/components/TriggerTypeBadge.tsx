@@ -1,8 +1,8 @@
 import type { TriggerType } from '../types';
-import { TRIGGER_TYPE_META } from '../constants';
+import { getTriggerMeta } from '../constants';
 
 const TriggerTypeBadge = ({ triggerType }: { triggerType: TriggerType }) => {
-  const meta = TRIGGER_TYPE_META[triggerType];
+  const meta = getTriggerMeta(triggerType);
   return <span className={`badge ${meta.badgeClass}`}>{meta.label}</span>;
 };
 

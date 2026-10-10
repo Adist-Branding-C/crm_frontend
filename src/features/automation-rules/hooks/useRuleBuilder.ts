@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { FormikHelpers } from 'formik';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAutomationData } from '../context/AutomationDataContext';
 import { useToast } from '../../../shared/hooks/useToast';
+import { isWebhookOnlyTrigger } from '../constants';
+import { sanitizeWebhookOnlyActions } from '../utils/webhookOnlyActions';
 import type { AutomationRule, RuleAction, TriggerConfig, TriggerType } from '../types';
 
 export interface RuleBuilderFormValues {
@@ -33,9 +36,26 @@ function toFormValues(rule: AutomationRule): RuleBuilderFormValues {
   };
 }
 
-function extractErrorMessage(error: unknown): string {
-  const response = (error as { response?: { data?: { message?: string } } })?.response;
-  return response?.data?.message ?? 'Something went wrong while saving the rule';
+function extractApiError(error: unknown): { message: string; field?: string } {
+  const data = (error as { response?: { data?: { message?: string; field?: string } } })?.response?.data;
+  return {
+    message: data?.message ?? 'Something went wrong while saving the rule',
+    ...(data?.field ? { field: data.field } : {}),
+  };
+}
+
+// The backend reports action-config errors without an action index (e.g. "actionConfig.title").
+// Attach them to this rule's notification action so the message lands on the matching input.
+function resolveApiErrorFieldPath(field: string, values: RuleBuilderFormValues): string | undefined {
+  const index = values.actions.findIndex((action) => action.actionType === 'NOTIFICATION');
+  if (index === -1) return undefined;
+  if (field.startsWith('actionConfig.')) {
+    return `actions.${index}.actionConfig.${field.slice('actionConfig.'.length)}`;
+  }
+  if (field === 'actions.actionType' || field === 'actions') {
+    return `actions.${index}.actionType`;
+  }
+  return undefined;
 }
 
 export function useRuleBuilder() {
@@ -76,16 +96,21 @@ export function useRuleBuilder() {
     [existingRule],
   );
 
-  const handleSubmit = async (values: RuleBuilderFormValues) => {
+  const handleSubmit = async (values: RuleBuilderFormValues, helpers: FormikHelpers<RuleBuilderFormValues>) => {
     const triggerType = values.triggerType as TriggerType;
-    const actions = triggerType === 'REASSIGN' || triggerType === 'NOTIFICATION' ? [] : values.actions;
+    const webhookOnlyRule = isWebhookOnlyTrigger(triggerType);
+    const actions = triggerType === 'REASSIGN' || triggerType === 'NOTIFICATION'
+      ? []
+      : webhookOnlyRule
+        ? sanitizeWebhookOnlyActions(values.actions)
+        : values.actions;
 
     const trimmedDescription = values.description.trim();
     const draft = {
       name: values.name.trim(),
       isActive: values.isActive,
       triggerType,
-      triggerConfig: values.triggerConfig,
+      triggerConfig: webhookOnlyRule ? {} : values.triggerConfig,
       actions,
       ...(trimmedDescription ? { description: trimmedDescription } : {}),
     };
@@ -99,7 +124,12 @@ export function useRuleBuilder() {
       toast.showToastMessage('Rule saved', 'success');
       setTimeout(() => navigate('/automation-rules'), 300);
     } catch (error) {
-      toast.showToastMessage(extractErrorMessage(error), 'error');
+      const { message, field } = extractApiError(error);
+      if (field) {
+        const path = resolveApiErrorFieldPath(field, values);
+        if (path) helpers.setFieldError(path, message);
+      }
+      toast.showToastMessage(message, 'error');
     }
   };
 

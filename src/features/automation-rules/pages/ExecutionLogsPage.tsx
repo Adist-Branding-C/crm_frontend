@@ -75,7 +75,7 @@ const ExecutionLogsPage = () => {
               <THead>
                 <TRow>
                   <TCell variant="th" />
-                  <TCell variant="th">Lead</TCell>
+                  <TCell variant="th">Lead / Deal / Task</TCell>
                   <TCell variant="th">Action Type</TCell>
                   <TCell variant="th">Status</TCell>
                   <TCell variant="th">Triggered At</TCell>

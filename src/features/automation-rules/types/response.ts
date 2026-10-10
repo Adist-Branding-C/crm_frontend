@@ -54,6 +54,10 @@ export interface ExecutionLogApiItem {
   companyId: string;
   aggregateType: string;
   aggregateId: string;
+  // Optional name enrichment — older API builds only return the aggregate id.
+  leadName?: string | null;
+  dealName?: string | null;
+  taskName?: string | null;
   outboxEventId: number;
   status: ExecutionStatus;
   retryCount: number;
@@ -67,7 +71,15 @@ export interface WebhookHistoryApiItem {
   id: number;
   webhookEndpointId: number;
   executionLogId: number;
-  leadId: string;
+  // A history row can belong to a lead, deal or task; either id may be null and the
+  // deal/task fields may be absent on older API builds.
+  leadId?: string | null;
+  dealId?: string | null;
+  taskId?: string | null;
+  leadName?: string | null;
+  dealName?: string | null;
+  taskName?: string | null;
+  aggregateType?: string;
   statusCode?: number | null;
   responseBody?: string | null;
   status: WebhookAttemptStatus;

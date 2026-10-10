@@ -1,4 +1,4 @@
-import type { AutomationRule, ExecutionLog, RuleAction, TriggerConfig, WebhookEndpoint, WebhookHistoryEntry } from '../types';
+import type { ActionConfig, ActionType, AddTaskActionConfig, AggregateType, AutomationRule, ExecutionLog, RuleAction, TriggerConfig, WebhookEndpoint, WebhookHistoryEntry } from '../types';
 import type {
   AutomationRuleApiItem,
   AutomationRuleActionApiItem,
@@ -30,11 +30,22 @@ function mapApiTriggerConfigToUI(config: AutomationRuleApiItem['triggerConfig'])
   };
 }
 
+// Older ADD_TASK rules were saved before taskType existed and the backend now rejects them
+// at run time ("taskType is required"). Default the missing discriminator on load so the
+// form shows GENERAL and simply re-saving the rule repairs it.
+function normalizeActionConfig(actionType: ActionType, config: ActionConfig): ActionConfig {
+  if (actionType === 'ADD_TASK') {
+    const addTask = config as AddTaskActionConfig;
+    if (!addTask.taskType) return { ...addTask, taskType: 'GENERAL' };
+  }
+  return config;
+}
+
 export function mapApiActionToUI(action: AutomationRuleActionApiItem): RuleAction {
   return {
     id: String(action.id),
     actionType: action.actionType,
-    actionConfig: action.actionConfig,
+    actionConfig: normalizeActionConfig(action.actionType, action.actionConfig),
     executionOrder: action.executionOrder,
     isActive: action.isActive,
   };
@@ -58,14 +69,42 @@ export function mapApiRuleToUI(rule: AutomationRuleApiItem): AutomationRule {
 
 type ActionTypeLookup = (actionId: number) => ExecutionLog['actionType'] | undefined;
 
+function toAggregateType(value: string | null | undefined): AggregateType {
+  if (value === 'deal' || value === 'task' || value === 'rule') return value;
+  return 'lead';
+}
+
 export function mapApiExecutionLogToUI(log: ExecutionLogApiItem, actionType: ActionTypeLookup): ExecutionLog {
+  const aggregateType = toAggregateType(log.aggregateType);
+  // actionId 0 + aggregateType 'rule' is the backend's reserved sentinel for a cron sweep
+  // run (no per-action row), so it must not be mistaken for a webhook execution.
+  const isSweep = log.actionId === 0 || aggregateType === 'rule';
   return {
     id: String(log.id),
     automationRuleId: String(log.automationRuleId),
     actionId: String(log.actionId),
     actionType: actionType(log.actionId) ?? 'WEBHOOK',
-    leadId: log.aggregateId,
-    leadName: log.aggregateId,
+    ...(isSweep ? { isSweep } : {}),
+    aggregateType,
+    aggregateId: log.aggregateId,
+    ...(aggregateType === 'deal'
+      ? {
+          dealId: log.aggregateId,
+          ...(log.dealName ? { dealName: log.dealName } : {}),
+        }
+      : aggregateType === 'task'
+        ? {
+            taskId: log.aggregateId,
+            ...(log.taskName ? { taskName: log.taskName } : {}),
+          }
+        : aggregateType === 'rule'
+          // Sweep rows carry the rule id as aggregateId; leave the lead fields unset so the
+          // row renders as "Rule" instead of a bogus lead.
+          ? {}
+          : {
+              leadId: log.aggregateId,
+              leadName: log.leadName || log.aggregateId,
+            }),
     status: log.status,
     retryCount: log.retryCount,
     ...(log.resultMessage ? { resultMessage: log.resultMessage } : {}),
@@ -75,6 +114,20 @@ export function mapApiExecutionLogToUI(log: ExecutionLogApiItem, actionType: Act
 }
 
 export function mapApiWebhookHistoryToUI(entry: WebhookHistoryApiItem): WebhookHistoryEntry {
+  const leadId = entry.leadId ?? null;
+  const dealId = entry.dealId ?? null;
+  const taskId = entry.taskId ?? null;
+  const aggregateType: AggregateType | undefined =
+    entry.aggregateType === 'deal' || entry.aggregateType === 'task' || entry.aggregateType === 'lead'
+      ? entry.aggregateType
+      : dealId && !leadId
+        ? 'deal'
+        : taskId && !leadId && !dealId
+          ? 'task'
+          : leadId
+            ? 'lead'
+            : undefined;
+  const aggregateId = dealId ?? taskId ?? leadId ?? undefined;
   return {
     id: String(entry.id),
     executionLogId: String(entry.executionLogId),
@@ -86,7 +139,14 @@ export function mapApiWebhookHistoryToUI(entry: WebhookHistoryApiItem): WebhookH
     ...(entry.errorMessage ? { errorMessage: entry.errorMessage } : {}),
     createdAt: entry.createdAt,
     ...(entry.webhookUrl ? { webhookUrl: entry.webhookUrl } : {}),
-    leadId: entry.leadId,
+    ...(leadId ? { leadId } : {}),
+    ...(dealId ? { dealId } : {}),
+    ...(taskId ? { taskId } : {}),
+    ...(entry.leadName ? { leadName: entry.leadName } : {}),
+    ...(entry.dealName ? { dealName: entry.dealName } : {}),
+    ...(entry.taskName ? { taskName: entry.taskName } : {}),
+    ...(aggregateType ? { aggregateType } : {}),
+    ...(aggregateId ? { aggregateId } : {}),
   };
 }
 

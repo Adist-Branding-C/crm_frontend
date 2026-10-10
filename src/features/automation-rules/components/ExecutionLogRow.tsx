@@ -6,6 +6,7 @@ import WebhookHistoryTable from './WebhookHistoryTable';
 import { ACTION_TYPE_META } from '../constants';
 import { automationRulesApi } from '../services/automationRulesApi';
 import { mapApiWebhookHistoryToUI } from '../mappers/automationRuleMapper';
+import { aggregateDisplayName } from '../utils/aggregateDisplay';
 import type { ExecutionLog, WebhookHistoryEntry } from '../types';
 
 interface ExecutionLogRowProps {
@@ -19,7 +20,7 @@ const ExecutionLogRow = ({ log, isExpanded, onToggle, onRetry }: ExecutionLogRow
   const [webhookHistory, setWebhookHistory] = useState<WebhookHistoryEntry[]>([]);
 
   useEffect(() => {
-    if (!isExpanded || log.actionType !== 'WEBHOOK') return;
+    if (!isExpanded || log.isSweep || log.actionType !== 'WEBHOOK') return;
     let cancelled = false;
     automationRulesApi.getWebhookHistory(Number(log.id)).then((response) => {
       if (cancelled) return;
@@ -32,8 +33,8 @@ const ExecutionLogRow = ({ log, isExpanded, onToggle, onRetry }: ExecutionLogRow
     <>
       <TRow className="automation-clickable-row" onClick={onToggle}>
         <TCell>{isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</TCell>
-        <TCell>{log.leadName}</TCell>
-        <TCell>{ACTION_TYPE_META[log.actionType].label}</TCell>
+        <TCell>{aggregateDisplayName(log)}</TCell>
+        <TCell>{log.isSweep ? 'Rule sweep' : ACTION_TYPE_META[log.actionType].label}</TCell>
         <TCell><ExecutionStatusBadge status={log.status} /></TCell>
         <TCell>{new Date(log.triggeredAt).toLocaleString()}</TCell>
         <TCell>{log.retryCount}</TCell>
@@ -49,7 +50,7 @@ const ExecutionLogRow = ({ log, isExpanded, onToggle, onRetry }: ExecutionLogRow
         <TRow className="automation-log-row-expanded">
           <TCell colSpan={7}>
             <div><strong>Result:</strong> {log.resultMessage ?? '-'}</div>
-            {log.actionType === 'WEBHOOK' && (
+            {log.actionType === 'WEBHOOK' && !log.isSweep && (
               <div style={{ marginTop: '0.75rem' }}>
                 <WebhookHistoryTable attempts={webhookHistory} />
               </div>

@@ -1,11 +1,12 @@
-import { GripVertical, ChevronDown, ChevronUp, X } from 'lucide-react';
-import type { DragEvent, ReactElement } from 'react';
-import type { RuleAction } from '../types';
+import { GripVertical, ChevronDown, ChevronUp, X, Webhook, ListTodo, UserCheck, Megaphone, Bell } from 'lucide-react';
+import type { ComponentType, DragEvent, ReactElement } from 'react';
+import type { ActionType, RuleAction } from '../types';
 import { ACTION_TYPE_META } from '../constants';
 import WebhookFields from './action-config/WebhookFields';
 import AddTaskFields from './action-config/AddTaskFields';
 import AssignLeadFields from './action-config/AssignLeadFields';
 import AddToCampaignFields from './action-config/AddToCampaignFields';
+import NotificationFields from './action-config/NotificationFields';
 
 interface ActionCardProps {
   action: RuleAction;
@@ -25,6 +26,15 @@ const ACTION_FIELDS: Record<RuleAction['actionType'], (index: number) => ReactEl
   ADD_TASK: (index) => <AddTaskFields index={index} />,
   ASSIGN_LEAD: (index) => <AssignLeadFields index={index} />,
   ADD_TO_CAMPAIGN: (index) => <AddToCampaignFields index={index} />,
+  NOTIFICATION: (index) => <NotificationFields index={index} />,
+};
+
+const ACTION_ICONS: Record<ActionType, ComponentType<{ size?: number }>> = {
+  WEBHOOK: Webhook,
+  ADD_TASK: ListTodo,
+  ASSIGN_LEAD: UserCheck,
+  ADD_TO_CAMPAIGN: Megaphone,
+  NOTIFICATION: Bell,
 };
 
 const ActionCard = ({
@@ -40,6 +50,7 @@ const ActionCard = ({
   isDragging,
 }: ActionCardProps) => {
   const meta = ACTION_TYPE_META[action.actionType];
+  const Icon = ACTION_ICONS[action.actionType];
 
   return (
     <div
@@ -53,6 +64,7 @@ const ActionCard = ({
         <span className="automation-drag-handle" title="Drag to reorder"><GripVertical size={16} /></span>
         <button type="button" className="automation-action-card-title" onClick={onToggleExpanded} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
           {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          <Icon size={16} />
           {meta.label}
         </button>
         <label className="automation-toggle" title={action.isActive ? 'Disable action' : 'Enable action'}>

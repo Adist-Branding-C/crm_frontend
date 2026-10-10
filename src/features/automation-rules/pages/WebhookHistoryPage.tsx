@@ -3,6 +3,7 @@ import { ChevronDown, Filter } from 'lucide-react';
 import PageHeader from '../../../shared/components/layout/PageHeader';
 import { Table, THead, TBody, TRow, TCell, TableNav, Pagination, EmptyState } from '../../../shared/components/table';
 import { useWebhookHistoryPage } from '../hooks/useWebhookHistoryPage';
+import { aggregateDisplayName } from '../utils/aggregateDisplay';
 import { WEBHOOK_ATTEMPT_STATUS_FILTER_OPTIONS } from '../constants';
 import '../styles/automation.css';
 import './ExecutionLogsPage.css';
@@ -83,7 +84,7 @@ const WebhookHistoryPage = () => {
               <THead>
                 <TRow>
                   <TCell variant="th">Endpoint URL</TCell>
-                  <TCell variant="th">Lead</TCell>
+                  <TCell variant="th">Lead / Deal / Task</TCell>
                   <TCell variant="th">Status Code</TCell>
                   <TCell variant="th">Status</TCell>
                   <TCell variant="th">Duration</TCell>
@@ -97,7 +98,7 @@ const WebhookHistoryPage = () => {
                   page.entries.map((entry) => (
                     <TRow key={entry.id}>
                       <TCell>{entry.webhookUrl ?? '-'}</TCell>
-                      <TCell>{entry.leadId ?? '-'}</TCell>
+                      <TCell>{aggregateDisplayName(entry)}</TCell>
                       <TCell>{entry.statusCode ?? '-'}</TCell>
                       <TCell>
                         <span className={`badge ${entry.status === 'success' ? 'badge-exec-success' : 'badge-exec-failed'}`}>

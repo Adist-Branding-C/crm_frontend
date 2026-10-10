@@ -24,7 +24,7 @@ const AutomationRulesListPage = () => {
     <div className="automation-rules-page">
       <PageHeader
         title="Automation Rules"
-        description="Automate lead assignment, tasks, notifications, and webhooks"
+        description="Automate lead assignment, tasks, notifications, and lead/deal/task webhooks"
         breadcrumb={false}
         action={
           <div style={{ display: 'flex', gap: '0.75rem' }}>
